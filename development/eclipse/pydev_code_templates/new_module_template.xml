@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><templates><template autoinsert="true" context="org.python.pydev.editor.templates.python" deleted="false" description="Newly created files" enabled="true" name="new Python modules">#&#13;
+# Created: ${date} ${user} &lt;email&gt;&#13;
+# Changed: $$Id$$ &#13;
+# &#13;
+# Copyright (c) ${year}, German Aerospace Center (DLR)&#13;
+# All rights reserved.&#13;
+# &#13;
+# http://www.dlr.de/datafinder/&#13;
+#&#13;
+&#13;
+&#13;
+""" &#13;
+Module documentation string. &#13;
+"""&#13;
+&#13;
+&#13;
+__version__ = "$$LastChangedRevision$$"&#13;
+&#13;
+&#13;
+</template></templates>

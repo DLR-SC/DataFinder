@@ -1,0 +1,1 @@
+FORMS           = ./ui/user/main_window.ui

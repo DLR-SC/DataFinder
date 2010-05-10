@@ -1,0 +1,60 @@
+2.0.0
+=====
+* Extended archive process which now allows incremental adding of new data files to an existing archive.
+* The item action context menu is also shown when no specific item is selected.
+* When exporting items to the local file system only items can be used which are standard collections or whose content is retrievable.
+* Improved performance of the "Reverse Selection" action.
+* When creating a new configuration area with the administration client the created data store is marked as "default".
+* Fixed multiple display of the table header context menu.
+* Fixed unicode handling when reading or writing configurations files.
+* Fixed tool tip creation issue with displayed log messages which are no strings.
+* Fixed crash of the user client when moving items due to invalid item index propagation.
+* Fixed random crash when loading a stored search.
+* Fixed crash when trying to delete an existing configuration area with the administration client.
+* Fixed definition of required string properties which not have been marked as "required" in the user client.
+* Fixed script extension import that allowed selection of link items.
+* Fixed handling of valid character which can be used for item and property names.
+
+2.0.0-Beta2
+===========
+* Implemented script API and integrated it into the user GUI.
+* Newly added data type properties are also considered for earlier created items with the same data type.
+* Fixed crash when connecting to a shared repository.
+* Fixed crash when locking items.
+* Fixed refresh action which sometimes showed the place holder item although refresh has already been finished.
+* Fixed file name encoding handling when archiving items.
+* Fixed crash when connecting using an unsupported URI scheme.
+ 
+2.0.0-Beta1
+===========
+Please note this is a major release which requires changes of the data model and meta data!!!
+* Complete rewrite of the whole application.
+* Persistence layer supports file systems, WebDAV, TSM, and LDAP.
+* Added basic support of data formats.
+* Highly improved user interface.
+
+1.2.2
+=====
+* Solved problem connecting to LDAP.
+* Added compatibility check for preference files.
+* Corrected installer environment variables on Win32. 
+
+1.2.1
+=====
+* Fixed problems with file names containing non-ASCII characters on file, script extension, and icon import. (MANTIS ID 3446) [Data Management Client + Administration Client]
+* Fixed handling of trailing slashes in collection paths which caused problems with WebDAV server Apache + mod_dav. (MANTIS ID 3435) [Data Management Client]
+* Improved rendering of system-specific attribute values in the attribute dialog. (MANTIS ID 3445) [Data Management Client]
+* Fixed problem on download of collections which could cause an infinite loop in conjunction with collection links. (MANTIS ID 3444) [Data Management Client]
+* Improved data browsing performance and performance of structural data modification operations (import, copy, move etc.). (MANTIS ID 3433) [Data Management Client]
+* Improved arrangement of data-model-specific and user-defined attributes by meaningful sorting. (MANTIS ID 3434) [Data Management Client]
+* Added check for missing and changed attribute values when closing the attribute dialog without usage of the "Cancel" button. (MANTIS ID 3432) [Data Management Client]
+* Fixed activation state of available actions when not connected to a WebDAV server. (MANTIS ID 3425) [Data Management Client]
+* Fixed problem on login which always required the user name to contain at least one character. (MANTIS ID 3424) [Data Management Client + Administration Client]
+* Fixed problem within the attribute dialog which in some cases reported unsaved changes although nothing has been altered. (MANTIS ID 3427) [Data Management Client]
+* Fixed crash of the attribute dialog when the attributes of a data item without available data type have been edited. (MANTIS ID 3426) [Data Management Client]
+* Fixed problem on overwrite of an existing configuration which did not work with WebDAV server Apache + mod_dav. (MANTIS ID 3429) [Administration Client]
+* Fixed rendering of attribute names in the data type dialog. (MANTIS ID 3430) [Administration Client]
+
+1.2.0
+=====
+* Initial open source release.

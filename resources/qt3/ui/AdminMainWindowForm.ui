@@ -1,0 +1,734 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>AdminWindow</class>
+<author>Matthias Wagner</author>
+<widget class="QMainWindow">
+    <property name="name">
+        <cstring>AdminWindow</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>836</width>
+            <height>630</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>DataFinder Admin View</string>
+    </property>
+    <grid>
+        <property name="name">
+            <cstring>unnamed</cstring>
+        </property>
+        <property name="margin">
+            <number>2</number>
+        </property>
+        <property name="spacing">
+            <number>6</number>
+        </property>
+        <widget class="QSplitter" row="0" column="0">
+            <property name="name">
+                <cstring>splitter3</cstring>
+            </property>
+            <property name="orientation">
+                <enum>Vertical</enum>
+            </property>
+            <widget class="QSplitter">
+                <property name="name">
+                    <cstring>splitter5</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <widget class="QTabWidget">
+                    <property name="name">
+                        <cstring>dataNavigator</cstring>
+                    </property>
+                    <property name="sizePolicy">
+                        <sizepolicy>
+                            <hsizetype>7</hsizetype>
+                            <vsizetype>7</vsizetype>
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>dataTypes</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Data Types</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QListView" row="0" column="0">
+                                <column>
+                                    <property name="text">
+                                        <string>Name</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <property name="name">
+                                    <cstring>dataTypeBrowser</cstring>
+                                </property>
+                                <property name="minimumSize">
+                                    <size>
+                                        <width>300</width>
+                                        <height>300</height>
+                                    </size>
+                                </property>
+                                <property name="resizeMode">
+                                    <enum>LastColumn</enum>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>relationTypes</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Relation Types</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QListView" row="0" column="0">
+                                <column>
+                                    <property name="text">
+                                        <string>Name</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <property name="name">
+                                    <cstring>relationTypeBrowser</cstring>
+                                </property>
+                                <property name="sizePolicy">
+                                    <sizepolicy>
+                                        <hsizetype>7</hsizetype>
+                                        <vsizetype>7</vsizetype>
+                                        <horstretch>0</horstretch>
+                                        <verstretch>0</verstretch>
+                                    </sizepolicy>
+                                </property>
+                                <property name="resizeMode">
+                                    <enum>LastColumn</enum>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>dataStores</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Data Stores</string>
+                        </attribute>
+                        <grid>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QListView" row="0" column="0">
+                                <column>
+                                    <property name="text">
+                                        <string>Name</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <column>
+                                    <property name="text">
+                                        <string>Default</string>
+                                    </property>
+                                    <property name="clickable">
+                                        <bool>true</bool>
+                                    </property>
+                                    <property name="resizable">
+                                        <bool>true</bool>
+                                    </property>
+                                </column>
+                                <property name="name">
+                                    <cstring>dataStoreBrowser</cstring>
+                                </property>
+                                <property name="resizeMode">
+                                    <enum>LastColumn</enum>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
+                </widget>
+                <widget class="QFrame">
+                    <property name="name">
+                        <cstring>propertyPanel</cstring>
+                    </property>
+                    <property name="minimumSize">
+                        <size>
+                            <width>500</width>
+                            <height>0</height>
+                        </size>
+                    </property>
+                    <property name="frameShape">
+                        <enum>StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Raised</enum>
+                    </property>
+                </widget>
+            </widget>
+            <widget class="QTabWidget">
+                <property name="name">
+                    <cstring>messagePanel</cstring>
+                </property>
+                <property name="sizePolicy">
+                    <sizepolicy>
+                        <hsizetype>7</hsizetype>
+                        <vsizetype>7</vsizetype>
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                    </sizepolicy>
+                </property>
+                <widget class="QWidget">
+                    <property name="name">
+                        <cstring>tab</cstring>
+                    </property>
+                    <attribute name="title">
+                        <string>Log</string>
+                    </attribute>
+                    <grid>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QTextBrowser" row="0" column="0">
+                            <property name="name">
+                                <cstring>logList</cstring>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>75</height>
+                                </size>
+                            </property>
+                        </widget>
+                    </grid>
+                </widget>
+            </widget>
+        </widget>
+    </grid>
+</widget>
+<menubar>
+    <property name="name">
+        <cstring>menubar</cstring>
+    </property>
+    <item text="&amp;File" name="fileMenu">
+        <action name="fileConnectAction"/>
+        <separator/>
+        <action name="fileCreateConfigurationAction"/>
+        <action name="reloadConfigurationAction"/>
+        <action name="fileDeleteConfigurationAction"/>
+        <separator/>
+        <action name="fileExitAction"/>
+    </item>
+    <item text="&amp;Edit" name="Edit">
+        <separator/>
+        <action name="editAction"/>
+        <action name="deleteAction"/>
+    </item>
+    <item text="Data &amp;Model" name="Data_Model">
+        <action name="datamodelNewDataTypeAction"/>
+        <action name="datamodelNewRelationTypeAction"/>
+        <separator/>
+        <action name="datamodelImportAction"/>
+        <action name="datamodelExportAction"/>
+    </item>
+    <item text="Data &amp;Store" name="Data_Store">
+        <action name="storeNewAction"/>
+        <separator/>
+        <action name="storeImportAction"/>
+        <action name="storeExportAction"/>
+    </item>
+    <item text="&amp;Utilities" name="Utilities">
+        <action name="utilUploadIconAction"/>
+        <action name="utilDeleteIconAction"/>
+        <separator/>
+        <action name="utilUploadScriptAction"/>
+        <action name="utilDeleteScriptAction"/>
+    </item>
+    <item text="&amp;Help" name="helpMenu">
+        <separator/>
+        <action name="helpAboutAction"/>
+    </item>
+</menubar>
+<toolbars>
+    <toolbar dock="2">
+        <property name="name">
+            <cstring>toolBar</cstring>
+        </property>
+        <property name="label">
+            <string>Tools</string>
+        </property>
+        <action name="fileConnectAction"/>
+        <action name="fileCreateConfigurationAction"/>
+        <action name="reloadConfigurationAction"/>
+        <separator/>
+        <action name="datamodelNewDataTypeAction"/>
+        <action name="datamodelNewRelationTypeAction"/>
+        <action name="storeNewAction"/>
+        <separator/>
+    </toolbar>
+</toolbars>
+<actions>
+    <action>
+        <property name="name">
+            <cstring>fileExitAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>exit24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Exit</string>
+        </property>
+        <property name="menuText">
+            <string>E&amp;xit</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpAboutAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>about24.png</iconset>
+        </property>
+        <property name="text">
+            <string>About</string>
+        </property>
+        <property name="menuText">
+            <string>About</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>datamodelNewDataTypeAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>newDataType24.png</iconset>
+        </property>
+        <property name="text">
+            <string>New &amp;Data Type ...</string>
+        </property>
+        <property name="menuText">
+            <string>New &amp;Data Type...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editAction</cstring>
+        </property>
+        <property name="on">
+            <bool>false</bool>
+        </property>
+        <property name="iconSet">
+            <iconset>edit24.png</iconset>
+        </property>
+        <property name="text">
+            <string>&amp;Edit...</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Edit...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>datamodelNewRelationTypeAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>newRelationType24.png</iconset>
+        </property>
+        <property name="text">
+            <string>New &amp;Relation Type ...</string>
+        </property>
+        <property name="menuText">
+            <string>New &amp;Relation Type...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>storeNewAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>newDataStore24.png</iconset>
+        </property>
+        <property name="text">
+            <string>&amp;New ...</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;New...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>deleteAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>delete24.png</iconset>
+        </property>
+        <property name="text">
+            <string>&amp;Delete</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Delete</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileConnectAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>connect24.png</iconset>
+        </property>
+        <property name="text">
+            <string>&amp;Connect...</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Connect...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>reloadConfigurationAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>refresh24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Reload Configuration</string>
+        </property>
+        <property name="menuText">
+            <string>Reload Configuration</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>utilUploadIconAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>import24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Import Icons...</string>
+        </property>
+        <property name="menuText">
+            <string>Import Icons...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>utilUploadScriptAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>import24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Import Scripts...</string>
+        </property>
+        <property name="menuText">
+            <string>Import Scripts...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>utilDeleteScriptAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>delete24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Delete Scripts...</string>
+        </property>
+        <property name="menuText">
+            <string>Delete Scripts...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>utilDeleteIconAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>delete24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Delete Icons...</string>
+        </property>
+        <property name="menuText">
+            <string>Delete Icons...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>editPreferencesAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>preferences24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Preferences...</string>
+        </property>
+        <property name="menuText">
+            <string>Preferences...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileCreateConfigurationAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>new24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Create Configuration ...</string>
+        </property>
+        <property name="menuText">
+            <string>Create Configuration...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>datamodelImportAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>import24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Import ...</string>
+        </property>
+        <property name="menuText">
+            <string>Import...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>datamodelExportAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>export24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Export ...</string>
+        </property>
+        <property name="menuText">
+            <string>Export...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>storeImportAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>import24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Import...</string>
+        </property>
+        <property name="menuText">
+            <string>Import...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>storeExportAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>export24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Export...</string>
+        </property>
+        <property name="menuText">
+            <string>Export...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileDeleteConfigurationAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>delete24.png</iconset>
+        </property>
+        <property name="text">
+            <string>Delete Configuration</string>
+        </property>
+        <property name="menuText">
+            <string>Delete Configuration</string>
+        </property>
+    </action>
+</actions>
+<connections>
+    <connection>
+        <sender>datamodelExportAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>exportDatamodelSlot()</slot>
+    </connection>
+    <connection>
+        <sender>datamodelImportAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>importDatamodelSlot()</slot>
+    </connection>
+    <connection>
+        <sender>datamodelNewDataTypeAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>addDataTypeSlot()</slot>
+    </connection>
+    <connection>
+        <sender>datamodelNewRelationTypeAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>addRelationTypeSlot()</slot>
+    </connection>
+    <connection>
+        <sender>deleteAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>deleteSlot()</slot>
+    </connection>
+    <connection>
+        <sender>editAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>editSlot()</slot>
+    </connection>
+    <connection>
+        <sender>editPreferencesAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>editPreferencesSlot()</slot>
+    </connection>
+    <connection>
+        <sender>fileConnectAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>fileConnectSlot()</slot>
+    </connection>
+    <connection>
+        <sender>fileCreateConfigurationAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>createConfigurationSlot()</slot>
+    </connection>
+    <connection>
+        <sender>fileExitAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>fileExitSlot()</slot>
+    </connection>
+    <connection>
+        <sender>helpAboutAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>showAboutDialogSlot()</slot>
+    </connection>
+    <connection>
+        <sender>reloadConfigurationAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>reloadConfigurationSlot()</slot>
+    </connection>
+    <connection>
+        <sender>storeExportAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>exportDataStoresSlot()</slot>
+    </connection>
+    <connection>
+        <sender>storeImportAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>importDataStoresSlot()</slot>
+    </connection>
+    <connection>
+        <sender>storeNewAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>addDataStoreSlot()</slot>
+    </connection>
+    <connection>
+        <sender>utilDeleteIconAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>deleteIconSlot()</slot>
+    </connection>
+    <connection>
+        <sender>utilDeleteScriptAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>deleteScriptSlot()</slot>
+    </connection>
+    <connection>
+        <sender>utilUploadIconAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>uploadIconSlot()</slot>
+    </connection>
+    <connection>
+        <sender>utilUploadScriptAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>uploadScriptSlot()</slot>
+    </connection>
+    <connection>
+        <sender>fileDeleteConfigurationAction</sender>
+        <signal>activated()</signal>
+        <receiver>AdminWindow</receiver>
+        <slot>deleteConfigurationSlot()</slot>
+    </connection>
+</connections>
+<slots>
+    <slot>exportDataStoresSlot()</slot>
+    <slot>showPopupSlot()</slot>
+    <slot>addRelationTypeSlot()</slot>
+    <slot>fileExitSlot()</slot>
+    <slot>importDataStoresSlot()</slot>
+    <slot>fileConnectSlot()</slot>
+    <slot>showAboutDialogSlot()</slot>
+    <slot>reloadConfigurationSlot()</slot>
+    <slot>deleteSlot()</slot>
+    <slot>uploadIconSlot()</slot>
+    <slot>uploadScriptSlot()</slot>
+    <slot>deleteScriptSlot()</slot>
+    <slot>deleteIconSlot()</slot>
+    <slot>editPreferencesSlot()</slot>
+    <slot>editSlot()</slot>
+    <slot>createConfigurationSlot()</slot>
+    <slot>importDatamodelSlot()</slot>
+    <slot>exportDatamodelSlot()</slot>
+    <slot>addDataTypeSlot()</slot>
+    <slot>addDataStoreSlot()</slot>
+    <slot>deleteConfigurationSlot()</slot>
+</slots>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="2"/>
+</UI>

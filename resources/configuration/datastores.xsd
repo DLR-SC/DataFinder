@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.dlr.de/sc/datafinder" xmlns="http://www.dlr.de/sc/datafinder"
+	elementFormDefault="qualified">
+
+	<xs:element name="datastores">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="stores" maxOccurs="unbounded" type="datastore" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+    <xs:simpleType name="storageRealisationEnum">
+        <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="Flat"/>
+            <xs:enumeration value="Hierarchical"/>
+        </xs:restriction>
+    </xs:simpleType>
+    
+	<xs:complexType name="datastore" abstract="true">
+		<xs:sequence minOccurs="1" maxOccurs="1">
+			<xs:element name="name" type="xs:string" default="" />
+			<xs:element name="storeType" type="xs:string" />
+            <xs:element name="iconName" type="xs:string" default="dataStore" />
+			<xs:element name="url" type="xs:anyURI" default=""/>
+            <xs:element name="isDefault" type="xs:boolean" default="false" />
+			<xs:element name="owner" type="xs:string" default="" />
+	    </xs:sequence>
+	</xs:complexType>
+
+    <xs:complexType name="default">
+        <xs:complexContent>
+            <xs:extension base="datastore">
+                <xs:sequence>
+                    <xs:element name="storeType" type="xs:string" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+	<xs:complexType name="file">
+		<xs:complexContent>
+			<xs:extension base="datastore">
+				<xs:sequence>
+				    <xs:element name="storeType" type="xs:string" />
+					<xs:element name="dataLocation" type="xs:string" default=""/>
+					<xs:element name="removePathPrefix" type="xs:string" default="" />
+					<xs:element name="isMigratedTo" type="xs:string" default="" />
+                    <xs:element name="storageRealisation" type="storageRealisationEnum" default="Hierarchical"/>
+					
+					<xs:element name="username" type="xs:string" default="" />
+					<xs:element name="password" type="xs:string" default="" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="ftp">
+		<xs:complexContent>
+			<xs:extension base="datastore">
+				<xs:sequence>
+				    <xs:element name="storeType" type="xs:string" />
+					<xs:element name="dataLocation" type="xs:string" default="" />
+					<xs:element name="removePathPrefix" type="xs:string" default="" />
+					<xs:element name="isMigratedTo" type="xs:string" default="" />
+                    <xs:element name="storageRealisation" type="storageRealisationEnum" default="Hierarchical"/>
+                    
+					<xs:element name="username" type="xs:string" default="" />
+					<xs:element name="password" type="xs:string" default="" />
+					<xs:element name="isAnonymousAuthenticationEnabled" type="xs:boolean" default="true"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="gridftp">
+		<xs:complexContent>
+			<xs:extension base="datastore">
+				<xs:sequence>
+				    <xs:element name="storeType" type="xs:string" />
+					<xs:element name="dataLocation" type="xs:string" default="" />
+					<xs:element name="removePathPrefix" type="xs:string" default="" />
+					<xs:element name="isMigratedTo" type="xs:string" default="" />
+                    <xs:element name="storageRealisation" type="storageRealisationEnum" default="Hierarchical"/>
+                    
+					<xs:element name="securityMode" default="Standard">
+						<xs:simpleType>
+							<xs:restriction base="xs:NMTOKEN">
+								<xs:enumeration value="Standard"/>
+								<xs:enumeration value="Safe"/>
+								<xs:enumeration value="Private"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+
+					<xs:element name="dataTransferMode" default="Stream">
+						<xs:simpleType>
+							<xs:restriction base="xs:NMTOKEN">
+								<xs:enumeration value="Extended"/>
+								<xs:enumeration value="Stream"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+
+					<xs:element name="tcpBufferSize" type="xs:positiveInteger" default="60"/>
+					<xs:element name="parallelConnections" type="xs:positiveInteger" default="1" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="offlinemedia">
+		<xs:complexContent>
+			<xs:extension base="datastore">
+				<xs:sequence>
+				    <xs:element name="storeType" type="xs:string" />
+					<xs:element name="dataLocation" type="xs:string" default="" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="tsm">
+		<xs:complexContent>
+			<xs:extension base="datastore">
+				<xs:sequence>
+				    <xs:element name="storeType" type="xs:string" />
+					<xs:element name="clientHostName" type="xs:string" default="" />
+					<xs:element name="serverNodeName" type="xs:string" default="" />
+					<xs:element name="archiveRootDirectory" type="xs:string" default="" />
+					<xs:element name="description" type="xs:string" default="" />
+					<xs:element name="retentionPeriod" type="xs:int" default="0" />
+					<xs:element name="readOnly" type="xs:boolean" default="false" />
+					<xs:element name="username" type="xs:string" default="" />
+					<xs:element name="password" type="xs:string" default="" />
+					<xs:element name="storageRealisation" type="storageRealisationEnum" default="Flat"/>
+					<xs:element name="isMigratedTo" type="xs:string" default="" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="webdav">
+		<xs:complexContent>
+			<xs:extension base="datastore">
+				<xs:sequence>
+				    <xs:element name="storeType" type="xs:string" />
+					<xs:element name="dataLocation" type="xs:string" default="" />
+					<xs:element name="removePathPrefix" type="xs:string" default="" />
+					<xs:element name="isMigratedTo" type="xs:string" default="" />
+                    <xs:element name="storageRealisation" type="storageRealisationEnum" default="Hierarchical"/>
+					<xs:element name="username" type="xs:string" default="" />
+					<xs:element name="password" type="xs:string" default="" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<xs:complexType name="s3">
+		<xs:complexContent>
+			<xs:extension base="datastore">
+				<xs:sequence>
+				    <xs:element name="storeType" type="xs:string" />
+					<xs:element name="dataLocation" type="xs:string" default="" />
+					<xs:element name="removePathPrefix" type="xs:string" default="" />
+					<xs:element name="isMigratedTo" type="xs:string" default="" />
+                    <xs:element name="storageRealisation" type="storageRealisationEnum" default="Flat"/>
+					<xs:element name="username" type="xs:string" default="" />
+					<xs:element name="password" type="xs:string" default="" />
+					<xs:element name="awsAccessKey" type="xs:string" default="" />
+					<xs:element name="awsSecretAccessKey" type="xs:string" default="" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+</xs:schema>

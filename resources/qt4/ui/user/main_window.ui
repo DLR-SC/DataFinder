@@ -1,0 +1,1927 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mainWindow</class>
+ <widget class="QMainWindow" name="mainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1114</width>
+    <height>882</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>DataFinder</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../user.qrc">
+    <normaloff>:/icons/icons/datafinder24.png</normaloff>:/icons/icons/datafinder24.png</iconset>
+  </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QSplitter" name="localRemoteSplitter">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="handleWidth">
+         <number>4</number>
+        </property>
+        <widget class="QDockWidget" name="localDockWidget">
+         <property name="windowTitle">
+          <string>File System</string>
+         </property>
+         <widget class="QWidget" name="localDockWidgetContents">
+          <layout class="QVBoxLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="margin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QFrame" name="localPathFrame">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Panel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout">
+              <property name="leftMargin">
+               <number>7</number>
+              </property>
+              <property name="topMargin">
+               <number>1</number>
+              </property>
+              <property name="rightMargin">
+               <number>1</number>
+              </property>
+              <property name="bottomMargin">
+               <number>1</number>
+              </property>
+              <item>
+               <layout class="QHBoxLayout">
+                <item>
+                 <widget class="QLabel" name="localPathLabel">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Path:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="localPathLineEdit">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="contextMenuPolicy">
+                   <enum>Qt::DefaultContextMenu</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSplitter" name="localTreeListSplitter">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="handleWidth">
+              <number>3</number>
+             </property>
+             <widget class="QDockWidget" name="localTreeDockWidget">
+              <property name="features">
+               <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
+              </property>
+              <property name="allowedAreas">
+               <set>Qt::NoDockWidgetArea</set>
+              </property>
+              <property name="windowTitle">
+               <string>Collections:</string>
+              </property>
+              <widget class="QWidget" name="localTreeDockWidgetContents">
+               <layout class="QVBoxLayout">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="margin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="DefaultTreeView" name="localTreeView">
+                  <property name="contextMenuPolicy">
+                   <enum>Qt::CustomContextMenu</enum>
+                  </property>
+                  <property name="editTriggers">
+                   <set>QAbstractItemView::EditKeyPressed</set>
+                  </property>
+                  <property name="selectionMode">
+                   <enum>QAbstractItemView::SingleSelection</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+             <widget class="QStackedWidget" name="localStackedWidget">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+              <property name="lineWidth">
+               <number>1</number>
+              </property>
+              <property name="midLineWidth">
+               <number>0</number>
+              </property>
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="localTableViewPage">
+               <layout class="QVBoxLayout">
+                <property name="spacing">
+                 <number>6</number>
+                </property>
+                <property name="margin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="DefaultTableView" name="localTableView">
+                  <property name="contextMenuPolicy">
+                   <enum>Qt::CustomContextMenu</enum>
+                  </property>
+                  <property name="editTriggers">
+                   <set>QAbstractItemView::EditKeyPressed</set>
+                  </property>
+                  <property name="selectionBehavior">
+                   <enum>QAbstractItemView::SelectRows</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="localListViewPage">
+               <layout class="QVBoxLayout">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="margin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="DefaultListView" name="localListView">
+                  <property name="contextMenuPolicy">
+                   <enum>Qt::CustomContextMenu</enum>
+                  </property>
+                  <property name="editTriggers">
+                   <set>QAbstractItemView::EditKeyPressed</set>
+                  </property>
+                  <property name="selectionMode">
+                   <enum>QAbstractItemView::ExtendedSelection</enum>
+                  </property>
+                  <property name="selectionBehavior">
+                   <enum>QAbstractItemView::SelectRows</enum>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>16</width>
+                    <height>16</height>
+                   </size>
+                  </property>
+                  <property name="isWrapping" stdset="0">
+                   <bool>true</bool>
+                  </property>
+                  <property name="resizeMode">
+                   <enum>QListView::Adjust</enum>
+                  </property>
+                  <property name="layoutMode">
+                   <enum>QListView::SinglePass</enum>
+                  </property>
+                  <property name="gridSize">
+                   <size>
+                    <width>115</width>
+                    <height>80</height>
+                   </size>
+                  </property>
+                  <property name="uniformItemSizes">
+                   <bool>false</bool>
+                  </property>
+                  <property name="wordWrap">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QDockWidget" name="serverDockWidget">
+         <property name="windowTitle">
+          <string>Shared Data Repository</string>
+         </property>
+         <widget class="QWidget" name="serverDockWidgetContents">
+          <layout class="QVBoxLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="margin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QFrame" name="serverPathFrame">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Panel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout">
+              <property name="leftMargin">
+               <number>7</number>
+              </property>
+              <property name="topMargin">
+               <number>1</number>
+              </property>
+              <property name="rightMargin">
+               <number>1</number>
+              </property>
+              <property name="bottomMargin">
+               <number>1</number>
+              </property>
+              <item>
+               <layout class="QHBoxLayout">
+                <item>
+                 <widget class="QLabel" name="serverPathLabel">
+                  <property name="text">
+                   <string>Path:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="serverPathLineEdit">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="contextMenuPolicy">
+                   <enum>Qt::DefaultContextMenu</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="serverFileFrame">
+             <property name="frameShape">
+              <enum>QFrame::Panel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout">
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QSplitter" name="serverAttributeSplitter">
+                <property name="lineWidth">
+                 <number>0</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="handleWidth">
+                 <number>3</number>
+                </property>
+                <widget class="QSplitter" name="serverTreeListSplitter">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="handleWidth">
+                  <number>3</number>
+                 </property>
+                 <widget class="QDockWidget" name="serverTreeViewDockWidget">
+                  <property name="features">
+                   <set>QDockWidget::DockWidgetClosable</set>
+                  </property>
+                  <property name="allowedAreas">
+                   <set>Qt::NoDockWidgetArea</set>
+                  </property>
+                  <property name="windowTitle">
+                   <string>Collections:</string>
+                  </property>
+                  <widget class="QWidget" name="serverTreeViewDockWidgetContents">
+                   <layout class="QVBoxLayout">
+                    <property name="margin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="DefaultTreeView" name="serverTreeView">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::CustomContextMenu</enum>
+                      </property>
+                      <property name="editTriggers">
+                       <set>QAbstractItemView::EditKeyPressed</set>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </widget>
+                 <widget class="QStackedWidget" name="serverStackedWidget">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="currentIndex">
+                   <number>0</number>
+                  </property>
+                  <widget class="QWidget" name="serverTableViewPage">
+                   <layout class="QVBoxLayout">
+                    <property name="margin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="DefaultTableView" name="serverTableView">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::CustomContextMenu</enum>
+                      </property>
+                      <property name="editTriggers">
+                       <set>QAbstractItemView::EditKeyPressed</set>
+                      </property>
+                      <property name="selectionBehavior">
+                       <enum>QAbstractItemView::SelectRows</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                  <widget class="QWidget" name="serverListViewPage">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <layout class="QVBoxLayout">
+                    <property name="margin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="DefaultListView" name="serverListView">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::CustomContextMenu</enum>
+                      </property>
+                      <property name="editTriggers">
+                       <set>QAbstractItemView::EditKeyPressed</set>
+                      </property>
+                      <property name="selectionMode">
+                       <enum>QAbstractItemView::ExtendedSelection</enum>
+                      </property>
+                      <property name="selectionBehavior">
+                       <enum>QAbstractItemView::SelectRows</enum>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>16</width>
+                        <height>16</height>
+                       </size>
+                      </property>
+                      <property name="isWrapping" stdset="0">
+                       <bool>true</bool>
+                      </property>
+                      <property name="resizeMode">
+                       <enum>QListView::Adjust</enum>
+                      </property>
+                      <property name="layoutMode">
+                       <enum>QListView::SinglePass</enum>
+                      </property>
+                      <property name="gridSize">
+                       <size>
+                        <width>115</width>
+                        <height>80</height>
+                       </size>
+                      </property>
+                      <property name="uniformItemSizes">
+                       <bool>false</bool>
+                      </property>
+                      <property name="wordWrap">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </widget>
+                </widget>
+                <widget class="QDockWidget" name="serverPropertiesDockWidget">
+                 <property name="features">
+                  <set>QDockWidget::DockWidgetClosable</set>
+                 </property>
+                 <property name="windowTitle">
+                  <string>Properties</string>
+                 </property>
+                 <widget class="QWidget" name="serverAttributesDockWidgetContents">
+                  <layout class="QVBoxLayout">
+                   <property name="margin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="DefaultTableView" name="serverAttributeTableView">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::CustomContextMenu</enum>
+                     </property>
+                     <property name="editTriggers">
+                      <set>QAbstractItemView::NoEditTriggers</set>
+                     </property>
+                     <property name="selectionMode">
+                      <enum>QAbstractItemView::SingleSelection</enum>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="HideableTabWidget" name="outputTabWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::CustomContextMenu</enum>
+        </property>
+        <property name="tabPosition">
+         <enum>QTabWidget::North</enum>
+        </property>
+        <property name="tabShape">
+         <enum>QTabWidget::Rounded</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="elideMode">
+         <enum>Qt::ElideNone</enum>
+        </property>
+        <widget class="QWidget" name="logTab">
+         <attribute name="icon">
+          <iconset resource="../../user.qrc">
+           <normaloff>:/icons/icons/console.png</normaloff>:/icons/icons/console.png</iconset>
+         </attribute>
+         <attribute name="title">
+          <string>Log</string>
+         </attribute>
+         <attribute name="toolTip">
+          <string>log</string>
+         </attribute>
+         <layout class="QVBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="DefaultTableView" name="rootLogTableView">
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="scriptOutputTab">
+         <attribute name="icon">
+          <iconset resource="../../user.qrc">
+           <normaloff>:/icons/icons/lightning_bolt_24.png</normaloff>:/icons/icons/lightning_bolt_24.png</iconset>
+         </attribute>
+         <attribute name="title">
+          <string>Script Output</string>
+         </attribute>
+         <attribute name="toolTip">
+          <string>Script Output</string>
+         </attribute>
+         <layout class="QVBoxLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="margin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="DefaultTableView" name="scriptLogTableView"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="searchResultTab">
+         <attribute name="icon">
+          <iconset resource="../../user.qrc">
+           <normaloff>:/icons/icons/binoc24.png</normaloff>:/icons/icons/binoc24.png</iconset>
+         </attribute>
+         <attribute name="title">
+          <string>Search Results</string>
+         </attribute>
+         <attribute name="toolTip">
+          <string>Search Results</string>
+         </attribute>
+         <layout class="QVBoxLayout">
+          <property name="margin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="DefaultTableView" name="searchResultTableView">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::ExtendedSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1114</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="viewMenu">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <widget class="QMenu" name="changeToMenu">
+     <property name="title">
+      <string>&amp;Change to</string>
+     </property>
+     <addaction name="localBackwardAction"/>
+     <addaction name="localForwardAction"/>
+     <addaction name="localParentDirectoryAction"/>
+    </widget>
+    <widget class="QMenu" name="localViewMenu">
+     <property name="title">
+      <string>&amp;File System</string>
+     </property>
+     <addaction name="localViewAction"/>
+     <addaction name="separator"/>
+     <addaction name="localToolbarAction"/>
+     <addaction name="localPathAction"/>
+     <addaction name="localTreeViewAction"/>
+     <addaction name="separator"/>
+     <addaction name="localRefreshAction"/>
+    </widget>
+    <widget class="QMenu" name="serverViewMenu">
+     <property name="title">
+      <string>Shared Data Repository</string>
+     </property>
+     <addaction name="serverViewAction"/>
+     <addaction name="separator"/>
+     <addaction name="serverToolbarAction"/>
+     <addaction name="serverPathAction"/>
+     <addaction name="serverTreeViewAction"/>
+     <addaction name="serverPropertiesViewAction"/>
+     <addaction name="separator"/>
+     <addaction name="serverRefreshAction"/>
+    </widget>
+    <widget class="QMenu" name="menuOutput">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../user.qrc">
+       <normaloff>:/icons/icons/monitor_24.png</normaloff>:/icons/icons/monitor_24.png</iconset>
+     </property>
+     <addaction name="logAction"/>
+     <addaction name="scriptOutputAction"/>
+     <addaction name="searchResultsAction"/>
+    </widget>
+    <addaction name="fixToolbarAction"/>
+    <addaction name="statusBarAction"/>
+    <addaction name="menuOutput"/>
+    <addaction name="separator"/>
+    <addaction name="localViewMenu"/>
+    <addaction name="serverViewMenu"/>
+    <addaction name="separator"/>
+    <addaction name="changeToMenu"/>
+   </widget>
+   <widget class="QMenu" name="searchMenu">
+    <property name="title">
+     <string>S&amp;earch</string>
+    </property>
+    <addaction name="searchAction"/>
+   </widget>
+   <widget class="QMenu" name="helpMenu">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="aboutAction"/>
+   </widget>
+   <widget class="QMenu" name="scriptMenu">
+    <property name="title">
+     <string>&amp;Scripts</string>
+    </property>
+    <widget class="ActionTooltipMenu" name="removeScriptMenu">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>&amp;Remove Script</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../user.qrc">
+       <normaloff>:/icons/icons/remove24.png</normaloff>:/icons/icons/remove24.png</iconset>
+     </property>
+    </widget>
+    <widget class="ActionTooltipMenu" name="useSharedScriptMenu">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="cursor">
+      <cursorShape>UpArrowCursor</cursorShape>
+     </property>
+     <property name="title">
+      <string>Use &amp;Shared Script</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../user.qrc">
+       <normaloff>:/icons/icons/sql_execute24.png</normaloff>:/icons/icons/sql_execute24.png</iconset>
+     </property>
+    </widget>
+    <widget class="ActionTooltipMenu" name="useLocalScriptMenu">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Use &amp;Local Script</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../user.qrc">
+       <normaloff>:/icons/icons/lightning_bolt24.png</normaloff>:/icons/icons/lightning_bolt24.png</iconset>
+     </property>
+    </widget>
+    <widget class="ActionTooltipMenu" name="scriptPreferencesMenu">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>&amp;Preferences</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../user.qrc">
+       <normaloff>:/icons/icons/preferences24.png</normaloff>:/icons/icons/preferences24.png</iconset>
+     </property>
+    </widget>
+    <addaction name="addScriptAction"/>
+    <addaction name="removeScriptMenu"/>
+    <addaction name="separator"/>
+    <addaction name="scriptPreferencesMenu"/>
+    <addaction name="separator"/>
+    <addaction name="useLocalScriptMenu"/>
+    <addaction name="useSharedScriptMenu"/>
+   </widget>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <widget class="QMenu" name="newMenu">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>&amp;New</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../user.qrc">
+       <normaloff>:/icons/icons/new24.png</normaloff>:/icons/icons/new24.png</iconset>
+     </property>
+     <addaction name="createCollectionAction"/>
+     <addaction name="createLeafAction"/>
+     <addaction name="createArchiveAction"/>
+     <addaction name="createLinkAction"/>
+    </widget>
+    <addaction name="newMenu"/>
+    <addaction name="separator"/>
+    <addaction name="disconnectAction"/>
+    <addaction name="connectAction"/>
+    <addaction name="selectDatastoresAction"/>
+    <addaction name="separator"/>
+    <addaction name="printAction"/>
+    <addaction name="separator"/>
+    <addaction name="importAction"/>
+    <addaction name="exportAction"/>
+    <addaction name="separator"/>
+    <addaction name="commitArchiveAction"/>
+    <addaction name="separator"/>
+    <addaction name="searchAction"/>
+    <addaction name="separator"/>
+    <addaction name="exitAction"/>
+   </widget>
+   <widget class="QMenu" name="editMenu">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="cutAction"/>
+    <addaction name="copyAction"/>
+    <addaction name="copyPropertiesAction"/>
+    <addaction name="pasteAction"/>
+    <addaction name="separator"/>
+    <addaction name="deleteAction"/>
+    <addaction name="renameAction"/>
+    <addaction name="separator"/>
+    <addaction name="selectAllAction"/>
+    <addaction name="reverseSelectionAction"/>
+    <addaction name="separator"/>
+    <addaction name="editPropertiesAction"/>
+    <addaction name="privilegeAction"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="editMenu"/>
+   <addaction name="viewMenu"/>
+   <addaction name="scriptMenu"/>
+   <addaction name="searchMenu"/>
+   <addaction name="helpMenu"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Datei</string>
+   </property>
+   <property name="movable">
+    <bool>true</bool>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>32</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="connectAction"/>
+   <addaction name="disconnectAction"/>
+   <addaction name="separator"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="exitAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/exit24.png</normaloff>:/icons/icons/exit24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Exit</string>
+   </property>
+   <property name="iconText">
+    <string>Exit</string>
+   </property>
+   <property name="toolTip">
+    <string>Exit</string>
+   </property>
+   <property name="statusTip">
+    <string>Exit Datafinder</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="importAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/export24.png</normaloff>:/icons/icons/export24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Import...</string>
+   </property>
+   <property name="iconText">
+    <string>Upload</string>
+   </property>
+   <property name="statusTip">
+    <string>Imports data into the shared data repository.</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="exportAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/import24.png</normaloff>:/icons/icons/import24.png</iconset>
+   </property>
+   <property name="text">
+    <string>E&amp;xport...</string>
+   </property>
+   <property name="iconText">
+    <string>Download</string>
+   </property>
+   <property name="statusTip">
+    <string>Exports data from the shared data repository.</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="copyAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/copy24.png</normaloff>:/icons/icons/copy24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+   <property name="statusTip">
+    <string>Copy selected items.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="cutAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/cut.png</normaloff>:/icons/icons/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>C&amp;ut</string>
+   </property>
+   <property name="statusTip">
+    <string>Cut selected items-</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="pasteAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/paste.png</normaloff>:/icons/icons/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+   <property name="statusTip">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="deleteAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/delete24.png</normaloff>:/icons/icons/delete24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+   <property name="statusTip">
+    <string>Delete selected items.</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="aboutAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/about24.png</normaloff>:/icons/icons/about24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;About...</string>
+   </property>
+   <property name="statusTip">
+    <string>About information.</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="selectAllAction">
+   <property name="text">
+    <string>&amp;Select All</string>
+   </property>
+   <property name="statusTip">
+    <string>Select all files in the current selected view</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="localRefreshAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Refresh</string>
+   </property>
+   <property name="statusTip">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="connectAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/connect24.png</normaloff>:/icons/icons/connect24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Connect...</string>
+   </property>
+   <property name="iconText">
+    <string>Connect</string>
+   </property>
+   <property name="statusTip">
+    <string>Connect shared data repository.</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="disconnectAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/disconnect24.png</normaloff>:/icons/icons/disconnect24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Disconnect</string>
+   </property>
+   <property name="statusTip">
+    <string>Disconnect shared data repository.</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="createLeafAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/new24.png</normaloff>:/icons/icons/new24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Leaf...</string>
+   </property>
+   <property name="statusTip">
+    <string>Create a leaf.</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="createArchiveAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/export24.png</normaloff>:/icons/icons/export24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Archive...</string>
+   </property>
+   <property name="statusTip">
+    <string>Create an archive.</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="statusBarAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>S&amp;tatusbar</string>
+   </property>
+  </action>
+  <action name="printAction">
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/print24.png</normaloff>:/icons/icons/print24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Print</string>
+   </property>
+   <property name="toolTip">
+    <string>Print</string>
+   </property>
+  </action>
+  <action name="openAction">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="toolTip">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="addScriptAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/insert24.png</normaloff>:/icons/icons/insert24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Add Script...</string>
+   </property>
+  </action>
+  <action name="searchToolBarAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>S&amp;earch</string>
+   </property>
+  </action>
+  <action name="logAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/console.png</normaloff>:/icons/icons/console.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Log</string>
+   </property>
+  </action>
+  <action name="scriptOutputAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/lightning_bolt_24.png</normaloff>:/icons/icons/lightning_bolt_24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Script Output</string>
+   </property>
+  </action>
+  <action name="localPathAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Path</string>
+   </property>
+  </action>
+  <action name="localTreeViewAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/directories24.png</normaloff>:/icons/icons/directories24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Collections</string>
+   </property>
+  </action>
+  <action name="serverPathAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Path</string>
+   </property>
+  </action>
+  <action name="serverTreeViewAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/directories24.png</normaloff>:/icons/icons/directories24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Collections</string>
+   </property>
+  </action>
+  <action name="serverPropertiesViewAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/properties24.png</normaloff>:/icons/icons/properties24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Properties</string>
+   </property>
+  </action>
+  <action name="selectDatastoresAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/DataStoreNew24.png</normaloff>:/icons/icons/DataStoreNew24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Select Data Stores...</string>
+   </property>
+   <property name="toolTip">
+    <string>Select datastores</string>
+   </property>
+  </action>
+  <action name="privilegeAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/key24.png</normaloff>:/icons/icons/key24.png</iconset>
+   </property>
+   <property name="text">
+    <string>P&amp;revileges...</string>
+   </property>
+   <property name="statusTip">
+    <string>Open previlegedialog for the current selected file</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="editPropertiesAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/preferences24.png</normaloff>:/icons/icons/preferences24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Properties...</string>
+   </property>
+   <property name="statusTip">
+    <string>View and edit properties.</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="localForwardAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/forward.png</normaloff>:/icons/icons/forward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Forward</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Right</string>
+   </property>
+  </action>
+  <action name="localBackwardAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/backward.png</normaloff>:/icons/icons/backward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Left</string>
+   </property>
+  </action>
+  <action name="localParentDirectoryAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/back.png</normaloff>:/icons/icons/back.png</iconset>
+   </property>
+   <property name="text">
+    <string>Local Parent Directory</string>
+   </property>
+   <property name="iconText">
+    <string>Parent</string>
+   </property>
+   <property name="toolTip">
+    <string>Change to parent collection.</string>
+   </property>
+   <property name="statusTip">
+    <string>Change to the parent collection.</string>
+   </property>
+  </action>
+  <action name="changeToAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Change to</string>
+   </property>
+  </action>
+  <action name="reverseSelectionAction">
+   <property name="text">
+    <string>&amp;Reverse Selection</string>
+   </property>
+   <property name="statusTip">
+    <string>Reverse selection</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="fixToolbarAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>F&amp;ix Toolbar</string>
+   </property>
+   <property name="iconText">
+    <string>Fix Toolbar</string>
+   </property>
+  </action>
+  <action name="newAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/new24.png</normaloff>:/icons/icons/new24.png</iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::TextHeuristicRole</enum>
+   </property>
+  </action>
+  <action name="localViewAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;File System View</string>
+   </property>
+  </action>
+  <action name="serverViewAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Shared Data Repository View</string>
+   </property>
+  </action>
+  <action name="localViewsAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/viewsmenu.png</normaloff>:/icons/icons/viewsmenu.png</iconset>
+   </property>
+   <property name="text">
+    <string>Local Views</string>
+   </property>
+  </action>
+  <action name="localToolbarAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Toolbar</string>
+   </property>
+  </action>
+  <action name="serverToolbarAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Toolbar</string>
+   </property>
+  </action>
+  <action name="serverViewsAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/viewsmenu.png</normaloff>:/icons/icons/viewsmenu.png</iconset>
+   </property>
+   <property name="text">
+    <string>Remote Views</string>
+   </property>
+  </action>
+  <action name="serverBackwardAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/backward.png</normaloff>:/icons/icons/backward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </action>
+  <action name="serverForwardAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/forward.png</normaloff>:/icons/icons/forward.png</iconset>
+   </property>
+   <property name="text">
+    <string>Remote Forward</string>
+   </property>
+  </action>
+  <action name="serverParentCollectionAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/back.png</normaloff>:/icons/icons/back.png</iconset>
+   </property>
+   <property name="text">
+    <string>Remote Parent Directory</string>
+   </property>
+   <property name="toolTip">
+    <string>Change to parent collection.</string>
+   </property>
+   <property name="statusTip">
+    <string>Change to parent collection.</string>
+   </property>
+  </action>
+  <action name="serverRefreshAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
+  </action>
+  <action name="serverViewsTableAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Table</string>
+   </property>
+  </action>
+  <action name="serverViewsListAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>List</string>
+   </property>
+  </action>
+  <action name="localViewsTableAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Table</string>
+   </property>
+  </action>
+  <action name="localViewsListAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>List</string>
+   </property>
+  </action>
+  <action name="searchResultsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/binoc24.png</normaloff>:/icons/icons/binoc24.png</iconset>
+   </property>
+   <property name="text">
+    <string>S&amp;earch Results</string>
+   </property>
+  </action>
+  <action name="noScriptAvailableAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>No Script available</string>
+   </property>
+  </action>
+  <action name="renameAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/rename24.png</normaloff>:/icons/icons/rename24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Rename</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="expandAction">
+   <property name="text">
+    <string>Expand</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="collapseAction">
+   <property name="text">
+    <string>Collapse</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="createCollectionAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/close_file24.png</normaloff>:/icons/icons/close_file24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Collection...</string>
+   </property>
+   <property name="statusTip">
+    <string>Create collection.</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="serverViewsIconsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Icons</string>
+   </property>
+  </action>
+  <action name="localViewsIconsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Icons</string>
+   </property>
+  </action>
+  <action name="copyPropertiesAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/copy24.png</normaloff>:/icons/icons/copy24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy &amp;Properties</string>
+   </property>
+   <property name="statusTip">
+    <string>Copy properties.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="createLinkAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/get24.png</normaloff>:/icons/icons/get24.png</iconset>
+   </property>
+   <property name="text">
+    <string>L&amp;ink...</string>
+   </property>
+   <property name="statusTip">
+    <string>Create a link.</string>
+   </property>
+  </action>
+  <action name="searchAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/binoc24.png</normaloff>:/icons/icons/binoc24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Search...</string>
+   </property>
+   <property name="toolTip">
+    <string>Search</string>
+   </property>
+   <property name="statusTip">
+    <string>Search items.</string>
+   </property>
+  </action>
+  <action name="commitArchiveAction">
+   <property name="icon">
+    <iconset resource="../../user.qrc">
+     <normaloff>:/icons/icons/insert_doc24.png</normaloff>:/icons/icons/insert_doc24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Commit Archive</string>
+   </property>
+   <property name="toolTip">
+    <string>Commits an archive...</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DefaultTableView</class>
+   <extends>QTableView</extends>
+   <header>datafinder.gui.user.common.widget</header>
+  </customwidget>
+  <customwidget>
+   <class>HideableTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>datafinder.gui.user.common.widget</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DefaultTreeView</class>
+   <extends>QTreeView</extends>
+   <header>datafinder.gui.user.common.widget</header>
+  </customwidget>
+  <customwidget>
+   <class>DefaultListView</class>
+   <extends>QListView</extends>
+   <header>datafinder.gui.user.common.widget</header>
+  </customwidget>
+  <customwidget>
+   <class>ActionTooltipMenu</class>
+   <extends>QMenu</extends>
+   <header>datafinder.gui.user.common.widget</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../user.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>serverTreeViewAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>serverTreeViewDockWidget</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>696</x>
+     <y>225</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>serverPropertiesViewAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>serverPropertiesDockWidget</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>915</x>
+     <y>469</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>serverTreeViewDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>serverTreeViewAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>764</x>
+     <y>234</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>serverPropertiesDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>serverPropertiesViewAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>915</x>
+     <y>469</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>localViewAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>localDockWidget</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>303</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>serverViewAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>serverDockWidget</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>915</x>
+     <y>328</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>serverPathAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>serverPathFrame</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>915</x>
+     <y>103</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>statusBarAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>statusbar</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>609</x>
+     <y>881</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>localDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>localViewAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>303</x>
+     <y>328</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>serverDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>serverViewAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>915</x>
+     <y>328</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>localTreeViewAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>localTreeDockWidget</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>150</x>
+     <y>333</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>localTreeDockWidget</sender>
+   <signal>visibilityChanged(bool)</signal>
+   <receiver>localTreeViewAction</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>138</x>
+     <y>333</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>localPathAction</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>localPathFrame</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>303</x>
+     <y>103</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

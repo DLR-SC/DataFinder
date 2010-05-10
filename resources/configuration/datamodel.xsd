@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.dlr.de/sc/datafinder" xmlns="http://www.dlr.de/sc/datafinder"
+	elementFormDefault="qualified">
+
+	<xs:element name="datamodel">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="datatypes" maxOccurs="unbounded" type="datatype" />
+				<xs:element name="relations" maxOccurs="unbounded" type="relation" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="datatype">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="iconName" type="xs:string" />
+			<xs:element name="properties" maxOccurs="unbounded" type="property"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="property">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<!--  todo: enumeration for valueTypes -->
+			<xs:element name="valueType" type="xs:string" />
+			<xs:element name="mandatory" type="xs:boolean" />
+			<xs:element name="defaultValue" type="xs:anySimpleType" />
+		</xs:sequence>
+	</xs:complexType>
+    
+	<xs:complexType name="relation">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="iconName" type="xs:string" />
+			<xs:element name="sourceDataTypeNames" maxOccurs="unbounded" type="xs:string" />
+			<xs:element name="targetDataTypeNames" maxOccurs="unbounded" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>
+	
