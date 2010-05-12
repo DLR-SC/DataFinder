@@ -358,6 +358,8 @@ def performImport(sourcePath, targetParentPath, targetRepository, defaultPropert
     @type targetRepository: L{Repository<datafinder.script_api.repository.Repository>}
     @param defaultProperties: Optional properties which are set for every item. Default: C{None}
     @type defaultProperties: C{dict} of C{unicode},C{object}
+    @param copyData: Flag indicating whether data of imported leafs is copy as well. Default: C{True}
+    @type copyData: C{bool}
     
     @raise ItemSupportError: Raised when errors during the import occur.
     """
@@ -372,7 +374,7 @@ def performImport(sourcePath, targetParentPath, targetRepository, defaultPropert
         mappedProperties = _mapProperties(defaultProperties, cwr)
         try:
             targetItemName = targetRepository.determineUniqueItemName(sourceItem.name, targetParentPath)
-            targetRepository._repository.performImport(sourceItem, targetParentItem, targetItemName, mappedProperties)  
+            targetRepository._repository.performImport(sourceItem, targetParentItem, targetItemName, mappedProperties, copyData)  
         except ItemError, error:
             errorMessage = "Problems during import of the following item:\n"
             errorMessage += "\n" + sourceItem.path + "\nReason: " + error.message

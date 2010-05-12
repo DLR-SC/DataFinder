@@ -56,17 +56,19 @@ class Repository(object):
 
     @staticmethod
     def performImport(sourceItem, targetCollection, 
-                      targetItemName=None, defaultProperties=None):
+                      targetItemName=None, defaultProperties=None, copyData=True):
         """ 
         Import the given item into the repository.
         
         @raise ItemError: Indicating problems on import.
+        @see: L{performImport<datafinder.core.item.visitor.importer.Importer.performImport>}
+              for details on parameters.
         """
         
         importer = Importer()
         if not defaultProperties is None:
             defaultProperties = defaultProperties[:]
-        importer.performImport(sourceItem, targetCollection, targetItemName, defaultProperties)
+        importer.performImport(sourceItem, targetCollection, targetItemName, defaultProperties, copyData)
         
     @staticmethod
     def walk(item):
