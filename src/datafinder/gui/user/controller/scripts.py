@@ -156,7 +156,7 @@ class ScriptController(object):
                 availability += "\nData Formats: "
                 for dataFormatName in script.dataformats:
                     availability += dataFormatName + " "
-            if len(script.dataformats) > 0:
+            if len(script.datatypes) > 0:
                 availability += "\nData Types: "
                 for dataTypeName in script.datatypes:
                     availability += dataTypeName + " "
