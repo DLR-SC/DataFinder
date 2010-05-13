@@ -46,7 +46,7 @@ def managedRepositoryDescription():
     return _context.managedRepositoryDescription
         
 
-def lock(paths):
+def lock(paths, repositoryDescription=None):
     """ 
     Locks the given paths. Instead of the child
     items a place holder item ("...") is displayed until
@@ -54,36 +54,42 @@ def lock(paths):
     
     @param paths: Paths of the items which should be locked.
     @type paths: C{unicode}
+    @param repositoryDescription: Identifies the target repository.
+    @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     """
     
-    rm = _context.determineRepositoryModel()
+    rm = _context.determineRepositoryModel(repositoryDescription)
     indexes = _context.determinesIndexes(rm, paths)
     rm.lock(indexes)
 
 
-def unlock(paths):
+def unlock(paths, repositoryDescription=None):
     """ 
     Unlocks the given paths.
     
     @param paths: Paths of the items which should be unlocked.
     @type paths: C{unicode}
+    @param repositoryDescription: Identifies the target repository.
+    @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     """
     
-    rm = _context.determineRepositoryModel()
+    rm = _context.determineRepositoryModel(repositoryDescription)
     indexes = _context.determinesIndexes(rm, paths)
     for index in indexes:
         rm.unlock(index)
 
 
-def currentSelection():
+def currentSelection(repositoryDescription=None):
     """ 
     Returns paths of the current selected items. 
     
     @return: Paths of the selected items.
     @rtype: C{list} of C{unicode}
+    @param repositoryDescription: Identifies the target repository.
+    @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     """
     
-    rc = _context.determineRepositoryController()
+    rc = _context.determineRepositoryController(repositoryDescription)
     paths = list()
     for index in rc.collectionController.selectedIndexes:
         if index.isValid():
@@ -91,27 +97,31 @@ def currentSelection():
     return paths
 
 
-def currentCollection():
+def currentCollection(repositoryDescription=None):
     """ 
     Returns the current active collection. 
     
     @return: Path of the current active collection.
     @rtype: C{unicode}
+    @param repositoryDescription: Identifies the target repository.
+    @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     """
     
-    rm = _context.determineRepositoryModel()
+    rm = _context.determineRepositoryModel(repositoryDescription)
     return rm.nodeFromIndex(rm.activeIndex).path
 
 
-def selectItem(path):
+def selectItem(path, repositoryDescription=None):
     """
     Selects the item identified by the given path.
     
     @param path: Path of the item to select.
     @type path: C{unicode}
+    @param repositoryDescription: Identifies the target repository.
+    @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     """
 
-    rm = _context.determineRepositoryModel()
+    rm = _context.determineRepositoryModel(repositoryDescription)
     rm.activePath = path
     
     

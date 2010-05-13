@@ -133,7 +133,14 @@ class RepositoryManager(object):
         """
         Connect to a remote repository.
         
-        @type connection: L{<datafinder.core.configuration.preferences.connection>} 
+        @param dataUri: URI identifying the root item of repository which has to be connected.
+        @type dataUri: C{unicode}
+        @param repositoryConfiguration: Optional repository configuration. Default: C{None}
+        @type repositoryConfiguration: L{RepositoryConfiguration<datafinder.core.configuration.configuration.RepositoryConfiguration>}
+        @param username: Optional user name. Default: C{None}
+        @type username: C{unicode}
+        @param password: Optional password. Default: C{None}
+        @type password: C{unicode}
         """
         
         if repositoryConfiguration is None:

@@ -27,7 +27,14 @@ def connectRepository(dataUri, configUri=None, username=None, password=None):
     """
     Connect to a remote repository.
         
-    @type connection: L{<datafinder.core.configuration.preferences.connection>} 
+    @param dataUri: URI identifying the root item of repository which has to be connected.
+    @type dataUri: C{unicode}
+    @param configUri: Optional repository configuration URI. Default: C{None}
+    @type configUri: C{unicode}
+    @param username: Optional user name. Default: C{None}
+    @type username: C{unicode}
+    @param password: Optional password. Default: C{None}
+    @type password: C{unicode}
     
     @raise ScriptApiError: Raised when an error occurred.
     """
@@ -71,7 +78,7 @@ def setWorkingRepository(repositoryDescription):
     """
     Set the current working repository.
     
-    @param repositoryDesrciption: Repository to set.
+    @param repositoryDescription: Repository to set.
     @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     """
     

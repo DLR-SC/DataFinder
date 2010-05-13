@@ -367,21 +367,24 @@ class _ScriptApiContext(object):
         self.repositoryManager = None
         self.progressDialog = None
 
-    def determineRepositoryController(self):
+    def determineRepositoryController(self, repositoryDescription=None):
         """ Determines the current repository. """
         
         rm = None
-        workingRepository = self.repositoryManager.workingRepository
+        if not repositoryDescription is None:
+            workingRepository = repositoryDescription._repository
+        else:
+            workingRepository = self.repositoryManager.workingRepository
         if self.managedRepositoryController.model.repository == workingRepository:
             rm = self.managedRepositoryController
         else:
             rm = self.unmanagedRepositoryController
         return rm
     
-    def determineRepositoryModel(self):
+    def determineRepositoryModel(self, repositoryDescription=None):
         """ Determines the current repository. """
     
-        return self.determineRepositoryController().model
+        return self.determineRepositoryController(repositoryDescription).model
     
     @staticmethod
     def determinesIndexes(rm, paths):    
