@@ -2,3 +2,6 @@ build
 MANIFEST.in
 .settings
 .checkstyle
+.project
+.pydevproject
+src/datafinder/gui/gen
