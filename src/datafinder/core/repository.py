@@ -55,8 +55,8 @@ class Repository(object):
         self.root = self._itemFactory.create("/")
 
     @staticmethod
-    def performImport(sourceItem, targetCollection, 
-                      targetItemName=None, defaultProperties=None, copyData=True):
+    def performImport(sourceItem, targetCollection, targetItemName=None, 
+                      defaultProperties=None, copyData=True, ignoreLinks=False, determinePropertiesCallback=None):
         """ 
         Import the given item into the repository.
         
@@ -68,7 +68,8 @@ class Repository(object):
         importer = Importer()
         if not defaultProperties is None:
             defaultProperties = defaultProperties[:]
-        importer.performImport(sourceItem, targetCollection, targetItemName, defaultProperties, copyData)
+        importer.performImport(sourceItem, targetCollection, targetItemName, defaultProperties, 
+                               copyData, ignoreLinks, determinePropertiesCallback)
         
     @staticmethod
     def walk(item):

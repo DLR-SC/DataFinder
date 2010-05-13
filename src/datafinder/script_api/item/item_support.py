@@ -345,7 +345,8 @@ def createArchive(path, targetPath, defaultProperties=None):
             raise ItemSupportError(errorMessage)
 
 
-def performImport(sourcePath, targetParentPath, targetRepository, defaultProperties=None, copyData=True):
+def performImport(sourcePath, targetParentPath, targetRepository, 
+                  defaultProperties=None, copyData=True, ignoreLinks=False, determinePropertiesCallback=None):
     """
     This method initiates the copy process and starts walking the source creating a
     new node in the destination tree for each item it passes.
@@ -360,6 +361,11 @@ def performImport(sourcePath, targetParentPath, targetRepository, defaultPropert
     @type defaultProperties: C{dict} of C{unicode},C{object}
     @param copyData: Flag indicating whether data of imported leafs is copy as well. Default: C{True}
     @type copyData: C{bool}
+    @param ignoreLinks: Flag indicating the links are ignored during import. Default: C{False}
+    @type ignoreLinks: C{bool}
+    @param determinePropertiesCallback: Function determining properties used when importing a specific item.
+    @type: determinePropertiesCallback: C{callable} using an item description as input and returns a dictionary
+                                        describing the properties.
     
     @raise ItemSupportError: Raised when errors during the import occur.
     """
@@ -372,13 +378,25 @@ def performImport(sourcePath, targetParentPath, targetRepository, defaultPropert
         raise ItemSupportError("One of the items cannot be found.")
     else:
         mappedProperties = _mapProperties(defaultProperties, cwr)
+        if not determinePropertiesCallback is None:
+            determinePropertiesCallback = _createDeterminePropertiesCallback(determinePropertiesCallback, cwr)
         try:
             targetItemName = targetRepository.determineUniqueItemName(sourceItem.name, targetParentPath)
-            targetRepository._repository.performImport(sourceItem, targetParentItem, targetItemName, mappedProperties, copyData)  
+            targetRepository._repository.performImport(sourceItem, targetParentItem, targetItemName, 
+                                                       mappedProperties, copyData, ignoreLinks, determinePropertiesCallback)  
         except ItemError, error:
             errorMessage = "Problems during import of the following item:\n"
             errorMessage += "\n" + sourceItem.path + "\nReason: " + error.message
             raise ItemSupportError(errorMessage)
+
+
+def _createDeterminePropertiesCallback(baseFunction, cwr):
+    """ Adds parameter conversion to the original callback function. """
+    
+    def callback(item):
+        properties = baseFunction(ItemDescription(item))
+        return _mapProperties(properties, cwr)
+    return callback
 
 
 def _mapProperties(properties, cwr):

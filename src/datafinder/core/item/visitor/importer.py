@@ -59,10 +59,11 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         self._source = None
         self._copyData = True
         self._ignoreLinks = False
+        self._determinePropertiesCallback = None
         self.importedLeafs = None
         
     def performImport(self, source, targetCollection, newSourceName=None, 
-                      defaultProperties=None, copyData=True, ignoreLinks=False):
+                      defaultProperties=None, copyData=True, ignoreLinks=False, determinePropertiesCallback=None):
         """
         This method initiates the copy process and starts walking the source creating a
         new node in the destination tree for each item it passes.
@@ -77,6 +78,12 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         @type defaultProperties: C{list} of L{Property<datafinder.core.item.property.Property>}
         @param copyData: Flag indicating whether data has to be copied or not.
         @type copyData: C{bool}
+        @param ignoreLinks: Flag indicating the links are ignored during import. Default: C{False}
+        @type ignoreLinks: C{bool}
+        @param determinePropertiesCallback: Function determining properties used when importing a specific item.
+        @type: determinePropertiesCallback: C{callable} using an item description as input and returns a dictionary
+                                            describing the properties.
+    
         
         @raise ItemError: Indicating errors during import.
         """
@@ -91,7 +98,8 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         self._copyData = copyData
         self.importedLeafs = list()
         self._ignoreLinks = ignoreLinks
-
+        self._determinePropertiesCallback = determinePropertiesCallback
+        
         self.walk(source)
         
         missingDefferedLinkPaths = list()
@@ -128,6 +136,8 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         destinationLinkTarget = self._itemFactory.create(destinationLinkTargetPath)
         link = self._itemFactory.createLink(importName, destinationLinkTarget, destinationParent)
         properties = source.properties.values()[:]
+        if not self._determinePropertiesCallback is None:
+            properties.extend(self._determinePropertiesCallback(source))
         if not self._defaultProperties is None:
             properties.extend(self._defaultProperties)
         try:
@@ -188,6 +198,8 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
             properties.append(Property(contentSizeDefinition, leaf.properties[SIZE_ID].value))
             dataFormatPropertyDefinition = self._itemFactory.getPropertyDefinition(DATA_FORMAT_ID) 
             properties.append(Property(dataFormatPropertyDefinition, leaf.dataFormat.name))
+        if not self._determinePropertiesCallback is None:
+            properties.extend(self._determinePropertiesCallback(leaf))
         if not self._defaultProperties is None:
             properties.extend(self._defaultProperties)
         return properties
@@ -199,6 +211,8 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         importedCollection = self._itemFactory.createCollection(importName, self._pwd)
         
         properties = collection.properties.values()[:]
+        if not self._determinePropertiesCallback is None:
+            properties.extend(self._determinePropertiesCallback(collection))
         if not self._defaultProperties is None:
             properties.extend(self._defaultProperties)
         try:
