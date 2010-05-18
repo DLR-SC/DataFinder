@@ -15,6 +15,7 @@ Module that supports simple item operations.
 """
 
 
+from datafinder.core.configuration.properties.constants import DATATYPE_ID
 from datafinder.core.error import CoreError, PropertyError, ItemError
 from datafinder.core.repository_manager import repositoryManagerInstance
 from datafinder.script_api.error import ItemSupportError
@@ -123,8 +124,11 @@ def __createItem(item, properties=None):
     try:
         mappedProperties = list()
         if not properties is None:
+            namespace = None
+            if DATATYPE_ID in properties:
+                namespace = properties[DATATYPE_ID]
             for propertyIdentifier, value in properties.iteritems():
-                mappedProperties.append(repositoryManagerInstance.workingRepository.createProperty(propertyIdentifier, value))
+                mappedProperties.append(repositoryManagerInstance.workingRepository.createProperty(propertyIdentifier, value, namespace))
     except PropertyError, error:
         raise ItemSupportError("Invalid properties found.\nReason: %s" % error.message)
     else:
