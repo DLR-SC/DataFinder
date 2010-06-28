@@ -155,6 +155,13 @@ class PreferencesHandlerTestCase(unittest.TestCase):
         self.assertEquals(connection.password, "test")
         self.assertEquals(connection.defaultDataStore, "defaultDs")
         self.assertEquals(connection.defaultArchiveStore, "defaultADs")
+        # Test access to configuration with trailing slash
+        connection = self._handler.getConnection("http://192.168.125.130/repos/config/test2/")
+        self.assertEquals(connection.username, "test")
+        self.assertEquals(connection.password, "test")
+        self.assertEquals(connection.defaultDataStore, "defaultDs")
+        self.assertEquals(connection.defaultArchiveStore, "defaultADs")
+        
         
         self._handler.addConnection("http://192.168.125.130/repos/config/test2", None, "test")
         self.assertEquals(len(self._handler.connectionUris), 1)

@@ -135,8 +135,10 @@ class PreferencesHandler(object):
         """
         
         result = None
-        if configurationUri in self._connections:
-            result = self._connections[configurationUri]
+        if not configurationUri is None:
+            configurationUri = self._normalizeConfigurationUri(configurationUri)
+            if configurationUri in self._connections:
+                result = self._connections[configurationUri]
         return result
 
     def addScriptUri(self, scriptUri):
@@ -227,8 +229,7 @@ class PreferencesHandler(object):
         """
         
         if not configurationUri is None:
-            if configurationUri.endswith("/"):
-                configurationUri = configurationUri[:-1]
+            configurationUri = self._normalizeConfigurationUri(configurationUri)
             if configurationUri in self._connectionOrder:
                 connection = self.getConnection(configurationUri)
                 self._connectionOrder.remove(configurationUri)
@@ -244,6 +245,15 @@ class PreferencesHandler(object):
             self._connections[configurationUri] = connection
             self._connectionOrder.insert(0, configurationUri)
 
+    @staticmethod
+    def _normalizeConfigurationUri(configurationUri):
+        """ Ensures that the path component of the URI is in the correct format,
+        i.e. without trailing slash. """
+        
+        if configurationUri.endswith("/"):
+            configurationUri = configurationUri[:-1]
+        return configurationUri
+    
     def removeConnection(self, configurationUri):
         """ 
         Removes a connection.
@@ -252,10 +262,12 @@ class PreferencesHandler(object):
         @type configurationUri: C{unicode}
         """
         
-        if configurationUri in self._connections:
-            del self._connections[configurationUri]
-        if configurationUri in self._connectionOrder:
-            self._connectionOrder.remove(configurationUri)
+        if not configurationUri is None:
+            configurationUri = self._normalizeConfigurationUri(configurationUri)
+            if configurationUri in self._connections:
+                del self._connections[configurationUri]
+            if configurationUri in self._connectionOrder:
+                self._connectionOrder.remove(configurationUri)
             
     def clearConnections(self):
         """ Clears all connections. """
