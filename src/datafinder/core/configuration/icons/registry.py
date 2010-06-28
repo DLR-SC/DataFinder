@@ -12,6 +12,8 @@
 #
 # http://www.dlr.de/datafinder
 #
+from datafinder.persistence.error import PersistenceError
+from datafinder.core.error import ConfigurationError
 
 
 """ Initialization and administration of DataFinder images. """
@@ -38,10 +40,14 @@ class IconRegistry(object):
     def load(self):
         """ Initializes everything with the installed icons. """
         
-        directoryFileStorer = createFileStorer("file:///" + LOCAL_INSTALLED_ICONS_DIRECTORY_PATH)
-        icons = parseIconDirectory(directoryFileStorer)
-        self._registeredIcons.clear()
-        self.register(LOCAL_INSTALLED_ICONS_DIRECTORY_PATH, icons)
+        try:
+            directoryFileStorer = createFileStorer("file:///" + LOCAL_INSTALLED_ICONS_DIRECTORY_PATH)
+        except PersistenceError, error:
+            raise ConfigurationError("Cannot parse local icon directory.\nReason:'%s'", error.message)
+        else:
+            icons = parseIconDirectory(directoryFileStorer)
+            self._registeredIcons.clear()
+            self.register(LOCAL_INSTALLED_ICONS_DIRECTORY_PATH, icons)
     
     @property
     def icons(self):

@@ -93,6 +93,8 @@ class FileStorer(object):
                 result = baseUri + self.__identifier[1:]
             else:
                 result = baseUri + self.__identifier
+            if result.endswith("/"):
+                result = result[:-1]
         return result
     
     @property

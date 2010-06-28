@@ -86,7 +86,7 @@ class RepositoryManager(object):
         repositoryConfiguration = self._createDefaultRepositoryConfiguration(not configurationUri is None)
         if not configurationUri is None:
             try:
-                configurationCollection = createFileStorer(configurationUri, BaseConfiguration(username=username, password=password))
+                configurationCollection = createFileStorer(configurationUri, BaseConfiguration(configurationUri, username=username, password=password))
             except PersistenceError, error:
                 raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
             else:

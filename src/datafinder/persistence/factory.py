@@ -36,7 +36,9 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
     @type itemUri: C{unicode}
     @param additionalParameters: Defines additional parameters, e.g. credentials.
     @type additionalParameters: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
-    
+
+    @raise PersistenceError: Indicates an unsupported interface or wrong configuration.
+        
     @note: When setting C{itemUri} to C{None} a null pattern conform file storer 
            implementation is returned. 
     """
@@ -46,9 +48,19 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
     else:
         parsedUri = urlsplit(itemUri)
         baseUri = parsedUri.scheme + "://" + parsedUri.netloc + "/"
-        additionalParameters.baseUri = baseUri
-        return FileSystem(additionalParameters).createFileStorer(parsedUri.path)
-    
+        if additionalParameters.baseUri is None:
+            additionalParameters.baseUri = baseUri
+
+        if parsedUri.path.startswith(additionalParameters.uriPath):
+            fileStorerPath = parsedUri.path[len(additionalParameters.uriPath):]
+            if not fileStorerPath.startswith("/"):
+                fileStorerPath = "/" + fileStorerPath
+        else:
+            errorMessage = "The item URI '%s' and the file system base URI '%s' do not match." \
+                           % (parsedUri.path, additionalParameters.uriPath)
+            raise PersistenceError(errorMessage)
+        return FileSystem(additionalParameters).createFileStorer(fileStorerPath)
+
 
 class FileSystem(object):
     """ Implements a generic file system interface. """
@@ -253,3 +265,9 @@ class FileSystem(object):
         """
     
         return self._factory.hasPrivilegeSupport
+
+
+if __name__ == "__main__":
+    fs = createFileStorer("http://localhost/webdav", BaseConfiguration("http://localhost/webdav", username="wampp", password="xampp")) 
+    print fs.getChildren()
+    

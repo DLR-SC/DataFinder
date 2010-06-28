@@ -14,10 +14,12 @@ Implements WebDAV-specific connection pool.
 """
 
 
-from webdav.Connection import Connection
+from webdav.Connection import AuthorizationError, Connection, WebdavError
+from webdav.WebdavClient import CollectionStorer, parseDigestAuthInfo
 
-from datafinder.persistence.common.connection.pool import ConnectionPool
 from datafinder.persistence.adapters.webdav_.constants import MAX_CONNECTION_NUMBER
+from datafinder.persistence.common.connection.pool import ConnectionPool
+from datafinder.persistence.error import PersistenceError
 
 
 __version__ = "$LastChangedRevision: 3803 $"
@@ -40,13 +42,27 @@ class WebdavConnectionPool(ConnectionPool):
         
     def _createConnection(self):
         """ Overwrites template method for connection creation. """
-        
+
         protocol = self._configuration.protocol
         hostname = self._configuration.hostname
         port = self._configuration.port
         connection = Connection(hostname, port, protocol=protocol)
-        username = self._configuration.username
-        password = self._configuration.password
-        if not username is None or password is None:
-            connection.addBasicAuthorization(username, password)
+        baseCollection = CollectionStorer(self._configuration.basePath, connection)
+        try:
+            try:
+                baseCollection.validate()
+            except AuthorizationError, error:
+                username = self._configuration.username or ""
+                password = self._configuration.password or ""
+                if error.authType == "Basic":
+                    connection.addBasicAuthorization(username, password)
+                elif error.authType == "Digest":
+                    authInfo = parseDigestAuthInfo(error.authInfo)
+                    connection.addDigestAuthorization(username, password, 
+                                                      realm=authInfo["realm"], qop=authInfo["qop"], nonce=authInfo["nonce"])
+                else:
+                    raise PersistenceError("Cannot create connection. Authentication type '%s' is not supported.")
+        except WebdavError, error:
+            errorMessage = "Cannot create connection.\nReason:'%s'" % error.reason
+            raise PersistenceError(errorMessage)
         return connection
