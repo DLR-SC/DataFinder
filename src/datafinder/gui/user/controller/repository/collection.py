@@ -123,6 +123,7 @@ class _TableController(AbstractController):
         column = self.model.columnCount(root) - 1
         item = QtGui.QItemSelection(self.model.index(0, 0, root),
                                     self.model.index(0, column, root))
+        self.selectionModel().clear()
         self.selectionModel().select(item, QtGui.QItemSelectionModel.Select)
         self.selectionModel().setCurrentIndex(self.model.index(0, 0, root),
                                               QtGui.QItemSelectionModel.Select)

@@ -84,12 +84,6 @@ class ManagedRepositoryController(AbstractController):
         
         self._delegate = _ManagedRepositoryDelegate(self, repositoryManager)
 
-    def _layoutChanged(self):
-        """ Correctly focuses the collection widget when layout changed. """
-        
-        self.focus()
-        QtCore.QObject.disconnect(self.model, QtCore.SIGNAL("layoutChanged()"), self._layoutChanged)
-        
     def load(self, unmanagedRepositoryController, scriptController):
         """
         Initializes the managed repository controller.
@@ -142,10 +136,10 @@ class ManagedRepositoryController(AbstractController):
             self.itemActionController.clear()
             self._unmanagedRepositoryController.focus()
         else:
-            QtCore.QObject.connect(self.model, QtCore.SIGNAL("layoutChanged()"), self._layoutChanged)
+            QtCore.QTimer.singleShot(0, self.focus)
         self._toolbarController.setActivated(success)
         self.setEnabled(success)
-        
+
     @property
     def itemActionController(self):
         """
