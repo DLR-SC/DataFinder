@@ -37,7 +37,7 @@ class run_pylint(Command):
                      "Specifies the output type (HTML or parsable)")]
     __configurationPath = os.path.realpath("build_scripts/configuration/pylintrc")
     __pylintCommandTemplate = "%s --rcfile=\"%s\" --output-format=%s " \
-                            + "--files-output=yes --reports=yes datafinder%s"
+                            + "datafinder%s"
 
     def __init__(self, distribution):
         """ Constructor. """
@@ -65,7 +65,7 @@ class run_pylint(Command):
 
         # Hudson needs parseable output in one file to work correctly
         if self.outputformat == 'parseable':
-            redirection = ' > REPORT_pylint.txt'
+            redirection = ' > build/pylint/pylint.txt'
         else:
             redirection = ''
         currentDirectory = os.path.realpath(os.curdir)
