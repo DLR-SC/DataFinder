@@ -45,7 +45,7 @@
                 <enum>Sunken</enum>
             </property>
             <property name="text">
-                <string>http://datafinderhost:80</string>
+                <string>http://datafinderhost:80/webdav</string>
             </property>
             <property name="toolTip" stdset="0">
                 <string>Server to connect to. http[s]://SERVER_NAME|IP[:PORT]</string>
@@ -56,7 +56,7 @@
                 <cstring>hostNameLabel</cstring>
             </property>
             <property name="text">
-                <string>Hostname:</string>
+                <string>Base URI:</string>
             </property>
         </widget>
         <widget class="QCheckBox" row="1" column="0" rowspan="1" colspan="2">
@@ -134,7 +134,7 @@
                 <enum>Sunken</enum>
             </property>
             <property name="text">
-                <string>/config/path</string>
+                <string>config/path</string>
             </property>
             <property name="toolTip" stdset="0">
                 <string>Root path on the server for the storage of the configuration data.Example: /repos/configuration/Application1</string>
@@ -146,6 +146,9 @@
             </property>
             <property name="text">
                 <string>Configuration Path:</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Path relative to the base URI which contains the configuration items.</string>
             </property>
         </widget>
         <widget class="QLineEdit" row="6" column="1">
@@ -159,7 +162,7 @@
                 <enum>Sunken</enum>
             </property>
             <property name="text">
-                <string>/data/path</string>
+                <string>data/path</string>
             </property>
             <property name="toolTip" stdset="0">
                 <string>Root path on the server for storage of the managed data. Example: /repos/data/Application1</string>
@@ -171,6 +174,9 @@
             </property>
             <property name="text">
                 <string>Data Path:</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Path relative to the base URI which is used to store data items.</string>
             </property>
         </widget>
         <widget class="QLabel" row="2" column="0">

@@ -55,27 +55,12 @@ class FileStorer(object):
         """
         
         self.__fileSystem = fileSystem
-        self.__identifier = self._correctIdentifier(identifier)
+        self.__identifier = identifier
         self.__dataStorer = dataStorer
         self.__metadataStorer = metadataStorer
         self.__privilegeStorer = privilegeStorer
         self._tempfile = None
         
-    @staticmethod
-    def _correctIdentifier(identifier):
-        """ 
-        Ensures that the identifier matches the required format
-        (i.e. absolute path, separated by slash, ends without slash).
-        """
-        
-        if not identifier is None:
-            identifier = identifier.replace("\\", "/")
-            if not identifier.startswith("/"):
-                identifier = "/"  + identifier
-            if identifier.endswith("/") and identifier != "/":
-                identifier = identifier[:-1]
-        return identifier
-
     @property
     def identifier(self):
         """ Simple getter for the identifier attribute. """

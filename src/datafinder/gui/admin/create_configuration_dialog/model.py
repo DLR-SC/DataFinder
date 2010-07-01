@@ -69,18 +69,30 @@ class CreateConfigurationModel(object):
         @raise ConfigurationError: Indicating problems on repository initialization.
         """
         
+        if not hostUri.endswith("/"):
+            hostUri += "/"
+        if configurationPath.startswith("/"):
+            configurationPath = configurationPath[1:]
+        if configurationPath.endswith("/"):
+            configurationPath = configurationPath[:-1]
+        if dataPath.startswith("/"):
+            dataPath = dataPath[1:]
+        if dataPath.endswith("/"):
+            dataPath = dataPath[:-1]
         if dataPath == configurationPath:
-            raise ConfigurationError("Configuration and data path must not be equal.")
+            raise ConfigurationError("Configuration and data path should not be equal.")
         else:
             self._configurationUri = hostUri + configurationPath
             self._dataPath = dataPath
             self._username = username
             self._password = password
+            
             self._repositoryConfiguration = self._repositoryManager.getRepositoryConfiguration(self._configurationUri,
                                                                                                username=self._username,
-                                                                                               password=self._password)
+                                                                                               password=self._password,
+                                                                                               baseUri=hostUri)
             self._exists = self._repositoryConfiguration.exists()
-            
+                    
     def createConfiguration(self, overwrite=True):
         """ 
         Creates the configuration or overwrites an existing.

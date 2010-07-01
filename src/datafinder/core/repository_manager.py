@@ -75,9 +75,21 @@ class RepositoryManager(object):
         self.iconRegistry.load()
         self.dataFormatRegistry.load()
 
-    def getRepositoryConfiguration(self, configurationUri=None, username=None, password=None):
+    def getRepositoryConfiguration(self, configurationUri=None, username=None, password=None, baseUri=None):
         """ 
         Returns a repository configuration for the given parameters.
+        
+        @param configurationUri: URI which identifies the configuration collection. If C{None} a default configuration is used.
+        @type configurationUri: C{unicode}
+        @param username: An optional user name used for authentication.
+        @param username: C{unicode}
+        @param password: An optional password used for authentication.
+        @param password: C{unicode}
+        @param baseUri: Optional base URI of the underlying file system containing the configuration.
+                        This can be used to identify the root collection of this file system.
+                        E.g. configuration URI is: http://myserver.de/test/config and base URI should be: http://myserver.de/test
+                        when http://myserver.de/test is the base WebDAV-enabled root collection.
+        @type baseUri: C{unicode}
         
         @return: Repository configuration.
         @rtype: L{RepositoryConfigurationy<datafinder.core.configuration.configuration.RepositoryConfiguration>}
@@ -85,8 +97,10 @@ class RepositoryManager(object):
 
         repositoryConfiguration = self._createDefaultRepositoryConfiguration(not configurationUri is None)
         if not configurationUri is None:
+            if baseUri is None:
+                baseUri = configurationUri
             try:
-                configurationCollection = createFileStorer(configurationUri, BaseConfiguration(configurationUri, username=username, password=password))
+                configurationCollection = createFileStorer(configurationUri, BaseConfiguration(baseUri, username=username, password=password))
             except PersistenceError, error:
                 raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
             else:

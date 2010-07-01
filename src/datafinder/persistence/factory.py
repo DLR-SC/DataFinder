@@ -126,10 +126,26 @@ class FileSystem(object):
         """
         
         self._factory.prepareUsage()
+        identifier = self._normalizeIdentifier(identifier)
         dataStorer = self._factory.createDataStorer(identifier)
         metadataStorer = self._factory.createMetadataStorer(identifier)
         privilegeStorer = self._factory.createPrivilegeStorer(identifier)
         return FileStorer(self, identifier, dataStorer, metadataStorer, privilegeStorer)
+
+    @staticmethod
+    def _normalizeIdentifier(identifier):
+        """ 
+        Ensures that the identifier matches the required format
+        (i.e. absolute path, separated by slash, ends without slash).
+        """
+        
+        if not identifier is None:
+            identifier = identifier.replace("\\", "/")
+            if not identifier.startswith("/"):
+                identifier = "/"  + identifier
+            if identifier.endswith("/") and identifier != "/":
+                identifier = identifier[:-1]
+        return identifier
 
     def searchPrincipal(self, pattern, searchMode):
         """ 
