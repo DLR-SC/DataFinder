@@ -5,3 +5,4 @@ MANIFEST.in
 .project
 .pydevproject
 src/datafinder/gui/gen
+src/datafinder/core/configuration/gen
