@@ -65,7 +65,7 @@ class run_pylint(Command):
 
         # Hudson needs parseable output in one file to work correctly
         if self.outputformat == 'parseable':
-            redirection = ' > build/pylint/pylint.txt'
+            redirection = ' > pylint.txt'
         else:
             redirection = ''
         currentDirectory = os.path.realpath(os.curdir)
