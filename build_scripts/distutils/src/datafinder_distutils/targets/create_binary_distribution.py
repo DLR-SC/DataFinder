@@ -34,12 +34,11 @@ __version__ = "$LastChangedRevision: 4617 $"
 
 # some Python modules whose inclusion has to be forced
 _forcedIncludes = ["datafinder", "sgmllib", "htmlentitydefs", 
-                   "qt", "sip",
+                   "qt", "sip", "uuid", "unittest",
                    "ConfigParser", "Crypto.Util.randpool", "Crypto.PublicKey.DSA",
                    "Crypto.PublicKey.RSA", "Crypto.Cipher.Blowfish", "Crypto.Cipher.AES",
                    "Crypto.Hash.SHA", "Crypto.Hash.MD5", "Crypto.Hash.HMAC", 
                    "Crypto.Cipher.DES3", "Crypto.Util.number", "select",
-                   "unittest", 
 				   "datafinder.persistence.adapters.filesystem.factory", 
 				   "datafinder.persistence.adapters.webdav_.factory", 
 				   "datafinder.persistence.adapters.tsm.factory",

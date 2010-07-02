@@ -110,8 +110,9 @@ class FileSystem(object):
             try:
                 moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
                 return getattr(moduleInstance, self.__class__.__name__)
-            except (ImportError, AttributeError):
-                errorMessage = "The specified interface '%s' is not supported." % adapterPackageName
+            except (ImportError, AttributeError), error:
+                errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
+                               % (adapterPackageName, str(error))
                 raise PersistenceError(errorMessage)
 
     def createFileStorer(self, identifier):
