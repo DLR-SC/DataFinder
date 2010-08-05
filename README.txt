@@ -76,3 +76,4 @@ WebDAV server please follow these steps:
 * Chose 'File->Connect...' and connect to the created configuration (configuration URL and credentials are already inserted into the login dialog).
 * The environment variable 'DF_START' has to be set to the configuration URL.
 * Start the DataFinder data management client.
+
