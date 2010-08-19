@@ -20,6 +20,7 @@ defined in this package.
 """
 
 
+from datafinder.core.error import PrivilegeError
 from datafinder.core.item.base import ItemBase
 from datafinder.core.item.collection import ItemRoot, ItemCollection
 from datafinder.core.item.data_persister import constants
@@ -189,13 +190,20 @@ class ActionCheckVisitor(object):
     def _checkPrivileges(self, item):
         """ Helper method checking the privileges. """
         
-        if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_PRIVILEGE in item.privileges):
+        try:
+            if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_PRIVILEGE in item.privileges):
+                self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
+                               ActionCheckVisitor.CAPABILITY_STORE,
+                               ActionCheckVisitor.CAPABILITY_MOVE,
+                               ActionCheckVisitor.CAPABILITY_DELETE,
+                               ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES))
+        except PrivilegeError:
             self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
                            ActionCheckVisitor.CAPABILITY_STORE,
                            ActionCheckVisitor.CAPABILITY_MOVE,
                            ActionCheckVisitor.CAPABILITY_DELETE,
                            ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES))
-            
+    
     def handleLink(self, item):
         """
         Implementation of the C{handle} slot for L{ItemLink<datafinder.core.item.link.ItemLink>}.
