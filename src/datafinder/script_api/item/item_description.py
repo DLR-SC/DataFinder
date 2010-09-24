@@ -40,6 +40,22 @@ class ItemDescription(object):
         self.__capabilities = item.capabilities
     
     @property
+    def name(self):
+        """
+        Returns the name of the item.
+        """   
+    
+        return self.__item.name
+
+    @property
+    def path(self):
+        """
+        Returns the path of the item.
+        """   
+    
+        return self.__item.path
+    
+    @property
     def isRoot(self):
         """
         Indicates whether it is the root item or not.
