@@ -120,11 +120,11 @@ class ItemBase(object):
         
         missingProperties = list()
         requiredPropertyDefinitions = self.requiredPropertyDefinitions
-        avaialablePropertyDefinitions = [property_.propertyDefinition for property_ in properties]
+        availablePropertyDefinitions = [property_.propertyDefinition for property_ in properties]
         
         for requiredPropertyDefinition in requiredPropertyDefinitions:
-            isAvailable = requiredPropertyDefinition in avaialablePropertyDefinitions
-            if not isAvailable and not requiredPropertyDefinition.notNull:
+            isAvailable = requiredPropertyDefinition in availablePropertyDefinitions
+            if not isAvailable and requiredPropertyDefinition.notNull:
                 missingProperties.append(requiredPropertyDefinition.displayName)
             elif not isAvailable:
                 property_ = Property(requiredPropertyDefinition, requiredPropertyDefinition.defaultValue)
