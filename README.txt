@@ -38,15 +38,14 @@ http://catacomb.tigris.org/
 = CLIENT INSTALLATION =
 == Source Distribution Installation ==
 * Required Packages:
-  * Python >= 2.4
-  * PyQt 3.18.1 (Qt 3.3.8, SIP 4.1)
-  * PyQt 4.7 (Qt 4.6.2, SIP 4.1)
+  * Python >= 2.6
+  * PyQt 3.18.1 (Qt 3.3.8, SIP 4.10)
+  * PyQt 4.7.3 (Qt 4.6.2, SIP 4.10)
   * Python WebDAV Library >= 0.1.2
-  * Pyparsing >= 1.5.1
-  * PyWin32 (Windows only)
+  * Pyparsing >= 1.5.2
+  * PyWin32 214 (Win32 only)
 * Optional Packages:
   * Paramiko >= 1.7.4
-  * Python LDAP >= 2.3.4
   
 * Install dependencies.
 * Extract archive.
