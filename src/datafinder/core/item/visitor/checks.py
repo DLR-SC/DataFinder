@@ -20,6 +20,8 @@ defined in this package.
 """
 
 
+import logging
+
 from datafinder.core.error import PrivilegeError
 from datafinder.core.item.base import ItemBase
 from datafinder.core.item.collection import ItemRoot, ItemCollection
@@ -31,6 +33,9 @@ from datafinder.core.item.visitor.base import ItemTreeWalkerBase, VisitSlot
 
 
 __version__ = "$LastChangedRevision: 4596 $"
+
+
+_logger = logging.getLogger()
 
 
 class ActionCheckVisitor(object):
@@ -197,7 +202,8 @@ class ActionCheckVisitor(object):
                                ActionCheckVisitor.CAPABILITY_MOVE,
                                ActionCheckVisitor.CAPABILITY_DELETE,
                                ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES))
-        except PrivilegeError:
+        except PrivilegeError, error:
+            _logger.debug(error.args)
             self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
                            ActionCheckVisitor.CAPABILITY_STORE,
                            ActionCheckVisitor.CAPABILITY_MOVE,
