@@ -73,12 +73,12 @@ class ScriptTestCase(unittest.TestCase):
     
     _VALID_SCRIPT_HEADER = \
     """
-    @title: Title
-    @description: Description goes here...
-    @datatypes: DataTypeName1,DataTypeName2,DataTypeName3
-    @dataformats: MimeType1,MimeType2,MimeType3
-    @icon: AnIconName
-    @version: 1.2.0
+    # @title:  Title  
+    #     @description:   Description goes here...  
+    #   @datatypes: DataTypeName1, DataTypeName2,  ,  DataTypeName3
+     # @dataformats: MimeType1,  MimeType2,   , MimeType3
+        # @icon:   AnIconName   
+     # @version:   1.2.0  
     """
                         
     def setUp(self):

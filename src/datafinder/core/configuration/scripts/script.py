@@ -33,6 +33,10 @@ from datafinder.persistence.factory import createFileStorer
 __version__ = "$LastChangedRevision: 4579 $"
 
 
+_COMMENT_CHARACTER = "#"
+_LIST_SEPARATOR = ","
+
+
 class Script(object):
     """ Represents a single script extension. """
     
@@ -74,23 +78,29 @@ class Script(object):
             try:
                 line = dataStream.readline()
                 while line:
-                    words = line.split()
-                    try:
-                        if constants.TITLE_KEYWORD in words:
-                            self.title = " ".join(words[words.index(constants.TITLE_KEYWORD) + 1:])
-                        elif constants.DATATYPES_KEYWORD in words:
-                            self.datatypes = words[words.index(constants.DATATYPES_KEYWORD) + 1].split(",")
-                        elif constants.DATAFORMATS_KEYWORD in words:
-                            self.dataformats = words[words.index(constants.DATAFORMATS_KEYWORD) + 1].split(",")
-                        elif constants.ICON_KEYWORD in words:
-                            self.iconName = " ".join(words[words.index(constants.ICON_KEYWORD) + 1:])
-                        elif constants.VERSION_KEYWORD in words:
-                            self.version = " ".join(words[words.index(constants.VERSION_KEYWORD) + 1:])
-                        elif constants.DESCRIPTION_KEYWORD in words:
-                            self.description = " ".join(words[words.index(constants.DESCRIPTION_KEYWORD) + 1:])
-                        line = dataStream.readline()
-                    except IndexError:
-                        line = dataStream.readline()
+                    line = line.strip()
+                    if line.startswith(_COMMENT_CHARACTER):
+                        if constants.TITLE_KEYWORD in line:
+                            self.title = line.split(constants.TITLE_KEYWORD)[1].strip()
+                        elif constants.DATATYPES_KEYWORD in line:
+                            datatypes = line.split(constants.DATATYPES_KEYWORD)[1].split(_LIST_SEPARATOR)
+                            for datatype in datatypes:
+                                datatype = datatype.strip()
+                                if len(datatype) > 0:
+                                    self.datatypes.append(datatype)
+                        elif constants.DATAFORMATS_KEYWORD in line:
+                            dataformats = line.split(constants.DATAFORMATS_KEYWORD)[1].split(_LIST_SEPARATOR)
+                            for dataformat in dataformats:
+                                dataformat = dataformat.strip()
+                                if len(dataformat) > 0:
+                                    self.dataformats.append(dataformat)
+                        elif constants.ICON_KEYWORD in line:
+                            self.iconName = line.split(constants.ICON_KEYWORD)[1].strip()
+                        elif constants.VERSION_KEYWORD in line:
+                            self.version = line.split(constants.VERSION_KEYWORD)[1].strip()
+                        elif constants.DESCRIPTION_KEYWORD in line:
+                            self.description = line.split(constants.DESCRIPTION_KEYWORD)[1].strip()
+                    line = dataStream.readline()
             finally:
                 dataStream.close()
         except IOError:

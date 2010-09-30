@@ -155,11 +155,15 @@ class ScriptController(object):
             if len(script.dataformats) > 0:
                 availability += "\nData Formats: "
                 for dataFormatName in script.dataformats:
-                    availability += dataFormatName + " "
+                    availability += dataFormatName 
+                    if dataFormatName != script.dataformats[-1]:
+                        availability += ","
             if len(script.datatypes) > 0:
                 availability += "\nData Types: "
                 for dataTypeName in script.datatypes:
-                    availability += dataTypeName + " "
+                    availability += dataTypeName
+                    if dataTypeName != script.datatypes[-1]:
+                        availability += ","
             if len(script.dataformats) == 0 and len(script.datatypes) == 0:
                 availability = "Common Script Extension"
             description = script.description or "No details available."
