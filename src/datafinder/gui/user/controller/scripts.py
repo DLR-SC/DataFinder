@@ -93,7 +93,7 @@ class ScriptController(object):
         if hasattr(script, "scripts"):
             scriptCollectionMenu = ActionTooltipMenu(useScriptMenu)
             scriptCollectionMenu.setIcon(self._SCRIPT_COLLECTION_ICON)
-            scriptCollectionMenu.setTitle(script.name)
+            scriptCollectionMenu.setTitle(script.title)
             useScriptMenu.addMenu(scriptCollectionMenu)
             scripts = list()
             for script_ in script.scripts:
@@ -103,14 +103,14 @@ class ScriptController(object):
             self._registerScripts(scripts)
             useScriptAction = scriptCollectionMenu.menuAction()
         else:
-            useScriptAction = self._createAction(useScriptMenu, script.name, 
+            useScriptAction = self._createAction(useScriptMenu, script.title, 
                                                  self._createUseScriptSlot(script), self._determineScriptTooltip(script))
             self._registerScripts([(script, useScriptAction)])
             
         preferencesAction = None
         if hasattr(script, "hasPreferences"):
             if script.hasPreferences:
-                preferencesAction = self._createAction(self._scriptPreferencesMenu, "Configure " + script.name + "...",
+                preferencesAction = self._createAction(self._scriptPreferencesMenu, "Configure " + script.title + "...",
                                                        self._createPreferencesSlot(script),
                                                        self._determineScriptTooltip(script, self._PREFERENCES_TOOLTIP_TYPE),
                                                        self._PREFERENCES_ICON)
@@ -119,7 +119,7 @@ class ScriptController(object):
             removeActionIcon = self._SCRIPT_ICON
             if hasattr(script, "scripts"):
                 removeActionIcon = self._SCRIPT_COLLECTION_ICON
-            removeScriptAction = self._createAction(self._removeScriptMenu, script.name, None,
+            removeScriptAction = self._createAction(self._removeScriptMenu, script.title, None,
                                                     self._determineScriptTooltip(script, self._REMOVE_TOOLTIP_TYPE), removeActionIcon)
             self._connectAction(removeScriptAction, self._createRemoveScriptSlot(script, useScriptMenu, useScriptAction, 
                                                                                  removeScriptAction, preferencesAction))
@@ -163,11 +163,11 @@ class ScriptController(object):
             if len(script.dataformats) == 0 and len(script.datatypes) == 0:
                 availability = "Common Script Extension"
             description = script.description or "No details available."
-            tooltip = self._USE_TOOLTIP % (script.name, availability, description)
+            tooltip = self._USE_TOOLTIP % (script.title, availability, description)
         elif whichTooltip == self._REMOVE_TOOLTIP_TYPE:
-            tooltip = self._REMOVE_TOOLTIP % (script.name)
+            tooltip = self._REMOVE_TOOLTIP % (script.title)
         else:
-            tooltip = self._PREFERENCES_TOOLTIP % (script.name)
+            tooltip = self._PREFERENCES_TOOLTIP % (script.title)
         return tooltip
     
     def _registerScripts(self, scripts):
@@ -196,7 +196,7 @@ class ScriptController(object):
                 script.execute()
             except ConfigurationError, error:
                 QtGui.QMessageBox.critical(self._mainWindow,
-                                           "Problems on usage of script '%s'..." % script.name,
+                                           "Problems on usage of script '%s'..." % script.title,
                                            "The following problem occurred:\n'%s'" % error.message)
         return _useScriptCallback
     
@@ -231,7 +231,7 @@ class ScriptController(object):
                 script.executePreferences()
             except ConfigurationError, error:
                 QtGui.QMessageBox.critical(self._mainWindow,
-                                           "Problems on showing preferences of script '%s'..." % script.name,
+                                           "Problems on showing preferences of script '%s'..." % script.title,
                                            "The following problem occurred:\n'%s'" % error.message)
         return _preferencesCallback
             
