@@ -30,9 +30,8 @@ def performSetup():
     buildConfiguration = _readConfiguration()
     _createBuildDirectories(buildConfiguration)
     _decorateSdistTarget(buildConfiguration.fullName, buildConfiguration.distDirectory)
-    _createManifestTemplate(buildConfiguration.licenseFile, buildConfiguration.changesFile)
+    _createManifestTemplate(buildConfiguration.getAdditionalFiles())
     buildTargets = _initBuildTargets(buildConfiguration) 
-    
     setup(name=buildConfiguration.name,
           version=buildConfiguration.fullVersion,
           author = buildConfiguration.author,
@@ -41,19 +40,20 @@ def performSetup():
           maintainer_email = buildConfiguration.maintainerEmail,
           url = buildConfiguration.url,
           cmdclass=buildTargets,
-          py_modules = buildConfiguration.getModules(),
-          packages = buildConfiguration.getAllPackages())
+          package_dir = {"":"src"},
+          scripts = buildConfiguration.getScripts(),
+          packages = buildConfiguration.getPackages())
 
 
-def _createManifestTemplate(licenseFile, changesFile):
+def _createManifestTemplate(additionalFiles):
     """ Handles the creation of the manifest template file. """
     
     manifestTemplateFileName = "MANIFEST.in"
     if not os.path.exists(manifestTemplateFileName):
         try:
             fileHandle = open(manifestTemplateFileName, "wb")
-            fileHandle.write("include %s" % licenseFile)
-            fileHandle.write("include %s" % changesFile)
+            for filePath in additionalFiles:
+                fileHandle.write("include %s\n" % filePath)
             fileHandle.close()
         except IOError:
             print("Cannot create manifest template file.")

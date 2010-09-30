@@ -1,3 +1,4 @@
+#!python
 # pylint: disable-msg=C0103,W1010
 # Created: 11.08.2003 Matthias Wagner <Matthias.Wagner@dlr.de>
 # Changed: $Id: datafinder-admin-client.py 4607 2010-04-14 13:27:38Z schlauch $ 

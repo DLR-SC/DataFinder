@@ -85,9 +85,8 @@ class BuildConfiguration(object):
             self.distutilTargetPackage = configParser.get(_globalSection, "distutil_target_package")
             self.userClientStartScript = configParser.get(_globalSection, "userclient_start_script")
             self.adminClientStartScript = configParser.get(_globalSection, "adminclient_start_script")
-            self.unittestDirectory = os.path.join(os.curdir, configParser.get(_globalSection, "unittest_directory"))
+            self.unittestDirectory = configParser.get(_globalSection, "unittest_directory")
             self.unittestPackageSuffix = configParser.get(_globalSection, "unittest_package_suffix")
-            self.unittestPackagePath = os.path.join(self.unittestDirectory, self.package + self.unittestPackageSuffix)
             self.staticImageModulePath = configParser.get(_globalSection, "static_image_module_path")
 
             # script extensions
@@ -126,34 +125,47 @@ class BuildConfiguration(object):
                             scriptExtensions[directoryName] = ScriptExtensionConfiguration(directoryName, packageName, baseConfig)
         return scriptExtensions
 
-    def getModules(self):
+    def getScripts(self):
         """ Returns the list of Python modules. """
 
         if self.includeClients:
-            return [self.userClientStartScript[:-3], self.adminClientStartScript[:-3]] # removing .py
+            return [self.userClientStartScript, self.adminClientStartScript]
         else:
             return list()
 
-    def getAllPackages(self):
+    def getPackages(self):
         """ Returns a list of all relevant packages. """
 
         if not self.includeClients:
             ignorePackageList = ["gui"]
         else:
             ignorePackageList = list()
-        topLevelDirectoryList = [self.sourceDirectory, self.libSourceDirectory, self.distutilSourceDirectory]
-        packageList = list()
-        for directory in topLevelDirectoryList:
-            for walkTuple in os.walk(directory):
-                if "__init__.py" in walkTuple[2]: # directory is a python package
-                    ignorePackage = False
-                    for ignoredPackageName in ignorePackageList:
-                        if ignoredPackageName in walkTuple[0]:
-                            ignorePackage = True
-                            break
-                    if not ignorePackage:
-                        packageList.append(walkTuple[0])
-        return packageList
+        directory = self.sourceDirectory
+        packages = list()
+        for walkTuple in os.walk(directory):
+            if "__init__.py" in walkTuple[2]: # directory is a python package
+                ignorePackage = False
+                for ignoredPackageName in ignorePackageList:
+                    if ignoredPackageName in walkTuple[0]:
+                        ignorePackage = True
+                        break
+                if not ignorePackage:
+                    packages.append(walkTuple[0][(len(directory) + 1):])
+        return packages
+    
+    def getAdditionalFiles(self):
+        """ Determines all files which should be distributed but not installed. """
+        
+        additionalFiles = [self.changesFile, self.licenseFile]
+        topLevelDirectories = [self.unittestDirectory, self.distutilSourceDirectory]
+        for directory in topLevelDirectories:
+            for rootPath, dirNames, fileNames in os.walk(directory):
+                for fileName in fileNames:
+                    if fileName.endswith(".py"):
+                        additionalFiles.append(os.path.join(rootPath, fileName))
+            if not self.includeClients and "gui" in dirNames:
+                dirNames.remove("gui")
+        return additionalFiles 
 
 
 class ScriptExtensionBaseConfiguration(object):
