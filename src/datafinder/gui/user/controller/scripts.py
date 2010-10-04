@@ -66,6 +66,7 @@ class ScriptController(object):
         self._dataTypeScriptActionMap = dict()
         self._sharedScriptRemovalSlots = list()
         self._currentActions = list()
+        self._boundScriptExecutionContext = None
         filterModel = PropertyFilter(self._repositoryModel, allowedItemNameSuffixes=[".py", ".tar"])
         self._itemSelectionDialog = ItemSelectionDialog(filterModel, self._mainWindow)
         self._itemSelectionDialog.helpText = "Select a single Python script or Tar Archive."
@@ -81,6 +82,8 @@ class ScriptController(object):
         """ Initializes the scripts menu. """
         
         scripts = self._scriptRegistry.getScripts(LOCAL_SCRIPT_LOCATION)
+        scripts.sort(cmp=lambda x,y: cmp(x.lower(),y.lower()), 
+                     key=operator.attrgetter("title"))
         for script in scripts:
             self._addScript(script)
 
@@ -180,13 +183,11 @@ class ScriptController(object):
         for script, scriptAction in scripts:
             for dataFormatName in script.dataformats:
                 self._dataFormatScriptActionMap.setdefault(dataFormatName, list()).append(scriptAction)
-                self._dataFormatScriptActionMap[dataFormatName].sort(key=operator.methodcaller("text"))
         
             for dataTypeName in script.datatypes:
                 self._dataTypeScriptActionMap.setdefault(dataTypeName, list()).append(scriptAction)
-                self._dataTypeScriptActionMap[dataTypeName].sort(key=operator.methodcaller("text"))
         
-            if len(script.dataformats) > 0 or len(script.datatypes) > 0:
+            if script.isBound:
                 self._boundScriptActions.add(scriptAction)
                 scriptAction.setEnabled(False)
         
@@ -195,13 +196,17 @@ class ScriptController(object):
         
         def _useScriptCallback():
             """ Executes the script and handles errors. """
-            
+
+            if not script.isBound: # general scripts do not gave specific execution context
+                self._boundScriptExecutionContext = None
             try:
                 script.execute()
             except ConfigurationError, error:
                 QtGui.QMessageBox.critical(self._mainWindow,
                                            "Problems on usage of script '%s'..." % script.title,
                                            "The following problem occurred:\n'%s'" % error.message)
+            finally:
+                self._boundScriptExecutionContext = None
         return _useScriptCallback
     
     def _createRemoveScriptSlot(self, script, useScriptMenu, useAction, removeAction, preferencesAction):
@@ -255,47 +260,46 @@ class ScriptController(object):
                 self._scriptRegistry.register(LOCAL_SCRIPT_LOCATION, [script])
                 self._addScript(script)
 
-    def activateActionsForDataFormat(self, dataFormatName):
+    def scriptsAvailable(self, dataFormatNames, dataTypeNames, context):
         """
-        Enables and returns the script extension actions which are available for the data format 
-        identified by C{dataFormatName}. The actions are ordered alphabetically.
+        Enables bound (to data type or data format) scripts extensions and
+        returns whether those script extension are available at all.
         
-        @param dataFormatName: Name of the data format.
-        @type dataFormatName: C{unicode}
+        @param dataFormatNames: List of data format names to look for scripts.
+        @type: dataFormatNames: C{list} of C{unicode}
+        @param dataTypeNames: List of data format names to look for scripts.
+        @type: dataTypeNames: C{list} of C{unicode}
+        @context: Returns the current set of items used on script execution. 
+        @context: C{tuple} of L{Repository<datafinder.core.repository.Repository>}, 
+                              C{list} of L{ItemBase<datafinder.core.item.base.ItemBase>}
     
         @return: Flag indicating availability of those actions.
         @rtype: C{bool}
         """
         
-        useScriptActions = self._dataFormatScriptActionMap.get(dataFormatName, list())
-        self._setCurrentActions(useScriptActions)
-        return len(useScriptActions) > 0
-
+        scriptsAvailable = False
+        if len(dataFormatNames) > 0 or len(dataTypeNames) > 0:
+            self._boundScriptExecutionContext = context
+            actions = self._boundScriptActions
+            for dataFormatName in dataFormatNames:
+                actions = actions & set(self._dataFormatScriptActionMap.get(dataFormatName, list()))
+            for dataTypeName in dataTypeNames:
+                actions = actions & set(self._dataTypeScriptActionMap.get(dataTypeName, list()))
+            self._setCurrentActions(list(actions))
+            scriptsAvailable = len(actions) > 0
+        return scriptsAvailable
+    
     def _setCurrentActions(self, useScriptActions):
         """ Sets currently used script actions and disables the remaining ones. """
         
         self._currentActions = useScriptActions
+        self._currentActions.sort(cmp=lambda x,y: cmp(x.lower(),y.lower()), 
+                                  key=operator.methodcaller("text"))
         for action in self._boundScriptActions:
             action.setEnabled(action in self._currentActions)
         self._useScriptMenu.clear()
         self._useScriptMenu.addActions(self._currentActions)
     
-    def activateActionsForDataType(self, dataTypeName):
-        """
-        Enables and returns the script extension actions which are available for the data type 
-        identified by C{dataTypeName}. The actions are ordered alphabetically.
-        
-        @param dataTypeName: Name of the data type.
-        @type dataTypeName: C{unicode}
-    
-        @return: Flag indicating availability of those actions.
-        @rtype: C{bool}
-        """
-
-        useScriptActions = self._dataTypeScriptActionMap.get(dataTypeName, list())
-        self._setCurrentActions(useScriptActions)
-        return len(useScriptActions) > 0
-
     def clearUseScriptMenu(self):
         """ Clears the current usable actions. """
 
@@ -311,11 +315,13 @@ class ScriptController(object):
         """
         
         self._useSharedScriptMenu.setEnabled(True)
+        scripts.sort(cmp=lambda x,y: cmp(x.lower(),y.lower()), 
+                     key=operator.attrgetter("title"))
         for script in scripts:
             self._addScript(script, False)
             
     def clearSharedScripts(self):
-        """ Removes the registered shared scritpts. """
+        """ Removes the registered shared scripts. """
         
         for removeScriptSlot in self._sharedScriptRemovalSlots:
             removeScriptSlot()
@@ -327,3 +333,13 @@ class ScriptController(object):
         """ The use script menu containing the current active actions """
         
         return self._useScriptMenu
+
+    @property
+    def boundScriptExecutionContext(self):
+        """  
+        @return: Returns the current set of items used on script execution. 
+        @rtype: C{tuple} of L{Repository<datafinder.core.repository.Repository>}, 
+                            C{list} of L{ItemBase<datafinder.core.item.base.ItemBase>}
+        """
+        
+        return self._boundScriptExecutionContext

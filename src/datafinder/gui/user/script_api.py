@@ -7,6 +7,7 @@
 # 
 # http://www.dlr.de/datafinder/
 #
+from datafinder.script_api.repository import RepositoryDescription
 
 
 """ 
@@ -18,7 +19,6 @@ from datafinder.gui.user.common.progress_dialog import ProgressDialog
 
 
 __version__ = "$LastChangedRevision: 4578 $"
-
 
 
 _context = None
@@ -142,3 +142,37 @@ def performWithProgressDialog(function, callback=None):
         _context.progressDialog = ProgressDialog("Perform Script Action", "Performing a script action in background...")
     _context.progressDialog._cb = callback
     _context.progressDialog.start(function)
+
+
+def getScriptExecutionContext():
+    """
+    Returns the repository description instance and
+    the set of items selected on script action execution.
+    
+    @return: Script execution context.
+    @rtype: L{ScriptExecutionContext<datafinder.gui.user.script_api.ScriptExecutionContext>}
+    """
+    
+    scriptExecutionContext = None
+    if not _context.scriptController.boundScriptExecutionContext is None:
+        repository, items = _context.scriptController.boundScriptExecutionContext
+        itemPaths = [item.path for item in items]
+        scriptExecutionContext = ScriptExecutionContext(RepositoryDescription(repository) ,itemPaths)
+    return scriptExecutionContext
+
+
+class ScriptExecutionContext(object):
+    """ Simple context object which contains the script execution context. """
+    
+    def __init__(self, repositoryDescription, itemPaths):
+        """
+        Constructor. 
+        
+        @param repositoryDescription: The description of the repository.
+        @type: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
+        @param itemPaths: Selected item paths in which context the script is executed.
+        @type itemPaths: C{list} of C{unicode} 
+        """
+        
+        self.repositoryDescription = repositoryDescription
+        self.itemPaths = itemPaths

@@ -347,6 +347,7 @@ class Application(QtGui.QApplication):
         scriptApiContext.repositoryManager = repositoryManager
         scriptApiContext.managedRepositoryController = self.__managedRepositoryController
         scriptApiContext.unmanagedRepositoryController = self.__unmanagedRepositoryController
+        scriptApiContext.scriptController = self.__scriptController
         script_api._context = scriptApiContext
 
         # Register clean up stuff
@@ -366,6 +367,7 @@ class _ScriptApiContext(object):
         self.unmanagedRepositoryController = None
         self.repositoryManager = None
         self.progressDialog = None
+        self.scriptController = None
 
     def determineRepositoryController(self, repositoryDescription=None):
         """ Determines the current repository. """

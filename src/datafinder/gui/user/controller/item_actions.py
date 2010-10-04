@@ -472,10 +472,10 @@ class _ItemActionChecker(object):
     _DEFAULT_ITEM_ACTIONS = [ac.SEARCH_ACTION, ac.CREATE_LEAF_ACTION, ac.CREATE_LINK_ACTION, ac.CREATE_COLLECTION_ACTION,
                              ac.CREATE_ARCHIVE_ACTION, ac.IMPORT_ACTION, ac.EXPORT_ACTION, ac.PASTE_ACTION, 
                              ac.SELECT_ALL_ACTION, ac.REVERSE_SELECTION]
-    _MULTI_ITEM_ACTIONS = _DEFAULT_ITEM_ACTIONS + [ac.COPY_ACTION, ac.CUT_ACTION, ac.DELETE_ACTION, ac.COMMIT_ARCHIVE_ACTION]
+    _MULTI_ITEM_ACTIONS = _DEFAULT_ITEM_ACTIONS + [ac.COPY_ACTION, ac.CUT_ACTION, ac.DELETE_ACTION, ac.COMMIT_ARCHIVE_ACTION, ac.USE_SCRIPT_ACTION]
     _SINGLE_ITEM_ACTIONS = _MULTI_ITEM_ACTIONS + \
                            [ac.RENAME_ACTION, ac.COPY_PROPERTIES_ACTION, ac.EDIT_PROPERTIES_ACTION, ac.PRINT_ACTION, 
-                            ac.OPEN_ACTION, ac.USE_SCRIPT_ACTION]
+                            ac.OPEN_ACTION]
     ALL_ITEM_ACTIONS = _SINGLE_ITEM_ACTIONS
 
     _ACTION_CHECK_MAP = {ac.CREATE_ARCHIVE_ACTION: lambda item: item.capabilities.canArchive,
@@ -587,13 +587,17 @@ class _ItemActionChecker(object):
         """ Restricts availability of the use script action. """
         
         scriptsAvailable = False
-        if len(items) == 1:
-            if items[0].dataType is None:
-                if not items[0].dataFormat is None:
-                    scriptsAvailable = self._scriptController.activateActionsForDataFormat(items[0].dataFormat.name)
-            else:
-                scriptsAvailable = self._scriptController.activateActionsForDataType(items[0].dataType.name)
-        if not scriptsAvailable:
-            if ac.USE_SCRIPT_ACTION in availableActionConstants:
-                availableActionConstants.remove(ac.USE_SCRIPT_ACTION)
-                self._scriptController.clearUseScriptMenu()
+        if len(items) > 0:
+            dataTypeNames = list()
+            dataFormatNames = list()
+            for item in items:
+                if not item.dataFormat is None:
+                    dataFormatNames.append(item.dataFormat.name)
+                if not item.dataType is None:
+                    dataTypeNames.append(item.dataType.name)
+            context = (self._sourceRepositoryModel.repository, items)
+            scriptsAvailable = self._scriptController.scriptsAvailable(dataFormatNames, dataTypeNames, context)
+
+        if not scriptsAvailable and ac.USE_SCRIPT_ACTION in availableActionConstants:
+            availableActionConstants.remove(ac.USE_SCRIPT_ACTION)
+            self._scriptController.clearUseScriptMenu()

@@ -134,6 +134,15 @@ class Script(object):
             finally:
                 dataStream.close()
                 
+    @property
+    def isBound(self):
+        """ 
+        Flag indicating whether the scripts does
+        only work with certain data types or formats.
+        """
+        
+        return len(self.dataformats) > 0 or len(self.datatypes) > 0        
+
 
 class ScriptCollection(object):
     """ Class representing a script collection. """
