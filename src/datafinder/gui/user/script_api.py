@@ -7,7 +7,6 @@
 # 
 # http://www.dlr.de/datafinder/
 #
-from datafinder.script_api.repository import RepositoryDescription
 
 
 """ 
@@ -15,7 +14,12 @@ Provides access to certain states of the user GUI.
 """
 
 
+from PyQt4.QtGui import QDialog
+
+from datafinder.gui.user.common.item_selection_dialog import ItemSelectionDialog
 from datafinder.gui.user.common.progress_dialog import ProgressDialog
+from datafinder.gui.user.models.repository.filter.leaf_filter import LeafFilter
+from datafinder.script_api.repository import RepositoryDescription
 
 
 __version__ = "$LastChangedRevision: 4578 $"
@@ -150,6 +154,30 @@ def performWithProgressDialog(function, callback=None,
     _context.progressDialog.start(function)
 
 
+def getExistingCollection(repositoryDescription=None, helpText=""):
+    """ 
+    Shows a dialog allowing the selection of a collection and returns its path.
+    When the dialog has been canceled by the user C{None} is returned.
+    
+    @param repositoryDescription: Identifies the target repository.
+    @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
+    @param helpText: An optional information displayed in the dialog. Default: C{}
+    @type helpText: C{unicode}
+    """
+    
+    existingCollectionPath = None
+    rm = _context.determineRepositoryModel(repositoryDescription)
+    filteredRm = LeafFilter(rm)
+    itemSelectionDialog = ItemSelectionDialog(filteredRm)
+    itemSelectionDialog.selectedIndex = filteredRm.activeIndex
+    itemSelectionDialog.helpText = helpText
+    exitCode = itemSelectionDialog.exec_()
+    
+    if exitCode == QDialog.Accepted:
+        existingCollectionPath = rm.nodeFromIndex(itemSelectionDialog.selectedIndex).path
+    return existingCollectionPath
+
+
 def getScriptExecutionContext():
     """
     Returns the repository description instance and
@@ -163,7 +191,7 @@ def getScriptExecutionContext():
     if not _context.scriptController.boundScriptExecutionContext is None:
         repository, items = _context.scriptController.boundScriptExecutionContext
         itemPaths = [item.path for item in items]
-        scriptExecutionContext = ScriptExecutionContext(RepositoryDescription(repository) ,itemPaths)
+        scriptExecutionContext = ScriptExecutionContext(RepositoryDescription(repository), itemPaths)
     return scriptExecutionContext
 
 
