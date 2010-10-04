@@ -198,6 +198,7 @@ class ScriptController(object):
             """ Executes the script and handles errors. """
 
             if not script.isBound: # general scripts do not gave specific execution context
+                boundScriptExecutionContext = self._boundScriptExecutionContext
                 self._boundScriptExecutionContext = None
             try:
                 script.execute()
@@ -205,8 +206,8 @@ class ScriptController(object):
                 QtGui.QMessageBox.critical(self._mainWindow,
                                            "Problems on usage of script '%s'..." % script.title,
                                            "The following problem occurred:\n'%s'" % error.message)
-            finally:
-                self._boundScriptExecutionContext = None
+            if not script.isBound: # reset the context
+                self._boundScriptExecutionContext = boundScriptExecutionContext
         return _useScriptCallback
     
     def _createRemoveScriptSlot(self, script, useScriptMenu, useAction, removeAction, preferencesAction):
@@ -293,7 +294,7 @@ class ScriptController(object):
         """ Sets currently used script actions and disables the remaining ones. """
         
         self._currentActions = useScriptActions
-        self._currentActions.sort(cmp=lambda x,y: cmp(x.lower(),y.lower()), 
+        self._currentActions.sort(cmp=lambda x,y: cmp(x.toLower(),y.toLower()), 
                                   key=operator.methodcaller("text"))
         for action in self._boundScriptActions:
             action.setEnabled(action in self._currentActions)
