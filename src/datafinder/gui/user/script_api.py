@@ -125,21 +125,27 @@ def selectItem(path, repositoryDescription=None):
     rm.activePath = path
     
     
-def performWithProgressDialog(function, callback=None):
+def performWithProgressDialog(function, callback=None, 
+                              windowTitle="Perform Script Action", 
+                              labelText="Performing a script action in background..."):
     """
-    Performs the given function and shows a nice progres dialog.
+    Performs the given function and shows a nice progress dialog.
     Please make sure to perform no action changing GUI elements within this function.
     Moreover the locking and unlocking of items not be performed within this function.
     Cleaning up actions can be implemented in the given call back function.
     
     @param function: Function to perform.
     @type function: Callable without any arguments.
-    @param callback: Function to perform clean up actions.
+    @param callback: Function to perform clean up actions. Default: C{None}
     @type callback: Callable without any arguments.
+    @param windowTitle: Title of the progress dialog. Default: C{Perform Script Action}
+    @type windowTitle: C{unicode}
+    @param labelText: Message shown in the progress dialog. Default: C{Performing a script action in background...}
+    @type labelText: C{unicode}
     """
 
     if _context.progressDialog is None:
-        _context.progressDialog = ProgressDialog("Perform Script Action", "Performing a script action in background...")
+        _context.progressDialog = ProgressDialog(windowTitle, labelText)
     _context.progressDialog._cb = callback
     _context.progressDialog.start(function)
 
