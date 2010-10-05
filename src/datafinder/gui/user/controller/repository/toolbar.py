@@ -71,8 +71,7 @@ class ToolbarController(AbstractController):
             self.parentDirectoryAction.setEnabled(activated)
             self.refreshAction.setEnabled(activated)
 
-    @staticmethod
-    def createHistoryMenu(pathlist, menu, iterator):
+    def createHistoryMenu(self, pathlist, menu, iterator):
         """
         Create a menu from the given list with L{QtCore.QModelIndex} objects.
 
@@ -87,11 +86,21 @@ class ToolbarController(AbstractController):
         menu.clear()
         for steps, path in enumerate(pathlist):
             action = QtGui.QAction(path, menu)
-            action.setData(QtCore.QVariant((steps+1)*iterator))
+            action.setData(QtCore.QVariant((steps + 1) * iterator))
+            QtCore.QObject.connect(action, QtCore.SIGNAL("triggered()"), self._createJumpToPathActionSlot(action))
             menu.addAction(action)
 
         if len(pathlist):
             menu.setDefaultAction(menu.actions()[0])
+
+    def _createJumpToPathActionSlot(self, action):
+        """ Creates a slot which directly jumps to the associated path in the history. """
+        
+        def _jumpToPathActionSlot():
+            steps, success = action.data().toInt()
+            if success:
+                self.model.relativeHistoryIndex = steps
+        return _jumpToPathActionSlot
 
 
 class _ToolbarDelegate(AbstractDelegate):
@@ -116,7 +125,7 @@ class _ToolbarDelegate(AbstractDelegate):
 
         backwardList, forwardList = self._controller.model.history
 
-        self._controller.createHistoryMenu(forwardList, self._controller.forwardMenu, -1)
+        self._controller.createHistoryMenu(forwardList, self._controller.forwardMenu, 1)
         self._controller.createHistoryMenu(backwardList, self._controller.backwardMenu, -1)
        
         self._controller.forwardAction.setEnabled(len(forwardList) > 0)

@@ -14,7 +14,7 @@
    <string>DataFinder</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../user.qrc">
+   <iconset>
     <normaloff>:/icons/icons/datafinder24.png</normaloff>:/icons/icons/datafinder24.png</iconset>
   </property>
   <property name="dockOptions">
@@ -534,7 +534,7 @@
         </property>
         <widget class="QWidget" name="logTab">
          <attribute name="icon">
-          <iconset resource="../../user.qrc">
+          <iconset>
            <normaloff>:/icons/icons/console.png</normaloff>:/icons/icons/console.png</iconset>
          </attribute>
          <attribute name="title">
@@ -561,7 +561,7 @@
         </widget>
         <widget class="QWidget" name="scriptOutputTab">
          <attribute name="icon">
-          <iconset resource="../../user.qrc">
+          <iconset>
            <normaloff>:/icons/icons/lightning_bolt_24.png</normaloff>:/icons/icons/lightning_bolt_24.png</iconset>
          </attribute>
          <attribute name="title">
@@ -584,7 +584,7 @@
         </widget>
         <widget class="QWidget" name="searchResultTab">
          <attribute name="icon">
-          <iconset resource="../../user.qrc">
+          <iconset>
            <normaloff>:/icons/icons/binoc24.png</normaloff>:/icons/icons/binoc24.png</iconset>
          </attribute>
          <attribute name="title">
@@ -624,37 +624,46 @@
      <x>0</x>
      <y>0</y>
      <width>1114</width>
-     <height>19</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="viewMenu">
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <widget class="QMenu" name="changeToMenu">
-     <property name="title">
-      <string>&amp;Change to</string>
-     </property>
-     <addaction name="localBackwardAction"/>
-     <addaction name="localForwardAction"/>
-     <addaction name="localParentDirectoryAction"/>
-    </widget>
     <widget class="QMenu" name="localViewMenu">
      <property name="title">
       <string>&amp;File System</string>
      </property>
+     <widget class="QMenu" name="menuChange_to">
+      <property name="title">
+       <string>Change to</string>
+      </property>
+      <addaction name="localBackwardAction"/>
+      <addaction name="localForwardAction"/>
+      <addaction name="localParentDirectoryAction"/>
+     </widget>
      <addaction name="localViewAction"/>
      <addaction name="separator"/>
      <addaction name="localToolbarAction"/>
      <addaction name="localPathAction"/>
      <addaction name="localTreeViewAction"/>
      <addaction name="separator"/>
+     <addaction name="menuChange_to"/>
      <addaction name="localRefreshAction"/>
     </widget>
     <widget class="QMenu" name="serverViewMenu">
      <property name="title">
       <string>Shared Data Repository</string>
      </property>
+     <widget class="QMenu" name="menuChange_to_2">
+      <property name="title">
+       <string>Change to</string>
+      </property>
+      <addaction name="serverBackwardAction"/>
+      <addaction name="serverForwardAction"/>
+      <addaction name="serverParentCollectionAction"/>
+     </widget>
      <addaction name="serverViewAction"/>
      <addaction name="separator"/>
      <addaction name="serverToolbarAction"/>
@@ -662,6 +671,7 @@
      <addaction name="serverTreeViewAction"/>
      <addaction name="serverPropertiesViewAction"/>
      <addaction name="separator"/>
+     <addaction name="menuChange_to_2"/>
      <addaction name="serverRefreshAction"/>
     </widget>
     <widget class="QMenu" name="menuOutput">
@@ -669,7 +679,7 @@
       <string>Output</string>
      </property>
      <property name="icon">
-      <iconset resource="../../user.qrc">
+      <iconset>
        <normaloff>:/icons/icons/monitor_24.png</normaloff>:/icons/icons/monitor_24.png</iconset>
      </property>
      <addaction name="logAction"/>
@@ -683,7 +693,6 @@
     <addaction name="localViewMenu"/>
     <addaction name="serverViewMenu"/>
     <addaction name="separator"/>
-    <addaction name="changeToMenu"/>
    </widget>
    <widget class="QMenu" name="searchMenu">
     <property name="title">
@@ -709,7 +718,7 @@
       <string>&amp;Remove Script</string>
      </property>
      <property name="icon">
-      <iconset resource="../../user.qrc">
+      <iconset>
        <normaloff>:/icons/icons/remove24.png</normaloff>:/icons/icons/remove24.png</iconset>
      </property>
     </widget>
@@ -724,7 +733,7 @@
       <string>Use &amp;Shared Script</string>
      </property>
      <property name="icon">
-      <iconset resource="../../user.qrc">
+      <iconset>
        <normaloff>:/icons/icons/sql_execute24.png</normaloff>:/icons/icons/sql_execute24.png</iconset>
      </property>
     </widget>
@@ -736,7 +745,7 @@
       <string>Use &amp;Local Script</string>
      </property>
      <property name="icon">
-      <iconset resource="../../user.qrc">
+      <iconset>
        <normaloff>:/icons/icons/lightning_bolt24.png</normaloff>:/icons/icons/lightning_bolt24.png</iconset>
      </property>
     </widget>
@@ -748,7 +757,7 @@
       <string>&amp;Preferences</string>
      </property>
      <property name="icon">
-      <iconset resource="../../user.qrc">
+      <iconset>
        <normaloff>:/icons/icons/preferences24.png</normaloff>:/icons/icons/preferences24.png</iconset>
      </property>
     </widget>
@@ -772,7 +781,7 @@
       <string>&amp;New</string>
      </property>
      <property name="icon">
-      <iconset resource="../../user.qrc">
+      <iconset>
        <normaloff>:/icons/icons/new24.png</normaloff>:/icons/icons/new24.png</iconset>
      </property>
      <addaction name="createCollectionAction"/>
@@ -857,7 +866,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="exitAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/exit24.png</normaloff>:/icons/icons/exit24.png</iconset>
    </property>
    <property name="text">
@@ -878,7 +887,7 @@
   </action>
   <action name="importAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/export24.png</normaloff>:/icons/icons/export24.png</iconset>
    </property>
    <property name="text">
@@ -896,7 +905,7 @@
   </action>
   <action name="exportAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/import24.png</normaloff>:/icons/icons/import24.png</iconset>
    </property>
    <property name="text">
@@ -914,7 +923,7 @@
   </action>
   <action name="copyAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/copy24.png</normaloff>:/icons/icons/copy24.png</iconset>
    </property>
    <property name="text">
@@ -932,7 +941,7 @@
   </action>
   <action name="cutAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/cut.png</normaloff>:/icons/icons/cut.png</iconset>
    </property>
    <property name="text">
@@ -953,7 +962,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/paste.png</normaloff>:/icons/icons/paste.png</iconset>
    </property>
    <property name="text">
@@ -971,7 +980,7 @@
   </action>
   <action name="deleteAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/delete24.png</normaloff>:/icons/icons/delete24.png</iconset>
    </property>
    <property name="text">
@@ -989,7 +998,7 @@
   </action>
   <action name="aboutAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/about24.png</normaloff>:/icons/icons/about24.png</iconset>
    </property>
    <property name="text">
@@ -1018,7 +1027,7 @@
   </action>
   <action name="localRefreshAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
    </property>
    <property name="text">
@@ -1036,7 +1045,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/connect24.png</normaloff>:/icons/icons/connect24.png</iconset>
    </property>
    <property name="text">
@@ -1057,7 +1066,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/disconnect24.png</normaloff>:/icons/icons/disconnect24.png</iconset>
    </property>
    <property name="text">
@@ -1072,7 +1081,7 @@
   </action>
   <action name="createLeafAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/new24.png</normaloff>:/icons/icons/new24.png</iconset>
    </property>
    <property name="text">
@@ -1087,7 +1096,7 @@
   </action>
   <action name="createArchiveAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/export24.png</normaloff>:/icons/icons/export24.png</iconset>
    </property>
    <property name="text">
@@ -1116,7 +1125,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/print24.png</normaloff>:/icons/icons/print24.png</iconset>
    </property>
    <property name="text">
@@ -1145,7 +1154,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/insert24.png</normaloff>:/icons/icons/insert24.png</iconset>
    </property>
    <property name="text">
@@ -1171,7 +1180,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/console.png</normaloff>:/icons/icons/console.png</iconset>
    </property>
    <property name="text">
@@ -1186,7 +1195,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/lightning_bolt_24.png</normaloff>:/icons/icons/lightning_bolt_24.png</iconset>
    </property>
    <property name="text">
@@ -1212,7 +1221,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/directories24.png</normaloff>:/icons/icons/directories24.png</iconset>
    </property>
    <property name="text">
@@ -1238,7 +1247,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/directories24.png</normaloff>:/icons/icons/directories24.png</iconset>
    </property>
    <property name="text">
@@ -1253,7 +1262,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/properties24.png</normaloff>:/icons/icons/properties24.png</iconset>
    </property>
    <property name="text">
@@ -1262,7 +1271,7 @@
   </action>
   <action name="selectDatastoresAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/DataStoreNew24.png</normaloff>:/icons/icons/DataStoreNew24.png</iconset>
    </property>
    <property name="text">
@@ -1274,7 +1283,7 @@
   </action>
   <action name="privilegeAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/key24.png</normaloff>:/icons/icons/key24.png</iconset>
    </property>
    <property name="text">
@@ -1289,7 +1298,7 @@
   </action>
   <action name="editPropertiesAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/preferences24.png</normaloff>:/icons/icons/preferences24.png</iconset>
    </property>
    <property name="text">
@@ -1304,38 +1313,32 @@
   </action>
   <action name="localForwardAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/forward.png</normaloff>:/icons/icons/forward.png</iconset>
    </property>
    <property name="text">
-    <string>Forward</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+Right</string>
+    <string>&amp;Forward</string>
    </property>
   </action>
   <action name="localBackwardAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/backward.png</normaloff>:/icons/icons/backward.png</iconset>
    </property>
    <property name="text">
-    <string>Back</string>
+    <string>&amp;Back</string>
    </property>
    <property name="statusTip">
     <string/>
    </property>
-   <property name="shortcut">
-    <string>Alt+Left</string>
-   </property>
   </action>
   <action name="localParentDirectoryAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/back.png</normaloff>:/icons/icons/back.png</iconset>
    </property>
    <property name="text">
-    <string>Local Parent Directory</string>
+    <string>&amp;Parent Directory</string>
    </property>
    <property name="iconText">
     <string>Parent</string>
@@ -1385,7 +1388,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/new24.png</normaloff>:/icons/icons/new24.png</iconset>
    </property>
    <property name="text">
@@ -1425,7 +1428,7 @@
   </action>
   <action name="localViewsAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/viewsmenu.png</normaloff>:/icons/icons/viewsmenu.png</iconset>
    </property>
    <property name="text">
@@ -1456,7 +1459,7 @@
   </action>
   <action name="serverViewsAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/viewsmenu.png</normaloff>:/icons/icons/viewsmenu.png</iconset>
    </property>
    <property name="text">
@@ -1465,29 +1468,29 @@
   </action>
   <action name="serverBackwardAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/backward.png</normaloff>:/icons/icons/backward.png</iconset>
    </property>
    <property name="text">
-    <string>Back</string>
+    <string>&amp;Back</string>
    </property>
   </action>
   <action name="serverForwardAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/forward.png</normaloff>:/icons/icons/forward.png</iconset>
    </property>
    <property name="text">
-    <string>Remote Forward</string>
+    <string>&amp;Forward</string>
    </property>
   </action>
   <action name="serverParentCollectionAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/back.png</normaloff>:/icons/icons/back.png</iconset>
    </property>
    <property name="text">
-    <string>Remote Parent Directory</string>
+    <string>&amp;Parent Directory</string>
    </property>
    <property name="toolTip">
     <string>Change to parent collection.</string>
@@ -1498,7 +1501,7 @@
   </action>
   <action name="serverRefreshAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/refresh.png</normaloff>:/icons/icons/refresh.png</iconset>
    </property>
    <property name="text">
@@ -1548,7 +1551,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/binoc24.png</normaloff>:/icons/icons/binoc24.png</iconset>
    </property>
    <property name="text">
@@ -1565,7 +1568,7 @@
   </action>
   <action name="renameAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/rename24.png</normaloff>:/icons/icons/rename24.png</iconset>
    </property>
    <property name="text">
@@ -1596,7 +1599,7 @@
   </action>
   <action name="createCollectionAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/close_file24.png</normaloff>:/icons/icons/close_file24.png</iconset>
    </property>
    <property name="text">
@@ -1627,7 +1630,7 @@
   </action>
   <action name="copyPropertiesAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/copy24.png</normaloff>:/icons/icons/copy24.png</iconset>
    </property>
    <property name="text">
@@ -1645,7 +1648,7 @@
   </action>
   <action name="createLinkAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/get24.png</normaloff>:/icons/icons/get24.png</iconset>
    </property>
    <property name="text">
@@ -1657,7 +1660,7 @@
   </action>
   <action name="searchAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/binoc24.png</normaloff>:/icons/icons/binoc24.png</iconset>
    </property>
    <property name="text">
@@ -1672,7 +1675,7 @@
   </action>
   <action name="commitArchiveAction">
    <property name="icon">
-    <iconset resource="../../user.qrc">
+    <iconset>
      <normaloff>:/icons/icons/insert_doc24.png</normaloff>:/icons/icons/insert_doc24.png</iconset>
    </property>
    <property name="text">
@@ -1712,7 +1715,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../user.qrc"/>
+  <include location="D:/hudson-work/workspace/DataFinder_Nightly_Build_WinXP_32Bit/resources/qt4/user.qrc"/>
  </resources>
  <connections>
   <connection>
