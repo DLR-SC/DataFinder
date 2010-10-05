@@ -48,6 +48,17 @@ _forcedIncludes = ["datafinder", "sgmllib", "htmlentitydefs",
                    "datafinder.script_api.item.item_support"]
 _win32ForcedIncludes = ["win32com", "win32com.client"]
 
+_manifestFileContent = """
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <noInheritable />
+    <assemblyIdentity type="win32" name="Microsoft.VC90.CRT" version="9.0.30411.0" processorArchitecture="x86" />
+    <file name="msvcr90.dll" /> 
+    <file name="msvcp90.dll" /> 
+    <file name="msvcm90.dll" />
+</assembly>
+"""
+
 
 class create_binary_distribution(Command):
     """ Creates a binary distribution containing all required C and Python extensions. """
@@ -57,12 +68,16 @@ class create_binary_distribution(Command):
     user_options = [("excludepythonshell", 
                      None, 
                      "Flag indicating the exclusion of the separate Python shell."),
+                     ("generatemanifestfiles", 
+                     None, 
+                     "Flag indicating the generation and inclusion of manifest files on Windows."),
                      ]
     
     def __init__(self, distribution):
         """ Constructor. """
         
         self.verbose = None
+        self.generatemanifestfiles = None
         self.excludepythonshell = None
         
         self.__buildConfiguration = BuildConfiguration()
@@ -74,6 +89,7 @@ class create_binary_distribution(Command):
     def initialize_options(self):
         """ Definition of command options. """
         
+        self.generatemanifestfiles = False
         self.excludepythonshell = True
         self.verbose = False
         
@@ -81,6 +97,7 @@ class create_binary_distribution(Command):
         """ Set final values of options. """
         
         self.verbose = self.distribution.verbose
+        self.generatemanifestfiles = bool(int(self.generatemanifestfiles))
         self.excludepythonshell = bool(int(self.excludepythonshell))
         
     def run(self):
@@ -133,3 +150,19 @@ class create_binary_distribution(Command):
                 if imageName.endswith(".ico") or imageName.endswith(".png"):
                     shutil.copy(os.path.join(baseImageDir, imageName), 
                                 destinationImagePath)
+        
+        # create manifest files
+        if self.generatemanifestfiles:
+            scriptNames = [startScript[0] for startScript in startScripts]
+            if not self.excludepythonshell:
+                scriptNames.append("py.py")
+            
+            for scriptName in scriptNames:
+                fileExtension = ".exe.manifest"
+                content = _manifestFileContent
+                    
+                fileBaseName = os.path.basename(scriptName).replace(".py", fileExtension)
+                filePath = os.path.join(self.destinationPath, fileBaseName)
+                fileHandle = open(filePath, "wb")
+                fileHandle.write(content)
+                fileHandle.close()
