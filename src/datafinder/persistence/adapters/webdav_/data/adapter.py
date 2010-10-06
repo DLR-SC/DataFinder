@@ -220,11 +220,6 @@ class DataWebdavAdapter(NullDataStorer):
                     resourceStorer.uploadFile(dataStream)
                 else:
                     content = dataStream.read()
-                    if not isinstance(content, unicode): # workaround for bug in WebDAV library (always uses Latin-1)
-                        try:
-                            content = unicode(content, "UTF-8")
-                        except UnicodeDecodeError:
-                            raise PersistenceError("Non-UTF-8 interpretable binary string has been provided.")
                     resourceStorer.uploadContent(content)
             except WebdavError, error:
                 errorMessage = "Unable to write data to '%s'. " % self.identifier + \
