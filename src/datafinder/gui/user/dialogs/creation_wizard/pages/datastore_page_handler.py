@@ -60,7 +60,7 @@ class DataStoreWizardPage(BaseWizardPage):
             if len(dataStores) > 0:
                 for dataStore in dataStores:
                     self._dataStores[dataStore.name] = dataStore
-                    icon = self.iconProvider.iconForDataType(dataStore)
+                    icon = self.iconProvider.iconForDataStore(dataStore)
                     if not icon is None:
                         self.dataStoreComboBox.addItem(icon, dataStore.name)
                     else:

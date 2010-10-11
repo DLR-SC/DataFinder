@@ -47,13 +47,15 @@ class IconProvider(object):
         self._defaultDriveIcon = qtIconProvider.icon(QFileIconProvider.Drive)
         self._defaultFolderIcon = qtIconProvider.icon(QFileIconProvider.Folder)
         self._defaultFileIcon = qtIconProvider.icon(QFileIconProvider.File)
+        self._defaultDataTypeIcon = QIcon(":/icons/icons/dataType16.png")
+        self._defaultDataStoreIcon = QIcon(":/icons/icons/dataStore16.png")
         
     def iconForDataType(self, dataType):
         """ Retrieves an icon for the icon name. """
 
         icon = None
         if not dataType is None:
-            icon = self._determineIcon(dataType.iconName, DEFAULT_DATATYPE_ICONNAME)
+            icon = self._determineIcon(dataType.iconName, self._defaultDataTypeIcon)
         return icon
             
     def iconForDataStore(self, dataStore):
@@ -61,10 +63,10 @@ class IconProvider(object):
         
         icon = None
         if not dataStore is None:
-            icon = self._determineIcon(dataStore.iconName, DEFAULT_STORE_ICONNAME)
+            icon = self._determineIcon(dataStore.iconName, self._defaultDataStoreIcon)
         return icon
         
-    def _determineIcon(self, iconName, defaultIconName=None):
+    def _determineIcon(self, iconName, defaultIcon=None):
         """ Determines the icon identified by the given name. """
             
         icon = None
@@ -72,9 +74,10 @@ class IconProvider(object):
             icon = self._loadedIcons[iconName]
         else:
             registeredIcon = self._iconHandler.getIcon(iconName)
-            if registeredIcon is None and not defaultIconName is None:
-                registeredIcon = self._iconHandler.getIcon(defaultIconName)
-            if not registeredIcon is None:
+            if registeredIcon is None and not defaultIcon is None:
+                icon = defaultIcon
+                self._loadedIcons[iconName] = defaultIcon
+            elif not registeredIcon is None:
                 icon = QIcon(registeredIcon.smallIconLocalPath)
                 self._loadedIcons[iconName] = icon
         return icon
@@ -127,7 +130,10 @@ class IconProvider(object):
         if item.name.endswith(":") and sys.platform == "win32":
             icon = self._defaultDriveIcon
         elif item.isCollection:
-            icon = self._defaultFolderIcon
+            if item.isManaged:
+                icon = self._defaultDataTypeIcon
+            else:
+                icon = self._defaultFolderIcon
         else:
             icon = self._defaultFileIcon
         return icon

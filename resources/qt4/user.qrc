@@ -95,6 +95,8 @@
     <file>icons/window_options24.png</file>
     <file>icons/print16.png</file>
     <file>icons/print24.png</file>
+    <file>icons/dataStore16.png</file>
+    <file>icons/dataType16.png</file>
   </qresource>
   <qresource prefix="/images" >
     <file>images/DF_Admin_About.png</file>
