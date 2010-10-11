@@ -36,6 +36,8 @@ _log = logging.getLogger()
 _STOP_TRAVERSAL_STATES = [ITEM_STATE_ARCHIVED, ITEM_STATE_ARCHIVED_READONLY]
 _STOP_PROCESSING_STATES = [ITEM_STATE_ARCHIVED_MEMBER]
 
+_ARCHIVE_SUFFIX = " Archive"
+
 
 class Archiver(object):
     """ Implements the archiving process. """
@@ -98,7 +100,7 @@ class Archiver(object):
         """ Determines the target archive item. """
         
         if self._repository.configuration.isManagedRepository:
-            name = self._repository.determineUniqueItemName(sourceItem.name, targetCollection)
+            name = self._repository.determineUniqueItemName(sourceItem.name + _ARCHIVE_SUFFIX, targetCollection)
             properties += sourceItem.properties.values()
             properties.append(self._repository.createProperty(ARCHIVE_PART_COUNT_ID, 0))
             archiveRoot = self._repository.createCollection(name, targetCollection)
