@@ -34,7 +34,7 @@ __version__ = "$LastChangedRevision: 4617 $"
 
 # some Python modules whose inclusion has to be forced
 _forcedIncludes = ["datafinder", "sgmllib", "htmlentitydefs", 
-                   "qt", "sip", "uuid", "unittest",
+                   "uuid", "unittest",
                    "ConfigParser", "Crypto.Util.randpool", "Crypto.PublicKey.DSA",
                    "Crypto.PublicKey.RSA", "Crypto.Cipher.Blowfish", "Crypto.Cipher.AES",
                    "Crypto.Hash.SHA", "Crypto.Hash.MD5", "Crypto.Hash.HMAC", 
@@ -47,8 +47,9 @@ _forcedIncludes = ["datafinder", "sgmllib", "htmlentitydefs",
                    "datafinder.script_api.properties.property_support",
                    "datafinder.script_api.item.item_support"]
 _win32ForcedIncludes = ["win32com", "win32com.client"]
+_qtSpecificForcedIncludes = ["qt", "sip"]
 
-_manifestFileContent = """
+_MANIFEST_FILE_CONTENT = """
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
     <noInheritable />
@@ -58,9 +59,10 @@ _manifestFileContent = """
     <file name="msvcm90.dll" />
 </assembly>
 """
+_DOCUMENTATION_DIRECTORY = "doc"
 
 
-class create_binary_distribution(Command):
+class bdist(Command):
     """ Creates a binary distribution containing all required C and Python extensions. """
     
     description = "Creates a platform-specific DataFinder distribution including all " + \
@@ -68,10 +70,12 @@ class create_binary_distribution(Command):
     user_options = [("excludepythonshell", 
                      None, 
                      "Flag indicating the exclusion of the separate Python shell."),
-                     ("generatemanifestfiles", 
+                     ("outputformat=", 
                      None, 
-                     "Flag indicating the generation and inclusion of manifest files on Windows."),
-                     ]
+                     "Format of the package format (nsis: NSIS installer (win32 only), " \
+                     + "tar compressed tar archive). Default: No archive is created.")]
+    sub_commands = [("gen", None), ("doc", None)]
+
     
     def __init__(self, distribution):
         """ Constructor. """
@@ -79,6 +83,7 @@ class create_binary_distribution(Command):
         self.verbose = None
         self.generatemanifestfiles = None
         self.excludepythonshell = None
+        self.outputformat = None
         
         self.__buildConfiguration = BuildConfiguration()
         self.destinationPath = os.path.join("./", 
@@ -89,32 +94,51 @@ class create_binary_distribution(Command):
     def initialize_options(self):
         """ Definition of command options. """
         
-        self.generatemanifestfiles = False
-        self.excludepythonshell = True
+        self.excludepythonshell = False
+        self.outputformat = None
         self.verbose = False
         
     def finalize_options(self):
         """ Set final values of options. """
         
         self.verbose = self.distribution.verbose
-        self.generatemanifestfiles = bool(int(self.generatemanifestfiles))
         self.excludepythonshell = bool(int(self.excludepythonshell))
         
     def run(self):
         """ Perform command actions. """
+
+        # Preparation...        
+        self._prepare()
         
-        setVersion(self.__buildConfiguration.fullName)
-        startScripts = list()
-        if self.__buildConfiguration.includeClients:
-            startScripts.append((self.__buildConfiguration.userClientStartScript, False))
-            startScripts.append((self.__buildConfiguration.adminClientStartScript, False))
+        # Run sub commands
+        for commandName in self.get_sub_commands():
+            self.run_command(commandName)
         
+        # Create the binary distribution
         from distutils import dist
         distutilDistributionClass = dist.Distribution # save reference to distutils Distribution class because it is overwritten by bbfreeze
-        self.__createBinaryDistribution(startScripts)
+        startScripts = [(scriptName, False) for scriptName in self.__buildConfiguration.getScripts()]
+        self._createBinaryDistribution(startScripts)
         setattr(dist, "Distribution", distutilDistributionClass) # correct reference again so later build targets work properly
         
-    def __createBinaryDistribution(self, startScripts):
+        if self.outputformat == "tar":
+            self.run_command("_bdist_tar")
+        elif self.outputformat == "nsis":
+            self.run_command("_bdist_nsis")
+        
+    def _prepare(self):
+        """ Prepares the source distribution creation. """
+        
+        epydocOptions = self.distribution.get_option_dict("doc")
+        epydocOptions["destdir"] = ("", _DOCUMENTATION_DIRECTORY)
+        modules = "src/datafinder/script_api"
+        if not self.__buildConfiguration.excludeClients:
+            modules += ";src/datafinder/gui/user/script_api.py"
+        epydocOptions["modules"] = ("", modules)
+
+        setVersion(self.__buildConfiguration.fullName)
+
+    def _createBinaryDistribution(self, startScripts):
         """ 
         Creates a binary DataFinder distribution for Linux/Windows platforms
         including the Python interpreter.
@@ -124,10 +148,12 @@ class create_binary_distribution(Command):
                              on the Windows platform a console window is visible or not.
         @type startScripts: C{list} of C{tuple} (C{unicode}/C{string}, C{bool})
         """
-       
+        
         forcedIncludes = _forcedIncludes[:]
+        forcedIncludes.extend(_qtSpecificForcedIncludes)
         if sys.platform == "win32":
             forcedIncludes.extend(_win32ForcedIncludes)
+        
         freezer = Freezer(self.destinationPath, includes=forcedIncludes)
         freezer.include_py = not self.excludepythonshell
         for scriptPath, guiOnly in startScripts:
@@ -136,30 +162,36 @@ class create_binary_distribution(Command):
         # create distribution
         freezer()
         
-        # copy readme and license file
+        # copy readme, license, changes files
         shutil.copy(self.__buildConfiguration.readmeFile, self.destinationPath)
         shutil.copy(self.__buildConfiguration.licenseFile, self.destinationPath)
         shutil.copy(self.__buildConfiguration.changesFile, self.destinationPath)
         
-        # copy image files
-        if self.__buildConfiguration.includeClients:
-            destinationImagePath = os.path.join(self.destinationPath, self.__buildConfiguration.imageDirectory)
-            os.makedirs(destinationImagePath)
-            baseImageDir = self.__buildConfiguration.imageDirectory
-            for imageName in os.listdir(baseImageDir):
-                if imageName.endswith(".ico") or imageName.endswith(".png"):
-                    shutil.copy(os.path.join(baseImageDir, imageName), 
-                                destinationImagePath)
+        # copy image, example script files
+        destinationImagePath = os.path.join(self.destinationPath, self.__buildConfiguration.imageDirectory)
+        os.makedirs(destinationImagePath)
+        baseImageDir = self.__buildConfiguration.imageDirectory
+        for imageName in os.listdir(baseImageDir):
+            if imageName.endswith(".ico"):
+                shutil.copy(os.path.join(baseImageDir, imageName), destinationImagePath)
         
+        scriptsExampleDir = self.__buildConfiguration.scriptExamplesDirectory
+        shutil.copytree(scriptsExampleDir, os.path.join(self.destinationPath, scriptsExampleDir))
+        scriptProjectDir = "script_extensions"
+        shutil.copytree(scriptProjectDir, os.path.join(self.destinationPath, scriptProjectDir))
+        docDir = "doc"
+        shutil.copytree(docDir, os.path.join(self.destinationPath, docDir))
+        shutil.rmtree(docDir)
+
         # create manifest files
-        if self.generatemanifestfiles:
+        if sys.platform == "win32":
             scriptNames = [startScript[0] for startScript in startScripts]
             if not self.excludepythonshell:
                 scriptNames.append("py.py")
             
             for scriptName in scriptNames:
                 fileExtension = ".exe.manifest"
-                content = _manifestFileContent
+                content = _MANIFEST_FILE_CONTENT
                     
                 fileBaseName = os.path.basename(scriptName).replace(".py", fileExtension)
                 filePath = os.path.join(self.destinationPath, fileBaseName)

@@ -30,7 +30,7 @@ from qt import QMimeSourceFactory, QCustomEvent, QObject, qApp, QEvent, \
 
 from datafinder.core.configuration import constants
 try:
-    from datafinder.gui import static_images
+    from datafinder.gui.gen import static_images
     _haveImagesAsModule = True
 except ImportError:
     _haveImagesAsModule = False

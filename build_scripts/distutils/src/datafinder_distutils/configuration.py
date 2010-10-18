@@ -17,19 +17,17 @@ Provides access to the global build configuration parameters.
 
 
 import os
-import sys
 from ConfigParser import ConfigParser
-
-from distutils.sysconfig import get_python_lib
 
 
 __version__ = "$LastChangedRevision: 4617 $"
 
 
-_globalSection = "global"
-_scriptExtensionSection = "script_extensions"
-_listSeparator = ";"
-
+_GLOBAL_SECTION_KEYWORD = "global"
+_SCRIPT_EXTENSION_SECTION_KEYWORD = "script_extensions"
+_LIST_SEPARATOR = ";"
+_SCRIPTAPI_DISTNAME_SUFFIX = "-Scripting-API"
+        
 
 class BuildConfiguration(object):
     """ Allows access to the general configuration parameters. """
@@ -48,68 +46,84 @@ class BuildConfiguration(object):
         if len(self.__sharedState) <= 0:
             configParser = ConfigParser()
             configParser.read(configurationFilePath)
-
-            self.includeClients = bool(int(configParser.get(_globalSection, "include_clients")))
-            self.name = configParser.get(_globalSection, "name")
-            self.author = configParser.get(_globalSection, "author")
-            self.authorEmail = configParser.get(_globalSection, "author_email")
-            self.maintainer = configParser.get(_globalSection, "maintainer")
-            self.maintainerEmail = configParser.get(_globalSection, "maintainer_email")
-            self.url = configParser.get(_globalSection, "url")
-            self.version = configParser.get(_globalSection, "version")
-            self.revision = os.environ.get("SVN_REVISION") or configParser.get(_globalSection, "revision")
-            if os.environ.get("RELEASE_VERSION") is None:
+            
+            self._dist = None # distutils distribution information
+            self.excludeClients = False
+            
+            self.name = configParser.get(_GLOBAL_SECTION_KEYWORD, "name")
+            self.author = configParser.get(_GLOBAL_SECTION_KEYWORD, "author")
+            self.authorEmail = configParser.get(_GLOBAL_SECTION_KEYWORD, "author_email")
+            self.maintainer = configParser.get(_GLOBAL_SECTION_KEYWORD, "maintainer")
+            self.maintainerEmail = configParser.get(_GLOBAL_SECTION_KEYWORD, "maintainer_email")
+            self.url = configParser.get(_GLOBAL_SECTION_KEYWORD, "url")
+            self.version = configParser.get(_GLOBAL_SECTION_KEYWORD, "version")
+            self.revision = os.environ.get("SVN_REVISION") or configParser.get(_GLOBAL_SECTION_KEYWORD, "revision")
+            self.isRelease = os.environ.get("RELEASE_VERSION") or configParser.getboolean(_GLOBAL_SECTION_KEYWORD, "is_release")
+            if not self.isRelease:
                 self.fullVersion = self.version + "-SNAPSHOT-" + self.revision
             else:
                 self.fullVersion = self.version + "-RELEASE-" + self.revision
-            self.fullName = self.name + "-" + self.fullVersion
-            self.licenseFile = configParser.get(_globalSection, "license_file")
-            self.readmeFile = configParser.get(_globalSection, "readme_file")
-            self.changesFile = configParser.get(_globalSection, "changes_file")
+            self.licenseFile = configParser.get(_GLOBAL_SECTION_KEYWORD, "license_file")
+            self.readmeFile = configParser.get(_GLOBAL_SECTION_KEYWORD, "readme_file")
+            self.changesFile = configParser.get(_GLOBAL_SECTION_KEYWORD, "changes_file")
 
             # general package names, directories, start scripts
-            self.buildDirectory = configParser.get(_globalSection, "build_directory")
-            self.epydocResultDirectory = configParser.get(_globalSection, "epydoc_result_directory")
-            self.pylintResultDirectory = configParser.get(_globalSection, "pylint_result_directory")
-            self.distDirectory = configParser.get(_globalSection, "dist_directory")
-            self.unittestResultDirectory = configParser.get(_globalSection, "unittest_result_directory")
+            self.buildDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "build_directory")
+            self.epydocResultDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "epydoc_result_directory")
+            self.pylintResultDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "pylint_result_directory")
+            self.distDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "dist_directory")
+            self.unittestResultDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "unittest_result_directory")
 
-            self.imageDirectory = configParser.get(_globalSection, "image_directory")
-            self.imageInstallDirectory = os.path.join(get_python_lib(), self.imageDirectory)[(len(sys.prefix) + 1):]
-            self.qtDesignerDirectory = configParser.get(_globalSection, "qt3_designer_directory")
-            self.generatedGuiModuleDirectory = configParser.get(_globalSection, "generated_gui_module_directory")
-            self.sourceDirectory = configParser.get(_globalSection, "source_directory")
-            self.package = configParser.get(_globalSection, "package")
-            self.libSourceDirectory = configParser.get(_globalSection, "lib_source_directory")
-            self.distutilSourceDirectory = configParser.get(_globalSection, "distutil_source_directory")
-            self.distutilTargetPackage = configParser.get(_globalSection, "distutil_target_package")
-            self.userClientStartScript = configParser.get(_globalSection, "userclient_start_script")
-            self.adminClientStartScript = configParser.get(_globalSection, "adminclient_start_script")
-            self.unittestDirectory = configParser.get(_globalSection, "unittest_directory")
-            self.unittestPackageSuffix = configParser.get(_globalSection, "unittest_package_suffix")
-            self.staticImageModulePath = configParser.get(_globalSection, "static_image_module_path")
-
+            self.imageDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "image_directory")
+            self.iconDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "icon_directory")
+            self.generatedGuiModuleDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "generated_gui_module_directory")
+            self.generatedConfigurationDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "generated_configuration_directory")
+            self.sourceDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "source_directory")
+            self.unittestDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "unittest_directory")
+            self.scriptExamplesDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "script_examples_directory")
+            self.distutilSourceDirectory = configParser.get(_GLOBAL_SECTION_KEYWORD, "distutil_source_directory")
+            self.distutilTargetPackage = configParser.get(_GLOBAL_SECTION_KEYWORD, "distutil_target_package")
+            self.distutilTargetPackagePath = os.path.join(self.distutilSourceDirectory, *(self.distutilTargetPackage.split(".")))
+        
+            self.userClientStartScript = configParser.get(_GLOBAL_SECTION_KEYWORD, "userclient_start_script")
+            self.adminClientStartScript = configParser.get(_GLOBAL_SECTION_KEYWORD, "adminclient_start_script")
+            
             # script extensions
             self.__scriptExtensions = dict()
-            self.baseDirectoryNames = configParser.get(_scriptExtensionSection, "base_directory_names").split(_listSeparator)
+            self.baseDirectoryNames = configParser.get(_SCRIPT_EXTENSION_SECTION_KEYWORD, "base_directory_names").split(_LIST_SEPARATOR)
             self.scriptExtensions = self.__initScriptExtensions(configParser)
+
+    @property
+    def fullName(self):
+        """ Returns the name and the version information as string. """
+        
+        return self.name + "-" + self.fullVersion
+
+    def __setDist(self, dist):
+        """ Sets the distutils distribution information. """
+        
+        self._dist = dist
+        self.excludeClients = bool(int(dist.exclude_clients))
+        if self.excludeClients:
+            self.name = self.name + _SCRIPTAPI_DISTNAME_SUFFIX
+            
+    dist = property(fset=__setDist)
 
     def __initScriptExtensions(self, configParser):
         """ Initializes script extension specific information. """
 
         scriptExtensions = dict()
-        sourceDirectoryName = configParser.get(_scriptExtensionSection, "source_directory_name")
-        testDirectoryName = configParser.get(_scriptExtensionSection, "test_directory_name")
-        qtDesignerDirectoryName = configParser.get(_scriptExtensionSection, "qt_designer_directory_name")
-        generatedGuiModuleDirectoryName = configParser.get(_scriptExtensionSection, "generated_gui_module_directory_name")
+        sourceDirectoryName = configParser.get(_SCRIPT_EXTENSION_SECTION_KEYWORD, "source_directory_name")
+        testDirectoryName = configParser.get(_SCRIPT_EXTENSION_SECTION_KEYWORD, "test_directory_name")
+        qtDesignerDirectoryName = configParser.get(_SCRIPT_EXTENSION_SECTION_KEYWORD, "qt_designer_directory_name")
+        generatedGuiModuleDirectoryName = configParser.get(_SCRIPT_EXTENSION_SECTION_KEYWORD, "generated_gui_module_directory_name")
 
         for baseDirectoryName in self.baseDirectoryNames:
             baseConfig = ScriptExtensionBaseConfiguration(baseDirectoryName,
                                                           sourceDirectoryName,
                                                           testDirectoryName,
                                                           qtDesignerDirectoryName,
-                                                          generatedGuiModuleDirectoryName,
-                                                          self.unittestPackageSuffix)
+                                                          generatedGuiModuleDirectoryName)
 
             if os.path.isdir(baseDirectoryName):
                 for directoryName in os.listdir(baseDirectoryName):
@@ -128,15 +142,16 @@ class BuildConfiguration(object):
     def getScripts(self):
         """ Returns the list of Python modules. """
 
-        if self.includeClients:
-            return [self.userClientStartScript, self.adminClientStartScript]
-        else:
-            return list()
+        scripts = list()
+        if not self.excludeClients:
+            scripts.append(self.userClientStartScript)
+            scripts.append(self.adminClientStartScript)
+        return scripts
 
     def getPackages(self):
         """ Returns a list of all relevant packages. """
 
-        if not self.includeClients:
+        if self.excludeClients:
             ignorePackageList = ["gui"]
         else:
             ignorePackageList = list()
@@ -152,28 +167,13 @@ class BuildConfiguration(object):
                 if not ignorePackage:
                     packages.append(walkTuple[0][(len(directory) + 1):])
         return packages
-    
-    def getAdditionalFiles(self):
-        """ Determines all files which should be distributed but not installed. """
-        
-        additionalFiles = [self.changesFile, self.licenseFile]
-        topLevelDirectories = [self.unittestDirectory, self.distutilSourceDirectory]
-        for directory in topLevelDirectories:
-            for rootPath, dirNames, fileNames in os.walk(directory):
-                for fileName in fileNames:
-                    if fileName.endswith(".py"):
-                        additionalFiles.append(os.path.join(rootPath, fileName))
-            if not self.includeClients and "gui" in dirNames:
-                dirNames.remove("gui")
-        return additionalFiles 
 
 
 class ScriptExtensionBaseConfiguration(object):
     """ Contains base configuration parameters. """
 
     def __init__(self, baseDirectoryName, sourceDirectoryName, testDirectoryName,
-                 qtDesignerDirectoryName, generatedGuiModuleDirectoryName,
-                 unittestPackageNameSuffix):
+                 qtDesignerDirectoryName, generatedGuiModuleDirectoryName):
         """ Initializes the base parameters. """
 
         self.baseDirectoryName = baseDirectoryName
@@ -181,7 +181,6 @@ class ScriptExtensionBaseConfiguration(object):
         self.testDirectoryName = testDirectoryName
         self.qtDesignerDirectoryName = qtDesignerDirectoryName
         self.generatedGuiModuleDirectoryName = generatedGuiModuleDirectoryName
-        self.unittestPackageNameSuffix = unittestPackageNameSuffix
 
 
 class ScriptExtensionConfiguration(object):
@@ -224,10 +223,3 @@ class ScriptExtensionConfiguration(object):
         return os.path.join(self.baseDirectory, self.__baseConfiguration.testDirectoryName)
 
     testDirectory = property(__getTestDirectory)
-
-    def __getTestPackageDirectory(self):
-        """ Returns the directory identifying the test package. """
-
-        return os.path.join(self.testDirectory, self.packageName + self.__baseConfiguration.unittestPackageNameSuffix)
-
-    testPackageDirectory = property(__getTestPackageDirectory)

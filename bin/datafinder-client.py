@@ -22,14 +22,15 @@ import os
 import locale
 import sys
 
+from datafinder.gui.user import application
+
 
 __version__ = "$LastChangedRevision: 4523 $"
 
 
-dfHome  = os.environ.get('DF_HOME')
-dfStart = os.environ.get('DF_START')
-profile = os.environ.get('PROFILE')
-debug = os.environ.get('DEBUG_DATAFINDER')
+dfStart = os.environ.get("DF_START")
+profile = os.environ.get("DF_PROFILE")
+debug = os.environ.get("DF_DEBUG")
 
 # set the encoding
 encoding = "UTF-8"
@@ -39,38 +40,11 @@ try:
     sys.setdefaultencoding(encoding)
 except AttributeError:
     if sys.getdefaultencoding() == "ascii":
-        print "It is required to correctly set default encoding. Please see site.py for further details."
-
-if not dfStart:
-    print 'Sorry, you will have to set the environment variable "DF_START"'
-    print 'properly in order to start the DataFinder.'
-    raise SystemExit
-
-if not dfHome: # assume that this script is in df_home/bin/
-    dfHome = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
-    os.environ['DF_HOME'] = dfHome
-
-if dfHome and os.path.exists(dfHome):
-    # modify the PYTHONPATH internally
-    sys.path.append(os.path.join(dfHome, 'lib', 'src'))
-    sys.path.append(os.path.join(dfHome, 'src'))
-
-    # OK, and now do it ...
-    from datafinder.gui.user import application
+        print("It is required to correctly set default encoding. " + \
+              "Please see site.py for further details.")
     
-    if profile:
-        import cProfile
-        cProfile.run('application.main()', sort='cumulative')
-    else:
-        if debug is None:
-            debug = False
-        else:
-            debug = True
-        application.main(dfStart, debug)
-    
+if profile:
+    import cProfile
+    cProfile.run("application.main()", sort="cumulative")
 else:
-    print 'Sorry, you will have to set the environment variable "DF_HOME"'
-    print 'properly in order to start the DataFinder.'
-    print 'Usually the path of the variable is one level below the'
-    print 'current directory ("bin") that contains this script.'
-    raise SystemExit
+    application.main(dfStart, bool(debug))

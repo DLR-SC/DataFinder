@@ -1715,7 +1715,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="D:/hudson-work/workspace/DataFinder_Nightly_Build_WinXP_32Bit/resources/qt4/user.qrc"/>
+  <include location="../../user.qrc"/>
  </resources>
  <connections>
   <connection>

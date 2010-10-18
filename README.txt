@@ -41,7 +41,7 @@ http://catacomb.tigris.org/
   * Python >= 2.6
   * PyQt 3.18.1 (Qt 3.3.8, SIP 4.10)
   * PyQt 4.7.3 (Qt 4.6.2, SIP 4.10)
-  * Python WebDAV Library >= 0.1.2
+  * Python WebDAV Library >= 0.3.0
   * Pyparsing >= 1.5.2
   * PyWin32 214 (Win32 only)
 * Optional Packages:

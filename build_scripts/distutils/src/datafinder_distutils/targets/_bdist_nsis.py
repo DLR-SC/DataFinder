@@ -16,8 +16,9 @@ This module implements a build target for creation Windows installer based on NS
 """
 
 
-import sys
 import os
+import sys
+
 from distutils.cmd import Command
 
 from datafinder_distutils.configuration import BuildConfiguration
@@ -46,7 +47,7 @@ _nsisWithAdminClientDef = "!define WITH_ADMIN_CLIENT"
 _nsisCommandTemplate = "%s \"%s\""
 
 
-class create_nsis_installer(Command):
+class _bdist_nsis(Command):
     """ Implements build target for creation of Windows installer based on NSIS. """
     
     description = "Creates the NSIS installer." 
@@ -67,8 +68,7 @@ class create_nsis_installer(Command):
                      "Name of the administration client icon. Expected in the general image resource folder."),
                     ("starturl=",
                      None,
-                     "Start URL that is set during installation process.") 
-                   ]
+                     "Start URL that is set during installation process.")]
     
     def __init__(self, distribution):
         """ Constructor. """
@@ -87,7 +87,9 @@ class create_nsis_installer(Command):
         self.__userClientExecutable = self.__userClientExecutable.replace(".py", ".exe")
         self.__adminClientExecutable = os.path.basename(self.__buildConfiguration.adminClientStartScript)
         self.__adminClientExecutable = self.__adminClientExecutable.replace(".py", ".exe")
-        
+        self.__sourceDistributionDirectory = os.path.join(self.__buildConfiguration.buildDirectory,
+                                                          self.__buildConfiguration.fullName + "_" + sys.platform)
+
     def initialize_options(self):
         """ Definition of command options. """
         
@@ -100,28 +102,32 @@ class create_nsis_installer(Command):
         
     def run(self):
         """ Perform command actions. """
-       
+
+        # Run sub commands
+        for commandName in self.get_sub_commands():
+            self.run_command(commandName)
+        
+        # Create NSIS installer       
         baseName = self.__buildConfiguration.fullName + "%s.exe"
         releaseVersions = os.environ.get("GENERATE_RELEASE_VERSIONS")
         if releaseVersions is None:
-            self.__createNsisInstaller(baseName % "_User+Admin", True, True)
-            self.__createNsisInstaller(baseName % "_User", True, False)
-            self.__createNsisInstaller(baseName % "_Admin", False, True)
+            self._createNsisInstaller(baseName % "_User+Admin", True, True)
+            self._createNsisInstaller(baseName % "_User", True, False)
+            self._createNsisInstaller(baseName % "_Admin", False, True)
         else:
             nameStartUrls = releaseVersions.split(";")
             for nameAndStarturl in nameStartUrls:
                 if len(nameAndStarturl) > 0:
                     nameSuffix, self.starturl = nameAndStarturl.split(":", 1)
-                    self.__createNsisInstaller(baseName % ("-" + nameSuffix + "_User+Admin"), True, True)
-                    self.__createNsisInstaller(baseName % ("-" + nameSuffix + "_User"), True, False)
-                    self.__createNsisInstaller(baseName % ("-" + nameSuffix + "_Admin"), False, True)
-    
-    def __createNsisInstaller(self, name, withUserClient, withAdminClient):
+                    self._createNsisInstaller(baseName % ("-" + nameSuffix + "_User+Admin"), True, True)
+                    self._createNsisInstaller(baseName % ("-" + nameSuffix + "_User"), True, False)
+                    self._createNsisInstaller(baseName % ("-" + nameSuffix + "_Admin"), False, True)
+
+    def _createNsisInstaller(self, name, withUserClient, withAdminClient):
         """ Creates the different variables for the NSIS installer script. """
         
         installerPath = os.path.join(os.path.realpath(self.__buildConfiguration.distDirectory), name)
-        sourceDistributionDirectory = os.path.join(self.__buildConfiguration.buildDirectory,
-                                                   self.__buildConfiguration.fullName + "_" + sys.platform)
+
         normedImageDir = os.path.normpath(self.__buildConfiguration.imageDirectory)
         userIconPath = os.path.join(normedImageDir, self.usericonname)
         adminIconPath = os.path.join(normedImageDir, self.adminiconname)
@@ -130,7 +136,7 @@ class create_nsis_installer(Command):
                                        self.__buildConfiguration.author,
                                        self.__buildConfiguration.url,
                                        installerPath,
-                                       os.path.realpath(sourceDistributionDirectory),
+                                       os.path.realpath(self.__sourceDistributionDirectory),
                                        self.starturl,
                                        userIconPath,
                                        adminIconPath,
@@ -140,7 +146,7 @@ class create_nsis_installer(Command):
             nsisDefs += _nsisWithUserClientDef
         if withAdminClient:
             nsisDefs += "\n" + _nsisWithAdminClientDef
-        fileHandle = open(self.nsisdefinitions, "w")
+        fileHandle = open(self.nsisdefinitions, "wb")
         fileHandle.write(nsisDefs)
         fileHandle.close()
         

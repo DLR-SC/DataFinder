@@ -25,7 +25,7 @@ from datafinder_distutils.configuration import BuildConfiguration
 __version__ = "$LastChangedRevision: 3712 $"
 
 
-class run_pylint(Command):
+class _pylint(Command):
     """ Runs the pylint command. """
 
     description = "Runs the pylint command."
@@ -34,7 +34,7 @@ class run_pylint(Command):
                      "Path and name of the pylint command line tool"),
                      ("outputformat=",
                      None,
-                     "Specifies the output type (HTML or parsable)")]
+                     "Specifies the output type (html or parsable)")]
     __configurationPath = os.path.realpath("build_scripts/configuration/pylintrc")
     __pylintCommandTemplate = "%s --rcfile=\"%s\" --output-format=%s " \
                             + "datafinder%s"
@@ -53,7 +53,7 @@ class run_pylint(Command):
 
         self.verbose = False
         self.pylintcommand = "pylint"
-        self.outputformat = 'html'
+        self.outputformat = "html"
 
     def finalize_options(self):
         """ Set final values of options. """
@@ -65,9 +65,9 @@ class run_pylint(Command):
 
         # Hudson needs parseable output in one file to work correctly
         if self.outputformat == 'parseable':
-            redirection = ' > pylint.txt'
+            redirection = " > pylint.txt"
         else:
-            redirection = ''
+            redirection = " > pylint.html"
         currentDirectory = os.path.realpath(os.curdir)
         pylintCommand = self.__pylintCommandTemplate % (self.pylintcommand,
                                                         self.__configurationPath,

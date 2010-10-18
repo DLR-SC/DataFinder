@@ -20,11 +20,11 @@ import os
 import locale
 import sys
 
+from datafinder.gui.admin import admin_application
+
 
 __version__ = "$LastChangedRevision: 4607 $"
 
-
-dfHome = os.environ.get('DF_HOME')
 
 # set the encoding
 encoding = "UTF-8"
@@ -34,23 +34,7 @@ try:
     sys.setdefaultencoding(encoding)
 except AttributeError:
     if sys.getdefaultencoding() == "ascii":
-        print "It is required to correctly set default encoding. Please see site.py for further details."
+        print("It is required to correctly set default encoding. " + \
+              "Please see site.py for further details.")
 
-if not dfHome: # assume that this script is in df_home/bin/
-    dfHome = os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
-    os.environ['DF_HOME'] = dfHome
-
-if dfHome and os.path.exists(dfHome):
-    # modify the PYTHONPATH internally
-    sys.path.append(os.path.join(dfHome, 'lib', 'src'))
-    sys.path.append(os.path.join(dfHome, 'src'))
-
-    from datafinder.gui.admin import admin_application
-    # OK, and now do it ...
-    admin_application.main()
-else:
-    print 'Sorry, you will have to set the environment variable "DF_HOME"'
-    print 'properly in order to start the DataFinder.'
-    print 'Usually the path of the variable is one level below the'
-    print 'current directory ("bin") that contains this script.'
-    raise SystemExit
+admin_application.main()

@@ -52,43 +52,34 @@ class clean(Command):
     def run(self):
         """ Perform command actions. """
 
-        self.__removeGeneratedGuiFiles()
-        
         # Removing build directory
         if os.path.isdir(self.__buildConfiguration.buildDirectory):
             shutil.rmtree(self.__buildConfiguration.buildDirectory)
             if self.verbose:
                 print("Removed build directory '%s'" % self.__buildConfiguration.buildDirectory)
+
+        # Removing generated GUI modules                
+        if os.path.isdir(self.__buildConfiguration.generatedGuiModuleDirectory):
+            shutil.rmtree(self.__buildConfiguration.generatedGuiModuleDirectory)
+            if self.verbose:
+                print("Removed generated GUI modules in directory '%s'" \
+                      % self.__buildConfiguration.generatedGuiModuleDirectory)
+
+        # Removing generated configuration modules
+        if os.path.isdir(self.__buildConfiguration.generatedConfigurationDirectory):
+            shutil.rmtree(self.__buildConfiguration.generatedConfigurationDirectory)
+            if self.verbose:
+                print("Removed generated configuration modules in directory '%s'" \
+                      % self.__buildConfiguration.generatedConfigurationDirectory)
         
         # Removing manifest files
         manifestTemplate = "MANIFEST.in" 
         if os.path.exists(manifestTemplate):
             os.remove(manifestTemplate)
             if self.verbose:
-                print("Static image module '%s'" % manifestTemplate)
+                print("Removed manifest template '%s'" % manifestTemplate)
         manifest = "MANIFEST"
         if os.path.exists(manifest):
             os.remove(manifest)
             if self.verbose:
-                print("Static image module '%s'" % manifest)
-
-    def __removeGeneratedGuiFiles(self):
-        """ Removes GUI-related generated files. """
-        
-        # Removing generated GUI modules
-        for scriptExtension in self.__buildConfiguration.scriptExtensions.values():
-            genGuiDir = scriptExtension.generatedPythonModuleDirectory
-            if os.path.isdir(genGuiDir):
-                shutil.rmtree(genGuiDir)
-                if self.verbose:
-                    print("Removed directory '%s'" % genGuiDir)
-        if os.path.isdir(self.__buildConfiguration.generatedGuiModuleDirectory):
-            shutil.rmtree(self.__buildConfiguration.generatedGuiModuleDirectory)
-            if self.verbose:
-                print("Removed directory '%s'" % self.__buildConfiguration.generatedGuiModuleDirectory)
-                
-        # Removing static images module
-        if os.path.exists(self.__buildConfiguration.staticImageModulePath):
-            os.remove(self.__buildConfiguration.staticImageModulePath)
-            if self.verbose:
-                print("Static image module '%s'" % self.__buildConfiguration.staticImageModulePath)
+                print("Removed manifest '%s'" % manifest)

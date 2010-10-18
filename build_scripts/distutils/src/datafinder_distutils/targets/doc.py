@@ -23,20 +23,29 @@ from distutils.cmd import Command
 __version__ = "$LastChangedRevision: 3603 $"
 
 
-class create_epydoc_documentation(Command):
+class doc(Command):
     """ Creates Epydoc documentation. """
     
     description = "Creates Epydoc documentation."
     user_options = [("epydoccommand=", 
                      None, 
-                     "Path and name of the epydoc command line tool")]
-    __epydocCommandTemplate = "%s --config build_scripts/configuration/epydoc.cfg" 
+                     "Path and name of the epydoc command line tool."),
+                     ("modules=", 
+                     None, 
+                     "Colon separated list of modules which should be documented."),
+                     ("destdir=", 
+                     None, 
+                     "Path to directory which should contain the documentation.")]
+    __epydocCommandTemplate = "%s --no-sourcecode --html %s %s"
+
     
     def __init__(self, distribution):
         """ Constructor. """
         
         self.verbose = None
         self.epydoccommand = None
+        self.modules = None
+        self.destdir = None
         Command.__init__(self, distribution)
 
     def initialize_options(self):
@@ -48,12 +57,18 @@ class create_epydoc_documentation(Command):
     def finalize_options(self):
         """ Set final values of options. """
         
+        if not self.modules is None:
+            self.modules = self.modules.replace(";", " ")
         self.verbose = self.distribution.verbose
         
     def run(self):
         """ Perform command actions. """
-        
-        epydocCommand = self.__epydocCommandTemplate % self.epydoccommand
+
+        modules = self.modules or ""
+        destdir = ""
+        if not self.destdir is None:
+            destdir = "--output=%s" % self.destdir
+        epydocCommand = self.__epydocCommandTemplate % (self.epydoccommand, destdir, modules)
         if self.verbose:
             print(epydocCommand)
         os.system(epydocCommand)

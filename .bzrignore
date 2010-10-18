@@ -4,5 +4,6 @@ MANIFEST.in
 .checkstyle
 .project
 .pydevproject
+.coverage
 src/datafinder/gui/gen
 src/datafinder/core/configuration/gen

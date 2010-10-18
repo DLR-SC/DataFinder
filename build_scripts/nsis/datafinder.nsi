@@ -89,9 +89,7 @@ Section "Hauptgruppe" SEC01
   !endif
   
   ; Write Environment variable
-  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("DF_HOME", "$INSTDIR").r0'
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("DF_START", "${START_URL}").r0'
-  WriteRegExpandStr ${HKLM_ENVIRONMENT_VARIABLE} "DF_HOME" $INSTDIR
   WriteRegExpandStr ${HKLM_ENVIRONMENT_VARIABLE} "DF_START" ${START_URL}
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
  
@@ -178,7 +176,6 @@ Section Uninstall
   RMDir /r "$INSTDIR"
   
   DeleteRegValue ${HKLM_ENVIRONMENT_VARIABLE} DF_START
-  DeleteRegValue ${HKLM_ENVIRONMENT_VARIABLE} DF_HOME
   
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   SetAutoClose true

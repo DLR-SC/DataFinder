@@ -25,10 +25,10 @@ from datafinder.script_api.properties.property_support import retrieveProperties
 __version__ = "$LastChangedRevision: 4556 $"
 
 
-def propertyAccess(baseUrl):
+def propertyAccess(baseUrl, username=None, password=None):
     """ Demonstrates the access to properties. """
     
-    connectRepository(baseUrl)
+    connectRepository(baseUrl, username=username, password=password)
     for propertyDescription_ in availableProperties().values():
         print propertyDescription_
     print propertyDescription("anotherProperty")
@@ -43,7 +43,10 @@ def propertyAccess(baseUrl):
     
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Call: properties.py URL"
-    else:
+
+    if len(sys.argv) == 2:
         propertyAccess(unicode(sys.argv[1]))
+    elif len(sys.argv) == 4:
+        propertyAccess(unicode(sys.argv[1]), unicode(sys.argv[2]), unicode(sys.argv[3]))
+    else:
+        print "Call: properties.py URL [username] [password]"

@@ -16,9 +16,10 @@ This module implements a build target for creation tar archives usable for insta
 """
 
 
-import sys
 import os
+import sys
 import tarfile
+
 from distutils.cmd import Command
 
 from datafinder_distutils.configuration import BuildConfiguration
@@ -27,7 +28,7 @@ from datafinder_distutils.configuration import BuildConfiguration
 __version__ = "$LastChangedRevision: 3603 $"
 
 
-class create_tar_installer(Command):
+class _bdist_tar(Command):
     """ Implements build target for creation of tar archives usable for installation. """
     
     description = "Creates tar distribution archives." 
@@ -41,6 +42,8 @@ class create_tar_installer(Command):
         
         Command.__init__(self, distribution)
         self.__buildConfiguration = BuildConfiguration()
+        self.__sourceDistributionDirectory = os.path.join(self.__buildConfiguration.buildDirectory,
+                                                          self.__buildConfiguration.fullName + "_" + sys.platform)
         
     def initialize_options(self):
         """ Definition of command options. """
@@ -54,9 +57,13 @@ class create_tar_installer(Command):
         
     def run(self):
         """ Perform command actions. """
-       
-        baseName = self.__buildConfiguration.fullName + "%s"
+
+        # Run sub commands
+        for commandName in self.get_sub_commands():
+            self.run_command(commandName)
         
+        # Create Tar archives       
+        baseName = self.__buildConfiguration.fullName + "%s"
         self.__createTar(baseName % "_User+Admin", True, True)
         self.__createTar(baseName % "_User", True, False)
         self.__createTar(baseName % "_Admin", False, True)
@@ -65,8 +72,7 @@ class create_tar_installer(Command):
         """ Creates the different variables for the NSIS installer script. """
         
         installerPath = os.path.join(os.path.realpath(self.__buildConfiguration.distDirectory), name + ".tar.gz")
-        sourceDistributionDirectory = os.path.join(self.__buildConfiguration.buildDirectory,
-                                                   self.__buildConfiguration.fullName + "_" + sys.platform)
+        
         if self.verbose:
             print("Create archive '%s'." % installerPath)
         
@@ -76,13 +82,13 @@ class create_tar_installer(Command):
         if not withAdminClient:
             ignoreFiles.append(os.path.basename(self.__buildConfiguration.adminClientStartScript)[:-3])
         tarFile = tarfile.open(installerPath, "w:gz")
-        for fileName in os.listdir(sourceDistributionDirectory):
+        for fileName in os.listdir(self.__sourceDistributionDirectory):
             ignoreFileName = False
             for ignoreFile in ignoreFiles:
                 if ignoreFile == fileName or \
                    ignoreFile + "." in fileName:
                     ignoreFileName = True
             if not ignoreFileName:
-                tarFile.add(os.path.join(sourceDistributionDirectory, fileName),
+                tarFile.add(os.path.join(self.__sourceDistributionDirectory, fileName),
                             arcname=os.path.join(name, fileName))
         tarFile.close()

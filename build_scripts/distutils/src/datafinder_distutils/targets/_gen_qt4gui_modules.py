@@ -8,7 +8,6 @@
 #
 # http://www.dlr.de/datafinder/
 #
-import shutil
 
 
 """
@@ -17,19 +16,21 @@ Implements the build target which generates required Qt4 resources.
 
 
 import os
+import shutil
 
 from distutils.cmd import Command
 
 from datafinder_distutils import configuration
+from datafinder_distutils.utils import regenerateFile
 
 
 __version__ = "$LastChangedRevision: 4392 $"
 
 
-class generate_qt4_resources(Command):
+class _gen_qt4gui_modules(Command):
     """
     Implements command to generate python modules
-    from Qt designer files.
+    from Qt4 designer files.
     """
 
     description = "Generates Python modules from Qt designer files."
@@ -96,44 +97,30 @@ class generate_qt4_resources(Command):
         open(initFileName, "w").close()
 
     def _convertUiFiles(self):
-        """
-        Converting of the ui files to py files.
-        """
+        """ Converting of the ui files to py files. """
 
-        print("Convert *.ui to *.py files...")
         self._makePackage(self.uiTargetDirectory)
-        directoryList = os.listdir(self.uidirectory)
-        for directoryBaseName in directoryList:
-            directoryName = os.path.join(self.uidirectory, directoryBaseName)
-            if os.path.isdir(directoryName):
-                directoryContent = os.listdir(directoryName)
-                for itemBaseName in directoryContent:
-                    itemPath = os.path.join(directoryName, itemBaseName)
-                    if os.path.isfile(itemPath) and itemBaseName.endswith(".ui") and not itemBaseName in self.ignoreuifilenames:
-                        pythonFileBaseName = itemBaseName[:-3] + "_ui.py"
-                        destinationPythonDirectoryName = os.path.join(self.uiTargetDirectory,
-                                                                      directoryBaseName)
-                        #Create python package
-                        self._makePackage(destinationPythonDirectoryName)
-
-                        destinationPythonFileName = os.path.join(destinationPythonDirectoryName,
-                                                                 pythonFileBaseName)
-                        command = self.PYUIC_COMMAND_TEMPLATE % (self.pyuiccommand,
-                                                                 destinationPythonFileName,
-                                                                 itemPath)
-
-                        msg = self.MESSAGE_FAILED_TEMPLATE
-                        if os.system(command) == 0:
-                            msg = self.MESSAGE_SUCCESS_TEMPLATE
-                        if self.verbose:
-                            print msg % (itemBaseName, pythonFileBaseName)
+        for directoryName in os.listdir(self.uidirectory):
+            directoryPath = os.path.join(self.uidirectory, directoryName)
+            if os.path.isdir(directoryPath):
+                packagePath = os.path.join(self.uiTargetDirectory, directoryName)
+                self._makePackage(packagePath)  #Create python target package
+                for fileName in os.listdir(directoryPath):
+                    filePath = os.path.join(directoryPath, fileName)
+                    if os.path.isfile(filePath) and fileName.endswith(".ui") and not fileName in self.ignoreuifilenames:
+                        moduleName = fileName[:-3] + "_ui.py"
+                        modulePath = os.path.join(packagePath, moduleName)
+                        if regenerateFile(filePath, modulePath):
+                            command = self.PYUIC_COMMAND_TEMPLATE % (self.pyuiccommand, modulePath, filePath)
+                            msg = self.MESSAGE_FAILED_TEMPLATE
+                            if os.system(command) == 0:
+                                msg = self.MESSAGE_SUCCESS_TEMPLATE
+                            if self.verbose:
+                                print(msg % (filePath, moduleName))
 
     def _generateResourceFile(self):
-        """
-        Generation of the resource_rc.py file.
-        """
+        """ Generation of the image resource file. """
 
-        print("Generating resource file...")
         if not os.path.exists(self.defaultResourceFilePath):
             directoryContent = os.listdir(self.basedirectory)
             for itemBaseName in directoryContent:
@@ -155,19 +142,20 @@ class generate_qt4_resources(Command):
                         if os.system(command) == 0:
                             msg = self.MESSAGE_SUCCESS_TEMPLATE
                         if self.verbose:
-                            print msg % (itemBaseName, destinationPythonFileName)
+                            print(msg % (itemBaseName, destinationPythonFileName))
                     else:
                         if self.verbose:
                             print("Unable to convert '%s'. Target '%s' doesn't exist." % (itemBaseName,
                                                                                           destinationPythonDirectoryName))
         else:
-            print("Copying default resource file instead of generating it.")
-            shutil.copy(self.defaultResourceFilePath, self.uiTargetDirectory + "/user")
+            targetDirectoryPath = os.path.join(self.uiTargetDirectory, "user")
+            targetResourceFilePath = os.path.join(targetDirectoryPath, os.path.basename(self.defaultResourceFilePath))
+            if regenerateFile(self.defaultResourceFilePath, targetResourceFilePath):
+                print("Copying default resource file instead of generating it.")
+                shutil.copy(self.defaultResourceFilePath, targetDirectoryPath)
 
     def run(self):
-        """
-        Perform command actions.
-        """
+        """ Perform command actions. """
 
         self._convertUiFiles()
         self._generateResourceFile()

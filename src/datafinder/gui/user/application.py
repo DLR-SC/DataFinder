@@ -291,7 +291,7 @@ class Application(QtGui.QApplication):
 
         QtGui.QApplication.__init__(self, parameter)
 
-        pixmap = QtGui.QPixmap(":/images/images/DF_User_Splash.png")
+        pixmap = QtGui.QPixmap(":/images/images/splash_datafinder_user.png")
         splash = QtGui.QSplashScreen(pixmap, QtCore.Qt.WindowStaysOnTopHint)
         splash.show()
         self.processEvents()
