@@ -132,8 +132,7 @@ class bdist(Command):
         epydocOptions = self.distribution.get_option_dict("doc")
         epydocOptions["destdir"] = ("", _DOCUMENTATION_DIRECTORY)
         modules = "src/datafinder/script_api"
-        if not self.__buildConfiguration.excludeClients:
-            modules += ";src/datafinder/gui/user/script_api.py"
+        modules += ";src/datafinder/gui/user/script_api.py"
         epydocOptions["modules"] = ("", modules)
 
         setVersion(self.__buildConfiguration.fullName)
