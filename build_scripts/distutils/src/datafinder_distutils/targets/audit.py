@@ -57,13 +57,13 @@ class audit(Command):
         if self.outputformat == "html":
             testOptions["outputformat"] = ("", "html")
         else:
-            testOptions["outputformat"] = ("", "xml")
+            testOptions["outputformat"] = ("", "coverage")
         
         pylintOptions = self.distribution.get_option_dict("_pylint")
         if self.outputformat == "html":
             pylintOptions["outputformat"] = ("", "html")
         else:
-            pylintOptions["outputformat"] = ("", "parsable")
+            pylintOptions["outputformat"] = ("", "parseable")
             
         # Run commands
         for commandName in self.get_sub_commands():

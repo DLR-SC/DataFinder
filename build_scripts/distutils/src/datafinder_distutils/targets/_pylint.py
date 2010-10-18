@@ -34,7 +34,7 @@ class _pylint(Command):
                      "Path and name of the pylint command line tool"),
                      ("outputformat=",
                      None,
-                     "Specifies the output type (html or parsable)")]
+                     "Specifies the output type (html or parseable)")]
     __configurationPath = os.path.realpath("build_scripts/configuration/pylintrc")
     __pylintCommandTemplate = "%s --rcfile=\"%s\" --output-format=%s " \
                             + "datafinder%s"
@@ -64,7 +64,7 @@ class _pylint(Command):
         """ Perform command actions. """
 
         # Hudson needs parseable output in one file to work correctly
-        if self.outputformat == 'parseable':
+        if self.outputformat == "parseable":
             redirection = " > pylint.txt"
         else:
             redirection = " > pylint.html"
