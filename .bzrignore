@@ -1,4 +1,5 @@
 build
+coverage.xml
 MANIFEST.in
 .settings
 .checkstyle

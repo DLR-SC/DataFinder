@@ -83,9 +83,9 @@ class test(Command):
             
         # Run tests
         testdir = os.path.join("test", "unittest")
-        if not self.outputformat is None and self.outputformat == "xml":
+        if self.outputformat == "xml":
             noseOptions = "--with-xunit --xunit-file=" + _UNITTEST_OUTPUT_DIR + "/xunit.xml %s" 
-        elif not self.outputformat is None and self.outputformat == "coverage":
+        elif self.outputformat == "coverage":
             noseOptions = "--with-coverage --cover-erase --cover-inclusive %s src"
         else:
             noseOptions = "--verbosity=2 -d %s"
@@ -96,9 +96,13 @@ class test(Command):
         os.system(noseCommand)
         
         if self.outputformat == "coverage":
-            coverageCommand = "%s %s -d %s" % (self.coveragecommand, 
-                                               self.coverageoutputformat, 
-                                               _UNITTEST_OUTPUT_DIR)
+            if self.coverageoutputformat == "html":
+                coverageCommand = "%s %s -d %s" % (self.coveragecommand, 
+                                                   self.coverageoutputformat, 
+                                                   _UNITTEST_OUTPUT_DIR)
+            else: # xml
+                coverageCommand = "%s %s" % (self.coveragecommand, self.coverageoutputformat)
+            
             if self.verbose:
                 print(coverageCommand)
             os.system(coverageCommand)

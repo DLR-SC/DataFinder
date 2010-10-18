@@ -55,9 +55,9 @@ class audit(Command):
         testOptions = self.distribution.get_option_dict("test")
         testOptions["outputformat"] = ("", "coverage")
         if self.outputformat == "html":
-            testOptions["outputformat"] = ("", "html")
+            testOptions["coverageoutputformat"] = ("", "html")
         else:
-            testOptions["outputformat"] = ("", "coverage")
+            testOptions["coverageoutputformat"] = ("", "xml")
         
         pylintOptions = self.distribution.get_option_dict("_pylint")
         if self.outputformat == "html":
