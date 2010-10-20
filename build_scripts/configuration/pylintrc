@@ -20,7 +20,7 @@ profile=no
 
 # Add <file or directory> to the black list. It should be a base name, not a
 # path. You may set this option multiple times.
-ignore=gen, static_images.py
+ignore=gen, admin
 
 # Pickle collected data for later comparisons.
 persistent=no
@@ -53,7 +53,7 @@ disable-checker=SIMILARITIES
 #enable-msg=
 
 # Disable the message(s) with the given id(s).
-disable=E1101
+disable=SIMILARITIES
 
 
 [REPORTS]
