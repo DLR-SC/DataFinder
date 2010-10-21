@@ -176,8 +176,6 @@ class bdist(Command):
         
         scriptsExampleDir = self.__buildConfiguration.scriptExamplesDirectory
         shutil.copytree(scriptsExampleDir, os.path.join(self.destinationPath, scriptsExampleDir))
-        scriptProjectDir = "script_extensions"
-        shutil.copytree(scriptProjectDir, os.path.join(self.destinationPath, scriptProjectDir))
         docDir = "doc"
         shutil.copytree(docDir, os.path.join(self.destinationPath, docDir))
         shutil.rmtree(docDir)
