@@ -17,6 +17,7 @@ This module provides the target for running the unit tests.
 
 
 import os
+import sys
 
 from distutils.cmd import Command
 
@@ -27,7 +28,7 @@ __version__ = "$LastChangedRevision: 4538 $"
 
 
 _UNITTEST_OUTPUT_DIR = "build/unittest"
-
+_NOSE_DEFAULT_SCRIPT = "nosetests-script.py"
 
 class test(Command):
     """ Runs all unit tests. """
@@ -39,7 +40,7 @@ class test(Command):
                      ("outputformat=",
                       None,
                       "Specifies the output format of the test results." \
-                      + "Formats: xml, coverage, standard out. Default: standard out."),
+                      + "Formats: xml, standard out. Default: standard out."),
                       ("coveragecommand=",
                       None,
                       "Optionally, path and name of the coverage command."),
@@ -63,17 +64,19 @@ class test(Command):
     def initialize_options(self):
         """ Definition of command options. """
 
-        self.nosecommand = "nosetests"
+        self.nosecommand = _NOSE_DEFAULT_SCRIPT
         self.outputformat = None
         self.coveragecommand = "coverage"
-        self.coverageoutputformat = "html"
+        self.coverageoutputformat = None
         self.verbose = False
 
     def finalize_options(self):
         """ Set final values of options. """
 
         self.verbose = self.distribution.verbose
-
+        if sys.platform == "win32" and self.nosecommand == _NOSE_DEFAULT_SCRIPT:
+            self.nosecommand = os.path.join(os.path.normpath(sys.exec_prefix), "Scripts", self.nosecommand)
+            
     def run(self):
         """ Perform command actions. """
 
@@ -85,23 +88,28 @@ class test(Command):
         testdir = os.path.join("test", "unittest")
         if self.outputformat == "xml":
             noseOptions = "--with-xunit --xunit-file=" + _UNITTEST_OUTPUT_DIR + "/xunit.xml %s" 
-        elif self.outputformat == "coverage":
-            noseOptions = "--with-coverage --cover-erase --cover-inclusive %s src"
         else:
             noseOptions = "--verbosity=2 -d %s"
+        
         noseCommand = self.nosecommand + " " + noseOptions % (testdir)
-
+        if not self.coverageoutputformat is None:
+            noseCommand = self.coveragecommand \
+                        + " run --branch --source=src/datafinder,test/unittest/datafinder_test " \
+                        + noseCommand
+        else:
+            noseCommand = "%s %s" % (sys.executable, noseCommand) 
+                        
         if self.verbose:
             print(noseCommand)
         os.system(noseCommand)
-        
-        if self.outputformat == "coverage":
+
+        if not self.coverageoutputformat is None:
             if self.coverageoutputformat == "html":
-                coverageCommand = "%s %s -d %s" % (self.coveragecommand, 
+                coverageCommand = "%s %s --omit=*gen* -d %s" % (self.coveragecommand, 
                                                    self.coverageoutputformat, 
                                                    _UNITTEST_OUTPUT_DIR)
             else: # xml
-                coverageCommand = "%s %s" % (self.coveragecommand, self.coverageoutputformat)
+                coverageCommand = "%s %s --omit=*gen*" % (self.coveragecommand, self.coverageoutputformat)
             
             if self.verbose:
                 print(coverageCommand)
