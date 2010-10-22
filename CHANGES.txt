@@ -1,3 +1,15 @@
+2.1.0
+=====
+* History of the user client allows direct navigation to a specific path.
+* Deactivated keyword search as the resulting search queries may block the Catacomb WebDAV server.
+* Added support of digest authentication with WebDAV servers.
+* Added basic support of the Limestone WebDAV server. 
+* Simplified creation a new repository configurations using the administration client.
+* Enhanced provided distributions (stand-alone script API distribution, Additional documentation, and script examples).
+* Improvements of the script API functions and the script extension user client integration.
+* Some bug fixes.
+The complete list is available on: https://launchpad.net/datafinder/+milestone/2.1.0
+
 2.0.0
 =====
 * Extended archive process which now allows incremental adding of new data files to an existing archive.

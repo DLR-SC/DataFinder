@@ -39,27 +39,36 @@ http://catacomb.tigris.org/
 == Source Distribution Installation ==
 * Required Packages:
   * Python >= 2.6
-  * PyQt 3.18.1 (Qt 3.3.8, SIP 4.10)
-  * PyQt 4.7.3 (Qt 4.6.2, SIP 4.10)
   * Python WebDAV Library >= 0.3.0
   * Pyparsing >= 1.5.2
-  * PyWin32 214 (Win32 only)
+* GUI clients only
+   * PyQt 3.18.1 (Qt 3.3.8, SIP 4.10)
+   * PyQt 4.7.3 (Qt 4.6.2, SIP 4.10)
+* Win32 only
+   * PyWin32 214 (Win32 only) 
 * Optional Packages:
   * Paramiko >= 1.7.4
+  * nose 0.11.1
   
 * Install dependencies.
 * Extract archive.
 * Change to the created directory.
-* (In some cases it is necessary to set the environment variable 'DF_HOME' to the path of the installation directory.)
-* Start administrative client with 'python bin/datafinder-admin-client.py'.
-* Start data management client with 'python bin/datafinder-client.py' (set environment variable 'DF_START' to a valid configuration URL).
+* Run to verify your environment: $> python setup.py test
+  (Set --nosecommand to the complete path of the nose Python start script if not found; e.g., --nosecommand=/usr/local/bin/nosetests)
+* Run to install: $> python setup.py install 
+
+Script API distribution:
+* Try the script examples in contrib/script_examples.
+
+GUI client distribution:
+* Start administrative client with 'python datafinder-admin-client.py'.
+* Start data management client with 'python datafinder-client.py'.
  
 == Binary Distribution Installation ==
 * Extract archive.
 * Change to the created directory.
-* (In some cases it is necessary to set the environment variable 'DF_HOME' to the path of the installation directory.)
 * Start administrative client with 'datafinder-admin-client[.exe]'.
-* Start data management client with 'datafinder-client[.exe]' (set environment variable 'DF_START' to a valid configuration URL).
+* Start data management client with 'datafinder-client[.exe]'.
  
 == Binary Windows Distribution Installation ==
 * Start the corresponding installer.
@@ -73,6 +82,7 @@ WebDAV server please follow these steps:
 * Cancel the login dialog and create a new configuration with 
   'File->Create Configuration...'.
 * Chose 'File->Connect...' and connect to the created configuration (configuration URL and credentials are already inserted into the login dialog).
-* The environment variable 'DF_START' has to be set to the configuration URL.
+* The environment variable 'DF_START' can be set to the configuration URL.
 * Start the DataFinder data management client.
 
+More detailed information is available on: https://wiki.sistec.dlr.de/DataFinderOpenSource
