@@ -58,7 +58,10 @@ class BuildConfiguration(object):
             self.url = configParser.get(_GLOBAL_SECTION_KEYWORD, "url")
             self.version = configParser.get(_GLOBAL_SECTION_KEYWORD, "version")
             self.revision = os.environ.get("SVN_REVISION") or configParser.get(_GLOBAL_SECTION_KEYWORD, "revision")
-            self.isRelease = os.environ.get("RELEASE_VERSION") or configParser.getboolean(_GLOBAL_SECTION_KEYWORD, "is_release")
+            if not os.environ.get("RELEASE_VERSION") is None:
+                self.isRelease = True
+            else:
+                self.isRelease =  configParser.getboolean(_GLOBAL_SECTION_KEYWORD, "is_release")
             if not self.isRelease:
                 self.fullVersion = self.version + "-SNAPSHOT-" + self.revision
             else:
