@@ -17,7 +17,7 @@ Edit dialog to change authentification information such as url, username, passwo
 """
 
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 
 from datafinder.gui.gen.user.authentification_edit_wizard_ui import Ui_editAuth
 
@@ -27,12 +27,12 @@ from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
 __version__ = "$Revision-Id:  $"
 
 
-class AuthEditDialogView(QtGui.QDialog, Ui_editAuth, currentUri):
+class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
     """
     This dialog provides an interface to change credentials that belong to a specified connection
     """
 
-    def __init__(self, parent=None, preferences=None):
+    def __init__(self, parent=None, preferences=None, currentUri = None):
         """
         Constructor.
 
@@ -110,7 +110,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth, currentUri):
 
         return unicode(self.passwordLineEdit.text())
 
-    def _setAuthentification(self, password):
+    def _setAuthentification(self, authentification):
         """
         Sets the password/credentials link in the credentials field.
 
@@ -129,7 +129,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth, currentUri):
         """
         return unicode(self.authMechanismCombo.text())
     
-    def _setAuthMechansim (self, authMechanism):
+    def _setAuthMechanism (self, authMechanism):
         """
         Sets the authentification mechanism from the authentification mechanism field.
 
@@ -157,7 +157,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth, currentUri):
         self.commentPlainText.setPlainText(comment)    
     
    
-    uri = property(_getUrl, _setUrl)
+    currenturi = property(_getUrl, _setUrl)
 
     username = property(_getUsername, _setUsername)
 
