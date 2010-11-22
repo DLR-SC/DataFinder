@@ -4,32 +4,32 @@
 # Created: 16.11.2010 ney_mi <miriam.ney@dlr.de>
 # Changed:
 #
-# Copyright (C) 2003-2007 DLR/SISTEC, Germany
+# Copyright (C) 2003-2010 DLR/SISTEC, Germany
 #
 # All rights reserved
 #
-# http://www.dlr.de/datafinder
+# http://www.launchpad.net/datafinder
 #
 
 
 """
-Connect dialog for entering the url, username, password of the WebDAV Server.
+Edit dialog to change authentification information such as url, username, password, ldap support
 """
 
 
 from PyQt4 import QtCore, QtGui
 
-from datafinder.gui.gen.user.authentification_edit_wizard_ui import Ui_Dialog
+from datafinder.gui.gen.user.authentification_edit_wizard_ui import Ui_editAuth
 
 from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
 
 
-__version__ = "$LastChangedRevision: 3989 $"
+__version__ = "$Revision-Id:  $"
 
 
-class AuthConnectDialogView(QtGui.QDialog, Ui_Dialog):
+class AuthEditDialogView(QtGui.QDialog, Ui_editAuth, currentUri):
     """
-    
+    This dialog provides an interface to change credentials that belong to a specified connection
     """
 
     def __init__(self, parent=None, preferences=None):
@@ -43,16 +43,12 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_Dialog):
         """
 
         QtGui.QDialog.__init__(self, parent)
-        Ui_Dialog.__init__(self)
+        Ui_editAuth.__init__(self)
 
         self.setupUi(self)
         
         self._preferences = preferences
-        self.connect(self.cancelButton, QtCore.SIGNAL("clicked()"), self.reject)
-        self.connect(self.connectButton, QtCore.SIGNAL("clicked()"), self.accept)
-        self.connect(self.urlComboBox, QtCore.SIGNAL("currentIndexChanged(const QString)"), self._urlChangedSlot)
-        self.connect(self.preferencesButton, QtCore.SIGNAL("clicked()"), self._preferencesActionSlot)
-        self.uri = preferences.connectionUris
+        self._urlChangedSlot(currentUri)
                      
     def _urlChangedSlot(self, newUri):
         """ Implementing changing of connection URI. """
@@ -72,7 +68,7 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_Dialog):
         @rtype: C{string}
         """
 
-        return unicode(self.urlComboBox.lineEdit().text())
+        return unicode(self.serverLineEdit.lineEdit().text())
 
     def _setUrl(self, urls):
         """
@@ -82,7 +78,7 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_Dialog):
         @type urls: C{list}
         """
 
-        self.urlComboBox.addItems(urls)
+        self.serverLineEdit.addItems(urls)
 
     def _getUsername(self):
         """
@@ -104,65 +100,75 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_Dialog):
 
         self.usernameLineEdit.setText(username or "")
 
-    def _getPassword(self):
+    def _getAuthentification(self):
         """
-        Returns the password from the password field.
+        Returns the authentification information from the password/certificate location field.
 
-        @return: Returns the password in the password field.
+        @return: Returns the authentification information in the password field.
         @rtype: C{string}
         """
 
         return unicode(self.passwordLineEdit.text())
 
-    def _setPassword(self, password):
+    def _setAuthentification(self, password):
         """
-        Sets the password in the password field.
+        Sets the password/credentials link in the credentials field.
 
-        @param password: The password that has to be in the password field.
-        @type password: C{string}
-        """
-
-        self.passwordLineEdit.setText(password or "")
-
-    def _getSavePassword(self):
-        """
-        Returns true when the save password L{QtGui.QCheckBox} is checked else false.
-
-        @return: True when the L{QtGui.QCheckBox} is checked else False.
-        @rtype: C{boolean}
+        @param authentification: The credential information that has to be in the password/certificate location field.
+        @type authentification: C{string}
         """
 
-        return self.savePasswordCheckBox.isChecked()
+        self.authLineEdit.setText(authentification or "")
 
-    def _setSavePassword(self, checked):
+    def _getAuthMechanism(self):
         """
-        Set the state of the save password L{QtGui.QCheckBox}.
+        Returns the authentification mechanism from the authentification mechanism field.
 
-        @param checked: True when the L{QtGui.QCheckBox} has to be checked else False.
-        @type checked: C{boolean}
+        @return: Returns the authentificationMechanism in the authentification mechanism field.
+        @rtype: C{string}
         """
-
-        self.savePasswordCheckBox.setChecked(checked)
-
-    def _setShowUrl(self, show):
+        return unicode(self.authMechanismCombo.text())
+    
+    def _setAuthMechansim (self, authMechanism):
         """
-        Show or hide the server groupbox by the given show parameter.
+        Sets the authentification mechanism from the authentification mechanism field.
 
-        @param show: True when the server groupbox has to be shown else False.
-        @type show: C{boolean}
+        @param: Integer to  the password field.
+        @rtype: C{string}
         """
+        self.authMechanismCombo.setCurrentIndex(authMechanism)
+        
+    def _getComment(self):
+        """
+        Returns the comment from the comment field.
 
-        self.serverGroupBox.setHidden(not show)
+        @return: Returns the comment in the comment field.
+        @rtype: C{string}
+        """
+        return unicode(self.commentPlainText.text())
 
+    def _setComment(self, comment):
+        """
+        Sets the comment from the comment field.
+
+        @param: Sets the comment in the comment field.
+        @rtype: C{string}
+        """
+        self.commentPlainText.setPlainText(comment)    
+    
+   
     uri = property(_getUrl, _setUrl)
 
     username = property(_getUsername, _setUsername)
 
-    password = property(_getPassword, _setPassword)
+    authentification = property(_getAuthentification, _setAuthentification)
+    
+    authMechanism = property (_getAuthMechanism, _setAuthMechanism)
+    
+    comment = property (_getComment, _setComment )
+    
+    
 
-    savePasswordFlag = property(_getSavePassword, _setSavePassword)
-
-    showUrl = property(fset=_setShowUrl)
     
     def _preferencesActionSlot(self):
         """ Shows the preferences dialog for connection settings. """

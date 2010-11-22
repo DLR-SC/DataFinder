@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>editAuth</class>
+ <widget class="QDialog" name="editAuth">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Edit Authentification</string>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -46,27 +46,27 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>348</width>
+      <width>379</width>
       <height>193</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="authMechanismLbl">
        <property name="text">
         <string>Authentification mechanisms</string>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="usernameLbl">
        <property name="text">
         <string>Username/publickey Information</string>
        </property>
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="authMechanismCombo">
        <item>
         <property name="text">
          <string>none</string>
@@ -90,58 +90,41 @@
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="serverLbl">
        <property name="text">
-        <string>Location</string>
+        <string>Server URL:</string>
        </property>
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="authLocationLbl">
        <property name="text">
         <string>Certificate location/ Password</string>
        </property>
       </widget>
      </item>
      <item row="3" column="2">
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="authLabel"/>
      </item>
      <item row="2" column="2">
-      <widget class="QLineEdit" name="lineEdit_2"/>
+      <widget class="QLineEdit" name="usernameLineEdit"/>
      </item>
      <item row="0" column="2">
-      <widget class="QLineEdit" name="lineEdit_3"/>
-     </item>
-     <item row="2" column="3">
-      <widget class="QToolButton" name="toolButton">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QToolButton" name="toolButton_2">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
-      <widget class="QToolButton" name="toolButton_3">
-       <property name="text">
-        <string>...</string>
+      <widget class="QLineEdit" name="serverLineEdit">
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="ldapLabel">
        <property name="text">
         <string>ldap</string>
        </property>
       </widget>
      </item>
      <item row="4" column="2">
-      <widget class="QComboBox" name="comboBox_2">
+      <widget class="QComboBox" name="ldapCombo">
        <item>
         <property name="text">
          <string>enabled</string>
@@ -155,14 +138,35 @@
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="commentLabel">
        <property name="text">
         <string>Comment</string>
        </property>
       </widget>
      </item>
      <item row="5" column="2">
-      <widget class="QPlainTextEdit" name="plainTextEdit"/>
+      <widget class="QPlainTextEdit" name="commentPlainText"/>
+     </item>
+     <item row="0" column="3">
+      <widget class="QToolButton" name="serverToolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
+      <widget class="QToolButton" name="certificateToolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="3">
+      <widget class="QToolButton" name="usrnameToolButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -173,7 +177,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>editAuth</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -189,7 +193,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>editAuth</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

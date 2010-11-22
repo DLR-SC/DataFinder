@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>connectDialog</class>
- <widget class="QDialog" name="connectDialog">
+ <class>AuthConnectDialog</class>
+ <widget class="QDialog" name="AuthConnectDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -28,7 +28,7 @@
     <number>9</number>
    </property>
    <item>
-    <layout class="QVBoxLayout">
+    <layout class="QVBoxLayout" name="completeBox">
      <item>
       <widget class="QGroupBox" name="serverGroupBox">
        <property name="sizePolicy">
@@ -152,7 +152,7 @@
       </widget>
      </item>
      <item>
-      <spacer>
+      <spacer name="space_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -165,7 +165,7 @@
       </spacer>
      </item>
      <item>
-      <layout class="QHBoxLayout">
+      <layout class="QHBoxLayout" name="buttonBox">
        <item>
         <widget class="QPushButton" name="preferencesButton">
          <property name="text">
@@ -184,7 +184,7 @@
         </widget>
        </item>
        <item>
-        <spacer>
+        <spacer name="space">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>

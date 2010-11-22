@@ -2,7 +2,7 @@
 # auth_connect_dialog.py
 #
 # Created: 16.11.2010 ney_mi <miriam.ney@dlr.de>
-# Changed:
+# Changed: 
 #
 # Copyright (C) 2003-2007 DLR/SISTEC, Germany
 #
@@ -19,20 +19,21 @@ Connect dialog for entering the url, username, password of the WebDAV Server.
 
 from PyQt4 import QtCore, QtGui
 
-from datafinder.gui.gen.user.authentification_connect_dialog_ui import Ui_connectDialog
+from datafinder.gui.gen.user.authentification_connect_dialog_ui import Ui_AuthConnectDialog
 
 from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
-#from datafinder.gui.gen.user.connect_dialog_ui import Ui_connectDialog
+
+from datafinder.gui.user.dialogs.authentification_dialog.auth_edit_dialog import AuthEditDialogView
 
 
-__version__ = "$LastChangedRevision: 3989 $"
+__version__ = "$Revision-Id: 3989 $"
 
 
-class AuthConnectDialogView(QtGui.QDialog, Ui_connectDialog):
+class AuthConnectDialogView(QtGui.QDialog, Ui_AuthConnectDialog):
     """
     The connection dialog is displayed when the datafinder has to establish a connection to
     a webdav server or any other server needing authentification information.
-    This dialog contains field for entering a url and authentification credentials.
+    This dialog contains a field for entering a url and authentification credentials such as username and password.
     """
 
     def __init__(self, parent=None, preferences=None):
@@ -46,7 +47,7 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_connectDialog):
         """
 
         QtGui.QDialog.__init__(self, parent)
-        Ui_connectDialog.__init__(self)
+        Ui_AuthConnectDialog.__init__(self)
 
         self.setupUi(self)
         
@@ -55,6 +56,7 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_connectDialog):
         self.connect(self.connectButton, QtCore.SIGNAL("clicked()"), self.accept)
         self.connect(self.urlComboBox, QtCore.SIGNAL("currentIndexChanged(const QString)"), self._urlChangedSlot)
         self.connect(self.preferencesButton, QtCore.SIGNAL("clicked()"), self._preferencesActionSlot)
+        self.connect(self.editButton, QtCore.SIGNAL("clicked()"), self._editLocationActionSlot)
         self.uri = preferences.connectionUris
                      
     def _urlChangedSlot(self, newUri):
@@ -181,3 +183,10 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_connectDialog):
             self._preferences.ldapBaseDn = preferencesDialog.ldapBaseDn
             self._preferences.ldapServerUri = preferencesDialog.ldapServerUri
             self._preferences.store()
+    
+    def _editLocationActionSlot(self):
+        """ Shows the edit Loaction dialog for more information on the location settings"""
+        
+        AuthEditDialogView (self, self.uri)
+        
+        
