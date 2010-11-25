@@ -1,12 +1,11 @@
 #
-# auth_connect_dialog.py
+# $Filename: $
+# $Authors: $
+# Changed:$Date$ $Committer-Name$ $Committer-Email$
 #
-# Created: 16.11.2010 ney_mi <miriam.ney@dlr.de>
-# Changed:
+# Copyright (C) 2003-2010 German Aerospace Centre, Germany
 #
-# Copyright (C) 2003-2010 DLR/SISTEC, Germany
-#
-# All rights reserved
+# All rights reserved 
 #
 # http://www.launchpad.net/datafinder
 #
