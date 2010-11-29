@@ -1,9 +1,8 @@
-# $Filename:$
-# $Authors:$
+# $Filename$
+# $Authors$
 # 
 # Changed: $Date$ $Committer-Name$ $Committer-Email$
 #
-# http://www.launchpad.net/datafinder
 # Copyright (c) 2003-2010, German Aerospace Center (DLR)
 # All rights reserved.
 #

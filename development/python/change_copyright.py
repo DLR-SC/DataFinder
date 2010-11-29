@@ -2,7 +2,7 @@
 # Created: 19.11.2008 schlauch <Tobias.Schlauch@dlr.de>
 # Changed: $Id: change_copyright.py 3671 2009-01-07 09:19:10Z mohr_se $
 #
-# Copyright (c) 2008, German Aerospace Center (DLR)
+# Copyright (c) 2011, German Aerospace Center (DLR)
 # All rights reserved.
 #
 # http://www.dlr.de/datafinder/
@@ -21,16 +21,55 @@ import os
 __version__ = "$LastChangedRevision: 3671 $"
 
 
-licence = ["# Copyright (c) 2008, German Aerospace Center (DLR)\r\n",
+licence = ["# Copyright (c) 2011, German Aerospace Center (DLR)\r\n",
            "# All rights reserved.\r\n"]
 version = "__version__"
 newVersion = "__version__ = \"$LastChangedRevision: 3671 $\"\r\n"
 dirs = list # Specifies the directories
 
 
+licenselong =["# $Filename$ \r\n", 
+              "# $Authors$\r\n", 
+              "#\r\n", 
+              "# Changed: $Date$ $Committer-Name$ $Committer-Email$\r\n",
+            "#\r\n",
+            "# Copyright (c) 2003-2011, German Aerospace Center (DLR)\r\n",
+            "# All rights reserved.\r\n",
+            "#\r\n",
+            "#Redistribution and use in source and binary forms, with or without\r\n",
+            "#modification, are permitted provided that the following conditions are\r\n",
+            "#met:\r\n",
+            "#\r\n",
+            "# * Redistributions of source code must retain the above copyright \r\n",
+            "#   notice, this list of conditions and the following disclaimer. \r\n",
+            "#\r\n",
+            "# * Redistributions in binary form must reproduce the above copyright \r\n",
+            "#   notice, this list of conditions and the following disclaimer in the \r\n",
+            "#   documentation and/or other materials provided with the \r\n",
+            "#   distribution. \r\n",
+            "#\r\n",
+            "# * Neither the name of the German Aerospace Center nor the names of\r\n",
+            "#   its contributors may be used to endorse or promote products derived\r\n",
+            "#   from this software without specific prior written permission.\r\n",
+            "#\r\n",
+            "#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \r\n",
+            "# \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT \r\n",
+            "#LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR \r\n",
+            "#A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT \r\n",
+            "#OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, \r\n",
+            "#SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT \r\n",
+            "#LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, \r\n",
+            "#DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY \r\n",
+            "#THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT \r\n",
+            "#(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE \r\n",
+            "#OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  \r\n" 
+                          ]
+
 def main():
     """ Main function. """
 
+    print(list)
+    
     for dir_ in dirs:
         for walkTuple in os.walk(dir_):
             fileNames = walkTuple[2]
@@ -41,7 +80,7 @@ def main():
                     fh = open(filePath, "rb")
                     content = fh.readlines()
                     fh.close()
-                    _changeContent(content, filePath)
+                    _changeContent2LongLicense(content, filePath)
                     fh = open(filePath, "wb")
                     fh.writelines(content)
                     fh.close()
@@ -73,14 +112,55 @@ def _changeContent(content, filePath=""):
     else:
         print("No version string in '%s'." % filePath)
 
+def _changeContent2LongLicense(content, filepath = ""):
+    headerreached = False
+    counterlicense = 0
+    removeindex= 0
+    newpylintindex = 0
+    headerendindex = 0
+    
+    for line in content: 
+        if "pylint:" in line:
+            newpylint = line.split("-msg")
+            newpylintindex = content.index(line)
+            if len(newpylint)>1 :
+                content.remove(content[content.index(line)])
+                content.insert(newpylintindex, newpylint[0]+newpylint[1])
+            removeindex = newpylintindex
+        elif line.startswith("#") and not headerreached : 
+            if content.index(line) >= removeindex:
+                removeindex = content.index(line)
+            else:
+                removeindex = removeindex + 1
+            content.remove(content[removeindex])
+            print removeindex
+            
+            if not counterlicense >= len(licenselong):
+                content.insert(removeindex, licenselong[counterlicense])
+                counterlicense = counterlicense + 1
+        elif not line.startswith("#") and not headerreached :
+            headerendindex = content.index(line)
+            headerreached = True
+            
+                  
+        elif "__version__" in line:
+            versionindex = content.index(line)
+            content.remove(content[content.index(line)])
+            content.insert(versionindex, "__version__ = $Revision-Id$ \n")          
+    
+     
+    while counterlicense < len(licenselong):
+        content.insert(headerendindex,licenselong[counterlicense])
+        counterlicense = counterlicense + 1  
+        headerendindex=  headerendindex+ 1  
 
 def test():
     """ Simple self-test. """
     testData = """\
     #
-    # Copyright (C) 2003-2007 DLR, Simulation and Software Technology
+# Copyright (c) 2008, German Aerospace Center (DLR)
+# All rights reserved.
     #
-    # All rights reserved
     #
     # http://www.dlr.de/datafinder/
     #
@@ -110,7 +190,7 @@ def test():
     from eadsScriptExtension.gen_ui.SelectTemplateDialog import SelectTemplateDialog
 
 
-    __version__ = "$Revision: 3671 $"
+__version__ = "$LastChangedRevision: 3671 $"
 
 
     _templateErrorCaption = "Create Collection from Template Error"
