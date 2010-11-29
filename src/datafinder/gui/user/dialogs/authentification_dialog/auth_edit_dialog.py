@@ -48,7 +48,7 @@ from datafinder.gui.gen.user.authentification_edit_wizard_ui import Ui_editAuth
 from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
 
 
-__version__ = "$Revision-Id:  $"
+__version__ = "$Revision-Id$"
 
 
 class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
