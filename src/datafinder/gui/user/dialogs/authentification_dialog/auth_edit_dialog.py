@@ -1,10 +1,9 @@
-# Filename: 
-# Authors:
-# Committer:
-
-# Changed: $Date$ $Committer-Name$ $Committer-Email$
+# $Filename$
+# $Authors$
+# 
+# Last Changed: $Date$ $Committer$ $Revision-Id$
 #
-# Copyright (c) 2003-2010, German Aerospace Center (DLR)
+# Copyright (c) 2003-2011, German Aerospace Center (DLR)
 # All rights reserved.
 #
 #Redistribution and use in source and binary forms, with or without

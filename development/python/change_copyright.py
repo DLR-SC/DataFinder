@@ -31,7 +31,7 @@ dirs = list # Specifies the directories
 licenselong =["# $Filename$ \r\n", 
               "# $Authors$\r\n", 
               "#\r\n", 
-              "# Changed: $Date$ $Committer-Name$ $Committer-Email$\r\n",
+              "# Last Changed: $Date$ $Committer$ $Revision-Id$\r\n",
             "#\r\n",
             "# Copyright (c) 2003-2011, German Aerospace Center (DLR)\r\n",
             "# All rights reserved.\r\n",
