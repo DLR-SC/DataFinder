@@ -1,6 +1,7 @@
-# $Filename$
-# $Authors$
-# 
+# Filename: 
+# Authors:
+# Committer:
+
 # Changed: $Date$ $Committer-Name$ $Committer-Email$
 #
 # Copyright (c) 2003-2010, German Aerospace Center (DLR)
