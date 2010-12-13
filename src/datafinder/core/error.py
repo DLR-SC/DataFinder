@@ -69,6 +69,12 @@ class PrivilegeError(CoreError):
     
     pass
 
+class PrincipalError(CoreError):
+    """
+    Error class that occurs during principal handling.
+    """
+    
+    pass
 
 class ConfigurationError(CoreError):
     """

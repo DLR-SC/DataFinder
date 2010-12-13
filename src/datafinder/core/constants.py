@@ -1,4 +1,5 @@
-# $Filename$ 
+#
+# $Filename$$
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
 #
@@ -36,24 +37,17 @@
 
 
 """ 
-Principal search specific constants.
+Contains some constant definitions of the core package.
 """
+
+
+from datafinder.persistence.principal_search import constants
 
 
 __version__ = "$Revision-Id:$" 
 
 
-# principal search constants
-SEARCH_MODE_USER_ONLY = 0
-SEARCH_MODE_GROUP_ONLY = 1
-SEARCH_MODE_USER_AND_GROUP = 2
-
-# special principals
-ALL_PRINCIPAL = "____allprincipal____"
-AUTHENTICATED_PRINCIPAL = "____authenticatedprincipal____"
-UNAUTHENTICATED_PRINCIPAL = "____unauthenticatedprincipal____"
-OWNER_PRINCIPAL = "____ownerprincipal____"
-
-# principal types
-USER_PRINCIPAL_TYPE = "____user____"
-GROUP_PRINCIPAL_TYPE = "____group____"
+# Principal search modes
+SEARCH_MODE_USER_ONLY = constants.SEARCH_MODE_USER_ONLY
+SEARCH_MODE_GROUP_ONLY = constants.SEARCH_MODE_GROUP_ONLY
+SEARCH_MODE_USER_AND_GROUP = constants.SEARCH_MODE_USER_AND_GROUP

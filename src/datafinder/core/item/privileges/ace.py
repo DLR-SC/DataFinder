@@ -41,8 +41,8 @@ Represents an entry of an access control list (ACL).
 
 
 from datafinder.core.error import PrivilegeError
-from datafinder.core.principal import Principal
-from datafinder.core.item.privileges.privilege import getPrivilege, ALL_PRIVILEGE, PRIVILEGES
+from datafinder.core.item.privileges.principal import Principal
+from datafinder.core.item.privileges.privilege import getPrivilege, PRIVILEGES
 from datafinder.persistence.privileges.ace import AccessControlListEntry as PersistenceAce
 
 
@@ -95,11 +95,11 @@ class AccessControlListEntry(object):
         Grants the given privilege.
         
         @param privilege: Privilege that is granted.
-        @type privilege: L{privilege constants<datafinder.core.item.privileges.privilege>.
+        @type privilege: L{privilege constants<datafinder.core.item.privileges.privilege>}
         """
         
         if privilege in PRIVILEGES:
-            self._addPrivilege(privilege, True)
+            self._addPrivilege(privilege, self._grantedPrivileges, self._deniedPrivileges)
         else:
             raise PrivilegeError("The privilege %s is not supported." % repr(privilege))
     
@@ -108,34 +108,40 @@ class AccessControlListEntry(object):
         Denies the given privilege.
         
         @param privilege: Privilege that is denied.
-        @type privilege: L{privilege constants<datafinder.core.item.privileges.privilege>.
+        @type privilege: L{privilege constants<datafinder.core.item.privileges.privilege>}
         """
         
         if privilege in PRIVILEGES:
-            self._addPrivilege(privilege, False)
+            self._addPrivilege(privilege, self._deniedPrivileges, self._grantedPrivileges)
         else:
             raise PrivilegeError("The privilege %s is not supported." % repr(privilege))
     
-    def _addPrivilege(self, privilege, isGranted):
+    @staticmethod
+    def _addPrivilege(privilege, addTo, removeFrom):
         """ Adds the privilege and resolves conflicting definitions. """
         
-        if privilege == ALL_PRIVILEGE:
-            self._grantedPrivileges.clear()
-            self._deniedPrivileges.clear()
-            if isGranted:
-                self._grantedPrivileges.add(privilege)
-            else:
-                self._deniedPrivileges.add(privilege)
-        else:
-            if isGranted:
-                self._grantedPrivileges.add(privilege)
-                if privilege in self._deniedPrivileges:
-                    self._deniedPrivileges.remove(privilege)
-            else:
-                self._deniedPrivileges.add(privilege)
-                if privilege in self._grantedPrivileges:
-                    self._grantedPrivileges.remove(privilege)
-
+        # check whether the privilege is already included in an existing
+        privilegeAlreadyIncluded = False
+        for privilege_ in addTo:
+            if privilege in privilege_.aggregatedPrivileges:
+                privilegeAlreadyIncluded = True
+                break
+        
+        # Set the privilege and remove the aggregated
+        if not privilegeAlreadyIncluded:
+            aggregatedPrivileges = list()
+            for privilege_ in privilege.aggregatedPrivileges:
+                if privilege_ in addTo:
+                    aggregatedPrivileges.append(privilege_)
+            for privilege_ in aggregatedPrivileges:
+                addTo.remove(privilege_)
+            addTo.add(privilege)
+        
+        # Remove the privilege and all its "sub privileges" from the opposite
+        for privilege_ in [privilege] + privilege.aggregatedPrivileges: 
+            if privilege_ in removeFrom:
+                removeFrom.remove(privilege_)
+    
     def toPersistenceFormat(self):
         """
         Maps the access control list entry to the format required by the persistence layer.
@@ -151,8 +157,7 @@ class AccessControlListEntry(object):
         for priv in self._deniedPrivileges:
             mappedDeniedPrivileges.append(priv.identifier)
         
-        persistedAce = PersistenceAce()
-        persistedAce.principal = self.principal.toPersistenceFormat()
+        persistedAce = PersistenceAce(self.principal.toPersistenceFormat())
         persistedAce.grantedPrivileges = mappedGrantedPrivileges
         persistedAce.deniedPrivileges = mappedDeniedPrivileges
         return persistedAce
@@ -175,6 +180,7 @@ class AccessControlListEntry(object):
         @type ace: L{AccessControlListEntry<datafinder.persistence.privileges.ace.AccessControlListEntry>}
         
         @raise PrivilegeError: In case of an unsupported privilege.
+        @raise PrincipalError: In case of an unsupported principal type.
         """
         
         principal = Principal.create(ace.principal)

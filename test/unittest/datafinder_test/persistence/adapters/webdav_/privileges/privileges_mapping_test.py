@@ -42,7 +42,9 @@ Implements test cases for the privileges mapping.
 
 import unittest
 
-from webdav.Constants import TAG_READ, TAG_READ_ACL, TAG_WRITE, TAG_WRITE_ACL, TAG_ALL, TAG_WRITE_CONTENT
+from webdav.Constants import TAG_READ, TAG_READ_ACL, TAG_WRITE, TAG_WRITE_ACL, TAG_ALL, \
+                             TAG_WRITE_CONTENT, TAG_WRITE_PROPERTIES, TAG_BIND, TAG_UNBIND, \
+                             TAG_READ_CURRENT_USER_PRIVILEGE_SET, TAG_UNLOCK
 from webdav.acp import ACL, ACE, GrantDeny, Privilege
 
 from datafinder.persistence.adapters.webdav_.privileges.privileges_mapping import PrivilegeMapper
@@ -145,8 +147,13 @@ class PrivilegeMapperTestCase(unittest.TestCase):
         
         self.assertEquals(self._privilegeMapper.mapPersistencePrivileges([Privilege(TAG_READ), Privilege(TAG_READ_ACL), 
                                                                          Privilege(TAG_WRITE), Privilege(TAG_WRITE_ACL), 
-                                                                         Privilege(TAG_ALL)]),
+                                                                         Privilege(TAG_ALL), Privilege(TAG_WRITE_CONTENT),
+                                                                         Privilege(TAG_WRITE_PROPERTIES), Privilege(TAG_BIND),
+                                                                         Privilege(TAG_UNBIND),
+                                                                         Privilege(TAG_READ_CURRENT_USER_PRIVILEGE_SET)]),
                           [constants.READ_PRIVILEGE, constants.READ_PRIVILEGES_PRIVILEGE, constants.WRITE_PRIVILEGE,
-                           constants.WRITE_PRIVILEGES_PRIVILEGE, constants.ALL_PRIVILEGE])
-        self.assertEquals(self._privilegeMapper.mapPersistencePrivileges([Privilege(TAG_WRITE_CONTENT)]), list())
+                           constants.WRITE_PRIVILEGES_PRIVILEGE, constants.ALL_PRIVILEGE, constants.WRITE_CONTENT_PRIVILEGE,
+                           constants.WRITE_PROPERTIES_PRIVILEGE, constants.ADD_ITEM_PRIVILEGE, constants.REMOVE_ITEM_PRIVILEGE,
+                           constants.READ_USER_PRIVILEGES_PRIVILEGE])
+        self.assertEquals(self._privilegeMapper.mapPersistencePrivileges([Privilege(TAG_UNLOCK)]), list())
         self.assertRaises(AttributeError, self._privilegeMapper.mapPersistencePrivileges, [None])

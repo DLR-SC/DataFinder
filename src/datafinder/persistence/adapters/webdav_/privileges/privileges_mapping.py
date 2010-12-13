@@ -42,8 +42,10 @@ Maps the interface-specific privilege definition to the WebDAV-specific one and 
 
 import os
 
-from webdav.Constants import TAG_ALL, TAG_WRITE, TAG_READ, \
-                             TAG_WRITE_ACL, TAG_READ_ACL, \
+from webdav.Constants import TAG_ALL, TAG_READ, TAG_WRITE, \
+                             TAG_WRITE_CONTENT, TAG_WRITE_PROPERTIES, \
+                             TAG_BIND, TAG_UNBIND, \
+                             TAG_WRITE_ACL, TAG_READ_ACL, TAG_READ_CURRENT_USER_PRIVILEGE_SET, \
                              TAG_AUTHENTICATED, TAG_UNAUTHENTICATED, TAG_OWNER
 from webdav.acp import ACL, ACE, Principal, GrantDeny, Privilege
 
@@ -67,9 +69,14 @@ _generalToWebdavPrincipalMap = dict(zip(_webdavToGeneralPrincipalMap.values(),
 # maps WebDAV specific privilege constants to defined privileges
 _webdavToGeneralPrivilegeMap = {TAG_ALL: constants.ALL_PRIVILEGE,
                                 TAG_WRITE: constants.WRITE_PRIVILEGE,
+                                TAG_WRITE_CONTENT: constants.WRITE_CONTENT_PRIVILEGE,
+                                TAG_WRITE_PROPERTIES: constants.WRITE_PROPERTIES_PRIVILEGE,
+                                TAG_BIND: constants.ADD_ITEM_PRIVILEGE,
+                                TAG_UNBIND: constants.REMOVE_ITEM_PRIVILEGE,
                                 TAG_READ: constants.READ_PRIVILEGE,
                                 TAG_WRITE_ACL: constants.WRITE_PRIVILEGES_PRIVILEGE,
-                                TAG_READ_ACL: constants.READ_PRIVILEGES_PRIVILEGE}
+                                TAG_READ_ACL: constants.READ_PRIVILEGES_PRIVILEGE,
+                                TAG_READ_CURRENT_USER_PRIVILEGE_SET: constants.READ_USER_PRIVILEGES_PRIVILEGE}
 _generalToWebdavPrivilegeMap = dict(zip(_webdavToGeneralPrivilegeMap.values(), 
                                         _webdavToGeneralPrivilegeMap.keys()))
 

@@ -43,7 +43,7 @@ Tests the principal representation.
 import unittest
 
 from datafinder.core.error import CoreError
-from datafinder.core import principal
+from datafinder.core.item.privileges import principal
 from datafinder_test.mocks import SimpleMock
 
 

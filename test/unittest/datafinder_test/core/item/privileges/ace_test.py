@@ -45,21 +45,12 @@ import unittest
 from datafinder.core.error import PrivilegeError
 from datafinder.core.item.privileges import ace
 from datafinder.core.item.privileges import privilege
+from datafinder.persistence.principal_search import principal
 from datafinder_test.mocks import SimpleMock
 
 
 __version__ = "$Revision-Id:$" 
 
-
-class _PrincipalMock(object):
-    """ Mocks a principal. """
-    
-    @staticmethod
-    def create(principal):
-        """ Mocks creation. """
-        
-        return principal
-    
 
 class AccessControlListEntryTestCase(unittest.TestCase):
     """ Tests an access control list entry. """
@@ -67,8 +58,6 @@ class AccessControlListEntryTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates object under test. """
         
-        ace.PersistenceAce = SimpleMock
-        ace.Principal = _PrincipalMock
         self._ace = ace.AccessControlListEntry(SimpleMock("principal"))
     
     def testGrantPrivilege(self):
@@ -108,6 +97,18 @@ class AccessControlListEntryTestCase(unittest.TestCase):
         self.assertEquals(self._ace.grantedPrivileges, set([privilege.ALL_PRIVILEGE]))
         self.assertEquals(self._ace.deniedPrivileges, set())
         
+        self._ace.grantPrivilege(privilege.WRITE_PRIVILEGE)
+        self.assertEquals(self._ace.grantedPrivileges, set([privilege.ALL_PRIVILEGE]))
+        self.assertEquals(self._ace.deniedPrivileges, set())
+        
+        self._ace.denyPrivilege(privilege.WRITE_PRIVILEGE)
+        self.assertEquals(self._ace.grantedPrivileges, set([privilege.ALL_PRIVILEGE]))
+        self.assertEquals(self._ace.deniedPrivileges, set([privilege.WRITE_PRIVILEGE]))
+        
+        self._ace.denyPrivilege(privilege.ALL_PRIVILEGE)
+        self.assertEquals(self._ace.grantedPrivileges, set([]))
+        self.assertEquals(self._ace.deniedPrivileges, set([privilege.ALL_PRIVILEGE]))
+
     def testToPersistenceFormat(self):
         """ Tests the mapping to the persistence format. """
         
@@ -123,12 +124,12 @@ class AccessControlListEntryTestCase(unittest.TestCase):
         """ Tests the creation of an ACE. """
         
         persistenceAce = SimpleMock()
-        persistenceAce.principal = "principal"
+        persistenceAce.principal = principal.Principal(identifier="principal")
         persistenceAce.grantedPrivileges = [privilege.READ_PRIVILEGE.identifier]
         persistenceAce.deniedPrivileges = [privilege.WRITE_PRIVILEGE.identifier]
         mappedAce = self._ace.create(persistenceAce)
         
-        self.assertEquals(mappedAce.principal, "principal")
+        self.assertEquals(mappedAce.principal.identifier, "principal")
         self.assertEquals(mappedAce.grantedPrivileges, set([privilege.READ_PRIVILEGE]))
         self.assertEquals(mappedAce.deniedPrivileges, set([privilege.WRITE_PRIVILEGE]))
 

@@ -43,8 +43,20 @@ Defines privilege constants.
 __version__ = "$Revision-Id:$" 
 
 
+# Aggregates all privileges
 ALL_PRIVILEGE = "____all____"
+
+# Controls reading access to content and properties
 READ_PRIVILEGE = "____read____"
+
+# Modification control
+WRITE_PRIVILEGE = "____write____" # Aggregates all modifications to items and properties
+WRITE_PROPERTIES_PRIVILEGE = "____writeproperties____"
+WRITE_CONTENT_PRIVILEGE = "____writecontent____"
+ADD_ITEM_PRIVILEGE = "____additem____"
+REMOVE_ITEM_PRIVILEGE = "____removeitem____"
+
+# Administrative control
 READ_PRIVILEGES_PRIVILEGE = "____readprivileges____"
-WRITE_PRIVILEGE = "____write____"
 WRITE_PRIVILEGES_PRIVILEGE = "____writeprivileges____"
+READ_USER_PRIVILEGES_PRIVILEGE = "____readuserprivileges____"

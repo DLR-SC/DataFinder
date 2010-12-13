@@ -41,6 +41,7 @@ Represents an access control list (ACL) of an item.
 
 
 from datafinder.core.item.privileges.ace import AccessControlListEntry
+from datafinder.core.item.privileges import privilege
 
 
 __version__ = "$Revision-Id:$" 
@@ -51,6 +52,18 @@ class AccessControlList(object):
     Represents an access control list (ACL) of an item.
     """
     
+    # Available access levels
+    NO_ACCESS_LEVEL = 0 # Neither reading nor writing access
+    READ_ONLY_ACCESS_LEVEL = 1 # Reading
+    FULL_ACCESS_LEVEL = 2 # Reading and writing
+    
+    # [0]->Required read privileges [1]->Required write privileges
+    _CONTENT_PRIVS = ([privilege.READ_PRIVILEGE], [privilege.WRITE_CONTENT, 
+                       privilege.ADD_ITEM, privilege.REMOVE_ITEM])
+    _PROPERTIES_PRIVS = ([privilege.READ_PRIVILEGE], [privilege.WRITE_PROPERTIES]) 
+    _ADMIN_PRIVS = ([privilege.READ_PRIVILEGES_PRIVILEGE], [privilege.WRITE_PRIVILEGES_PRIVILEGE])
+    
+    
     def __init__(self, aces=None):
         """
         Constructor.
@@ -60,47 +73,52 @@ class AccessControlList(object):
         """
         
         self._aces = dict()
-
+        
+        self._principalOrder = list()
         if not aces is None:
             for ace in aces:
                 self._aces[ace.principal] = ace
+                self._principalOrder.append(ace.principal)
         
     def __getPrincipals(self):
         """ Getter for the principals. """
         
-        return self._aces.keys()[:]
+        return self._principalOrder[:]
     
     principals = property(__getPrincipals)
         
-    def grantPrivilege(self, principal, privilege):
+    def grantPrivilege(self, principal, priv):
         """ 
         Grants a privilege to a user / role.
         
         @param principal: User / role the privilege is granted.
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
-        @param privilege: Granted privilege.
-        @type privilege: L{privilege constants<datafinder.core.item.privileges.privilege>.
+        @param priv: Granted privilege.
+        @type priv: L{privilege constants<datafinder.core.item.privileges.privilege>.
         """
+    
+        self._addAce(principal)    
+        self._aces[principal].grantPrivilege(priv)
+
+    def _addAce(self, principal):
+        """ Adds an ACE for the given principal. """
         
         if not principal in self._aces:
-            self._aces[principal] = AccessControlListEntry(principal, [privilege])
-        else:
-            self._aces[principal].grantPrivilege(privilege)
+            self._aces[principal] = AccessControlListEntry(principal)
+            self._principalOrder.append(principal)
             
-    def denyPrivilege(self, principal, privilege):
+    def denyPrivilege(self, principal, priv):
         """ 
         Denies a privilege for a user / role.
         
         @param principal: User / role the privilege is granted.
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
-        @param privilege: Denied privilege.
-        @type privilege: L{privilege constants<datafinder.core.item.privileges.privilege>.
+        @param priv: Denied privilege.
+        @type priv: L{privilege constants<datafinder.core.item.privileges.privilege>.
         """
         
-        if not principal in self._aces:
-            self._aces[principal] = AccessControlListEntry(principal, deniedPrivileges=[privilege])
-        else:
-            self._aces[principal].denyPrivilege(privilege)
+        self._addAce(principal)
+        self._aces[principal].denyPrivilege(priv)
 
     def getGrantedPrivileges(self, principal):
         """ 
@@ -111,11 +129,15 @@ class AccessControlList(object):
         
         @return: Set of granted privileges.
         @rtype: C{set} of L{privilege constants<datafinder.core.item.privileges.privilege>.  
+        
+        @raise ValueError: If the principal does not exist.
         """
         
         privileges = set()
         if principal in self._aces:
             privileges = self._aces[principal].grantedPrivileges
+        else:
+            raise ValueError("The principal '%s' is not defined." % principal.displayName)
         return privileges
     
     def getDeniedPrivileges(self, principal):
@@ -127,13 +149,180 @@ class AccessControlList(object):
         
         @return: Set of denied privileges.
         @rtype: C{set} of L{privilege constants<datafinder.core.item.privileges.privilege>.  
+        
+        @raise ValueError: If the principal does not exist.
         """
 
         privileges = set()
         if principal in self._aces:
             privileges = self._aces[principal].deniedPrivileges
+        else:
+            raise ValueError("The principal '%s' is not defined." % principal.displayName)
         return privileges
- 
+
+    def setContentAccess(self, principal, level):
+        """ Sets the access level of the principal
+        concerning the item content.
+        
+        @param principal: User / role.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        @param level: Access level constant.
+        @type level: C{int}
+        """
+        
+        self._setAccessLevel(principal, level, self._CONTENT_PRIVS)
+
+    def contentAccessLevel(self, principal):
+        """ Returns the access level of the principal
+        concerning the item content.
+        
+        @param principal: User / role.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        
+        @return: Access level constant.
+        @rtype: C{int}
+        
+        @raise ValueError: If the principal does not exist.
+        """
+        
+        return self._getAccessLevel(principal, self._CONTENT_PRIVS)
+
+    def _setAccessLevel(self, principal, level, requiredPrivs):
+        """ Sets the access level. """
+        
+        self._addAce(principal)
+        if level == self.NO_ACCESS_LEVEL:
+            for priv in requiredPrivs[0] + requiredPrivs[1]:
+                self._aces[principal].denyPrivilege(priv)
+        elif level == self.READ_ONLY_ACCESS_LEVEL:
+            for priv in requiredPrivs[0]:
+                self._aces[principal].grantPrivilege(priv)
+            for priv in requiredPrivs[1]:
+                self._aces[principal].denyPrivilege(priv)
+        else: # Full access
+            for priv in requiredPrivs[0] + requiredPrivs[1]:
+                self._aces[principal].grantPrivilege(priv)
+
+    def _getAccessLevel(self, principal, requiredPrivs):
+        """ Determines the access level. """
+        
+        if not principal in self._aces:
+            raise ValueError("The principal '%s' is not defined." % principal.displayName)
+        grantedPrivileges = list()
+        for priv in self._aces[principal].grantedPrivileges:
+            grantedPrivileges += [priv] + priv.aggregatedPrivileges 
+
+        hasReadingAccess = True
+        for priv in requiredPrivs[0]:
+            if not priv in grantedPrivileges:
+                hasReadingAccess = False
+        hasWritingAccess = True
+        for priv in requiredPrivs[1]:
+            if not priv in grantedPrivileges:
+                hasWritingAccess = False
+        
+        if hasReadingAccess and hasWritingAccess:
+            contentAccessLevel = self.FULL_ACCESS_LEVEL
+        elif hasReadingAccess:
+            contentAccessLevel = self.READ_ONLY_ACCESS_LEVEL
+        else:
+            contentAccessLevel = self.NO_ACCESS_LEVEL
+        return contentAccessLevel
+
+    def setPropertiesAccess(self, principal, level):
+        """ Sets the access level of the principal
+        concerning the item properties.
+        
+        @param principal: User / role.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        @param level: Access level constant.
+        @type level: C{int}
+        """
+        
+        self._setAccessLevel(principal, level, self._PROPERTIES_PRIVS)
+
+    def propertiestAccessLevel(self, principal):
+        """ Returns the access level of the principal
+        concerning the item properties.
+        
+        @param principal: User / role.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        
+        @return: Access level constant.
+        @rtype: C{int}
+        
+        @raise ValueError: If the principal does not exist.
+        """
+        
+        return self._getAccessLevel(principal, self._PROPERTIES_PRIVS)
+    
+    def setAministrationAccess(self, principal, level):
+        """ Sets the access level of the principal
+        concerning the item administration.
+        
+        @param principal: User / role.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        @param level: Access level constant.
+        @type level: C{int}
+        """
+        
+        self._setAccessLevel(principal, level, self._ADMIN_PRIVS)
+
+    def aministrationAccessLevel(self, principal):
+        """ Returns the access level of the principal
+        concerning the item administration.
+        
+        @param principal: User / role.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        
+        @return: Access level constant.
+        @rtype: C{int}
+        
+        @raise ValueError: If the principal does not exist.
+        """
+        
+        return self._getAccessLevel(principal, self._ADMIN_PRIVS)
+    
+    def clearPrivileges(self, principal):
+        """ Removes privilege definition of the given
+        principal. If the principal does not exist no 
+        error will be triggered.
+        
+        @param principal: The user/group which privileges shall be reset.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        """
+        
+        if principal in self._aces:
+            del self._aces[principal]
+            self._principalOrder.remove(principal)
+            
+    def setIndex(self, principal, position):
+        """ Sets the index of the given principal.
+        
+        @param principal: The user/group whose position shall be set.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        """
+        
+        self._principalOrder.remove(principal)
+        self._principalOrder.insert(position, principal)
+    
+    def getIndex(self, principal):
+        """ Returns the index of the given principal. 
+
+        @param principal: The user/group whose position shall be determined.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+
+        @return: The positional index.
+        @rtype: C{int}
+        
+        @raise ValueError: If the principal does not exist.
+        """
+        
+        if not principal in self._principalOrder:
+            raise ValueError("The principal '%s' is not defined." % principal.displayName)
+        else:
+            return self._principalOrder.index(principal)
+
     def toPersistenceFormat(self):
         """
         Maps the access control lists to the format required by the persistence layer.
@@ -156,6 +345,7 @@ class AccessControlList(object):
         @type aces: C{list} of L{AccessControlListEntry<datafinder.persistence.privileges.ace.AccessControlListEntry>}
         
         @raise PrivilegeError: In case of an unsupported privilege.
+        @raise PrincipalError: In case of an unsupported principal type.
         """
         
         mappedAces = list()

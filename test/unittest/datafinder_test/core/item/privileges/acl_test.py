@@ -45,8 +45,9 @@ __version__ = "$Revision-Id:$"
 
 import unittest
 
-from datafinder.core.error import PrivilegeError
-from datafinder.core.item.privileges import acl
+from datafinder.core.error import PrivilegeError, PrincipalError
+from datafinder.core.item.privileges import acl, privilege
+from datafinder.persistence.principal_search import principal
 from datafinder_test.mocks import SimpleMock
 
 
@@ -54,51 +55,38 @@ __version__ = "$Revision-Id:$"
 
 
 
-class _AceMock(object):
-    """ Mocks the ace implementation. """
+class _PersistenceAceMock(object):
+    """ Mocks the persistence ACE. """
     
-    mock = None
-    principal = SimpleMock()
-    
-    def __init__(self, principal, grantedPrivileges=list(), deniedPrivileges=list()):
+    def __init__(self, principalId):
         """ Constructor. """
         
-        self.principal = principal
-        self.grantedPrivileges = set(grantedPrivileges)
-        self.deniedPrivileges = set(deniedPrivileges)
-
-    @staticmethod
-    def create(anAce):
-        """ Mocks the create implementation. """
+        self.principal = principal.Principal(principalId)
+        self.grantedPrivileges = list()
+        self.deniedPrivileges = list()
     
-        anAce.dummyCall() # Make a call to the mock to eventually raise an error
-        return _AceMock(anAce)
     
-    def __getattr__(self, name):
-        """ Delegates to the internal mock representation. """
-        
-        return getattr(self.mock, name)
-    
-        
 class AccessControlListTestCase(unittest.TestCase):
     """ 
     Tests for the ACL module. 
     """
+
+
+    _SUPPORTED_PRIVILEGE = privilege.READ_PRIVILEGE
+    _UNSUPPORTED_PRIVILEGE = "UNSUPPORTED"    
+    
     
     def setUp(self):
         """ Creates the required test environment. """
 
-        self._aceMock = SimpleMock()
-        _AceMock.mock = self._aceMock
-        acl.AccessControlListEntry = _AceMock
-        self._principalMock = SimpleMock()
+        self._principalMock = SimpleMock(identifier="id")
         self._acl = acl.AccessControlList()
             
     def testPrincipalsAttribute(self):
         """ Tests the principals attribute. """
         
         self.assertEquals(self._acl.principals, list())
-        self._acl.grantPrivilege(self._principalMock, "priv")
+        self._acl.grantPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
         self.assertEquals(self._acl.principals, [self._principalMock])
         
         principals = self._acl.principals
@@ -109,43 +97,48 @@ class AccessControlListTestCase(unittest.TestCase):
     def testGrantPrivilege(self):
         """ Tests granting of privileges. """
         
-        self._acl.grantPrivilege(self._principalMock, "priv")
-        self._acl.grantPrivilege(self._principalMock, "priv")
-        self._acl.grantPrivilege(self._principalMock, "priv")
-        self.assertEquals(self._acl.getGrantedPrivileges(self._principalMock), set(["priv"]))
+        self._acl.grantPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
+        self._acl.grantPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
+        self._acl.grantPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
+        self.assertEquals(self._acl.getGrantedPrivileges(self._principalMock), set([self._SUPPORTED_PRIVILEGE]))
 
-        self._aceMock.error = PrivilegeError("")
         self.assertRaises(PrivilegeError, self._acl.grantPrivilege, self._principalMock, "unsupported-priv")
 
     def testDenyPrivilege(self):
         """ Tests denying of privileges. """
         
-        self._acl.denyPrivilege(self._principalMock, "priv")
-        self._acl.denyPrivilege(self._principalMock, "priv")
-        self._acl.denyPrivilege(self._principalMock, "priv")
-        self.assertEquals(self._acl.getDeniedPrivileges(self._principalMock), set(["priv"]))
+        self._acl.denyPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
+        self._acl.denyPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
+        self._acl.denyPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
+        self.assertEquals(self._acl.getDeniedPrivileges(self._principalMock), set([self._SUPPORTED_PRIVILEGE]))
 
-        self._aceMock.error = PrivilegeError("")
         self.assertRaises(PrivilegeError, self._acl.denyPrivilege, self._principalMock, "unsupported-priv")
     
     def testToPersistenceFormat(self):
         """ Tests the mapping into the persistence format. """
         
-        self._acl.grantPrivilege(self._principalMock, "priv1")
+        self._acl.grantPrivilege(self._principalMock, self._SUPPORTED_PRIVILEGE)
         
-        self.assertEquals(self._acl.getGrantedPrivileges(self._principalMock), set(["priv1"]))
+        self.assertEquals(self._acl.getGrantedPrivileges(self._principalMock), 
+                          set([self._SUPPORTED_PRIVILEGE]))
         self.assertEquals(len(self._acl.toPersistenceFormat()), 1)
         
-        self._aceMock.error = PrivilegeError("")
-        self.assertRaises(PrivilegeError, self._acl.toPersistenceFormat)
 
     def testCreate(self):
         """ Tests the creation of ACL. """
         
-        newAcl = self._acl.create([SimpleMock(), SimpleMock(), SimpleMock()])
+        newAcl = self._acl.create([_PersistenceAceMock("a"), 
+                                   _PersistenceAceMock("b"),
+                                   _PersistenceAceMock("c")])
         self.assertEquals(len(newAcl.principals), 3)
 
-        self.assertRaises(PrivilegeError, self._acl.create, [SimpleMock(error=PrivilegeError(""))])
+        invalidPrivAce = _PersistenceAceMock("a")
+        invalidPrivAce.grantedPrivileges = [self._UNSUPPORTED_PRIVILEGE]
+        self.assertRaises(PrivilegeError, self._acl.create, [invalidPrivAce])
+
+        invalidPrincipalAce = _PersistenceAceMock("a")
+        invalidPrincipalAce.principal = SimpleMock("a")
+        self.assertRaises(PrincipalError, self._acl.create, [invalidPrincipalAce])
 
     def testComparison(self):
         """ Tests the comparison of two instances. """
@@ -156,8 +149,121 @@ class AccessControlListTestCase(unittest.TestCase):
         self.assertEquals(self._acl, anotherAcl)
         
         aPrincipal = SimpleMock()
-        anotherAcl.grantPrivilege(aPrincipal, "priv")
+        anotherAcl.grantPrivilege(aPrincipal, self._SUPPORTED_PRIVILEGE)
         self.assertNotEquals(self._acl, anotherAcl)
         
-        self._acl.grantPrivilege(aPrincipal, "priv")
+        self._acl.grantPrivilege(aPrincipal, self._SUPPORTED_PRIVILEGE)
         self.assertEquals(self._acl, anotherAcl)
+
+    def testContentAccessLevel(self):
+        """ Checks content access level handling. """
+        
+        self._acl.setContentAccess(self._principalMock, self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        
+        self._acl.setContentAccess(self._principalMock, self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        
+        self._acl.setContentAccess(self._principalMock, self._acl.FULL_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.FULL_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        
+    def testPropertiesAccessLevel(self):
+        """ Checks properties access level handling. """
+        
+        self._acl.setPropertiesAccess(self._principalMock, self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        
+        self._acl.setPropertiesAccess(self._principalMock, self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        
+        self._acl.setPropertiesAccess(self._principalMock, self._acl.FULL_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.FULL_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        
+    def testAdministrationAccessLevel(self):
+        """ Checks administration access level handling. """
+        
+        self._acl.setAministrationAccess(self._principalMock, self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        
+        self._acl.setAministrationAccess(self._principalMock, self._acl.READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.READ_ONLY_ACCESS_LEVEL)
+        
+        self._acl.setAministrationAccess(self._principalMock, self._acl.FULL_ACCESS_LEVEL)
+        self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+                          self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+                          self._acl.FULL_ACCESS_LEVEL)
+
+    def testClearPrivileges(self):
+        """ Tests clearing of privileges. """
+        
+        self._acl.setAministrationAccess(self._principalMock, self._acl.NO_ACCESS_LEVEL)
+        self.assertEquals(len(self._acl.principals), 1)
+        
+        self._acl.clearPrivileges(self._principalMock)
+        self.assertEquals(len(self._acl.principals), 0)
+
+    def testIndex(self):
+        """ Tests the index handling. """
+        
+        # Initially adding two principals
+        self._acl.setContentAccess(self._principalMock, self._acl.FULL_ACCESS_LEVEL)
+        self.assertEquals(self._acl.getIndex(self._principalMock), 0)
+        anotherPrincipal = SimpleMock(id="anotherPrincipal")
+        self._acl.setContentAccess(anotherPrincipal, self._acl.FULL_ACCESS_LEVEL)
+        self.assertEquals(self._acl.getIndex(anotherPrincipal), 1)
+
+        # Playing with the indexes        
+        self._acl.setIndex(self._principalMock, 1)
+        self.assertEquals(self._acl.getIndex(anotherPrincipal), 0)
+        self.assertEquals(self._acl.getIndex(self._principalMock), 1)
+        self._acl.setIndex(anotherPrincipal, 3) # The index does not exists
+        self.assertEquals(self._acl.getIndex(anotherPrincipal), 1)
+        self.assertEquals(self._acl.getIndex(self._principalMock), 0)
+        
+        # Clearing everything and testing error handling
+        self._acl.clearPrivileges(self._principalMock)
+        self._acl.clearPrivileges(anotherPrincipal)
+        self.assertRaises(ValueError, self._acl.getIndex, self._principalMock)

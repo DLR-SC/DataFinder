@@ -43,10 +43,10 @@ Module that contains the repository class.
 from datafinder.core.archiver import Archiver
 from datafinder.core.error import CoreError
 from datafinder.core.item.factory import ItemFactory
+from datafinder.core.item.privileges.principal import Principal
 from datafinder.core.item.property import Property
 from datafinder.core.item.visitor.importer import Importer
 from datafinder.core.item.visitor.walker import ItemTreeWalker
-from datafinder.core.principal import Principal
 from datafinder.persistence.error import PersistenceError
 
 
@@ -202,11 +202,17 @@ class Repository(object):
         
         return Property(propertyDefinition, value)
     
-    def searchPrincipal(self, restrictions):
-        """ Triggers a search for principals. """
+    def searchPrincipal(self, pattern, searchMode):
+        """ Triggers a search for principals. 
+        
+        @param pattern: Name pattern to match corresponding principals.
+        @type pattern: C{unicode}
+        @param searchMode: Determines type of search.
+        @type searchMode: C{int}
+        """
         
         try:
-            principals = self._fileStorerFactory.searchPrincipal(restrictions)
+            principals = self._fileStorerFactory.searchPrincipal(pattern, searchMode)
         except PersistenceError, error:
             raise CoreError(error.message)
         else:

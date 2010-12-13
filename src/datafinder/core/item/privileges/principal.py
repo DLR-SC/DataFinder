@@ -1,10 +1,10 @@
 # $Filename$ 
 # $Authors$
-#
 # Last Changed: $Date$ $Committer$ $Revision-Id$
 #
 # Copyright (c) 2003-2011, German Aerospace Center (DLR)
 # All rights reserved.
+#
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are
@@ -36,67 +36,123 @@
 
 
 """ 
-Principal module 
+Represents an user / group / role.
 """
+
+
+from datafinder.core.error import PrincipalError
+from datafinder.persistence.principal_search.principal import constants, Principal as PersistedPrincipal
 
 
 __version__ = "$Revision-Id:$" 
 
 
+class _PrincipalType(object):
+    """
+    This class defines available properties of a principal type.
+    The class mainly exists for documentation reasons and is intended
+    to be replaced by named tuples when switching to Python 3.
+    """
+    
+    def __init__(self, identifier, displayName, description):
+        """
+        Constructor.
+        
+        @param identifier: Identifier of the principal type.
+        @type identifier: C{unicode}
+        @param displayName: Display name of the principal type.
+        @type displayName: C{unicode}
+        @param description: Description of the principal type.
+        @type description: C{unicode}
+        """
+        
+        self.identifier = identifier
+        self.displayName = displayName
+        self.description = description
+
+
+USER_PRINCIPAL_TYPE = _PrincipalType(constants.USER_PRINCIPAL_TYPE, "User Type", "Represents a user.")
+GROUP_PRINCIPAL_TYPE = _PrincipalType(constants.GROUP_PRINCIPAL_TYPE, "Group Type", "Represents a group.")
+
+PRINCIPAL_TYPES = [USER_PRINCIPAL_TYPE, GROUP_PRINCIPAL_TYPE]
+
+
 class Principal(object):
     """
-    representation of a principal
+    Represents an user / group / role.
     """
     
-    def __init__(self, identifier, displayName):
+    def __init__(self, identifier, displayName=None):
         """
-        @param identifier: identifier of the principal
-        @type identifier: string
-        @param displayName: display name of the principal
-        @type displayName: string
+        @param identifier: Identifier of the principal.
+        @type identifier: C{unicode}
+        @param displayName: Identifier of the principal.
+        @type displayName: C{unicode}
         """
-        self._identifier = identifier
-        self._displayName = displayName 
         
+        self.identifier = identifier
+        self.displayName = displayName 
+        self.type = USER_PRINCIPAL_TYPE
+        self.memberof = set()
+        
+        if displayName is None:
+            self.displayName = self.identifier
+
     def __cmp__(self, other):
-        """
-        Allows comparision of two comparision
-        """
-        if self._identifier == other.identifier:
+        """ Compares two instances. """
+        
+        if self.identifier == other.identifier \
+           and self.type == other.type:
             return 0
-        else:
-            return 1
+        return 1
         
+    def toPersistenceFormat(self):
+        """
+        Maps the principal to the format required by the persistence layer.
         
-    def _getDisplayName(self):
-        """
-        Getter method for displayName
-        """
-        
-        return self._displayName
-    
-    def _setDisplayName(self, name):
-        """
-        Setter method for displayName
+        @return: Principal in persistence format.
+        @rtype: L{Principal<datafinder.persistence.principal_search.principal.Principal>}
         """
         
-        self._displayName = name
-    
-    def _getIdentifier(self):
-        """
-        Getter method for identifier
+        mappedPrincipal = PersistedPrincipal(self.identifier)
+        mappedPrincipal.type = self.type.identifier
+        mappedPrincipal.displayName = self.displayName
+        for principal in self.memberof:
+            mappedPrincipal.memberof.append(principal.toPersistenceFormat())
+        return mappedPrincipal
+        
+    @staticmethod
+    def create(principal):
+        """ 
+        Creates a principal from the persistence representation.
+        
+        @return: User / group / role.
+        @rtype: L{Principal<datafinder.persistence.principal_search.principal.Principal>}
+        
+        @raise CoreError: Indicates invalid principal type and infinite loops.
         """
         
-        return self._identifier
-    
-    def _setIdentifier(self, identifier):
-        """
-        Setter method for identifier
-        """
-        
-        self._identifier = identifier
-    
-    displayName = property(_setDisplayName, _getDisplayName,
-                           doc = "Display name of the principal")
-    identifier  = property(_getIdentifier, _setIdentifier,
-                           doc = "identifier of the principal")
+        mappedPrincipal = Principal(principal.identifier)
+        foundPrincipalType = False
+        for principalType in PRINCIPAL_TYPES:
+            if principalType.identifier == principal.type:
+                mappedPrincipal.type = principalType
+                foundPrincipalType = True
+        if not foundPrincipalType:
+            raise PrincipalError("Unsupported principal type '%s'." % principal.type)
+        mappedPrincipal.displayName = principal.displayName
+        try:
+            for principal in principal.memberof:
+                mappedPrincipal.memberof.add(Principal.create(principal))
+        except RuntimeError:
+            raise PrincipalError("Detected loop when trying to find out the groups the principal is member of.")
+        return mappedPrincipal
+
+
+OWNER_PRINCIPAL = Principal("____owner____", "Owner")
+AUTHENTICATED_PRINCIPAL = Principal("____authenticated____", "Authenticated Principal")
+AUTHENTICATED_PRINCIPAL.type = GROUP_PRINCIPAL_TYPE
+UNAUTHENTICATED_PRINCIPAL = Principal("____unauthenticated____", "Unauthenticated Principal")
+UNAUTHENTICATED_PRINCIPAL.type = GROUP_PRINCIPAL_TYPE
+
+SPECIAL_PRINCIPALS = [OWNER_PRINCIPAL, AUTHENTICATED_PRINCIPAL, UNAUTHENTICATED_PRINCIPAL]
