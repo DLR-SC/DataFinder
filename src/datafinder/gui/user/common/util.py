@@ -1,4 +1,4 @@
-# pylint: disable=W0703,R0901,W0142,R0912
+# pylint: disable=W0703,W0142,R0912
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
