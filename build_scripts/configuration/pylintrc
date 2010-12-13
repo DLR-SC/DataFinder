@@ -132,7 +132,7 @@ attr-rgx=_{0,2}[a-z][a-zA-Z0-9]*$
 argument-rgx=[a-z][a-zA-Z0-9]*_{0,1}$|_*
 
 # Regular expression which should only match correct variable names
-variable-rgx=[a-z][a-zA-Z0-9]*_{0,1}$
+variable-rgx=[a-z][a-zA-Z0-9]*_{0,1}$|_*
 
 # Regular expression which should only match correct list comprehension /
 # generator expression variable names
@@ -224,7 +224,7 @@ max-branchs=12
 max-statements=100
 
 # Maximum number of parents for a class (see R0901).
-max-parents=3
+max-parents=5
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=15
