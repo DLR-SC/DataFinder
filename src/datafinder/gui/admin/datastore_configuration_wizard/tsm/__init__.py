@@ -40,8 +40,8 @@ Implements option pages for the TSM data store.
 """
 
 
-import authentication_option_controller
-import storage_option_controller
+from datafinder.gui.admin.datastore_configuration_wizard.tsm import authentication_option_controller
+from datafinder.gui.admin.datastore_configuration_wizard.tsm import storage_option_controller
 
 
 __version__ = "$Revision-Id:$" 

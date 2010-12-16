@@ -40,7 +40,7 @@ Implement option pages for the off-line data store.
 """
 
 
-import storage_option_controller
+from datafinder.gui.admin.datastore_configuration_wizard.offline import storage_option_controller
 
 
 __version__ = "$Revision-Id:$" 

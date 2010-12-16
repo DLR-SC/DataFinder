@@ -39,10 +39,9 @@
 Implements controller for default option pages.
 """
 
-
-import authentication_option_controller
-import base_option_controller
-import storage_option_controller
+from datafinder.gui.admin.datastore_configuration_wizard.default import authentication_option_controller
+from datafinder.gui.admin.datastore_configuration_wizard.default import base_option_controller
+from datafinder.gui.admin.datastore_configuration_wizard.default import storage_option_controller 
 
 
 __version__ = "$Revision-Id:$" 

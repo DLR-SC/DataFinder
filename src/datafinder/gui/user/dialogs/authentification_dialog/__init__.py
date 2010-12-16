@@ -5,8 +5,8 @@
 # Copyright (c) 2003-2011, German Aerospace Center (DLR)
 # All rights reserved.
 #
-#Redistribution and use in source and binary forms, with or without
 #
+#Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are
 #met:
 #
@@ -36,11 +36,7 @@
 
 
 """ 
-Implements controller for WebDAV option pages.
+Implements a wizard for managing different authentifications 
 """
-
-
-from datafinder.gui.admin.datastore_configuration_wizard.s3 import authentication_option_controller
-
 
 __version__ = "$Revision-Id:$" 

@@ -39,8 +39,7 @@
 Implements controller for GridFTP option pages.
 """
 
-import performance_option_controller
-import security_option_controller
-
+from datafinder.gui.admin.datastore_configuration_wizard.gridftp import performance_option_controller 
+from datafinder.gui.admin.datastore_configuration_wizard.gridftp import security_option_controller
 
 __version__ = "$Revision-Id:$" 
