@@ -41,7 +41,7 @@ Implements the principal search part of the privilege dialog.
 """
 
 
-from PyQt4.QtGui import QMessageBox, QStandardItem, QStandardItemModel
+from PyQt4.QtGui import QMessageBox, QStandardItemModel
 from PyQt4.QtCore import QObject, SIGNAL
 
 from datafinder.core.constants import SEARCH_MODE_GROUP_ONLY, \
@@ -145,7 +145,6 @@ class PrincipalSearchModel(QStandardItemModel):
         QStandardItemModel.__init__(self)
         
         self._model = model
-        self._items = list()
         
         self._appendRows(SPECIAL_PRINCIPALS)
         
@@ -165,15 +164,6 @@ class PrincipalSearchModel(QStandardItemModel):
         """ Appends the principals to the internal model and clears it in advance. """
         
         self.clear()
-        self._items = [PrincipalItem(principal) for principal in principals]
-        for item in self._items:
+        items = [PrincipalItem(principal) for principal in principals]
+        for item in items:
             self.appendRow(item)
-
-    def item(self, row, _=None):
-        """ @see: L{item<PyQt4.QtGui.QStandardItemModel.item>} """
-
-        try:
-            item = self._items[row]
-        except IndexError:
-            item = QStandardItem()
-        return item

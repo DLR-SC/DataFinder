@@ -41,11 +41,12 @@ Implements the privilege dialog.
 """
 
 
-from PyQt4.QtGui import QApplication, QDialog
+from PyQt4.QtCore import SIGNAL
+from PyQt4.QtGui import QDialog
 
 from datafinder.gui.user.dialogs.privilege_dialog.principal_search import PrincipalSearchController, \
                                                                           PrincipalSearchModel
-
+from datafinder.gui.user.dialogs.privilege_dialog.privileges import PrivilegeController, PrivilegeModel
 from datafinder.gui.gen.user.privilege_dialog_ui import Ui_PrivilegeDialog
 
 
@@ -54,6 +55,8 @@ __version__ = "$Revision-Id:$"
 
 class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
     """ Main controller of the privilege dialog. """
+    
+    _WINDOW_TITLE_TEMPLATE = "Editing Privileges of %s"
     
     def __init__(self, model, parent=None):
         """ Constructor. 
@@ -68,19 +71,25 @@ class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
         Ui_PrivilegeDialog.__init__(self)
         self.setupUi(self)
         
+        self._item = None
         self._principalSearchModel = PrincipalSearchModel(model)
         self._principalSearchController = PrincipalSearchController(self, self._principalSearchModel)
+        self._privilegeModel = PrivilegeModel(model)
+        self._privilegeController = PrivilegeController(self, self._privilegeModel)
         
-    
-if __name__ == "__main__":
-    class Test(object):
-    
-        @staticmethod
-        def searchPrincipal(_, __):
-            return list()
+        self.connect(self._principalSearchController, 
+                     SIGNAL(self._principalSearchController.ADD_PRINCIPAL_SIGNAL),
+                     self._privilegeController.addPrincipals)
 
-    import sys
-    application = QApplication(sys.argv)
-    dialog = PrivilegeDialog(Test())
-    dialog.show()
-    sys.exit(application.exec_())
+    def _setItem(self, item):
+        """ Setter for displayed item. """
+        
+        self._item = item
+        self.setWindowTitle(self._WINDOW_TITLE_TEMPLATE % item.path)
+        self._privilegeController.item = item
+    
+    def _getItem(self):
+        """ Returns the current displayed item. """
+        
+        return self._item
+    item = property(_getItem, _setItem)

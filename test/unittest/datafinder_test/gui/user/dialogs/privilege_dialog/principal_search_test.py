@@ -49,8 +49,9 @@ import sys
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QApplication, QItemSelectionModel
 
-from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.core.error import CoreError
+from datafinder.core.item.privileges.acl import AccessControlList
+from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
 
 
@@ -69,6 +70,7 @@ class PrincipalSearchTestCase(unittest.TestCase):
         
         self._repositoryMock = _RepositoryMock()
         self._privilegeDialog = PrivilegeDialog(self._repositoryMock)
+        self._privilegeDialog.item = _ItemMock()
         self._model = self._privilegeDialog._principalSearchModel
         self._controller = self._privilegeDialog._principalSearchController
 
@@ -91,7 +93,7 @@ class PrincipalSearchTestCase(unittest.TestCase):
         self.assertEquals(self._model.rowCount(), 6)
         self.assertEquals(unicode(self._model.item(0, 0).text()), 
                           SPECIAL_PRINCIPALS[0].displayName) 
-        self.assertEquals(unicode(self._model.item(10, 0).text()), "") 
+        self.assertEquals(self._model.item(10, 0), None) 
         self.assertEquals(self._repositoryMock.searchMode, 2)
         
     def testSearchSuccessUser(self):
@@ -150,3 +152,14 @@ class _RepositoryMock(object):
         if self.error:
             raise CoreError("")
         return SPECIAL_PRINCIPALS
+
+
+class _ItemMock(object):
+    """ Used to mock an item and its ACL. """
+    
+    def __init__(self):
+        """ Constructor. """
+        
+        self.path = "/test/item/test.pdf"
+        self.acl = AccessControlList()
+        self.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[0])

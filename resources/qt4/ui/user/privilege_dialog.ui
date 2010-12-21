@@ -196,7 +196,7 @@
              </layout>
             </item>
             <item row="0" column="0">
-             <widget class="QTableWidget" name="privilegeTable">
+             <widget class="QTableView" name="privilegeTable">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -209,61 +209,18 @@
                 <height>0</height>
                </size>
               </property>
-              <attribute name="horizontalHeaderDefaultSectionSize">
+              <attribute name="horizontalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <attribute name="horizontalHeaderHighlightSections">
+               <bool>true</bool>
+              </attribute>
+              <attribute name="horizontalHeaderMinimumSectionSize">
                <number>80</number>
               </attribute>
-              <attribute name="verticalHeaderDefaultSectionSize">
+              <attribute name="verticalHeaderMinimumSectionSize">
                <number>22</number>
               </attribute>
-              <row>
-               <property name="text">
-                <string/>
-               </property>
-              </row>
-              <column>
-               <property name="text">
-                <string>Principal</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Content</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Properties</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Administration</string>
-               </property>
-              </column>
-              <item row="0" column="0">
-               <property name="text">
-                <string>User</string>
-               </property>
-               <property name="icon">
-                <iconset>
-                 <normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/user_edit24.png</normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/user_edit24.png</iconset>
-               </property>
-              </item>
-              <item row="0" column="1">
-               <property name="text">
-                <string>All</string>
-               </property>
-              </item>
-              <item row="0" column="2">
-               <property name="text">
-                <string>Read</string>
-               </property>
-              </item>
-              <item row="0" column="3">
-               <property name="text">
-                <string>All</string>
-               </property>
-              </item>
              </widget>
             </item>
            </layout>

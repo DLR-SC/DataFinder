@@ -41,14 +41,18 @@ Implements privilege handling.
 """
 
 
-from PyQt4.QtGui import QMessageBox, QStandardItem, QStandardItemModel
+from copy import deepcopy
+
+from PyQt4.QtGui import QStandardItemModel, QDialogButtonBox
 from PyQt4.QtCore import QObject, SIGNAL
+
+from datafinder.gui.user.dialogs.privilege_dialog.items import AccessLevelItem, PrincipalItem
 
 
 __version__ = "$Revision-Id:$" 
 
 
-class PrvilegeController(QObject):
+class PrivilegeController(QObject):
     """ Implements privilege handling related interactions. """
     
     def __init__(self, privilegeDialog, model):
@@ -56,6 +60,7 @@ class PrvilegeController(QObject):
 
         QObject.__init__(self)
         
+        self._applyButton = privilegeDialog.buttonBox.button(QDialogButtonBox.Apply)
         self._removeButton = privilegeDialog.removePrincipalButton
         self._upButton = privilegeDialog.upButton
         self._downButton = privilegeDialog.downButton
@@ -64,7 +69,39 @@ class PrvilegeController(QObject):
         
         self._privilegeWidget.setModel(self._model)
         
+        self.connect(self._removeButton, SIGNAL("clicked()"), self._removePrincipalsSlot)
 
+    def _setItem(self, item):
+        """ Sets the item. """
+        
+        self._applyButton.setEnabled(False)
+        self._model.item_ = item
+    item = property(None, _setItem)
+    
+    def addPrincipals(self, principals):
+        """ @see: L{PrivilegeModel.addPrincipals<datafinder.gui.user.dialogs.
+        privilege_dialog.privileges.PrivilegeModel.addPrincipals>}
+        in addition it enables or disables the apply button.
+        """
+        
+        self._model.addPrincipals(principals)
+        self._applyButton.setEnabled(self._model.isDirty)
+        
+    def _removePrincipalsSlot(self):
+        """ Remove the selected principals. """
+        
+        principals = list()
+        rows = list()  # to avoid multiple entries
+        for index in self._privilegeWidget.selectedIndexes():
+            item = self._model.item(index.row(), 0)
+            if not index.row() in rows:
+                principals.append(item)
+                rows.append(index.row())
+            
+        self._model.removePrincipals(principals)
+        self._applyButton.setEnabled(self._model.isDirty)
+
+        
 class PrivilegeModel(QStandardItemModel):
     """ Implements the privilege model. """
     
@@ -75,15 +112,63 @@ class PrivilegeModel(QStandardItemModel):
         
         self._model = model
         self._item = None
+        self._acl = None
+        
+        self.setColumnCount(4) # principal, content, properties, administration
     
-    def load(self):    
-        self._item = self._model.nodeFromIndex(self._model.activeIndex)
-        self._acl = self._item.acl
-        for principal in self._acl.principals:
-            pass
+    def _setItem(self, item):
+        """ Sets the item. """
+        
+        self._item = item
+        self._acl = deepcopy(item.acl)
  
-    def appendRow(self, principalItem, _, __, ___):
-        QStandardItemModel(self).appendRow(principalItem)
-
-    def store(self):
-        self._item.updateAcl(self._acl)
+        self.clear()
+        for principal in self._acl.principals:
+            self._appendRow(principal)
+    item_ = property(None, _setItem) # item already exists as method
+    
+    @property
+    def isDirty(self):
+        """ Checks whether the model contains not stored changes.
+        
+        @return: C{True} if there are those changes else C{False}.
+        @rtype: C{bool}
+        """
+        
+        return self._acl != self._item.acl
+    
+    def addPrincipals(self, principalItems):
+        """ Adds the given principals with default access level. 
+        
+        @param principalItems: Principals which should be added.
+        @type principalItems: C{list} of  L{PrincipalItem<datafinder.gui.user.
+        dialogs.privilege_dialog.items.PrincipalItem>}
+        """
+        
+        for principalItem in principalItems:
+            principal = principalItem.principal
+            if not principal in self._acl.principals:
+                self._acl.addDefaultPrincipal(principal)
+                self._appendRow(principal)
+                
+    def _appendRow(self, principal):
+        """ Adds the principal and its access levels to the table view. """
+       
+        row = [PrincipalItem(principal)]
+        row.append(AccessLevelItem(self._acl.contentAccessLevel(principal)))
+        row.append(AccessLevelItem(self._acl.propertiestAccessLevel(principal)))
+        row.append(AccessLevelItem(self._acl.aministrationAccessLevel(principal)))
+        self.appendRow(row)
+        
+    def removePrincipals(self, principalItems):
+        """ Removes the specified principals from the ACL.
+        
+        @param principalItems: List of principals to remove.
+        @type principalItems: C{list} of L{PrincipalItem<datafinder.gui.user.
+        dialogs.privilege_dialog.items.PrincipalItem>}
+        """
+        
+        principalItems.reverse()
+        for principalItem in principalItems:
+            self._acl.clearPrivileges(principalItem.principal)
+            self.removeRow(principalItem.row())

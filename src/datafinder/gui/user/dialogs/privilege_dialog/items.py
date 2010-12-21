@@ -41,7 +41,7 @@ Provides QStandardItem implementations for principals and privileges.
 """
 
 
-from PyQt4.QtGui import QIcon, QStandardItem
+from PyQt4.QtGui import QIcon, QStandardItem, QComboBox
 
 from datafinder.core.item.privileges.principal import USER_PRINCIPAL_TYPE
 
@@ -80,3 +80,34 @@ class PrincipalItem(QStandardItem):
             self._groupIcon = QIcon(":/icons/icons/users24.png")
         if self._userIcon is None:
             self._userIcon = QIcon(":/icons/icons/user24.png")
+
+
+class AccessLevelItem(QStandardItem):
+    """ Access level specific item. """
+
+    #@param accessLevels: Access levels that can be represented.
+    #@type accessLevels: C{list} of L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
+    accessLevels = list()
+    
+    def __init__(self, level):
+        """ Constructor.
+        
+        @param level: The associated access level constant.
+        @type level: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
+        """
+        
+        QStandardItem.__init__(self, level.displayName)
+        
+        self.level = level
+
+        self.setEditable(True)
+        
+    def _createEditor(self):
+        """ Returns the editor of the item. """
+        
+        editor = QComboBox()
+        for accessLevel in self.accessLevels:
+            editor.addItem(accessLevel.displayName)
+        editor.setCurrentIndex(self.accessLevels.index(self.level))
+        editor.setEditable(False)
+        return editor
