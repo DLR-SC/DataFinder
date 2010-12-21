@@ -60,9 +60,9 @@ class _Privilege(object):
         
         @param identifier: Identifier of the privilege.
         @type identifier: C{unicode}
-        @param displayName: Identifier of the privilege.
+        @param displayName: Display name of the privilege.
         @type displayName: C{unicode}
-        @param descriptiondentifier: Identifier of the privilege.
+        @param description: Describes the purpose of the privilege. 
         @type description: C{unicode}
         @param aggregatedPrivileges: Directly aggregated privileges.
         @type aggregatedPrivileges: C{list} of L{_Privilege<datafinder.core.item.privileges.privilege._Privilege>}
@@ -86,6 +86,16 @@ class _Privilege(object):
 
     __repr__ = __str__
     
+    def __cmp__(self, other):
+        """ Compares two instances. """
+        
+        return cmp(self.identifier, other.identifier)
+    
+    def __hash__(self):
+        """ Calculates has value in accordance to comparison. """
+        
+        return id(self.identifier)
+
 
 REMOVE_ITEM = _Privilege(constants.REMOVE_ITEM_PRIVILEGE, "Remove Item", "Determines removal of items.")
 ADD_ITEM = _Privilege(constants.ADD_ITEM_PRIVILEGE, "Add Item", "Determines adding of items.")
@@ -121,3 +131,40 @@ def getPrivilege(identifier):
         if privilege.identifier == identifier:
             return privilege 
     raise PrivilegeError("The privilege '%s' is not supported." % identifier)
+
+
+class _AccessLevel(object):
+    """
+    This class defines generally available access levels.
+    Access level correspond to the item aspects content, properties, and administration.
+    They are introduced to simplify the privilege handling in context of these item aspects
+    """
+    
+    def __init__(self, identifier, displayName, description):
+        """
+        Constructor.
+        
+        @param identifier: Identifier of the access level.
+        @type identifier: C{unicode}
+        @param displayName: Display name of the access level.
+        @type displayName: C{unicode}
+        @param description: Describes the purpose of the access level. 
+        @type description: C{unicode}
+        """
+        
+        self.identifier = identifier
+        self.displayName = displayName
+        self.description = description
+        
+    def __str__(self):
+        """ Determines the string representation. """
+        
+        return self.displayName
+
+    __repr__ = __str__
+
+
+NONE_ACCESS_LEVEL = _AccessLevel("____none____", "None", "Neither reading nor writing access.")
+READ_ONLY_ACCESS_LEVEL = _AccessLevel("____read-only____", "Read-Only", "Only reading access.")
+FULL_ACCESS_LEVEL = _AccessLevel("____full____", "Full", "Reading and writing access.")
+ACCESS_LEVELS = [NONE_ACCESS_LEVEL, READ_ONLY_ACCESS_LEVEL, FULL_ACCESS_LEVEL]

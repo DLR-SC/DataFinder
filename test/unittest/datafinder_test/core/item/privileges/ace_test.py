@@ -40,6 +40,7 @@ Tests an access control list entry.
 """
 
 
+from copy import deepcopy
 import unittest
 
 from datafinder.core.error import PrivilegeError
@@ -55,6 +56,8 @@ __version__ = "$Revision-Id:$"
 class AccessControlListEntryTestCase(unittest.TestCase):
     """ Tests an access control list entry. """
     
+    _UNSUPPORTED_PRIVILEGE = SimpleMock(identifier="UNSUPPORTED")
+    
     def setUp(self):
         """ Creates object under test. """
         
@@ -66,7 +69,7 @@ class AccessControlListEntryTestCase(unittest.TestCase):
         self._ace.grantPrivilege(privilege.READ_PRIVILEGE)
         self.assertEquals(self._ace.grantedPrivileges, set([privilege.READ_PRIVILEGE]))
         
-        self.assertRaises(PrivilegeError, self._ace.grantPrivilege, "unknown_priv")
+        self.assertRaises(PrivilegeError, self._ace.grantPrivilege, self._UNSUPPORTED_PRIVILEGE)
         
     def testDenyPrivilege(self):
         """ Tests the privilege denying. """
@@ -74,7 +77,7 @@ class AccessControlListEntryTestCase(unittest.TestCase):
         self._ace.denyPrivilege(privilege.READ_PRIVILEGE)
         self.assertEquals(self._ace.deniedPrivileges, set([privilege.READ_PRIVILEGE]))
         
-        self.assertRaises(PrivilegeError, self._ace.denyPrivilege, "unknown_priv")
+        self.assertRaises(PrivilegeError, self._ace.denyPrivilege, self._UNSUPPORTED_PRIVILEGE)
         
     def testPrivilegeNormalizing(self):
         """ Shows the management of privileges. """
@@ -149,3 +152,5 @@ class AccessControlListEntryTestCase(unittest.TestCase):
         
         self._ace.grantPrivilege(privilege.READ_PRIVILEGE)
         self.assertEquals(self._ace, anotherAce)
+        
+        self.assertEquals(self._ace, deepcopy(self._ace))

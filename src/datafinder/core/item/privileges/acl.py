@@ -52,11 +52,6 @@ class AccessControlList(object):
     Represents an access control list (ACL) of an item.
     """
     
-    # Available access levels
-    NO_ACCESS_LEVEL = 0 # Neither reading nor writing access
-    READ_ONLY_ACCESS_LEVEL = 1 # Reading
-    FULL_ACCESS_LEVEL = 2 # Reading and writing
-    
     # [0]->Required read privileges [1]->Required write privileges
     _CONTENT_PRIVS = ([privilege.READ_PRIVILEGE], [privilege.WRITE_CONTENT, 
                        privilege.ADD_ITEM, privilege.REMOVE_ITEM])
@@ -98,14 +93,29 @@ class AccessControlList(object):
         """
     
         self._addAce(principal)    
-        self._aces[principal].grantPrivilege(priv)
+        self._aces[principal.identifier].grantPrivilege(priv)
 
-    def _addAce(self, principal):
+    def addDefaultPrincipal(self, principal):
+        """ Adds the principal with default access levels 
+        Content: Read-only, Properties: Read-Only, Administration: None
+        If the principal has been already added nothing is changed.
+        
+        @param principal: User / role.
+        @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        """
+    
+        self._addAce(principal, True)
+        
+    def _addAce(self, principal, setDefaultAccessLevels=False):
         """ Adds an ACE for the given principal. """
         
-        if not principal in self._aces:
-            self._aces[principal] = AccessControlListEntry(principal)
+        if not principal.identifier in self._aces:
+            self._aces[principal.identifier] = AccessControlListEntry(principal)
             self._principalOrder.append(principal)
+            if setDefaultAccessLevels:
+                self.setContentAccessLevel(principal, privilege.READ_ONLY_ACCESS_LEVEL)
+                self.setPropertiesAccessLevel(principal, privilege.READ_ONLY_ACCESS_LEVEL)
+                self.setAministrationAccessLevel(principal, privilege.NONE_ACCESS_LEVEL)
             
     def denyPrivilege(self, principal, priv):
         """ 
@@ -118,7 +128,7 @@ class AccessControlList(object):
         """
         
         self._addAce(principal)
-        self._aces[principal].denyPrivilege(priv)
+        self._aces[principal.identifier].denyPrivilege(priv)
 
     def getGrantedPrivileges(self, principal):
         """ 
@@ -134,8 +144,8 @@ class AccessControlList(object):
         """
         
         privileges = set()
-        if principal in self._aces:
-            privileges = self._aces[principal].grantedPrivileges
+        if principal.identifier in self._aces:
+            privileges = self._aces[principal.identifier].grantedPrivileges
         else:
             raise ValueError("The principal '%s' is not defined." % principal.displayName)
         return privileges
@@ -154,20 +164,20 @@ class AccessControlList(object):
         """
 
         privileges = set()
-        if principal in self._aces:
-            privileges = self._aces[principal].deniedPrivileges
+        if principal.identifier in self._aces:
+            privileges = self._aces[principal.identifier].deniedPrivileges
         else:
             raise ValueError("The principal '%s' is not defined." % principal.displayName)
         return privileges
 
-    def setContentAccess(self, principal, level):
+    def setContentAccessLevel(self, principal, level):
         """ Sets the access level of the principal
         concerning the item content.
         
         @param principal: User / role.
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
         @param level: Access level constant.
-        @type level: C{int}
+        @type level: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
         """
         
         self._setAccessLevel(principal, level, self._CONTENT_PRIVS)
@@ -180,7 +190,7 @@ class AccessControlList(object):
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
         
         @return: Access level constant.
-        @rtype: C{int}
+        @rtype: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
         
         @raise ValueError: If the principal does not exist.
         """
@@ -191,25 +201,25 @@ class AccessControlList(object):
         """ Sets the access level. """
         
         self._addAce(principal)
-        if level == self.NO_ACCESS_LEVEL:
+        if level == privilege.NONE_ACCESS_LEVEL:
             for priv in requiredPrivs[0] + requiredPrivs[1]:
-                self._aces[principal].denyPrivilege(priv)
-        elif level == self.READ_ONLY_ACCESS_LEVEL:
+                self._aces[principal.identifier].denyPrivilege(priv)
+        elif level == privilege.READ_ONLY_ACCESS_LEVEL:
             for priv in requiredPrivs[0]:
-                self._aces[principal].grantPrivilege(priv)
+                self._aces[principal.identifier].grantPrivilege(priv)
             for priv in requiredPrivs[1]:
-                self._aces[principal].denyPrivilege(priv)
+                self._aces[principal.identifier].denyPrivilege(priv)
         else: # Full access
             for priv in requiredPrivs[0] + requiredPrivs[1]:
-                self._aces[principal].grantPrivilege(priv)
+                self._aces[principal.identifier].grantPrivilege(priv)
 
     def _getAccessLevel(self, principal, requiredPrivs):
         """ Determines the access level. """
         
-        if not principal in self._aces:
+        if not principal.identifier in self._aces:
             raise ValueError("The principal '%s' is not defined." % principal.displayName)
         grantedPrivileges = list()
-        for priv in self._aces[principal].grantedPrivileges:
+        for priv in self._aces[principal.identifier].grantedPrivileges:
             grantedPrivileges += [priv] + priv.aggregatedPrivileges 
 
         hasReadingAccess = True
@@ -222,21 +232,21 @@ class AccessControlList(object):
                 hasWritingAccess = False
         
         if hasReadingAccess and hasWritingAccess:
-            contentAccessLevel = self.FULL_ACCESS_LEVEL
+            contentAccessLevel = privilege.FULL_ACCESS_LEVEL
         elif hasReadingAccess:
-            contentAccessLevel = self.READ_ONLY_ACCESS_LEVEL
+            contentAccessLevel = privilege.READ_ONLY_ACCESS_LEVEL
         else:
-            contentAccessLevel = self.NO_ACCESS_LEVEL
+            contentAccessLevel = privilege.NONE_ACCESS_LEVEL
         return contentAccessLevel
 
-    def setPropertiesAccess(self, principal, level):
+    def setPropertiesAccessLevel(self, principal, level):
         """ Sets the access level of the principal
         concerning the item properties.
         
         @param principal: User / role.
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
         @param level: Access level constant.
-        @type level: C{int}
+        @type level: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
         """
         
         self._setAccessLevel(principal, level, self._PROPERTIES_PRIVS)
@@ -249,21 +259,21 @@ class AccessControlList(object):
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
         
         @return: Access level constant.
-        @rtype: C{int}
+        @rtype: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
         
         @raise ValueError: If the principal does not exist.
         """
         
         return self._getAccessLevel(principal, self._PROPERTIES_PRIVS)
     
-    def setAministrationAccess(self, principal, level):
+    def setAministrationAccessLevel(self, principal, level):
         """ Sets the access level of the principal
         concerning the item administration.
         
         @param principal: User / role.
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
         @param level: Access level constant.
-        @type level: C{int}
+        @type level: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
         """
         
         self._setAccessLevel(principal, level, self._ADMIN_PRIVS)
@@ -276,7 +286,7 @@ class AccessControlList(object):
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
         
         @return: Access level constant.
-        @rtype: C{int}
+        @rtype: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
         
         @raise ValueError: If the principal does not exist.
         """
@@ -292,8 +302,8 @@ class AccessControlList(object):
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
         """
         
-        if principal in self._aces:
-            del self._aces[principal]
+        if principal.identifier in self._aces:
+            del self._aces[principal.identifier]
             self._principalOrder.remove(principal)
             
     def setIndex(self, principal, position):
@@ -356,10 +366,16 @@ class AccessControlList(object):
     def __cmp__(self, other):
         """ Compares two ACLs. """
         
+        result = 0
         if len(self.principals) != len(other.principals):
-            return 1
-        for principal in self.principals:
-            if self.getGrantedPrivileges(principal) != other.getGrantedPrivileges(principal) \
-               or self.getDeniedPrivileges(principal) != other.getDeniedPrivileges(principal):
-                return 1
-        return 0
+            result = 1
+        else:
+            for principal in self.principals:
+                if not principal in other.principals:
+                    result = 1
+                    break
+                if self.getGrantedPrivileges(principal) != other.getGrantedPrivileges(principal) \
+                   or self.getDeniedPrivileges(principal) != other.getDeniedPrivileges(principal):
+                    result = 1
+                    break
+        return result

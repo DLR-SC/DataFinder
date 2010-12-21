@@ -40,6 +40,7 @@ Tests the principal representation.
 """
 
 
+from copy import deepcopy
 import unittest
 
 from datafinder.core.error import CoreError
@@ -106,6 +107,6 @@ class PrincipalTestCase(unittest.TestCase):
         anotherPrincipal.identifier = self._principal.identifier
         self.assertEquals(self._principal, anotherPrincipal)
         
-        anotherPrincipal.type = principal.GROUP_PRINCIPAL_TYPE
-        self.assertNotEquals(self._principal, anotherPrincipal)
+        self.assertEquals(self._principal, deepcopy(self._principal))
         
+        self.assertTrue(self._principal in set([deepcopy(self._principal)]))

@@ -101,11 +101,13 @@ class Principal(object):
     def __cmp__(self, other):
         """ Compares two instances. """
         
-        if self.identifier == other.identifier \
-           and self.type == other.type:
-            return 0
-        return 1
+        return cmp(self.identifier, other.identifier)
         
+    def __hash__(self):
+        """ Calculates has value in accordance to comparison. """
+        
+        return id(self.identifier)
+    
     def toPersistenceFormat(self):
         """
         Maps the principal to the format required by the persistence layer.
