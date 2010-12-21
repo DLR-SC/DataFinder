@@ -1,4 +1,4 @@
-# pylint: disable=W0603
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -123,7 +123,8 @@ class RepositoryManager(object):
             if baseUri is None:
                 baseUri = configurationUri
             try:
-                configurationCollection = createFileStorer(configurationUri, BaseConfiguration(baseUri, username=username, password=password))
+                configurationCollection = createFileStorer(configurationUri, 
+                                                           BaseConfiguration(baseUri, username=username, password=password))
             except PersistenceError, error:
                 raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
             else:

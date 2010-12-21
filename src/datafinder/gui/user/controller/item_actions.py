@@ -1,4 +1,4 @@
-# pylint: disable=W0142
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -497,7 +497,8 @@ class _ItemActionChecker(object):
     _DEFAULT_ITEM_ACTIONS = [ac.SEARCH_ACTION, ac.CREATE_LEAF_ACTION, ac.CREATE_LINK_ACTION, ac.CREATE_COLLECTION_ACTION,
                              ac.CREATE_ARCHIVE_ACTION, ac.IMPORT_ACTION, ac.EXPORT_ACTION, ac.PASTE_ACTION, 
                              ac.SELECT_ALL_ACTION, ac.REVERSE_SELECTION]
-    _MULTI_ITEM_ACTIONS = _DEFAULT_ITEM_ACTIONS + [ac.COPY_ACTION, ac.CUT_ACTION, ac.DELETE_ACTION, ac.COMMIT_ARCHIVE_ACTION, ac.USE_SCRIPT_ACTION]
+    _MULTI_ITEM_ACTIONS = _DEFAULT_ITEM_ACTIONS + [ac.COPY_ACTION, ac.CUT_ACTION, ac.DELETE_ACTION, 
+                                                   ac.COMMIT_ARCHIVE_ACTION, ac.USE_SCRIPT_ACTION]
     _SINGLE_ITEM_ACTIONS = _MULTI_ITEM_ACTIONS + \
                            [ac.RENAME_ACTION, ac.COPY_PROPERTIES_ACTION, ac.EDIT_PROPERTIES_ACTION, ac.PRINT_ACTION, 
                             ac.OPEN_ACTION]

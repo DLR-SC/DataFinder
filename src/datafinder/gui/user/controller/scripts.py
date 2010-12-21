@@ -1,3 +1,4 @@
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -108,7 +109,7 @@ class ScriptController(object):
         """ Initializes the scripts menu. """
         
         scripts = self._scriptRegistry.getScripts(LOCAL_SCRIPT_LOCATION)
-        scripts.sort(cmp=lambda x,y: cmp(x.lower(),y.lower()), 
+        scripts.sort(cmp=lambda x, y: cmp(x.lower(), y.lower()), 
                      key=operator.attrgetter("title"))
         for script in scripts:
             self._addScript(script)
@@ -320,7 +321,7 @@ class ScriptController(object):
         """ Sets currently used script actions and disables the remaining ones. """
         
         self._currentActions = useScriptActions
-        self._currentActions.sort(cmp=lambda x,y: cmp(x.toLower(),y.toLower()), 
+        self._currentActions.sort(cmp=lambda x, y: cmp(x.toLower(), y.toLower()), 
                                   key=operator.methodcaller("text"))
         for action in self._boundScriptActions:
             action.setEnabled(action in self._currentActions)
@@ -342,7 +343,7 @@ class ScriptController(object):
         """
         
         self._useSharedScriptMenu.setEnabled(True)
-        scripts.sort(cmp=lambda x,y: cmp(x.lower(),y.lower()), 
+        scripts.sort(cmp=lambda x, y: cmp(x.lower(), y.lower()), 
                      key=operator.attrgetter("title"))
         for script in scripts:
             self._addScript(script, False)

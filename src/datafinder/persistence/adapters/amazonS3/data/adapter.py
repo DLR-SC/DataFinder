@@ -1,4 +1,4 @@
-# pylint: disable=W0511
+# pylint: disable=W0511, W0221
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -205,7 +205,7 @@ class DataS3Adapter(NullDataStorer):
             self._key = self.createResource()
             self._key.get_contents_to_file(temporaryFileObject)
             return temporaryFileObject
-        except (PersistenceError,S3ResponseError,BotoClientError), error:
+        except (PersistenceError, S3ResponseError, BotoClientError), error:
             errorMessage = "Unable to read data from '%s'. " % self.identifier + \
                                "Reason: %s" % error.reason
             raise PersistenceError(errorMessage)

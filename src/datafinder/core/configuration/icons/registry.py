@@ -1,4 +1,4 @@
-# pylint: disable=W0201,C0103
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -34,8 +34,6 @@
 #THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-from datafinder.persistence.error import PersistenceError
-from datafinder.core.error import ConfigurationError
 
 
 """ Initialization and administration of DataFinder images. """
@@ -45,7 +43,9 @@ from copy import copy
 
 from datafinder.core.configuration.constants import LOCAL_INSTALLED_ICONS_DIRECTORY_PATH
 from datafinder.core.configuration.icons.icon import parseIconDirectory
+from datafinder.core.error import ConfigurationError
 from datafinder.persistence.factory import createFileStorer
+from datafinder.persistence.error import PersistenceError
 
 
 __version__ = "$Revision-Id:$" 

@@ -1,4 +1,7 @@
-# pylint: disable=W0703,W0142,R0912
+# pylint: disable=E1101
+# E1101: "pythoncom" has a "CoInitialize" member but Pylint cannot detect it.
+#
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$

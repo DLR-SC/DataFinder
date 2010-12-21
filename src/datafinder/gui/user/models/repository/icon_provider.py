@@ -43,7 +43,7 @@ Implements an icon provider for the repository related icon data.
 import sys
 
 from PyQt4.QtGui import QFileIconProvider, QIcon, QPixmap, QPainter
-from PyQt4.QtCore import QRectF, QVariant
+from PyQt4.QtCore import QRectF
 
 from datafinder.core.configuration.icons.constants import SMALL_ICONFILENAME_SUFFIX
 from datafinder.core.configuration.datamodel.constants import DEFAULT_DATATYPE_ICONNAME
