@@ -1,4 +1,4 @@
-# pylint: disable=R0201
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -162,8 +162,7 @@ class DataTsmAdapter(NullDataStorer):
         fileObject = self.readData()
         destination.writeData(fileObject)
 
-    @staticmethod
-    def move(destination):
+    def move(self, destination):
         """
         @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
         """

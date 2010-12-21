@@ -1,4 +1,6 @@
-# pylint: disable=W0212,W0613,W0621,C0302
+# pylint: disable=W0212
+# W0212: For internal purposes it is fine to access the 
+#        internally used repository instance. 
 # $Filename$ 
 # $Authors$
 #

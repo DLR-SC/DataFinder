@@ -1,3 +1,8 @@
+# pylint: disable=E1101,E0611,F0401
+# E1101: Pylint cannot resolve specific win32 modules.
+# E0611: "shell" exists in win32com but Pylint cannot detect it.
+# F0401: "win32com.shell" exists but Pylint cannot import.
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$

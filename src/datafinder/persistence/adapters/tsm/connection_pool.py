@@ -1,4 +1,4 @@
-# pylint: disable=R0201
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -81,7 +81,7 @@ class TsmConnectionPool(ConnectionPool):
                            % (self._configuration.hostname) + "\nReason: '%s'" % str(error)
             raise PersistenceError(errorMessage)
 
-    def _releaseConnection(self, connection): #R0201
+    def _releaseConnection(self, connection):
         """
         @see: L{_releaseConnection<datafinder.persistence.common.connection.pool.ConnectionPool._releaseConnection>}
         """

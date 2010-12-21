@@ -1,3 +1,6 @@
+# pylint: disable=E1103
+# E1103: urlsplit produces the required results but Pylint
+#        cannot correctly determine it.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$

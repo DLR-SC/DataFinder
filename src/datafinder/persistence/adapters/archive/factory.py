@@ -1,4 +1,4 @@
-# pylint: disable=R0201
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -45,6 +45,7 @@ import os
 from zipfile import ZipFile, is_zipfile
 
 from datafinder.persistence.adapters.archive.data.adapter import DataArchiveAdapter
+from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
 from datafinder.persistence.privileges.privilegestorer import NullPrivilegeStorer
@@ -53,7 +54,7 @@ from datafinder.persistence.privileges.privilegestorer import NullPrivilegeStore
 __version__ = "$Revision-Id:$" 
 
 
-class FileSystem(object):
+class FileSystem(BaseFileSystem):
     """
     This class implements the FileSystem protocol to act as entry point into
     the archive storage adapter which provides ZIP archive based backups of
@@ -71,6 +72,8 @@ class FileSystem(object):
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """
 
+        BaseFileSystem.__init__(self)
+        
         self._configuration = baseConfiguration
         self._archive = None
         self.readonly = False
@@ -97,7 +100,7 @@ class FileSystem(object):
     
         return DataArchiveAdapter(identifier, self._archive, readonly=self.readonly)
     
-    def createMetadataStorer(self, identifier): # R0201
+    def createMetadataStorer(self, identifier):
         """ Create an instance of an archive specific MetadataStorer.
         
         @param identifier: The identifier of the node whose properties should be stored.
@@ -106,35 +109,17 @@ class FileSystem(object):
     
         return NullMetadataStorer(identifier)
     
-    def createPrivilegeStorer(self, identifier): # R0201
+    def createPrivilegeStorer(self, identifier):
         """ Dummy method creating nothing. """
     
         return NullPrivilegeStorer(identifier)
     
-    @staticmethod
-    def hasCustomMetadataSupport():
+    @property
+    def hasCustomMetadataSupport(self):
         """ Returns whether custom meta data are supported (which is True). """
     
         return True
     
-    @staticmethod
-    def metadataIdentifierPattern():
-        """ Returns the pattern to identify meta data. """
-        
-        return None
-    
-    @staticmethod
-    def hasMetadataSearchSupport():
-        """ Returns whether the meta data can be sought (which is False). """
-        
-        return False
-    
-    @staticmethod
-    def hasPrivilegeSupport():
-        """ Returns whether the archive supports privileges (which is False). """
-        
-        return False
-
     def release(self):
         """ Release the current archive from usage. This includes closing the ZIP file. """
         
