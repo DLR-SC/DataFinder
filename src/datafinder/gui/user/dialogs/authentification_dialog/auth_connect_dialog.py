@@ -33,6 +33,8 @@
 #THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+from compiler.ast import Print
+from pickle import TRUE
 
 
 """
@@ -40,11 +42,12 @@ Connect dialog for entering the url, username, password of the WebDAV Server.
 """
 
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
+from PyQt4.QtGui import QDialog
 
 from datafinder.gui.gen.user.authentification_connect_dialog_ui import Ui_AuthConnectDialog
 
-from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
+from datafinder.gui.user.dialogs.authentification_dialog.auth_pref_dialog import AuthPrefDialogView
 
 from datafinder.gui.user.dialogs.authentification_dialog.auth_edit_dialog import AuthEditDialogView
 
@@ -52,14 +55,14 @@ from datafinder.gui.user.dialogs.authentification_dialog.auth_edit_dialog import
 __version__ = "$Revision-Id:$" 
 
 
-class AuthConnectDialogView(QtGui.QDialog, Ui_AuthConnectDialog):
+class AuthConnectDialogView(QDialog, Ui_AuthConnectDialog):
     """
     The connection dialog is displayed when the datafinder has to establish a connection to
     a webdav server or any other server needing authentification information.
     This dialog contains a field for entering a url and authentification credentials such as username and password.
     """
 
-    def __init__(self, parent=None, preferences=None):
+    def __init__(self,  preferences=None, parent=None,):
         """
         Constructor.
 
@@ -69,7 +72,7 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_AuthConnectDialog):
         @type preferences: L{PreferencesHandler<datafinder.core.configuration.preferences.PreferencesHandler>}
         """
 
-        QtGui.QDialog.__init__(self, parent)
+        QDialog.__init__(self, parent)
         Ui_AuthConnectDialog.__init__(self)
 
         self.setupUi(self)
@@ -109,9 +112,9 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_AuthConnectDialog):
         @param urls: A list of urls that has to be added.
         @type urls: C{list}
         """
-
-        self.urlComboBox.addItems(urls)
-
+        for url in urls:
+            self.urlComboBox.addItem(url)
+        
     def _getUsername(self):
         """
         Returns the username that was entered by the user.
@@ -195,13 +198,14 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_AuthConnectDialog):
     def _preferencesActionSlot(self):
         """ Shows the preferences dialog for connection settings. """
 
-        preferencesDialog = PreferencesDialogView(self)
+        preferencesDialog = AuthPrefDialogView(None, self._preferences)
 
-        preferencesDialog.useLdap = self._preferences.useLdap
-        preferencesDialog.ldapBaseDn = self._preferences.ldapBaseDn
-        preferencesDialog.ldapServerUri = self._preferences.ldapServerUri
-
-        if preferencesDialog.exec_() == QtGui.QDialog.Accepted:
+        #preferencesDialog.useLdap = self._preferences.useLdap
+        #preferencesDialog.ldapBaseDn = self._preferences.ldapBaseDn
+        #preferencesDialog.ldapServerUri = self._preferences.ldapServerUri
+        preferencesDialog.fillingTable(self._preferences.connectionUris)
+        
+        if preferencesDialog.exec_() == QDialog.Accepted:
             self._preferences.useLdap = preferencesDialog.useLdap
             self._preferences.ldapBaseDn = preferencesDialog.ldapBaseDn
             self._preferences.ldapServerUri = preferencesDialog.ldapServerUri
@@ -210,6 +214,9 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_AuthConnectDialog):
     def _editLocationActionSlot(self):
         """ Shows the edit Loaction dialog for more information on the location settings"""
         
-        AuthEditDialogView (self, self.uri)
         
+        editDialog = AuthEditDialogView (None, self._preferences, self.uri)
+        
+        if editDialog.exec_() == QDialog.Accepted:
+            print "good job"
         

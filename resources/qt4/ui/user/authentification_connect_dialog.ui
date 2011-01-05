@@ -71,11 +71,6 @@
           <property name="sizeAdjustPolicy">
            <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
           </property>
-          <item>
-           <property name="text">
-            <string>Saved Authentification Information or new Location</string>
-           </property>
-          </item>
          </widget>
         </item>
        </layout>
@@ -177,7 +172,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="editButton">
          <property name="text">
           <string>Edit Location</string>
          </property>

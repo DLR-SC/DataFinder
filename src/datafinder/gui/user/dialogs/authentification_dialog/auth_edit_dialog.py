@@ -41,11 +41,10 @@ Edit dialog to change authentification information such as url, username, passwo
 """
 
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from datafinder.gui.gen.user.authentification_edit_wizard_ui import Ui_editAuth
-
-from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
+#from datafinder.gui.user.dialogs.authentification_dialog.auth_pref_dialog import AuthPrefDialogView
 
 
 __version__ = "$Revision-Id:$" 
@@ -56,7 +55,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
     This dialog provides an interface to change credentials that belong to a specified connection
     """
 
-    def __init__(self, parent=None, preferences=None, currentUri = None):
+    def __init__(self,  parent=None, preferences=None, currentUri = None):
         """
         Constructor.
 
@@ -70,18 +69,18 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
         Ui_editAuth.__init__(self)
 
         self.setupUi(self)
-        
+               
         self._preferences = preferences
         self._urlChangedSlot(currentUri)
                      
     def _urlChangedSlot(self, newUri):
         """ Implementing changing of connection URI. """
         
-        uri = unicode(newUri)
-        connection = self._preferences.getConnection(uri)
+        self.currenturi = unicode(newUri)
+        connection = self._preferences.getConnection(self.currenturi)
         if not connection is None:
             self.username = connection.username
-            self.password = connection.password
+            self.authentification = connection.password
             self.savePasswordFlag = not connection.password is None
     
     def _getUrl(self):
@@ -92,7 +91,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
         @rtype: C{string}
         """
 
-        return unicode(self.serverLineEdit.lineEdit().text())
+        return unicode(self.serverLineEdit.text())
 
     def _setUrl(self, urls):
         """
@@ -102,7 +101,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
         @type urls: C{list}
         """
 
-        self.serverLineEdit.addItems(urls)
+        self.serverLineEdit.setText(urls)
 
     def _getUsername(self):
         """
@@ -184,7 +183,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
     currenturi = property(_getUrl, _setUrl)
 
     username = property(_getUsername, _setUsername)
-
+     
     authentification = property(_getAuthentification, _setAuthentification)
     
     authMechanism = property (_getAuthMechanism, _setAuthMechanism)
@@ -197,7 +196,7 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
     def _preferencesActionSlot(self):
         """ Shows the preferences dialog for connection settings. """
 
-        preferencesDialog = PreferencesDialogView(self)
+        preferencesDialog = AuthPrefDialogView(self)
 
         preferencesDialog.useLdap = self._preferences.useLdap
         preferencesDialog.ldapBaseDn = self._preferences.ldapBaseDn

@@ -6,29 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>379</width>
-    <height>272</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Edit Authentification</string>
+   <string>Edit authentification information</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>240</y>
-     <width>341</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
@@ -46,7 +30,7 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>379</width>
+      <width>456</width>
       <height>193</height>
      </rect>
     </property>
@@ -61,7 +45,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="usernameLbl">
        <property name="text">
-        <string>Username/publickey Information</string>
+        <string>User info</string>
        </property>
       </widget>
      </item>
@@ -99,12 +83,12 @@
      <item row="3" column="0">
       <widget class="QLabel" name="authLocationLbl">
        <property name="text">
-        <string>Certificate location/ Password</string>
+        <string>Credentials</string>
        </property>
       </widget>
      </item>
      <item row="3" column="2">
-      <widget class="QLineEdit" name="authLabel"/>
+      <widget class="QLineEdit" name="authLineEdit"/>
      </item>
      <item row="2" column="2">
       <widget class="QLineEdit" name="usernameLineEdit"/>
@@ -121,20 +105,6 @@
        <property name="text">
         <string>ldap</string>
        </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QComboBox" name="ldapCombo">
-       <item>
-        <property name="text">
-         <string>enabled</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>disabled</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item row="5" column="0">
@@ -168,8 +138,28 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="2">
+      <widget class="QCheckBox" name="checkBox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>240</y>
+     <width>156</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
   </widget>
  </widget>
  <resources/>
@@ -178,31 +168,31 @@
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
    <receiver>editAuth</receiver>
-   <slot>accept()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>297</x>
+     <y>251</y>
     </hint>
     <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
+     <x>199</x>
+     <y>149</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>buttonBox</sender>
-   <signal>rejected()</signal>
+   <signal>clicked(QAbstractButton*)</signal>
    <receiver>editAuth</receiver>
-   <slot>reject()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>297</x>
+     <y>251</y>
     </hint>
     <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
+     <x>199</x>
+     <y>149</y>
     </hint>
    </hints>
   </connection>

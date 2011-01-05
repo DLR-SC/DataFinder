@@ -33,8 +33,6 @@
 #THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-
-
 """
 Connect dialog for entering the url, username, password of the WebDAV Server.
 """
@@ -42,23 +40,20 @@ Connect dialog for entering the url, username, password of the WebDAV Server.
 
 from PyQt4 import QtCore, QtGui
 
-from datafinder.gui.gen.user.authentification_preferences_wizard_ui import Ui_MainWindow
+from datafinder.gui.user.dialogs.authentification_dialog.auth_edit_dialog import AuthEditDialogView
 
-from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
-#from datafinder.gui.gen.user.connect_dialog_ui import Ui_connectDialog
-
+from datafinder.gui.gen.user.authentification_preferences_wizard_ui import Ui_auth_pref_dialog
 
 __version__ = "$Revision-Id:$" 
 
 
-class AuthConnectDialogView(QtGui.QDialog, Ui_MainWindow):
+class AuthPrefDialogView(QtGui.QDialog, Ui_auth_pref_dialog):
     """
-    The connection dialog is displayed when the datafinder has to establish a connection to
-    a webdav server or any other server needing authentification information.
-    This dialog contains field for entering a url and authentification credentials.
+    The dialog is displayed, when a user displays all of his stored authentification information. 
+    Each connection can be opened to be edited.
     """
 
-    def __init__(self, parent=None, preferences=None):
+    def __init__(self, parent=None, preferences=None ):
         """
         Constructor.
 
@@ -69,138 +64,57 @@ class AuthConnectDialogView(QtGui.QDialog, Ui_MainWindow):
         """
 
         QtGui.QDialog.__init__(self, parent)
-        Ui_MainWindow.__init__(self)
-
+       
         self.setupUi(self)
         
         self._preferences = preferences
         self.connect(self.cancelButton, QtCore.SIGNAL("clicked()"), self.reject)
-        self.connect(self.connectButton, QtCore.SIGNAL("clicked()"), self.accept)
-        self.connect(self.urlComboBox, QtCore.SIGNAL("currentIndexChanged(const QString)"), self._urlChangedSlot)
-        self.connect(self.preferencesButton, QtCore.SIGNAL("clicked()"), self._preferencesActionSlot)
-        self.uri = preferences.connectionUris
-                     
-    def _urlChangedSlot(self, newUri):
-        """ Implementing changing of connection URI. """
+        self.connect(self.okButton, QtCore.SIGNAL("clicked()"), self.accept)
+        self.connect(self.editButton, QtCore.SIGNAL("clicked()"), self._editLocationActionSlot)
         
-        uri = unicode(newUri)
-        connection = self._preferences.getConnection(uri)
-        if not connection is None:
-            self.username = connection.username
-            self.password = connection.password
-            self.savePasswordFlag = not connection.password is None
+        # filling the gridbox with information about locations
+        self.fillingTable(preferences.connectionUris)
+        
+                     
+    def _editLocationActionSlot(self):
+        """ Shows the edit Loaction dialog for more information on the location settings"""
+        
+        #Getting the currentRow with its Item and providing it as information to the EditView
+        rowcount = self.authTable.currentRow()
+        item = self.authTable.item(rowcount, 0)
+        
+        
+        editDialog = AuthEditDialogView (None, self._preferences,item.text())
     
-    def _getUrl(self):
-        """
-        Returns the entered url.
-
-        @return: The url that was entered in the combobox.
-        @rtype: C{string}
-        """
-
-        return unicode(self.urlComboBox.lineEdit().text())
-
-    def _setUrl(self, urls):
-        """
-        Appends urls to the L{QtGui.QComboBox} widget.
-
-        @param urls: A list of urls that has to be added.
-        @type urls: C{list}
-        """
-
-        self.urlComboBox.addItems(urls)
-
-    def _getUsername(self):
-        """
-        Returns the username that was entered by the user.
-
-        @return: The username that was entered.
-        @rtype: C{string}
-        """
-
-        return unicode(self.usernameLineEdit.text())
-
-    def _setUsername(self, username):
-        """
-        Set a string that in the username field.
-
-        @param username: The username that has to be in the username field.
-        @type username: C{string}
-        """
-
-        self.usernameLineEdit.setText(username or "")
-
-    def _getPassword(self):
-        """
-        Returns the password from the password field.
-
-        @return: Returns the password in the password field.
-        @rtype: C{string}
-        """
-
-        return unicode(self.passwordLineEdit.text())
-
-    def _setPassword(self, password):
-        """
-        Sets the password in the password field.
-
-        @param password: The password that has to be in the password field.
-        @type password: C{string}
-        """
-
-        self.passwordLineEdit.setText(password or "")
-
-    def _getSavePassword(self):
-        """
-        Returns true when the save password L{QtGui.QCheckBox} is checked else false.
-
-        @return: True when the L{QtGui.QCheckBox} is checked else False.
-        @rtype: C{boolean}
-        """
-
-        return self.savePasswordCheckBox.isChecked()
-
-    def _setSavePassword(self, checked):
-        """
-        Set the state of the save password L{QtGui.QCheckBox}.
-
-        @param checked: True when the L{QtGui.QCheckBox} has to be checked else False.
-        @type checked: C{boolean}
-        """
-
-        self.savePasswordCheckBox.setChecked(checked)
-
-    def _setShowUrl(self, show):
-        """
-        Show or hide the server groupbox by the given show parameter.
-
-        @param show: True when the server groupbox has to be shown else False.
-        @type show: C{boolean}
-        """
-
-        self.serverGroupBox.setHidden(not show)
-
-    uri = property(_getUrl, _setUrl)
-
-    username = property(_getUsername, _setUsername)
-
-    password = property(_getPassword, _setPassword)
-
-    savePasswordFlag = property(_getSavePassword, _setSavePassword)
-
-    showUrl = property(fset=_setShowUrl)
+        if editDialog.exec_() == QtGui.QDialog.Accepted:
+            print "good job"   
+        
+        
+    def fillingTable(self, locations = None): 
+        """ fills the table widget with information about authentification information """
+        rowcount = 0
+        
+        if locations:
+            for location in locations:
+                #itemlocation = QtGui.QTableWidgetItem.setText(location)
+                connection = self._preferences.getConnection(location)
+                self.authTable.setItem(rowcount, 0, self.getNewTableWidget(location))
+                # adding authmechanisminformation 
+                # self.authTable.setItem(rowcount, 1, connection)
+                self.authTable.setItem(rowcount, 2, self.getNewTableWidget(connection.username))
+                self.authTable.setItem(rowcount, 3, self.getNewTableWidget(connection.password))
+                # Adding ldap information 
+                # self.authTable.setItem(rowcount, 4, connection)
+                # Adding comment information 
+                # self.authTable.setItem(rowcount, 5, connection)
+                rowcount +1            
     
-    def _preferencesActionSlot(self):
-        """ Shows the preferences dialog for connection settings. """
-
-        preferencesDialog = PreferencesDialogView(self)
-
-        preferencesDialog.useLdap = self._preferences.useLdap
-        preferencesDialog.ldapBaseDn = self._preferences.ldapBaseDn
-        preferencesDialog.ldapServerUri = self._preferences.ldapServerUri
-
-        if preferencesDialog.exec_() == QtGui.QDialog.Accepted:
-            self._preferences.useLdap = preferencesDialog.useLdap
-            self._preferences.ldapBaseDn = preferencesDialog.ldapBaseDn
-            self._preferences.ldapServerUri = preferencesDialog.ldapServerUri
-            self._preferences.store()
+    
+    def getNewTableWidget(self, tableString):
+        widgetItem = QtGui.QTableWidgetItem()
+        widgetItem.setText(tableString)
+        
+        return widgetItem
+        
+        
+        
