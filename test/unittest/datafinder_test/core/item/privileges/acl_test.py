@@ -146,18 +146,31 @@ class AccessControlListTestCase(unittest.TestCase):
     def testComparison(self):
         """ Tests the comparison of two instances. """
     
+        # checking comparison with self
         self.assertEquals(self._acl, self._acl)
         
+        # checking comparison of different empty ACLs
         anotherAcl = acl.AccessControlList()
         self.assertEquals(self._acl, anotherAcl)
         
+        # adding a new principal to only one ACL should make them not equal
         aPrincipal = SimpleMock(identifier="aPrincipal")
         anotherAcl.grantPrivilege(aPrincipal, self._SUPPORTED_PRIVILEGE)
         self.assertNotEquals(self._acl, anotherAcl)
         
+        # making them equal again
         self._acl.grantPrivilege(aPrincipal, self._SUPPORTED_PRIVILEGE)
         self.assertEquals(self._acl, anotherAcl)
         
+        # ACLs with different principal order should be not equal
+        anotherPrincipal = SimpleMock(identifier="anotherPrincipal")
+        self._acl.grantPrivilege(anotherPrincipal, self._SUPPORTED_PRIVILEGE)
+        anotherAcl.grantPrivilege(anotherPrincipal, self._SUPPORTED_PRIVILEGE)
+        self.assertEquals(self._acl, anotherAcl)
+        self._acl.setIndex(aPrincipal, 1)
+        self.assertNotEquals(self._acl, anotherAcl)
+        
+        # checking comparison of a copy
         self.assertEquals(self._acl, deepcopy(self._acl))
 
     def testContentAccessLevel(self):

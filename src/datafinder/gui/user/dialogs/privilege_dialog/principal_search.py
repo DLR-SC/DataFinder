@@ -125,6 +125,7 @@ class PrincipalSearchController(QObject):
             items.append(self._model.item(index.row()))
             
         self.emit(SIGNAL(self.ADD_PRINCIPAL_SIGNAL), items)
+        self._resultWidget.selectionModel().clear()
 
     def _selectionChangedSlot(self, _=None, __=None):
         """ Enables the add principal button if there are selected items. """

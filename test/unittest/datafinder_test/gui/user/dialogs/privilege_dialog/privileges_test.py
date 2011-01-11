@@ -47,13 +47,13 @@ import unittest
 import sys
 
 from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QApplication, QItemSelectionModel
+from PyQt4.QtGui import QApplication
 
-from datafinder.core.item.privileges.acl import AccessControlList
 from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.core.item.privileges.privilege import READ_ONLY_ACCESS_LEVEL, NONE_ACCESS_LEVEL
 from datafinder.gui.user.dialogs.privilege_dialog.items import PrincipalItem
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
+from datafinder_test.gui.user.dialogs.privilege_dialog.main import ItemMock
 
 
 __version__ = "$Revision-Id:$" 
@@ -69,7 +69,7 @@ class PrivilegeControllerTest(unittest.TestCase):
         """ Creates the test fixture. """
         
         self._privilegeDialog = PrivilegeDialog(None)
-        self._privilegeDialog.item = _ItemMock()
+        self._privilegeDialog.item = ItemMock(None)
         self._principalController = self._privilegeDialog._principalSearchController
         self._model = self._privilegeDialog._privilegeModel
         self._controller = self._privilegeDialog._privilegeController
@@ -80,8 +80,7 @@ class PrivilegeControllerTest(unittest.TestCase):
         # Tests adding of three principals whereby one already exists
         self.assertEquals(self._model.rowCount(), 1)
         self.assertEquals(self._controller._applyButton.isEnabled(), False)
-        self._principalController.emit(SIGNAL(self._principalController.ADD_PRINCIPAL_SIGNAL), self._testPrincipalItems)
-        self.assertEquals(self._model.rowCount(), 3)
+        self._addTestPrincipals()
         for count in range(3):
             item = self._model.itemFromIndex(self._model.index(2, count))
             if count == 0:
@@ -93,7 +92,13 @@ class PrivilegeControllerTest(unittest.TestCase):
         self.assertEquals(self._controller._applyButton.isEnabled(), True)
 
         # Ensuring that there are no duplicate principal entries
+        self._addTestPrincipals()
+
+    def _addTestPrincipals(self):
+        """ Adds three test principals. """
+
         self._principalController.emit(SIGNAL(self._principalController.ADD_PRINCIPAL_SIGNAL), self._testPrincipalItems)
+        self.assertEquals(self._controller._applyButton.isEnabled(), True)
         self.assertEquals(self._model.rowCount(), 3)
 
     def testRemovePrincipal(self):
@@ -102,9 +107,7 @@ class PrivilegeControllerTest(unittest.TestCase):
         # Testing removal with no selection
         self.assertEquals(self._model.rowCount(), 1)
         self.assertEquals(self._controller._applyButton.isEnabled(), False)
-        self._controller._removeButton.click()
-        self.assertEquals(self._model.rowCount(), 1)
-        self.assertEquals(self._controller._applyButton.isEnabled(), False)
+        self.assertEquals(self._controller._removeButton.isEnabled(), False)
         
         # Testing removal of one principal
         self._removeRow(0)
@@ -113,9 +116,7 @@ class PrivilegeControllerTest(unittest.TestCase):
         self.assertEquals(len(self._model._acl.principals), 0)
         
         # Adding three principals
-        self._principalController.emit(SIGNAL(self._principalController.ADD_PRINCIPAL_SIGNAL), self._testPrincipalItems)
-        self.assertEquals(self._model.rowCount(), 3)
-        self.assertEquals(self._controller._applyButton.isEnabled(), True)
+        self._addTestPrincipals()
 
         # Removing the last two so the start state is reached
         self._removeRow(2)
@@ -126,17 +127,89 @@ class PrivilegeControllerTest(unittest.TestCase):
     def _removeRow(self, row):
         """ Removes a row. """
         
-        index = self._model.index(row, 0)
-        self._controller._privilegeWidget.selectionModel().select(index, QItemSelectionModel.SelectCurrent)
+        self._selectRow(row)
         self._controller._removeButton.click()
-
-
-class _ItemMock(object):
-    """ Used to mock an item and its ACL. """
     
-    def __init__(self):
-        """ Constructor. """
+    def _selectRow(self, row):
+        """ Selects the given row. """
+
+        self._controller._privilegeWidget.selectRow(row)
+
+    def testButtonEnabledStates(self):
+        """ Tests the enabled state of the controlled buttons. """
         
-        self.path = "/test/item/test.pdf"
-        self.acl = AccessControlList()
-        self.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[0])
+        # Checks the initial button enabling state
+        self.assertEquals(self._model.rowCount(), 1)
+        self.assertEquals(self._controller._applyButton.isEnabled(), False)
+        self.assertEquals(self._controller._removeButton.isEnabled(), False)
+        self.assertEquals(self._controller._upButton.isEnabled(), False)
+        self.assertEquals(self._controller._downButton.isEnabled(), False)
+        
+        # Adds and selects different entries and checks the enabling state again
+        self._addTestPrincipals()
+        self.assertEquals(self._controller._removeButton.isEnabled(), False)
+        self.assertEquals(self._controller._upButton.isEnabled(), False)
+        self.assertEquals(self._controller._downButton.isEnabled(), False)
+        self._selectRow(0)
+        self.assertEquals(self._controller._upButton.isEnabled(), False)
+        self.assertEquals(self._controller._downButton.isEnabled(), True)
+        self._selectRow(2)
+        self.assertEquals(self._controller._upButton.isEnabled(), True)
+        self.assertEquals(self._controller._downButton.isEnabled(), False)
+        self._selectRow(1)
+        self.assertEquals(self._controller._upButton.isEnabled(), True)
+        self.assertEquals(self._controller._downButton.isEnabled(), True)
+
+        # Creates the initial state and checks again the enabling state of buttons
+        self._removeRow(2)
+        self._removeRow(1)
+        self.assertEquals(self._controller._applyButton.isEnabled(), False)
+        self.assertEquals(self._controller._removeButton.isEnabled(), False)
+        
+    def testChangePosition(self):
+        """ Tests the changing of principal positions. """
+        
+        # Adding three principals and selecting the second entry 
+        self._addTestPrincipals()
+        self._controller._applyButton.click()
+        self._waitUntilFinished()
+        self.assertFalse(self._model.isDirty)
+        principal = SPECIAL_PRINCIPALS[1]
+        self._selectRow(1)
+        
+        # Move the second entry up and down
+        self._controller._upButton.click()
+        self.assertEquals(self._model.item(0).principal, principal)
+        self.assertTrue(self._model.isDirty)
+        
+        self._controller._downButton.click()
+        self.assertEquals(self._model.item(1).principal, principal)
+        self.assertFalse(self._model.isDirty)
+        
+        self._controller._downButton.click()
+        self.assertEquals(self._model.item(2).principal, principal)
+        self.assertTrue(self._model.isDirty)
+        
+    def _waitUntilFinished(self):
+        """ Helper function which waits until the worker thread has finished. """
+
+        while self._controller._workerThread.isRunning():
+            pass
+        
+    def testApplySuccess(self):
+        """ Tests the successful apply behavior. """
+        
+        self._addTestPrincipals()
+        self._privilegeDialog.item.error = None
+        self._controller._applyButton.click()
+        self._waitUntilFinished()
+        self.assertFalse(self._model.isDirty)
+
+    def testApplyError(self):
+        """ Tests apply error handling. """
+        
+        self._privilegeDialog.item = ItemMock()
+        self._addTestPrincipals()
+        self._controller._applyButton.click()
+        self._waitUntilFinished()
+        self.assertTrue(self._model.isDirty)

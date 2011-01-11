@@ -311,6 +311,10 @@ class AccessControlList(object):
         
         @param principal: The user/group whose position shall be set.
         @type principal: L{Principal<datafinder.core.item.privileges.principal.Principal>}
+        @param position: The new positional index.
+        @type position: C{int}
+        
+        @raise ValueError: If the principal does not exist.
         """
         
         self._principalOrder.remove(principal)
@@ -365,13 +369,13 @@ class AccessControlList(object):
 
     def __cmp__(self, other):
         """ Compares two ACLs. """
-        
+        # TODO: ensure that the order is correct
         result = 0
         if len(self.principals) != len(other.principals):
             result = 1
         else:
-            for principal in self.principals:
-                if not principal in other.principals:
+            for index, principal in enumerate(self.principals):
+                if principal != other.principals[index]:
                     result = 1
                     break
                 if self.getGrantedPrivileges(principal) != other.getGrantedPrivileges(principal) \

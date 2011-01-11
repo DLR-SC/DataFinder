@@ -43,9 +43,10 @@ Implements privilege handling.
 
 from copy import deepcopy
 
-from PyQt4.QtGui import QStandardItemModel, QDialogButtonBox
+from PyQt4.QtGui import QStandardItemModel, QDialogButtonBox, QMessageBox
 from PyQt4.QtCore import QObject, SIGNAL
 
+from datafinder.gui.user.common.util import startNewQtThread
 from datafinder.gui.user.dialogs.privilege_dialog.items import AccessLevelItem, PrincipalItem
 
 
@@ -66,11 +67,30 @@ class PrivilegeController(QObject):
         self._downButton = privilegeDialog.downButton
         self._privilegeWidget = privilegeDialog.privilegeTable
         self._model = model
+        self._workerThread = None
+        self._messageBox = QMessageBox(QMessageBox.Critical, "Error during privilege storage", "", 
+                                       QMessageBox.Ok, privilegeDialog)
+        
         
         self._privilegeWidget.setModel(self._model)
+        self._setButtonEnabledState(False)
         
+        self.connect(self._applyButton, SIGNAL("clicked()"), self._applySlot)
         self.connect(self._removeButton, SIGNAL("clicked()"), self._removePrincipalsSlot)
+        self.connect(self._upButton, SIGNAL("clicked()"), self._createMoveRowSlot(-1))
+        self.connect(self._downButton, SIGNAL("clicked()"), self._createMoveRowSlot(1))
+        self.connect(self._privilegeWidget.selectionModel(), 
+                     SIGNAL("selectionChanged(QItemSelection, QItemSelection)"),
+                     self._selectionChangedSlot)
 
+    def _setButtonEnabledState(self, enabled):
+        """ Sets the enabled state for all controlled buttons. """
+        
+        self._applyButton.setEnabled(enabled)
+        self._removeButton.setEnabled(enabled)
+        self._upButton.setEnabled(enabled)
+        self._downButton.setEnabled(enabled)
+         
     def _setItem(self, item):
         """ Sets the item. """
         
@@ -87,19 +107,68 @@ class PrivilegeController(QObject):
         self._model.addPrincipals(principals)
         self._applyButton.setEnabled(self._model.isDirty)
         
+    def _applySlot(self):
+        """ Initializes the ACL update in separated thread. """
+        
+        self._setButtonEnabledState(False)
+        self._privilegeWidget.setEnabled(False)
+        self._workerThread = startNewQtThread(self._model.store, self._applyCallback)
+        
+    def _applyCallback(self):
+        """ Checks the thread result and enables the dialog elements again. """
+        
+        if not self._workerThread.error is None:
+            self._messageBox.setText(self._workerThread.error.message)
+            self._messageBox.show()
+        
+        self._applyButton.setEnabled(self._model.isDirty)
+        self._privilegeWidget.setEnabled(True)
+        self._privilegeWidget.selectionModel().clearSelection()
+        
     def _removePrincipalsSlot(self):
         """ Remove the selected principals. """
         
+        self._model.removePrincipals(self._determinePrincipalItems())
+        self._applyButton.setEnabled(self._model.isDirty)
+        
+    def _createMoveRowSlot(self, posDiff):
+        """ Creates a slot used for moving a whole principal row. """
+        
+        def _moveRowSlot():
+            """ Handles the row moving. """
+            
+            principalItem = self._determinePrincipalItems()[0]
+            newRow = principalItem.row() + posDiff
+            self._model.movePrincipalPosition(principalItem, newRow)
+            self._applyButton.setEnabled(self._model.isDirty)
+            self._privilegeWidget.selectRow(newRow)
+        return _moveRowSlot
+        
+    def _determinePrincipalItems(self):
+        """ Determines the selected principal items. """
+        
         principals = list()
-        rows = list()  # to avoid multiple entries
+        rows = list()  # used to check for / avoid multiple entries
         for index in self._privilegeWidget.selectedIndexes():
             item = self._model.item(index.row(), 0)
             if not index.row() in rows:
                 principals.append(item)
                 rows.append(index.row())
+        return principals
+        
+    def _selectionChangedSlot(self, _, __):
+        """ Handles button enabling states in accordance to the selected items. """
+        
+        principals = self._determinePrincipalItems()
+        self._removeButton.setEnabled(True)
+        self._upButton.setEnabled(False)
+        self._downButton.setEnabled(False)
             
-        self._model.removePrincipals(principals)
-        self._applyButton.setEnabled(self._model.isDirty)
+        if len(principals) == 1:
+            self._upButton.setEnabled(principals[0].row() > 0)
+            self._downButton.setEnabled(principals[0].row() < self._model.rowCount() - 1)
+        elif len(principals) == 0:
+            self._removeButton.setEnabled(False)
 
         
 class PrivilegeModel(QStandardItemModel):
@@ -172,3 +241,24 @@ class PrivilegeModel(QStandardItemModel):
         for principalItem in principalItems:
             self._acl.clearPrivileges(principalItem.principal)
             self.removeRow(principalItem.row())
+            
+    def movePrincipalPosition(self, principalItem, newRow):
+        """
+        Moves the principal row to the new position.
+        
+        @param principalItem: Principal to move.
+        @type principalItem: L{PrincipalItem<datafinder.gui.user.
+        dialogs.privilege_dialog.items.PrincipalItem>}
+        @param newRow: The new row position.
+        @type newRow: C{int}
+        """
+        
+        self._acl.setIndex(principalItem.principal, newRow)
+        items = self.takeRow(principalItem.row())
+        self.insertRow(newRow, items)
+
+    def store(self):
+        """ Stores the current ACL state. """
+        
+        self._item.updateAcl(self._acl)
+        self._acl = deepcopy(self._acl)

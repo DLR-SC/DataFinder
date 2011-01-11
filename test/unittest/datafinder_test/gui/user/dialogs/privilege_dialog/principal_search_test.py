@@ -49,10 +49,9 @@ import sys
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QApplication, QItemSelectionModel
 
-from datafinder.core.error import CoreError
-from datafinder.core.item.privileges.acl import AccessControlList
 from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
+from datafinder_test.gui.user.dialogs.privilege_dialog.main import RepositoryMock, ItemMock
 
 
 __version__ = "$Revision-Id:$" 
@@ -68,9 +67,9 @@ class PrincipalSearchTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates the test setup. """
         
-        self._repositoryMock = _RepositoryMock()
+        self._repositoryMock = RepositoryMock()
         self._privilegeDialog = PrivilegeDialog(self._repositoryMock)
-        self._privilegeDialog.item = _ItemMock()
+        self._privilegeDialog.item = ItemMock()
         self._model = self._privilegeDialog._principalSearchModel
         self._controller = self._privilegeDialog._principalSearchController
 
@@ -137,29 +136,4 @@ class PrincipalSearchTestCase(unittest.TestCase):
         self._controller._resultWidget.selectionModel().select(index, QItemSelectionModel.SelectCurrent)
         self._controller._addPrincipalButton.click()
         self.assertEquals(len(self._items), 1)
-
-    
-class _RepositoryMock(object):
-    """ Mocks the principal search functionality. """
-    
-    error = False
-    searchMode = None
-    
-    def searchPrincipal(self, _, searchMode):
-        """ Raises an error or returns all special principals. """
-
-        self.searchMode = searchMode
-        if self.error:
-            raise CoreError("")
-        return SPECIAL_PRINCIPALS
-
-
-class _ItemMock(object):
-    """ Used to mock an item and its ACL. """
-    
-    def __init__(self):
-        """ Constructor. """
-        
-        self.path = "/test/item/test.pdf"
-        self.acl = AccessControlList()
-        self.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[0])
+        self.assertEquals(len(self._controller._resultWidget.selectedIndexes()), 0)

@@ -36,63 +36,8 @@
 
 
 """ 
-Allows simplified start of the privilege dialog.
+Contains tests of the authentication dialog.
 """
 
 
-import sys
-
-from PyQt4.QtGui import QApplication
-
-from datafinder.core.error import CoreError
-from datafinder.core.item.privileges.acl import AccessControlList
-from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
-from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
-
-
 __version__ = "$Revision-Id:$" 
-
-
-class RepositoryMock(object):
-    """ Mocks the principal search functionality. """
-    
-    error = False
-    searchMode = None
-    
-    def searchPrincipal(self, _, searchMode):
-        """ Raises an error or returns all special principals. """
-
-        self.searchMode = searchMode
-        if self.error:
-            raise CoreError("")
-        return SPECIAL_PRINCIPALS
-
-
-class ItemMock(object):
-    """ Used to mock an item and its ACL. """
-    
-    def __init__(self, error=CoreError("")):
-        """ Constructor. """
-        
-        self.name = "test.pdf"
-        self.path = "/test/item/test.pdf"
-        self.acl = AccessControlList()
-        self.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[0])
-        self.error = error
-        
-    def updateAcl(self, acl):
-        """ Mocks update ACL method and 
-        just set the given ACL to the current one. """
-        
-        if not self.error is None:
-            raise self.error
-        else:
-            self.acl = acl
-
-
-if __name__ == "__main__":
-    application = QApplication(sys.argv)
-    dialog = PrivilegeDialog(RepositoryMock())
-    dialog.item = ItemMock(None)
-    dialog.show()
-    sys.exit(application.exec_())
