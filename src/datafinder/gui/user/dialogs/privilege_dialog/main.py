@@ -42,7 +42,7 @@ Implements the privilege dialog.
 
 
 from PyQt4.QtCore import SIGNAL
-from PyQt4.QtGui import QDialog
+from PyQt4.QtGui import QDialog, QDialogButtonBox
 
 from datafinder.gui.user.dialogs.privilege_dialog.principal_search import PrincipalSearchController, \
                                                                           PrincipalSearchModel
@@ -80,6 +80,8 @@ class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
         self.connect(self._principalSearchController, 
                      SIGNAL(self._principalSearchController.ADD_PRINCIPAL_SIGNAL),
                      self._privilegeController.addPrincipals)
+        self.connect(self.buttonBox.button(QDialogButtonBox.Ok),
+                     SIGNAL("clicked()"), self._privilegeController.applySlot)
 
     def _setItem(self, item):
         """ Setter for displayed item. """

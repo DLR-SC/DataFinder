@@ -116,9 +116,10 @@ class PrincipalSearchTestCase(unittest.TestCase):
     def _waitUntilFinished(self):
         """ Helper function which waits until the worker thread has finished. """
 
-        while self._controller._workerThread.isRunning():
+        while not self._controller._workerThread.isFinished():
             pass
-        
+        self._controller._searchCallback()
+
     def testSearchError(self):
         """ Tests the error handling of the search. """
         

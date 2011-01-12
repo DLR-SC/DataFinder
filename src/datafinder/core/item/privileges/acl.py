@@ -251,7 +251,7 @@ class AccessControlList(object):
         
         self._setAccessLevel(principal, level, self._PROPERTIES_PRIVS)
 
-    def propertiestAccessLevel(self, principal):
+    def propertiesAccessLevel(self, principal):
         """ Returns the access level of the principal
         concerning the item properties.
         

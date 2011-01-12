@@ -113,6 +113,8 @@ class PrincipalSearchController(QObject):
         if not self._workerThread.error is None:
             self._messageBox.setText(self._workerThread.error.message)
             self._messageBox.show()
+        else:
+            self._model.enableCurrentResult()
         self._searchButton.setEnabled(True)
         self._resultWidget.setEnabled(True)
         self._selectionChangedSlot()
@@ -146,8 +148,8 @@ class PrincipalSearchModel(QStandardItemModel):
         QStandardItemModel.__init__(self)
         
         self._model = model
-        
-        self._appendRows(SPECIAL_PRINCIPALS)
+        self._currentResult = SPECIAL_PRINCIPALS
+        self.enableCurrentResult()
         
     def performPrincipalSearch(self, pattern, searchMode):
         """ Performs the search. 
@@ -158,13 +160,15 @@ class PrincipalSearchModel(QStandardItemModel):
         @type searchMode: C{int}
         """
 
-        principals = SPECIAL_PRINCIPALS + self._model.searchPrincipal(pattern, searchMode)
-        self._appendRows(principals)
+        self._currentResult = SPECIAL_PRINCIPALS + self._model.searchPrincipal(pattern, searchMode)
         
-    def _appendRows(self, principals):
-        """ Appends the principals to the internal model and clears it in advance. """
+    def enableCurrentResult(self):
+        """ Activates the current search. As the search is done in a separated thread which is
+        controlled by the controller component we have to provide this explicit activation function.
+        Otherwise GUI related updates would be performed in the worker thread and this leads to 
+        application crashed. """
         
         self.clear()
-        items = [PrincipalItem(principal) for principal in principals]
+        items = [PrincipalItem(principal) for principal in self._currentResult]
         for item in items:
             self.appendRow(item)

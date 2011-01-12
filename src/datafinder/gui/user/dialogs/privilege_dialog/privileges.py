@@ -43,7 +43,7 @@ Implements privilege handling.
 
 from copy import deepcopy
 
-from PyQt4.QtGui import QStandardItemModel, QDialogButtonBox, QMessageBox
+from PyQt4.QtGui import QStandardItemModel, QDialogButtonBox, QMessageBox, QStyledItemDelegate
 from PyQt4.QtCore import QObject, SIGNAL
 
 from datafinder.gui.user.common.util import startNewQtThread
@@ -74,8 +74,9 @@ class PrivilegeController(QObject):
         
         self._privilegeWidget.setModel(self._model)
         self._setButtonEnabledState(False)
+        self._privilegeWidget.setItemDelegate(_AccessLevelItemDelegate(self, self._model))
         
-        self.connect(self._applyButton, SIGNAL("clicked()"), self._applySlot)
+        self.connect(self._applyButton, SIGNAL("clicked()"), self.applySlot)
         self.connect(self._removeButton, SIGNAL("clicked()"), self._removePrincipalsSlot)
         self.connect(self._upButton, SIGNAL("clicked()"), self._createMoveRowSlot(-1))
         self.connect(self._downButton, SIGNAL("clicked()"), self._createMoveRowSlot(1))
@@ -91,6 +92,12 @@ class PrivilegeController(QObject):
         self._upButton.setEnabled(enabled)
         self._downButton.setEnabled(enabled)
          
+    def checkApplyEnabledState(self):
+        """ checks whether the apply button has to be activated which is only
+        required if the model contains unsaved changes. """
+        
+        self._applyButton.setEnabled(self._model.isDirty)
+
     def _setItem(self, item):
         """ Sets the item. """
         
@@ -105,14 +112,16 @@ class PrivilegeController(QObject):
         """
         
         self._model.addPrincipals(principals)
-        self._applyButton.setEnabled(self._model.isDirty)
+        self.checkApplyEnabledState()
         
-    def _applySlot(self):
-        """ Initializes the ACL update in separated thread. """
+    def applySlot(self):
+        """ Initializes the ACL update in separated thread. 
+        This is only performed if the model contains unsaved changes. """
         
-        self._setButtonEnabledState(False)
-        self._privilegeWidget.setEnabled(False)
-        self._workerThread = startNewQtThread(self._model.store, self._applyCallback)
+        if self._model.isDirty:
+            self._setButtonEnabledState(False)
+            self._privilegeWidget.setEnabled(False)
+            self._workerThread = startNewQtThread(self._model.store, self._applyCallback)
         
     def _applyCallback(self):
         """ Checks the thread result and enables the dialog elements again. """
@@ -121,7 +130,6 @@ class PrivilegeController(QObject):
             self._messageBox.setText(self._workerThread.error.message)
             self._messageBox.show()
         
-        self._applyButton.setEnabled(self._model.isDirty)
         self._privilegeWidget.setEnabled(True)
         self._privilegeWidget.selectionModel().clearSelection()
         
@@ -129,7 +137,7 @@ class PrivilegeController(QObject):
         """ Remove the selected principals. """
         
         self._model.removePrincipals(self._determinePrincipalItems())
-        self._applyButton.setEnabled(self._model.isDirty)
+        self.checkApplyEnabledState()
         
     def _createMoveRowSlot(self, posDiff):
         """ Creates a slot used for moving a whole principal row. """
@@ -140,7 +148,7 @@ class PrivilegeController(QObject):
             principalItem = self._determinePrincipalItems()[0]
             newRow = principalItem.row() + posDiff
             self._model.movePrincipalPosition(principalItem, newRow)
-            self._applyButton.setEnabled(self._model.isDirty)
+            self.checkApplyEnabledState()
             self._privilegeWidget.selectRow(newRow)
         return _moveRowSlot
         
@@ -169,6 +177,37 @@ class PrivilegeController(QObject):
             self._downButton.setEnabled(principals[0].row() < self._model.rowCount() - 1)
         elif len(principals) == 0:
             self._removeButton.setEnabled(False)
+
+
+class _AccessLevelItemDelegate(QStyledItemDelegate):
+    """ Implements an item delegate to provide a suitable editor (combination box)
+    for changing access level values. """
+
+    def __init__(self, controller, model, parent=None):
+        """
+        Constructor.
+        """
+
+        QStyledItemDelegate.__init__(self, parent)
+        self._controller = controller
+        self._model = model
+        
+    def createEditor(self, parent, _, index):
+        """ @see: L{createEditor<PyQt4.QtGui.QItemDelegate.createEditor>} """
+
+        if index.isValid():
+            item = self._model.item(index.row(), index.column())
+            if index.column() > 0:
+                return item.createEditor(parent)
+            
+    def setModelData(self, editor, _, index):
+        """ @see: L{setModelData<PyQt4.QtGui.QItemDelegate.setModelData>} """
+        
+        if index.isValid():
+            selectedAccessLevel = editor.currentIndex()
+            item = self._model.item(index.row(), index.column())
+            item.changeValue(selectedAccessLevel)
+            self._controller.checkApplyEnabledState()
 
         
 class PrivilegeModel(QStandardItemModel):
@@ -224,9 +263,12 @@ class PrivilegeModel(QStandardItemModel):
         """ Adds the principal and its access levels to the table view. """
        
         row = [PrincipalItem(principal)]
-        row.append(AccessLevelItem(self._acl.contentAccessLevel(principal)))
-        row.append(AccessLevelItem(self._acl.propertiestAccessLevel(principal)))
-        row.append(AccessLevelItem(self._acl.aministrationAccessLevel(principal)))
+        row.append(AccessLevelItem(self._acl.contentAccessLevel(principal), 
+                                   principal, self._acl.setContentAccessLevel))
+        row.append(AccessLevelItem(self._acl.propertiesAccessLevel(principal), 
+                                   principal, self._acl.setPropertiesAccessLevel))
+        row.append(AccessLevelItem(self._acl.aministrationAccessLevel(principal), 
+                                   principal, self._acl.setAministrationAccessLevel))
         self.appendRow(row)
         
     def removePrincipals(self, principalItems):

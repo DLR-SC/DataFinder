@@ -179,7 +179,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setContentAccessLevel(self._principalMock, NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
@@ -187,7 +187,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setContentAccessLevel(self._principalMock, READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
@@ -195,7 +195,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setContentAccessLevel(self._principalMock, FULL_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           FULL_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
@@ -206,7 +206,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setPropertiesAccessLevel(self._principalMock, NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
@@ -214,7 +214,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setPropertiesAccessLevel(self._principalMock, READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
@@ -222,7 +222,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setPropertiesAccessLevel(self._principalMock, FULL_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           FULL_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
@@ -233,7 +233,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setAministrationAccessLevel(self._principalMock, NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
@@ -241,7 +241,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setAministrationAccessLevel(self._principalMock, READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
@@ -249,7 +249,7 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.setAministrationAccessLevel(self._principalMock, FULL_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
                           FULL_ACCESS_LEVEL)
@@ -291,5 +291,5 @@ class AccessControlListTestCase(unittest.TestCase):
         
         self._acl.addDefaultPrincipal(self._principalMock)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock), READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.propertiestAccessLevel(self._principalMock), READ_ONLY_ACCESS_LEVEL)
+        self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock), READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock), NONE_ACCESS_LEVEL)

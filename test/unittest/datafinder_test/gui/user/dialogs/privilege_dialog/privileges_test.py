@@ -86,9 +86,9 @@ class PrivilegeControllerTest(unittest.TestCase):
             if count == 0:
                 self.assertEquals(item.principal, SPECIAL_PRINCIPALS[2])
             elif count == 1 or count == 2:
-                self.assertEquals(item.level, READ_ONLY_ACCESS_LEVEL)
+                self.assertEquals(item._level, READ_ONLY_ACCESS_LEVEL)
             else:
-                self.assertEquals(item.level, NONE_ACCESS_LEVEL)
+                self.assertEquals(item._level, NONE_ACCESS_LEVEL)
         self.assertEquals(self._controller._applyButton.isEnabled(), True)
 
         # Ensuring that there are no duplicate principal entries
@@ -195,7 +195,8 @@ class PrivilegeControllerTest(unittest.TestCase):
 
         while self._controller._workerThread.isRunning():
             pass
-        
+        self._controller._applyCallback()
+
     def testApplySuccess(self):
         """ Tests the successful apply behavior. """
         
@@ -213,3 +214,26 @@ class PrivilegeControllerTest(unittest.TestCase):
         self._controller._applyButton.click()
         self._waitUntilFinished()
         self.assertTrue(self._model.isDirty)
+
+    def testEditAccessLevel(self):
+        """ Tests the privilege editing functionality. """
+        
+        itemDelegate = self._controller._privilegeWidget.itemDelegate()
+        
+        # Nothing should happen when trying to edit the principal
+        index = self._model.index(0, 0)
+        editor = itemDelegate.createEditor(None, None, index)
+        self.assertEquals(editor, None)
+        
+        # Checking an invalid index
+        index = self._model.index(10, 200)
+        editor = itemDelegate.createEditor(None, None, index)
+        self.assertEquals(editor, None)
+        
+        # Checking the three access levels
+        for column in range(1, 4):
+            index = self._model.index(0, column)
+            editor = itemDelegate.createEditor(None, None, index)
+            editor.setCurrentIndex(0)
+            itemDelegate.setModelData(editor, None, index)
+            self.assertEquals(self._model.item(0, column)._level.displayName, unicode(editor.currentText()))
