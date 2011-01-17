@@ -86,9 +86,9 @@ class PrivilegeControllerTest(unittest.TestCase):
             if count == 0:
                 self.assertEquals(item.principal, SPECIAL_PRINCIPALS[2])
             elif count == 1 or count == 2:
-                self.assertEquals(item._level, READ_ONLY_ACCESS_LEVEL)
+                self.assertEquals(unicode(item.text()), READ_ONLY_ACCESS_LEVEL.displayName)
             else:
-                self.assertEquals(item._level, NONE_ACCESS_LEVEL)
+                self.assertEquals(unicode(item.text()), NONE_ACCESS_LEVEL.displayName)
         self.assertEquals(self._controller._applyButton.isEnabled(), True)
 
         # Ensuring that there are no duplicate principal entries
@@ -236,4 +236,4 @@ class PrivilegeControllerTest(unittest.TestCase):
             editor = itemDelegate.createEditor(None, None, index)
             editor.setCurrentIndex(0)
             itemDelegate.setModelData(editor, None, index)
-            self.assertEquals(self._model.item(0, column)._level.displayName, unicode(editor.currentText()))
+            self.assertEquals(self._model.item(0, column).text(), editor.currentText())

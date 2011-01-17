@@ -115,7 +115,7 @@ class AccessControlList(object):
             if setDefaultAccessLevels:
                 self.setContentAccessLevel(principal, privilege.READ_ONLY_ACCESS_LEVEL)
                 self.setPropertiesAccessLevel(principal, privilege.READ_ONLY_ACCESS_LEVEL)
-                self.setAministrationAccessLevel(principal, privilege.NONE_ACCESS_LEVEL)
+                self.setAdministrationAccessLevel(principal, privilege.NONE_ACCESS_LEVEL)
             
     def denyPrivilege(self, principal, priv):
         """ 
@@ -266,7 +266,7 @@ class AccessControlList(object):
         
         return self._getAccessLevel(principal, self._PROPERTIES_PRIVS)
     
-    def setAministrationAccessLevel(self, principal, level):
+    def setAdministrationAccessLevel(self, principal, level):
         """ Sets the access level of the principal
         concerning the item administration.
         
@@ -278,7 +278,7 @@ class AccessControlList(object):
         
         self._setAccessLevel(principal, level, self._ADMIN_PRIVS)
 
-    def aministrationAccessLevel(self, principal):
+    def administrationAccessLevel(self, principal):
         """ Returns the access level of the principal
         concerning the item administration.
         

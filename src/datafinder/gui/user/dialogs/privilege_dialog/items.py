@@ -41,12 +41,9 @@ Provides QStandardItem implementations for principals and privileges.
 """
 
 
-import copy
-
 from PyQt4.QtGui import QIcon, QStandardItem, QComboBox
 
 from datafinder.core.item.privileges.principal import USER_PRINCIPAL_TYPE
-from datafinder.core.item.privileges.privilege import ACCESS_LEVELS
 
 
 __version__ = "$Revision-Id:$" 
@@ -90,26 +87,19 @@ class AccessLevelItem(QStandardItem):
 
     #@param accessLevels: Access levels that can be represented.
     #@type accessLevels: C{list} of L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
-    _accessLevels = copy.copy(ACCESS_LEVELS)
+    accessLevelNames = list()
     
-    def __init__(self, level, principal, changeLevelFunction):
+    def __init__(self, levelName):
         """ Constructor.
         
         @param level: The associated access level constant.
-        @type level: L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
-        @param principal: The principal associated with this level.
-        @type principal: C{list} of L{Principal<datafinder.core.item.privileges.principal.Principal>}
-        @param changeLevelFunction: Callable function which allows changing the correct access level.
+        @type level: C{unicode}
         """
         
-        QStandardItem.__init__(self, level.displayName)
-        
-        self._level = level
-        self._principal = principal
-        self._changeLevelFunction = changeLevelFunction
+        QStandardItem.__init__(self, levelName)
         
         self.setEditable(True)
-        
+
     def createEditor(self, parent):
         """ Returns the correctly initialized editor for the item value. 
         
@@ -121,20 +111,8 @@ class AccessLevelItem(QStandardItem):
         """
         
         editor = QComboBox(parent)
-        for accessLevel in self._accessLevels:
-            editor.addItem(accessLevel.displayName)
-        editor.setCurrentIndex(self._accessLevels.index(self._level))
+        for accessLevelName in self.accessLevelNames:
+            editor.addItem(accessLevelName)
+        editor.setCurrentIndex(self.accessLevelNames.index(unicode(self.text())))
         editor.setEditable(False)
         return editor
-
-    def changeValue(self, levelIndex):
-        """ Changes the associated access level. Also the data model 
-        is adapted in accordance.
-
-        @param levelIndex: The new access level index (combination box index).
-        @type levelIndex: C{int}
-        """
-        
-        self._level = self._accessLevels[levelIndex]
-        self.setText(self._level.displayName)
-        self._changeLevelFunction(self._principal, self._level)

@@ -46,6 +46,7 @@ from copy import deepcopy
 from PyQt4.QtGui import QStandardItemModel, QDialogButtonBox, QMessageBox, QStyledItemDelegate
 from PyQt4.QtCore import QObject, SIGNAL
 
+from datafinder.core.item.privileges.privilege import ACCESS_LEVELS
 from datafinder.gui.user.common.util import startNewQtThread
 from datafinder.gui.user.dialogs.privilege_dialog.items import AccessLevelItem, PrincipalItem
 
@@ -83,7 +84,7 @@ class PrivilegeController(QObject):
         self.connect(self._privilegeWidget.selectionModel(), 
                      SIGNAL("selectionChanged(QItemSelection, QItemSelection)"),
                      self._selectionChangedSlot)
-
+        
     def _setButtonEnabledState(self, enabled):
         """ Sets the enabled state for all controlled buttons. """
         
@@ -204,9 +205,9 @@ class _AccessLevelItemDelegate(QStyledItemDelegate):
         """ @see: L{setModelData<PyQt4.QtGui.QItemDelegate.setModelData>} """
         
         if index.isValid():
-            selectedAccessLevel = editor.currentIndex()
+            levelName = editor.currentText()
             item = self._model.item(index.row(), index.column())
-            item.changeValue(selectedAccessLevel)
+            self._model.changeAccessLevel(item, levelName)
             self._controller.checkApplyEnabledState()
 
         
@@ -223,7 +224,8 @@ class PrivilegeModel(QStandardItemModel):
         self._acl = None
         
         self.setColumnCount(4) # principal, content, properties, administration
-    
+        AccessLevelItem.accessLevelNames = [accessLevel.displayName for accessLevel in ACCESS_LEVELS]
+
     def _setItem(self, item):
         """ Sets the item. """
         
@@ -263,12 +265,9 @@ class PrivilegeModel(QStandardItemModel):
         """ Adds the principal and its access levels to the table view. """
        
         row = [PrincipalItem(principal)]
-        row.append(AccessLevelItem(self._acl.contentAccessLevel(principal), 
-                                   principal, self._acl.setContentAccessLevel))
-        row.append(AccessLevelItem(self._acl.propertiesAccessLevel(principal), 
-                                   principal, self._acl.setPropertiesAccessLevel))
-        row.append(AccessLevelItem(self._acl.aministrationAccessLevel(principal), 
-                                   principal, self._acl.setAministrationAccessLevel))
+        row.append(AccessLevelItem(self._acl.contentAccessLevel(principal).displayName))
+        row.append(AccessLevelItem(self._acl.propertiesAccessLevel(principal).displayName))
+        row.append(AccessLevelItem(self._acl.administrationAccessLevel(principal).displayName)) 
         self.appendRow(row)
         
     def removePrincipals(self, principalItems):
@@ -304,3 +303,29 @@ class PrivilegeModel(QStandardItemModel):
         
         self._item.updateAcl(self._acl)
         self._acl = deepcopy(self._acl)
+        
+    def changeAccessLevel(self, levelItem, levelName):
+        """ Changes the associated access level. Also the data model 
+        is adapted in accordance.
+
+        @param principalItem: Principal to move.
+        @type principalItem: L{AccessLevelItem<datafinder.gui.user.
+        dialogs.privilege_dialog.items.AccessLevelItem>}
+        @param levelName: The new access level display name.
+        @type levelName: C{unicode}
+        """
+        
+        level = None
+        for accessLevel in ACCESS_LEVELS:
+            if levelName == accessLevel.displayName:
+                level = accessLevel
+                break
+        if not level is None:
+            principal = self.item(levelItem.row()).principal
+            levelItem.setText(levelName)
+            if levelItem.column() == 1:
+                self._acl.setContentAccessLevel(principal, level)
+            elif levelItem.column() == 2:
+                self._acl.setPropertiesAccessLevel(principal, level)
+            elif levelItem.column() == 3:
+                self._acl.setAdministrationAccessLevel(principal, level)

@@ -181,7 +181,7 @@ class AccessControlListTestCase(unittest.TestCase):
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         
         self._acl.setContentAccessLevel(self._principalMock, READ_ONLY_ACCESS_LEVEL)
@@ -189,7 +189,7 @@ class AccessControlListTestCase(unittest.TestCase):
                           READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         
         self._acl.setContentAccessLevel(self._principalMock, FULL_ACCESS_LEVEL)
@@ -197,7 +197,7 @@ class AccessControlListTestCase(unittest.TestCase):
                           FULL_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         
     def testPropertiesAccessLevel(self):
@@ -208,7 +208,7 @@ class AccessControlListTestCase(unittest.TestCase):
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         
         self._acl.setPropertiesAccessLevel(self._principalMock, READ_ONLY_ACCESS_LEVEL)
@@ -216,7 +216,7 @@ class AccessControlListTestCase(unittest.TestCase):
                           READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         
         self._acl.setPropertiesAccessLevel(self._principalMock, FULL_ACCESS_LEVEL)
@@ -224,40 +224,40 @@ class AccessControlListTestCase(unittest.TestCase):
                           READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           FULL_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         
     def testAdministrationAccessLevel(self):
         """ Checks administration access level handling. """
         
-        self._acl.setAministrationAccessLevel(self._principalMock, NONE_ACCESS_LEVEL)
+        self._acl.setAdministrationAccessLevel(self._principalMock, NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         
-        self._acl.setAministrationAccessLevel(self._principalMock, READ_ONLY_ACCESS_LEVEL)
+        self._acl.setAdministrationAccessLevel(self._principalMock, READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           READ_ONLY_ACCESS_LEVEL)
         
-        self._acl.setAministrationAccessLevel(self._principalMock, FULL_ACCESS_LEVEL)
+        self._acl.setAdministrationAccessLevel(self._principalMock, FULL_ACCESS_LEVEL)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock),
                           NONE_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock),
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock),
                           FULL_ACCESS_LEVEL)
 
     def testClearPrivileges(self):
         """ Tests clearing of privileges. """
         
-        self._acl.setAministrationAccessLevel(self._principalMock, NONE_ACCESS_LEVEL)
+        self._acl.setAdministrationAccessLevel(self._principalMock, NONE_ACCESS_LEVEL)
         self.assertEquals(len(self._acl.principals), 1)
         
         self._acl.clearPrivileges(self._principalMock)
@@ -292,4 +292,4 @@ class AccessControlListTestCase(unittest.TestCase):
         self._acl.addDefaultPrincipal(self._principalMock)
         self.assertEquals(self._acl.contentAccessLevel(self._principalMock), READ_ONLY_ACCESS_LEVEL)
         self.assertEquals(self._acl.propertiesAccessLevel(self._principalMock), READ_ONLY_ACCESS_LEVEL)
-        self.assertEquals(self._acl.aministrationAccessLevel(self._principalMock), NONE_ACCESS_LEVEL)
+        self.assertEquals(self._acl.administrationAccessLevel(self._principalMock), NONE_ACCESS_LEVEL)
