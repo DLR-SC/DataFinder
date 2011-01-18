@@ -40,7 +40,7 @@ Tests the access control list representation.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 from copy import deepcopy
@@ -54,7 +54,7 @@ from datafinder.persistence.principal_search import principal
 from datafinder_test.mocks import SimpleMock
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 

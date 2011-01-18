@@ -51,7 +51,7 @@ from datafinder.gui.user.common.util import startNewQtThread
 from datafinder.gui.user.dialogs.privilege_dialog.items import PrincipalItem
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class PrincipalSearchController(QObject):

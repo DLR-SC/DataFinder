@@ -50,7 +50,7 @@ from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class RepositoryMock(object):

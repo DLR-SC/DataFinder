@@ -110,7 +110,7 @@ class FileSystem(BaseFileSystem):    """
         @rtype: ... # missing return type
         """
         
-        return DataS3Adapter(identifier, self._connection, self._configuration.bucketName, self._configuration.keyName)
+        return DataS3Adapter(identifier, self._connectionPool, self._configuration.bucketName)#, self._configuration.keyName)
     
     def getConnection(self):
         """

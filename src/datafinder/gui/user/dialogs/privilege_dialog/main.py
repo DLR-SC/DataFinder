@@ -50,7 +50,7 @@ from datafinder.gui.user.dialogs.privilege_dialog.privileges import PrivilegeCon
 from datafinder.gui.gen.user.privilege_dialog_ui import Ui_PrivilegeDialog
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):

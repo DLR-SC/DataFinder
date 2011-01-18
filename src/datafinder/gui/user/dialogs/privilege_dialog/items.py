@@ -46,7 +46,7 @@ from PyQt4.QtGui import QIcon, QStandardItem, QComboBox
 from datafinder.core.item.privileges.principal import USER_PRINCIPAL_TYPE
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class PrincipalItem(QStandardItem):

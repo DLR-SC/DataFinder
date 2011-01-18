@@ -60,44 +60,44 @@ class DataS3AdapterTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates default adapter usable by test cases. """
         
-        self._defaultAdapter = DataS3Adapter("/path/identify", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock(), SimpleMock())
+        self._defaultAdapter = DataS3Adapter("/path/identify", SimpleMock(SimpleMock(SimpleMock(SimpleMock(SimpleMock(SimpleMock(SimpleMock(SimpleMock()))))))), SimpleMock(SimpleMock()))
                 
     def testisLeaf(self):
         """ Tests the normal behavior of the isLeaf method. """
 
-        adapter = DataS3Adapter("identifier", SimpleMock(), SimpleMock(), SimpleMock())
+        adapter = DataS3Adapter("identifier", SimpleMock(), SimpleMock() )
         self.assertTrue(adapter.isLeaf)
-        adapter = DataS3Adapter("identifier", SimpleMock(), SimpleMock(), '')
+        adapter = DataS3Adapter("", SimpleMock(), SimpleMock())
         self.assertFalse(adapter.isLeaf)
-        adapter = DataS3Adapter("identifier", SimpleMock(), '', SimpleMock())
+        adapter = DataS3Adapter("identifier", SimpleMock(), '')
         self.assertFalse(adapter.isLeaf)
         
     def testisCollection(self):
         """ Tests the normal behavior of the isResource method. """
         
-        adapter = DataS3Adapter("identifier", SimpleMock(), SimpleMock(), '')
+        adapter = DataS3Adapter("", SimpleMock(), SimpleMock())
         self.assertTrue(adapter.isCollection)
-        adapter = DataS3Adapter("identifier", SimpleMock(), '', '')
+        adapter = DataS3Adapter("identifier", SimpleMock(), '')
         self.assertFalse(adapter.isCollection)
 
     def testcreateResource(self):
         """ Tests the normal behavior of the createResource createKey method."""     
         
         self._defaultAdapter.createResource()
-        adapter = DataS3Adapter("identifier", SimpleMock(SimpleMock()), '', '')
+        adapter = DataS3Adapter("", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), '')
         self.assertRaises(PersistenceError, adapter.createResource)
     
     def testcreateCollection(self):
         """ Tests the normal behavior of the createCollection method. """
         
         self._defaultAdapter.createCollection()
-        adapter = DataS3Adapter("identifier", SimpleMock(SimpleMock()), '', '')
+        adapter = DataS3Adapter("", SimpleMock(SimpleMock()), '')
         self.assertRaises(PersistenceError, adapter.createCollection)
         
     def testgetChildren(self):
         """ Tests the normal behavior of the getChildren method. """
     
-        adapter = DataS3Adapter("/identifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock(keyset = 1)))), SimpleMock(), SimpleMock())
+        adapter = DataS3Adapter("/identifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock(keyset = 1)))), SimpleMock())
         self.assertEquals(adapter.getChildren(), 1)
     
     def testwriteData(self):
@@ -107,7 +107,7 @@ class DataS3AdapterTestCase(unittest.TestCase):
     def testreadData (self):
         """ Tests the normal behavior of the readData method. """
 
-        adapter = DataS3Adapter("identifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock(), SimpleMock())
+        adapter = DataS3Adapter("identifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock())
         self.assertEquals(adapter.readData().read(), "")
         
     def testdelete (self):
@@ -126,16 +126,16 @@ class DataS3AdapterTestCase(unittest.TestCase):
         
     def testcopy(self):
         """ Tests the normal behavior of the copy method. """
-        destinationBucket = SimpleMock(SimpleMock(SimpleMock()))
+        destinationBucket = SimpleMock(SimpleMock(SimpleMock(SimpleMock())))
         destinationKey = SimpleMock()
         self._defaultAdapter.copy(destinationBucket, destinationKey)
         
     def testexists(self):
         """ Tests the normal behavior of the exists method. """
         
-        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock(SimpleMock())), SimpleMock(), SimpleMock())
+        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock())
         self.assertTrue(adapter.exists())
-        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock()), "" , SimpleMock())
+        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock()), "" )
         self.assertFalse(adapter.exists())
-        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(error=PersistenceError("")), SimpleMock(), SimpleMock())
+        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(error=PersistenceError("")), SimpleMock())
         self.assertRaises(PersistenceError, adapter.exists)

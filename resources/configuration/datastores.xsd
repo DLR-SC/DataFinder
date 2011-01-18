@@ -163,9 +163,7 @@
 				<xs:sequence>
 				    <xs:element name="storeType" type="xs:string" />
 					<xs:element name="dataLocation" type="xs:string" default="" />
-					<xs:element name="removePathPrefix" type="xs:string" default="" />
-					<xs:element name="isMigratedTo" type="xs:string" default="" />
-                    <xs:element name="storageRealisation" type="storageRealisationEnum" default="Flat"/>
+					<xs:element name="storageRealisation" type="storageRealisationEnum" default="Flat"/>
 					<xs:element name="username" type="xs:string" default="" />
 					<xs:element name="password" type="xs:string" default="" />
 					<xs:element name="awsAccessKey" type="xs:string" default="" />

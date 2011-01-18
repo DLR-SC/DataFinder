@@ -40,7 +40,6 @@
 Implements Amazon S3-specific connection pool.
 """
 
-
 from boto.s3.connection import S3Connection
 
 from datafinder.persistence.common.connection.pool import ConnectionPool
@@ -69,7 +68,7 @@ class S3ConnectionPool(ConnectionPool):
         """ Overwrites template method for connection creation. """
         
         
-        secretAccessKey = self._configuration.awsSecretAccesKey
+        secretAccessKey = self._configuration.awsSecretAccessKey
         accessKey = self._configuration.awsAccessKey
         
         connection = S3Connection(accessKey, secretAccessKey) 

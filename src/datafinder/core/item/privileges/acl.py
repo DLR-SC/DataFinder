@@ -44,7 +44,7 @@ from datafinder.core.item.privileges.ace import AccessControlListEntry
 from datafinder.core.item.privileges import privilege
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class AccessControlList(object):

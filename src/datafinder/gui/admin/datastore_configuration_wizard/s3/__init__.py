@@ -39,7 +39,7 @@
 Implements controller for WebDAV option pages.
 """
 
-
+from datafinder.gui.admin.datastore_configuration_wizard.s3 import storage_option_controller
 from datafinder.gui.admin.datastore_configuration_wizard.s3 import authentication_option_controller
 
 

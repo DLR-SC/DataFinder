@@ -398,7 +398,7 @@ class WebdavDataStore(DefaultDataStore):
     
     
 class S3DataStore(DefaultDataStore):
-    """ Represents the default configuration for data stores. """
+    """  Restricts properties of a S3 data store configuration """
     
     _xmlBindingClass = datastores.s3
     
@@ -407,7 +407,7 @@ class S3DataStore(DefaultDataStore):
         
         DefaultDataStore.__init__(self, name, storeType, iconName, url, isDefault, owner, persistedStore)
         self._password = self._store.password
-        self._dataLocationUri = "S3://" + self.dataLocation
+        self._dataLocationUri = "S3:" + self.dataLocation # datalocation = bucketname
         
         self._parameters = {"username": self.username, "password": self.password, 
                             "awsAccessKey": self.awsAccessKey, "awsSecretAccessKey":self.awsSecretAccessKey}

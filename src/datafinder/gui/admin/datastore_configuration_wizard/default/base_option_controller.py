@@ -73,6 +73,7 @@ class BaseOptionController(AbstractOptionController):
         self.wizardView.datastoreTypeComboBox.insertItem(datastores.GRIDFTP_STORE, 4)
         self.wizardView.datastoreTypeComboBox.insertItem(datastores.OFFLINE_STORE, 5)
         self.wizardView.datastoreTypeComboBox.insertItem(datastores.TSM_CONNECTOR_STORE, 6)
+        self.wizardView.datastoreTypeComboBox.insertItem(datastores.S3_STORE, 7)
         # make owner button invisible
         self.wizardView.datastoreOwnerPushButton.hide()
         # set labels for error displaying

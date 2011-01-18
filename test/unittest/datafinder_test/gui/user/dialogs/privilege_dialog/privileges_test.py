@@ -56,7 +56,7 @@ from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
 from datafinder_test.gui.user.dialogs.privilege_dialog.main import ItemMock
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class PrivilegeControllerTest(unittest.TestCase):

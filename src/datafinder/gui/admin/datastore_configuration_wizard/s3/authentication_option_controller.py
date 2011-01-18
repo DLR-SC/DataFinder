@@ -51,21 +51,40 @@ __version__ = "$Revision-Id:$"
 class AuthenticationOptionController(AbstractOptionController):
     """ Handles the authentication options of the ExternalWebDAV DataStore. """
     
-    #TODO: Setting of Credentilals and Credential Options for the User
-    
+     
     def __init__(self, wizardView, wizardController, pageType):
         """
         @see L{AbstractOptionController <datafinder.gui.
         DFDataStoreConfigurationWizard.AbstractOptionController.__init__>}
         """
         
-        #TODO: Adjust to S3
         AbstractOptionController.__init__(self, wizardView, wizardController, pageType)
-        self.wizardView.externalWebDavPublicKeyLabel.hide()
-        self.wizardView.externalWebDavPrivateKeyLabel.hide()
-        self.wizardView.externalWebdavUploadPrivateKeyFilePushButton.hide()
-        self.wizardView.externalWebdavUploadPublicKeyFilePushButton.hide()
-        self.wizardView.connect(self.wizardView.externalWebdavUserLineEdit, SIGNAL("textChanged(const QString&)"), 
-                                self._externalWebdavUserTextChanged)
-        self.wizardView.connect(self.wizardView.externalWebdavPasswordLineEdit, SIGNAL("textChanged(const QString&)"), 
-                                self._externalWebdavPasswordTextChanged)  
+        #self.wizardView.externalWebDavPublicKeyLabel.show()
+        #self.wizardView.externalWebDavPrivateKeyLabel.show()
+        #self.wizardView.externalWebdavUploadPrivateKeyFilePushButton.show()
+        #self.wizardView.externalWebdavUploadPublicKeyFilePushButton.show()
+        self.wizardView.connect(self.wizardView.userLineEdit, SIGNAL("textChanged(const QString&)"), self._userTextChanged)
+        self.wizardView.connect(self.wizardView.passwordLineEdit, SIGNAL("textChanged(const QString&)"), self._passwordTextChanged)  
+    
+    def showModelPart(self):
+        """
+        @see L{AbstractOptionController <datafinder.gui.
+        DFDataStoreConfigurationWizard.AbstractOptionController.showModelPart>}
+        """
+        
+        self.wizardView.authenticationOptionWidgetStack.raiseWidget(1)
+        self.wizardView.userLineEdit.setText(self.wizardController.datastore.username or " ...public key ...")
+        self.wizardView.passwordLineEdit.setText(self.wizardController.datastore.password or " ...private key ...")
+
+    def _userTextChanged(self, username):
+        """ Set and validate the username. """
+        
+        self.setDatastoreProperty("username", unicode(username), self.wizardView.userLineEdit)
+        self.setDatastoreProperty("awsAccessKey", unicode(username), self.wizardView.userLineEdit)
+            
+    def _passwordTextChanged(self, password):
+        """ Set and validate the password. """
+
+        self.setDatastoreProperty("password", unicode(password), self.wizardView.passwordLineEdit)
+        self.setDatastoreProperty("awsSecretAccessKey", unicode(password), self.wizardView.passwordLineEdit)
+    

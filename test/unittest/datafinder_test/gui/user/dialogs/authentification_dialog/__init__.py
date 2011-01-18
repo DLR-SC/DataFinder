@@ -40,4 +40,4 @@ Contains tests of the authentication dialog.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

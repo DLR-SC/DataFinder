@@ -46,6 +46,7 @@ import tempfile
 
 from boto.exception import S3ResponseError, S3CreateError, BotoClientError, S3DataError
 
+
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.data.datastorer import NullDataStorer
 
@@ -59,24 +60,27 @@ _PROPERTY_NOT_FOUND_MESSAGE = "Property is missing"
 class DataS3Adapter(NullDataStorer):
     """ An adapter instance represents an item within the Amazon S3 file system. """
 
-    def __init__(self, identifier, connectionPool, bucketname, keyname):
+    def __init__(self, identifier, connectionPool, bucketname):
         """
         Constructor.
         
         @param identifier: Logical identifier of the resource.
         @type identifier: C{unicode}
         @param connectionPool: Connection pool - connection to S3
-        @type connectionPool: L{Connection<datafinder.persistence.webdav_.connection_pool.WebdavConnectionPool>}
+        @type connectionPool: L{Connection<datafinder.persistence.amazonS3.connection_pool.S3ConnectionPool>}
         """
         # TODO: Definition of identifier in core layer
         # Mappen auf bucketname und keyname --> Path of the item within the file system. - flat store
+        
         # usual url: http://s3.amazonaws.com/[bucket-name]/[object-name]
         NullDataStorer.__init__(self, identifier)
         self._connectionPool = connectionPool
         
         self._bucketname = bucketname
         self._bucket = None
-        self._keyname =  keyname
+        
+        #setting a different keyname
+        self._keyname =  identifier
         self._key = None
         
     @property
@@ -119,10 +123,13 @@ class DataS3Adapter(NullDataStorer):
             raise PersistenceError("Cannot create item with empty key name.")
         else:
             try:
-                self._bucket = self.createCollection()
-                self._key = self._bucket.new_key(self._keyname)
-                #self._key.key = self._keyname 
-                return self._key
+                self.createCollection()
+                if not self._keyname ==  "/":
+                    key = self._bucket.new_key(self._keyname)
+                    #self._key.key = self._keyname 
+                else:
+                    key = None
+                return key
             except PersistenceError, error:
                 errorMessage = "Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error) 
                 raise PersistenceError(errorMessage)
@@ -133,18 +140,22 @@ class DataS3Adapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             if self._bucketname == '':
-                raise PersistenceError("Cannot create item with empty collection(Bucket) name.")
+                raise PersistenceError("Cannot create item with empty collection(Bucket) name. Contact your Admin to configure the store")
             else:
                 try:
-                    self._bucket = connection.create_bucket(self._bucketname)
-                    return self._bucket
-                except (S3ResponseError, S3CreateError), error:
-                    errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error.reason)
-                    raise PersistenceError(errorMessage)
-                finally: 
-                    if recursively == True:
-                        raise PersistenceError("Storing with S3 does not support storing recursively")
-                    self._connectionPool.release(connection)
+                    self._bucket = connection.lookup(self, self._bucketname)   
+                except S3ResponseError, error:
+                    raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.reason)
+                finally:
+                    if self._bucket is None: 
+                        try:
+                            self._bucket = connection.create_bucket(self._bucketname)
+                            return self._bucket
+                        except (S3ResponseError, S3CreateError), error:
+                            errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error.reason)
+                            raise PersistenceError(errorMessage)
+                    self._connectionPool.release(connection)                  
+                    
         finally:
             self._connectionPool.release(connection)
               
@@ -155,7 +166,7 @@ class DataS3Adapter(NullDataStorer):
             result = list()
             try:
                 if not self._bucket:
-                    self._bucket = self.createCollection()
+                    self.createCollection()
                 rawresult = self._bucket.get_all_keys()
             except PersistenceError, error:
                 errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" % (self.identifier, error.reason)
@@ -186,10 +197,10 @@ class DataS3Adapter(NullDataStorer):
     
         try:
             self._key = self.createResource()
-            if isinstance(dataStream, types.FileType):
-                self._key.set_contents_from_file(dataStream.read())
-            else:
-                self._key.set_contents_from_string(dataStream)
+            #if isinstance(dataStream, types.FileType):
+            #   self._key.set_contents_from_file(dataStream.read())
+            #else:
+            self._key.set_contents_from_string(dataStream)
            
         except (S3ResponseError, S3DataError), error:
             errorMessage = "Unable to write data to '%s'. " % self.identifier + \
@@ -215,7 +226,7 @@ class DataS3Adapter(NullDataStorer):
 
         if self.isLeaf:
             try:
-                self._bucket = self.createCollection()
+                self.createCollection()
                 self._bucket.delete_key(self._keyname)
             except (PersistenceError, S3ResponseError), error:  
                 errorMessage = "Unable to delete item '%s'. " % self.identifier \
@@ -234,7 +245,7 @@ class DataS3Adapter(NullDataStorer):
                                + "Reason: %s" % error.reason
                 raise PersistenceError(errorMessage)
             finally:
-                self._connectionPool.release()
+                self._connectionPool.release(connection)
         else:
             raise PersistenceError("Specified identifier is not available and cannot be deleted")
        
@@ -280,7 +291,7 @@ class DataS3Adapter(NullDataStorer):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
         exists = True
         collection = self.isCollection
-        if collection == True:
+        if (self.identifier =="/" or collection == True):
             connection = self._connectionPool.acquire()
             try:
                 bucket = connection.lookup(self, self._bucketname)   
@@ -290,16 +301,15 @@ class DataS3Adapter(NullDataStorer):
                 else:
                     raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.reason)
             finally: 
-                self._connectionPool.release()
+                self._connectionPool.release(connection)
         elif self.isLeaf:
             try: 
                 self.createCollection()
                 key = self._bucket.get_key(self._keyname)
-            except S3ResponseError, error:
-                if key is None: 
+                if key is None:
                     exists = False
-                else:
-                    raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.reason)
+            except S3ResponseError, error:
+                raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.reason)
         else:
             exists = False
         return exists 
