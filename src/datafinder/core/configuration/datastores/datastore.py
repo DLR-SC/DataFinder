@@ -409,8 +409,7 @@ class S3DataStore(DefaultDataStore):
         self._password = self._store.password
         self._dataLocationUri = "S3:" + self.dataLocation # datalocation = bucketname
         
-        self._parameters = {"username": self.username, "password": self.password, 
-                            "awsAccessKey": self.awsAccessKey, "awsSecretAccessKey":self.awsSecretAccessKey}
+        self._parameters = {"username": self.username, "password": self.password}
         
     def __getPassword(self):
         """ Getter for the password. """
@@ -432,7 +431,12 @@ class S3DataStore(DefaultDataStore):
                 raise ValueError("Irregular password has been provided.")
     password = property(__getPassword, __setPassword)
     
+    def toPersistenceRepresentation(self):
+        """ Overwrites default implementation. """
         
+        store = DefaultDataStore.toPersistenceRepresentation(self)
+        store.password = self._password
+        return store
  
     
  

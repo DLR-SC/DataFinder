@@ -80,11 +80,9 @@ class AuthenticationOptionController(AbstractOptionController):
         """ Set and validate the username. """
         
         self.setDatastoreProperty("username", unicode(username), self.wizardView.userLineEdit)
-        self.setDatastoreProperty("awsAccessKey", unicode(username), self.wizardView.userLineEdit)
-            
+                  
     def _passwordTextChanged(self, password):
         """ Set and validate the password. """
 
         self.setDatastoreProperty("password", unicode(password), self.wizardView.passwordLineEdit)
-        self.setDatastoreProperty("awsSecretAccessKey", unicode(password), self.wizardView.passwordLineEdit)
-    
+            

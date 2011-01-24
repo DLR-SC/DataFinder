@@ -69,10 +69,7 @@ class DataS3Adapter(NullDataStorer):
         @param connectionPool: Connection pool - connection to S3
         @type connectionPool: L{Connection<datafinder.persistence.amazonS3.connection_pool.S3ConnectionPool>}
         """
-        # TODO: Definition of identifier in core layer
-        # Mappen auf bucketname und keyname --> Path of the item within the file system. - flat store
         
-        # usual url: http://s3.amazonaws.com/[bucket-name]/[object-name]
         NullDataStorer.__init__(self, identifier)
         self._connectionPool = connectionPool
         
@@ -80,6 +77,7 @@ class DataS3Adapter(NullDataStorer):
         self._bucket = None
         
         #setting a different keyname
+        # keyname --> Path of the item within the file system. - flat store
         self._keyname =  identifier
         self._key = None
         
@@ -125,8 +123,9 @@ class DataS3Adapter(NullDataStorer):
             try:
                 self.createCollection()
                 if not self._keyname ==  "/":
+                    print self._keyname
                     key = self._bucket.new_key(self._keyname)
-                    #self._key.key = self._keyname 
+                    self._key = key 
                 else:
                     key = None
                 return key
@@ -197,10 +196,10 @@ class DataS3Adapter(NullDataStorer):
     
         try:
             self._key = self.createResource()
-            #if isinstance(dataStream, types.FileType):
-            #   self._key.set_contents_from_file(dataStream.read())
-            #else:
-            self._key.set_contents_from_string(dataStream)
+            if isinstance(dataStream, types.FileType):
+                self._key.set_contents_from_file(dataStream)
+            else:
+                self._key.set_contents_from_string(dataStream)
            
         except (S3ResponseError, S3DataError), error:
             errorMessage = "Unable to write data to '%s'. " % self.identifier + \

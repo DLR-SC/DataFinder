@@ -47,8 +47,6 @@ to be implemented - erstellt einen Datastore des Typs S3
 __version__ = "$Revision-Id:$" 
 
 
-from boto.s3.connection import S3Connection 
-
 from datafinder.persistence.adapters.amazonS3.configuration import Configuration
 from datafinder.persistence.adapters.amazonS3.connection_pool import S3ConnectionPool
 from datafinder.persistence.adapters.amazonS3.data.adapter import DataS3Adapter
@@ -73,15 +71,9 @@ class FileSystem(BaseFileSystem):    """
         
         BaseFileSystem.__init__(self)
         self._configuration = Configuration(baseConfiguration)
-        self._connection = self._getConnection()
         self._connectionPool = self._getConnectionPool()
     
 
-    def _getConnection(self):
-        """ Creates / retrieves a usable connection for the given configuration. """
-        
-        self._connection = S3Connection(self._configuration.awsAccessKey, self._configuration.awsSecretAccessKey)
-        
     def _getConnectionPool(self):
         
         connectionPool = self._connectionManager.get(self._configuration.baseUrl)

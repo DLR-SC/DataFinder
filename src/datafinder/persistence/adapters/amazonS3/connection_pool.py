@@ -67,9 +67,9 @@ class S3ConnectionPool(ConnectionPool):
     def _createConnection(self):
         """ Overwrites template method for connection creation. """
         
-        
-        secretAccessKey = self._configuration.awsSecretAccessKey
-        accessKey = self._configuration.awsAccessKey
+        secretAccessKey = self._configuration.password
+         
+        accessKey = self._configuration.username
         
         connection = S3Connection(accessKey, secretAccessKey) 
          
