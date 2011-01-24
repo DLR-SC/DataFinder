@@ -92,7 +92,7 @@ class FileSystem(BaseFileSystem):    """
         except KeyError:
             raise PersistenceError("Invalid credentials provided.")
         else:
-            self._connection = self._getConnection()
+            self._connectionPool.reload()
     
     def createDataStorer(self, identifier):
         """ 
@@ -103,13 +103,6 @@ class FileSystem(BaseFileSystem):    """
         """
         
         return DataS3Adapter(identifier, self._connectionPool, self._configuration.bucketName)#, self._configuration.keyName)
-    
-    def getConnection(self):
-        """
-        Getter for the Connection
-        """
-        
-        return self._connection
     
   
     def getConfiguration(self):
