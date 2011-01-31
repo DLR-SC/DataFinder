@@ -50,7 +50,7 @@ from datafinder.script_api.error import ItemSupportError
 from datafinder.script_api.item.item_description import ItemDescription
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
     
 def refresh(path, stateOnly=False):
@@ -497,3 +497,10 @@ def getChildren(path):
             raise ItemSupportError(errorMessage)
         else:
             return [item.path for item in children]
+        
+def getParentItemPath(path):
+    """ Determines the path of the parent of the given item"""
+    childItemPath, parentItemPath = __getChildParentPath(path)
+    return parentItemPath
+    
+    

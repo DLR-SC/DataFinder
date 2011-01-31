@@ -48,7 +48,7 @@ from datafinder.core.item.link import ItemLink
 from datafinder.core.item.data_persister.factory import DataPersisterFactory
 from datafinder.core.item.visitor.checks import ActionCheckTreeWalker, ItemCapabilityChecker
 from datafinder.persistence.error import PersistenceError
-
+from datafinder.core.item.event_observer import Event, Observer
 
 __version__ = "$Revision-Id:$" 
 
@@ -247,7 +247,16 @@ class ItemFactory(object):
     def _createItem(self, itemClass, fileStorer=None, name=None, parent=None):
         """ Creates the concrete item. """
         
+        """
+        Callback must be added here! This function is called, whether there is a link, leaf or collection created.
+        Somehow getting the path or name of the item! in the filestorer?
+        """
         item = itemClass(name, fileStorer)
+        
+        'Fire event'
+        createItemEvent = Event("CreateItemEvent", name)
+        #global observer?
+        #Observer.fireEvent(self, createItemEvent)
         item.itemFactory = self
         if not parent is None:
             if parent.hasChild(item.name):
