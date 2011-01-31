@@ -143,4 +143,20 @@ def createSVNConnection(repoPath, workingCopyPath, username, password):
         connection= JythonSVNDataWrapper(repoPath, workingCopyPath, username, password)
     return connection
 
+def determineParentPath(self, path):
+    """ 
+    Determines the parent path of the logical path. 
+       
+    @param path: The path.
+    @type path: C{unicode}
+      
+    @return: The parent path of the identifier.
+    @rtype: C{unicode}
+    """
+       
+    parentPath = "/".join(path.rsplit("/")[:-1])
+    if parentPath == "" and path.startswith("/") and path != "/":
+        parentPath = "/"
+    return parentPath
+
 

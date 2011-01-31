@@ -49,7 +49,7 @@ import sys
 from pysvn._pysvn_2_6 import ClientError
 
 from datafinder.persistence.error import PersistenceError
-from datafinder.persistence.adapters.svn import constants
+from datafinder.persistence.adapters.svn import constants, util
 from datafinder.persistence.adapters.svn.error import SVNError
 
 
@@ -177,6 +177,7 @@ class CPythonSVNDataWrapper(object):
     def createLink(self, path, destinationPath):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
+        self.createResource(path)
         try:
             self._client.update(self._repoWorkingCopyPath + path)
             self._client.propset(constants.LINK_TARGET_PROPERTY, self._repoWorkingCopyPath + destinationPath, self._repoWorkingCopyPath + path)
@@ -188,10 +189,8 @@ class CPythonSVNDataWrapper(object):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         try:
-            try:
-                fd = open(self._repoWorkingCopyPath + path, "wb")
-            finally:
-                fd.close()
+            fd = open(self._repoWorkingCopyPath + path, "wb")
+            fd.close()
             self._client.add(self._repoWorkingCopyPath + path)
             self._client.checkin(self._repoWorkingCopyPath + path, "")
         except IOError, error:
@@ -205,7 +204,7 @@ class CPythonSVNDataWrapper(object):
         
         try:
             if recursively:
-                parentPath = self._determineParentPath(path)
+                parentPath = util.determineParentPath(path)
                 if not self.exists(self._repoWorkingCopyPath + parentPath) and parentPath != "/":
                     self.createCollection(parentPath, True)
             os.mkdir(self._repoWorkingCopyPath + path)
@@ -217,22 +216,6 @@ class CPythonSVNDataWrapper(object):
         except ClientError, error:
             os.rmdir(self._repoWorkingCopyPath + path)
             raise SVNError(error)
-        
-    def _determineParentPath(self, path):
-        """ 
-        Determines the parent path of the logical path. 
-        
-        @param path: The path.
-        @type path: C{unicode}
-        
-        @return: The parent path of the identifier.
-        @rtype: C{unicode}
-        """
-        
-        parentPath = "/".join(path.rsplit("/")[:-1])
-        if parentPath == "" and path.startswith("/") and path != "/":
-            parentPath = "/"
-        return parentPath
     
     def getChildren(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """

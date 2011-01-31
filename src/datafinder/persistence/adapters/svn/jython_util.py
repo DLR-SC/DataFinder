@@ -41,18 +41,23 @@ Implements a SVN specific data adapter for Jython.
 
 
 import hashlib
+import os
 
 from java.io import File
 
-from org.tmatesoft.svn.core import SVNException, SVNURL, SVNNodeKind
+from org.tmatesoft.svn.core import SVNException, SVNURL, SVNNodeKind, SVNDepth,\
+                                   SVNPropertyValue
 from org.tmatesoft.svn.core.io import SVNRepositoryFactory
 from org.tmatesoft.svn.core.internal.io.dav import DAVRepositoryFactory
 from org.tmatesoft.svn.core.internal.io.fs import FSRepositoryFactory
 from org.tmatesoft.svn.core.internal.io.svn import SVNRepositoryFactoryImpl
-from org.tmatesoft.svn.core.wc import SVNWCUtil, SVNCommitClient, SVNLogClient, \
-                                      SVNUpdateClient, SVNWCClient
+from org.tmatesoft.svn.core.wc import SVNWCUtil, SVNCommitClient, \
+                                      SVNUpdateClient, SVNWCClient, SVNRevision,\
+                                      SVNCopyClient, SVNCopySource,\
+                                      ISVNPropertyHandler
 
-from datafinder.persistence.error import PersistenceError
+from datafinder.persistence.error import PersistenceError    
+from datafinder.persistence.adapters.svn import constants, util
 from datafinder.persistence.adapters.svn.error import SVNError
 
 
@@ -90,36 +95,49 @@ class JythonSVNDataWrapper(object):
         self._repository = None
         self._svnWorkingCopyClient = None
         self._svnCommitClient = None
+        self._svnCopyClient = None
         self._svnUpdateClient = None
-        self._svnLogClient = None
         try:
             self._repository = SVNRepositoryFactory.create(SVNURL.parseURIDecoded(self._repoPath))
             self._authManager = SVNWCUtil.createDefaultAuthenticationManager(self._username, self._password)
-            self._repository.setAuthenticationManager()
+            self._repository.setAuthenticationManager(self._authManager)
             self._svnWorkingCopyClient = SVNWCClient(self._authManager, None)
             self._svnCommitClient = SVNCommitClient(self._authManager, None)
+            self._svnCopyClient = SVNCopyClient(self._authManager, None)
             self._svnUpdateClient = SVNUpdateClient(self._authManager, None)
-            self._svnLogClient = SVNLogClient(self._authManager, None)
-            self._svnUpdateClient.doCheckout(self._repositoryURL, SVNRevision.HEAD, self._repoWorkingCopyFile, True)
+            self._svnUpdateClient.doCheckout(self._repositoryURL, self._repoWorkingCopyFile, SVNRevision.HEAD, SVNRevision.HEAD, True)
         except SVNException, error:
             raise PersistenceError(error)  
     
     def linkTarget(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        try:
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            linkTargetPropertyData = self._svnWorkingCopyClient.doGetProperty(File(self._repoWorkingCopyPath + path), constants.LINK_TARGET_PROPERTY, \
+                                                                  SVNRevision.HEAD, SVNRevision.HEAD)
+            linkTarget = linkTargetPropertyData.getValue().getString()
+            if len(linkTarget) == 0:
+                return None
+            else:
+                return linkTarget
+        except SVNException, error:
+            raise SVNError(error)
     
     def isLink(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        linkTarget = self.linkTarget(path)
+        if linkTarget is None:
+            return False
+        else:
+            return True
     
     def isLeaf(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
           
-        path = self._correctPath(path)
         try:
-            nodeKind = self._repository.checkPath(path, -1)
+            nodeKind = self._repository.checkPath(path[1:], -1)
             if nodeKind == SVNNodeKind.FILE:
                 return True
             else:
@@ -130,9 +148,8 @@ class JythonSVNDataWrapper(object):
     def isCollection(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
         try:
-            nodeKind = self._repository.checkPath(path, -1)
+            nodeKind = self._repository.checkPath(path[1:], -1)
             if nodeKind == SVNNodeKind.DIR:
                 return True
             else:
@@ -143,55 +160,120 @@ class JythonSVNDataWrapper(object):
     def createLink(self, path, destinationPath):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        self.createResource(path)
+        try:
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            self._svnWorkingCopyClient.doSetProperty(File(self._repoWorkingCopyPath + path), constants.LINK_TARGET_PROPERTY, SVNPropertyValue.create(self._repoPath + destinationPath), False, SVNDepth.EMPTY, ISVNPropertyHandler, None)
+            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
+        except SVNException, error:
+            raise SVNError(error)
     
     def createResource(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        try:
+            fd = open(self._repoWorkingCopyPath + path, "wb")
+            fd.close()
+            self._svnWorkingCopyClient.doAdd(self._repoWorkingCopyFile, True, False, False, SVNDepth.INFINITY, False, False, False)
+            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
+        except IOError, error:
+            errorMessage = os.strerror(error.errno)
+            raise SVNError(errorMessage)
+        except SVNException, error:
+            raise SVNError(error)
             
     def createCollection(self, path, recursively):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        try:
+            if recursively:
+                parentPath = util.determineParentPath(path)
+                if not self.exists(self._repoWorkingCopyPath + parentPath) and parentPath != "/":
+                    self.createCollection(parentPath, True)
+            os.mkdir(self._repoWorkingCopyPath + path)
+            self._svnWorkingCopyClient.doAdd(self._repoWorkingCopyFile, True, False, False, SVNDepth.INFINITY, False, False, False)
+            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
+        except OSError, error:
+            errorMessage = os.strerror(error.errno)
+            raise SVNError(errorMessage)
+        except SVNException, error:
+            os.rmdir(self._repoWorkingCopyPath + path)
+            raise SVNError(error)
     
     def getChildren(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        try:
+            result = list()
+            entryList = self._repository.getDir(path[1:], -1, None, None)
+            for entry in entryList:
+                entryPath = entry.getURL().toString()
+                entryPath = entryPath.replace(self._repoPath, "")
+                result.append(entryPath) 
+            return result
+        except SVNException, error:
+            raise SVNError(error)
     
     def writeData(self, path, dataStream):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        try:
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            fd = open(self._repoWorkingCopyPath + path, "wb")
+            try:
+                block = dataStream.read(_BLOCK_SIZE)
+                while len(block) > 0:
+                    fd.write(block)
+                    block = dataStream.read(_BLOCK_SIZE)
+            finally:
+                fd.close()
+                dataStream.close()
+            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
+        except IOError, error:
+            errorMessage = os.strerror(error.errno)
+            raise SVNError(errorMessage)
+        except SVNException, error:
+            raise SVNError(error)
     
     def readData(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
+        try:
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            return open(self._repoWorkingCopyPath + path, "rb")
+        except IOError, error:
+            errorMessage = os.strerror(error.errno)
+            raise SVNError(errorMessage)
+        except SVNException, error:
+            raise SVNError(error)
     
     def delete(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        pass
+        try:
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            self._svnWorkingCopyClient.doDelete(File(self._repoWorkingCopyPath + path), True, False)
+            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
+        except SVNException, error:
+            raise SVNError(error)
     
     def copy(self, path, destinationPath):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        
-        path = self._correctPath(path)
+
+        try:
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            self._svnCopyClient.doCopy([SVNCopySource(SVNRevision.HEAD, SVNRevision.HEAD, File(self._repoWorkingCopyPath + path))], \
+                                       File(self._repoWorkingCopyPath + destinationPath), False, True, True)
+            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
+        except SVNException, error:
+            raise SVNError(error)
     
     def exists(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        path = self._correctPath(path)
         try:
-            nodeKind = self._repository.checkPath(path, -1)
-            if nodeKind != SVNNodeKind.NONE:
-                return True
-            else:
-                return False
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            return os.path.exists(self._repoWorkingCopyPath + path)
         except SVNException, error:
             raise SVNError(error)
         
-    def _correctPath(self, path):
-        return path[1:]

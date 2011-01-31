@@ -137,7 +137,6 @@ class DataSVNAdapter(NullDataStorer):
     def createLink(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
 
-        self.createResource()
         connection = self._connectionPool.acquire()
         try:
             try:
