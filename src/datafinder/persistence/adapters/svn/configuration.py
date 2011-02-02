@@ -62,3 +62,4 @@ class Configuration(object):
         self.password = baseConfiguration.password
 
         self.workingCopyPath = baseConfiguration.workingCopyPath
+        

@@ -46,11 +46,11 @@ to be implemented - erstellt einen Datastore des Typs S3
 from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.common.connection.manager import ConnectionPoolManager
 from datafinder.persistence.error import PersistenceError
-from datafinder.persistence.adapters.svn.util import ItemIdentifierMapper
-from datafinder.persistence.adapters.svn import constants, util
+from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.adapters.svn.configuration import Configuration
 from datafinder.persistence.adapters.svn.connection_pool import SVNConnectionPool
 from datafinder.persistence.adapters.svn.data.adapter import DataSVNAdapter
+from datafinder.persistence.adapters.svn.util import util
 
 
 __version__ = "$Revision-Id:$" 
@@ -87,7 +87,6 @@ class FileSystem(BaseFileSystem):
         
         self._connection = util.createSVNConnection(repoPath, workingCopyPath, username, password)
     
-        
     def _getConnectionPool(self):
         """ Creates / retrieves a usable connection pool for the given configuration. """
         
@@ -117,11 +116,10 @@ class FileSystem(BaseFileSystem):
         data.adapter.SVNAdapter>
         """
         
-        return DataSVNAdapter(identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl))    
+        return DataSVNAdapter(identifier, self._connectionPool)    
     
     def release(self):
         """ Releases the acquired connection pool. """
         
         self._connectionManager.remove(self._configuration.baseUrl)
-    
     

@@ -35,13 +35,12 @@
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 
 
-""" 
+"""
 Implements a SVN specific data adapter for Jython.
 """
 
 
 import hashlib
-import os
 
 from java.io import File
 
@@ -57,14 +56,10 @@ from org.tmatesoft.svn.core.wc import SVNWCUtil, SVNCommitClient, \
                                       ISVNPropertyHandler
 
 from datafinder.persistence.error import PersistenceError    
-from datafinder.persistence.adapters.svn import constants, util
 from datafinder.persistence.adapters.svn.error import SVNError
 
 
 __version__ = "$Revision-Id:$" 
-
-
-_BLOCK_SIZE = 30000
 
 
 class JythonSVNDataWrapper(object):
@@ -109,21 +104,6 @@ class JythonSVNDataWrapper(object):
         except SVNException, error:
             raise PersistenceError(error)  
     
-    def linkTarget(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        
-        try:
-            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            linkTargetPropertyData = self._svnWorkingCopyClient.doGetProperty(File(self._repoWorkingCopyPath + path), constants.LINK_TARGET_PROPERTY, \
-                                                                  SVNRevision.HEAD, SVNRevision.HEAD)
-            linkTarget = linkTargetPropertyData.getValue().getString()
-            if len(linkTarget) == 0:
-                return None
-            else:
-                return linkTarget
-        except SVNException, error:
-            raise SVNError(error)
-    
     def isLink(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
@@ -157,49 +137,102 @@ class JythonSVNDataWrapper(object):
         except SVNException, error:
             raise SVNError(error)
     
-    def createLink(self, path, destinationPath):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+    def update(self):
+        """ Updates the working copy. """
         
-        self.createResource(path)
         try:
             self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            self._svnWorkingCopyClient.doSetProperty(File(self._repoWorkingCopyPath + path), constants.LINK_TARGET_PROPERTY, SVNPropertyValue.create(self._repoPath + destinationPath), False, SVNDepth.EMPTY, ISVNPropertyHandler, None)
-            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
         except SVNException, error:
             raise SVNError(error)
-    
-    def createResource(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+    def checkin(self, path):
+        """ 
+        Checkins to the repository.
+        
+        @param path: Path to checkin.
+        @type path: C{unicode} 
+        """
         
         try:
-            fd = open(self._repoWorkingCopyPath + path, "wb")
-            fd.close()
-            self._svnWorkingCopyClient.doAdd(self._repoWorkingCopyFile, True, False, False, SVNDepth.INFINITY, False, False, False)
             self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
-        except IOError, error:
-            errorMessage = os.strerror(error.errno)
-            raise SVNError(errorMessage)
         except SVNException, error:
             raise SVNError(error)
-            
-    def createCollection(self, path, recursively):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+    def add(self, path):
+        """ 
+        Marks changes in the working copy for checking in. 
+        
+        @param path: Path to add.
+        @type path: C{unicode}
+        """
         
         try:
-            if recursively:
-                parentPath = util.determineParentPath(path)
-                if not self.exists(self._repoWorkingCopyPath + parentPath) and parentPath != "/":
-                    self.createCollection(parentPath, True)
-            os.mkdir(self._repoWorkingCopyPath + path)
             self._svnWorkingCopyClient.doAdd(self._repoWorkingCopyFile, True, False, False, SVNDepth.INFINITY, False, False, False)
-            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
-        except OSError, error:
-            errorMessage = os.strerror(error.errno)
-            raise SVNError(errorMessage)
         except SVNException, error:
-            os.rmdir(self._repoWorkingCopyPath + path)
             raise SVNError(error)
-    
+        
+    def delete(self, path):
+        """
+        Removes a file or directory from the working copy.
+        
+        @param path: Path to remove.
+        @type path: C{unicode}
+        """
+        
+        try:
+            self._svnWorkingCopyClient.doDelete(File(path), True, False)
+        except SVNException, error:
+            raise SVNError(error)
+        
+    def copy(self, path, destinationPath):
+        """
+        Copies a file or directory within the working copy.
+        
+        @param path: Path to copy.
+        @type path: C{unicode}
+        @param destinationPath: Path to the destination.
+        @type destinationPath: C{unicode}
+        """
+        
+        try:
+            self._svnCopyClient.doCopy([SVNCopySource(SVNRevision.HEAD, SVNRevision.HEAD, File(path))], \
+                                       File(destinationPath), False, True, True)
+        except SVNException, error:
+            raise SVNError(error)
+        
+    def setProperty(self, path, key, value):
+        """
+        Sets the property of a file or directory.
+        
+        @param path: Path where the property should be set.
+        @type path: C{unicode}
+        @param key: Name of the property.
+        @type key: C{unicode}
+        @param value: Value of the property.
+        @type value: C{unicode}
+        """
+        
+        try:
+            self._svnWorkingCopyClient.doSetProperty(File(path), key, SVNPropertyValue.create(value), False, SVNDepth.EMPTY, ISVNPropertyHandler, None)
+        except SVNException, error:
+            raise SVNError(error)
+        
+    def getProperty(self, path, key):
+        """
+        Gets the property of a file or directory.
+        
+        @param path: Path where the property should be retrieved.
+        @type path: C{unicode}
+        @param key: Name of the property.
+        @type key: C{unicode}
+        """
+        
+        try:
+            propertyData = self._svnWorkingCopyClient.doGetProperty(File(path), key, SVNRevision.HEAD, SVNRevision.HEAD)
+            return propertyData.getValue().getString()
+        except SVNException, error:
+            raise SVNError(error)
+
     def getChildren(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
@@ -213,67 +246,15 @@ class JythonSVNDataWrapper(object):
             return result
         except SVNException, error:
             raise SVNError(error)
-    
-    def writeData(self, path, dataStream):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        try:
-            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            fd = open(self._repoWorkingCopyPath + path, "wb")
-            try:
-                block = dataStream.read(_BLOCK_SIZE)
-                while len(block) > 0:
-                    fd.write(block)
-                    block = dataStream.read(_BLOCK_SIZE)
-            finally:
-                fd.close()
-                dataStream.close()
-            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
-        except IOError, error:
-            errorMessage = os.strerror(error.errno)
-            raise SVNError(errorMessage)
-        except SVNException, error:
-            raise SVNError(error)
-    
-    def readData(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+    @property
+    def repoWorkingCopyPath(self):
+        """ Returns the working copy path. """
         
-        try:
-            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            return open(self._repoWorkingCopyPath + path, "rb")
-        except IOError, error:
-            errorMessage = os.strerror(error.errno)
-            raise SVNError(errorMessage)
-        except SVNException, error:
-            raise SVNError(error)
+        return self._repoWorkingCopyPath
     
-    def delete(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+    @property
+    def repoPath(self):
+        """ Returns the repo path. """
         
-        try:
-            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            self._svnWorkingCopyClient.doDelete(File(self._repoWorkingCopyPath + path), True, False)
-            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
-        except SVNException, error:
-            raise SVNError(error)
-    
-    def copy(self, path, destinationPath):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-
-        try:
-            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            self._svnCopyClient.doCopy([SVNCopySource(SVNRevision.HEAD, SVNRevision.HEAD, File(self._repoWorkingCopyPath + path))], \
-                                       File(self._repoWorkingCopyPath + destinationPath), False, True, True)
-            self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
-        except SVNException, error:
-            raise SVNError(error)
-    
-    def exists(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        
-        try:
-            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            return os.path.exists(self._repoWorkingCopyPath + path)
-        except SVNException, error:
-            raise SVNError(error)
-        
+        return self._repoPath

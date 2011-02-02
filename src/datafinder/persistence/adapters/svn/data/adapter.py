@@ -39,22 +39,25 @@
 Implements adapter for manipulating a SVN file system.
 """
 
+import os
 
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.data.datastorer import NullDataStorer
 from datafinder.persistence.adapters.svn.error import SVNError
+from datafinder.persistence.adapters.svn import constants
+from datafinder.persistence.adapters.svn.util import util
 
 
 __version__ = "$Revision-Id:$" 
 
 
-_PROPERTY_NOT_FOUND_MESSAGE = "Property is missing"
+_BLOCK_SIZE = 30000
 
 
 class DataSVNAdapter(NullDataStorer):
     """ An adapter instance represents an item within the SVN file system. """
 
-    def __init__(self, identifier, connectionPool, itemIdMapper):
+    def __init__(self, identifier, connectionPool):
         """
         Constructor.
         
@@ -62,15 +65,13 @@ class DataSVNAdapter(NullDataStorer):
         @type identifier: C{unicode}
         @param connectionPool: Connection pool.
         @type connectionPool: L{Connection<datafinder.persistence.svn.connection_pool.SVNConnectionPool>}
-        @param itemIdMapper: Utility object mapping item identifiers. 
-        @type itemIdMapper: L{ItemIdentifierMapper<datafinder.persistence.adapters.svn.util.ItemIdentifierMapper}
+    
         """
         
         NullDataStorer.__init__(self, identifier)
         self._connectionPool = connectionPool
-        self._itemIdMapper = itemIdMapper
-        self._persistenceId = identifier
-        self._name = self._itemIdMapper.determineBaseName(identifier)
+        self._persistenceId = util.mapIdentifier(identifier)
+        self._name = util.determineBaseName(identifier)
 
     @property
     def linkTarget(self):
@@ -79,7 +80,12 @@ class DataSVNAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.linkTarget(self._persistenceId)
+                connection.update()
+                linkTarget = connection.getProperty(constants.LINK_TARGET_PROPERTY, connection.repoWorkingCopyPath + self._persistenceId)
+                if len(linkTarget) == 0:
+                    return None
+                else:
+                    return linkTarget
             except SVNError, error:
                 errorMessage = u"Cannot determine link target of '%s'. Reason: '%s'" % (self.identifier, error)
                 raise PersistenceError(errorMessage)
@@ -90,15 +96,11 @@ class DataSVNAdapter(NullDataStorer):
     def isLink(self):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
         
-        connection = self._connectionPool.acquire()
-        try:
-            try:
-                return connection.isLink(self._persistenceId)
-            except SVNError, error:
-                errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" % (self.identifier, error)
-                raise PersistenceError(errorMessage)
-        finally:
-            self._connectionPool.release(connection)
+        linkTarget = self.linkTarget()
+        if linkTarget is None:
+            return False
+        else:
+            return True
         
     @property
     def isLeaf(self):
@@ -137,10 +139,13 @@ class DataSVNAdapter(NullDataStorer):
     def createLink(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
 
+        self.createResource()
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.createLink(self._persistenceId, destination.identifier)
+                connection.update()
+                connection.setProperty(connection.repoWorkingCopyPath + self._persistenceId, constants.LINK_TARGET_PROPERTY, connection.repoPath + destination.identifier)
+                connection.checkin(self._persistenceId)
             except SVNError, error:
                 errorMessage = u"Cannot set property. Reason: '%s'" % error
                 raise PersistenceError(errorMessage)
@@ -156,8 +161,15 @@ class DataSVNAdapter(NullDataStorer):
             connection = self._connectionPool.acquire()
             try:
                 try:
-                    connection.createResource(self._persistenceId)
+                    fd = open(connection.repoWorkingCopyPath + self._persistenceId, "wb")
+                    fd.close()
+                    connection.add(self._persistenceId)
+                    connection.checkin(self._persistenceId)
+                except IOError, error:
+                    errorMessage = os.strerror(error.errno)
+                    raise PersistenceError(errorMessage)
                 except SVNError, error:
+                    os.remove(connection.repoWorkingCopyPath + self._persistenceId)
                     errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error)
                     raise PersistenceError(errorMessage)
             finally:
@@ -172,7 +184,16 @@ class DataSVNAdapter(NullDataStorer):
             connection = self._connectionPool.acquire()
             try:
                 try:
-                    connection.createCollection(self._persistenceId, recursively)
+                    if recursively:
+                        parent = self._getParent()
+                        if not parent.exists():
+                            parent.createCollection(True)
+                    os.mkdir(connection.repoWorkingCopyPath + self._persistenceId)
+                    connection.add(self._persistenceId)
+                    connection.checkin(self._persistenceId)
+                except OSError, error:
+                    errorMessage = os.strerror(error.errno)
+                    raise PersistenceError(errorMessage)
                 except SVNError, error:
                     errorMessage = u"Cannot create collection '%s'. Reason: '%s'" % (self.identifier, error)
                     raise PersistenceError(errorMessage)
@@ -181,9 +202,25 @@ class DataSVNAdapter(NullDataStorer):
                 
     def _getParent(self):
         """ Helper which create the parent data storer. """
-        
-        parentId = self._itemIdMapper.determineParentPath(self.identifier)
-        return DataSVNAdapter(parentId, self._connectionPool, self._itemIdMapper, self._connectionHelper)
+  
+        parentId = self._determineParentPath(self._persistenceId)
+        return DataSVNAdapter(parentId, self._connectionPool)
+    
+    def _determineParentPath(self, path):
+        """ 
+        Determines the parent path of the logical path. 
+       
+        @param path: The path.
+        @type path: C{unicode}
+      
+        @return: The parent path of the identifier.
+        @rtype: C{unicode}
+        """
+       
+        parentPath = "/".join(path.rsplit("/")[:-1])
+        if parentPath == "" and path.startswith("/") and path != "/":
+            parentPath = "/"
+        return parentPath
 
     def getChildren(self):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
@@ -204,7 +241,17 @@ class DataSVNAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.writeData(self._persistenceId, dataStream)
+                connection.update()
+                fd = open(connection.repoWorkingCopyPath + self._persistenceId, "wb")
+                try:
+                    block = dataStream.read(_BLOCK_SIZE)
+                    while len(block) > 0:
+                        fd.write(block)
+                        block = dataStream.read(_BLOCK_SIZE)
+                finally:
+                    fd.close()
+                    dataStream.close()
+                connection.checkin(self._persistenceId)
             except SVNError, error:
                 errorMessage = u"Unable to write data to '%s'. " % self.identifier + \
                                u"Reason: %s" % error
@@ -213,7 +260,6 @@ class DataSVNAdapter(NullDataStorer):
                 errorMessage = u"Cannot read from stream. Reason: '%s'" % error.message
                 raise PersistenceError(errorMessage)
         finally:
-            dataStream.close()
             self._connectionPool.release(connection)
 
     def readData(self):
@@ -222,7 +268,11 @@ class DataSVNAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                return connection.readData(self._persistenceId)
+                connection.update()
+                return open(connection.repoWorkingCopyPath + self._persistenceId, "rb")
+            except IOError, error:
+                errorMessage = os.strerror(error.errno)
+                raise PersistenceError(errorMessage)
             except SVNError, error:
                 errorMessage = u"Unable to read data from '%s'. " % self.identifier + \
                                u"Reason: %s" % error
@@ -236,7 +286,9 @@ class DataSVNAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.delete(self._persistenceId)
+                connection.update()
+                connection.delete(connection.repoWorkingCopyPath + self._persistenceId)
+                connection.checkin(self._persistenceId)
             except SVNError, error:
                 errorMessage = u"Unable to delete item '%s'. " % self.identifier \
                                + u"Reason: %s" % error
@@ -256,8 +308,11 @@ class DataSVNAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                destinationPersistenceId = self._itemIdMapper.mapIdentifier(destination.identifier)
-                connection.copy(self._persistenceId, destinationPersistenceId)
+                destinationPersistenceId = util.mapIdentifier(destination.identifier)
+                connection.update()
+                connection.copy(connection.repoWorkingCopyPath + self._persistenceId, connection.repoWorkingCopyPath + destinationPersistenceId)
+                connection.checkin(self._persistenceId)
+                connection.checkin(destinationPersistenceId)
             except SVNError, error:
                 errorMessage = u"Unable to copy item '%s' to '%s'. " % (self.identifier, destination.identifier) \
                                + u"Reason: %s" % error
@@ -271,7 +326,8 @@ class DataSVNAdapter(NullDataStorer):
         try:
             connection = self._connectionPool.acquire()
             try:
-                return connection.exists(self._persistenceId)
+                connection.update()
+                return os.path.exists(connection.repoWorkingCopyPath + self._persistenceId)
             except SVNError, error:
                 raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error)
         finally:

@@ -36,42 +36,54 @@
 
 
 """ 
-Implements SVN-specific connection pool.
+Implements mapping of logical identifiers to SVN-specific identifiers.
 """
 
 
-from datafinder.persistence.adapters.svn.constants import MAX_CONNECTION_NUMBER
-from datafinder.persistence.common.connection.pool import ConnectionPool
-from datafinder.persistence.adapters.svn.util import util
+import platform
+
+from datafinder.persistence.adapters.svn.util.cpython import CPythonSVNDataWrapper
+#from datafinder.persistence.adapters.svn.util.jython import JythonSVNDataWrapper
 
 
 __version__ = "$Revision-Id:$" 
 
 
-class SVNConnectionPool(ConnectionPool):
-    """ Implements a SVN-specific connection pool. """
-    
-    def __init__(self, configuration):
-        """ 
-        Constructor. 
+def createSVNConnection(repoPath, workingCopyPath, username, password):
+    if platform.platform().lower().find("java") == -1:
+        connection = CPythonSVNDataWrapper(repoPath, workingCopyPath, username, password)
+    else:
+        #connection= JythonSVNDataWrapper(repoPath, workingCopyPath, username, password)
+        pass
+    return connection
+
+def determineBaseName(identifier):
+    """ 
+    Determines the last component of the logical path - the base name. 
         
-        @param configurationContext: SVN connection parameters.
-        @type configurationContext: L{Configuration<datafinder.persistence.
-        webdav.configuration.Configuration>}
-        """
+    @param identifier: The interface identifier.
+    @type identifier: C{unicode}
         
-        self._configuration = configuration
-        ConnectionPool.__init__(self, MAX_CONNECTION_NUMBER)
+    @return: Last part of the identifier.
+    @rtype: C{unicode}
+    """
         
-    def _createConnection(self):
-        """ Overwrites template method for connection creation. """
+    return identifier.rsplit("/")[-1]
+
+def mapIdentifier(identifier):
+    """ 
+    Maps the logical identifier to the persistence representation.
         
-        repoPath = self._configuration.baseUrl
-        workingCopyPath = self._configuration.workingCopyPath
-        username = self._configuration.username
-        password = self._configuration.password
+    @param identifier: Path relative to the configured base URL.
+                       Base URL is implicitly represented by '/'.
+    @type identifier: C{unicode}
         
-        connection = util.createSVNConnection(repoPath, workingCopyPath, username, password)
+    @return: URL identifying the resource.
+    @rtype: C{unicode}
+    """
         
-        return connection
-    
+    if identifier.startswith("/"):
+        persistenceId = identifier
+    else:
+        persistenceId = "/" + identifier
+    return persistenceId

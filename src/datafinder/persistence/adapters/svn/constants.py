@@ -44,6 +44,6 @@ __version__ = "$Revision-Id:$"
 
 # Constants for connection pooling
 MAX_POOL_NUMBER = 10
-MAX_CONNECTION_NUMBER = 1 
+MAX_CONNECTION_NUMBER = 5 
 
 LINK_TARGET_PROPERTY = "svn:externals"
