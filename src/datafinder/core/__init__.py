@@ -41,3 +41,36 @@ The package implements core part of the DataFinder.
 
 
 __version__ = "$Revision-Id:$" 
+import logging
+_log = logging.getLogger("script")
+
+from datafinder.common.event_observer import EventParent
+#Events happening in core module
+
+class ItemEvent(EventParent):
+    '''
+    Module implementing the Event for creating an Item 
+    '''  
+    def __init__(self, name, stuff = None):
+        EventParent.__init__(self)
+        self.name = name
+        self.itemName = stuff
+        self.collection = None
+
+    def __str__(self):
+        return '%s(%s)'% (self.name, self.itemName)
+    
+    def setNewItem(self, newItem, newItemCollection = None ):
+        self.itemName = newItem
+        self.collection = newItemCollection
+        self.fireEvent()
+        _log.info("done firing")
+    def getItemName(self):
+        return self.itemName
+        
+_createItemEvent = ItemEvent("CreateItem")
+
+def getCreateItemEvent():
+    return _createItemEvent
+
+

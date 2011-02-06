@@ -48,6 +48,7 @@ from datafinder.core.error import CoreError, PropertyError, ItemError
 from datafinder.core.repository_manager import repositoryManagerInstance
 from datafinder.script_api.error import ItemSupportError
 from datafinder.script_api.item.item_description import ItemDescription
+from datafinder.core import getCreateItemEvent
 
 
 __version__ = "$Revision-Id$" 
@@ -503,4 +504,7 @@ def getParentItemPath(path):
     childItemPath, parentItemPath = __getChildParentPath(path)
     return parentItemPath
     
-    
+def registerCreateItemListener(observer):
+    """ Register for the createItemListener """
+    event = getCreateItemEvent()
+    event.register(observer)

@@ -39,59 +39,75 @@
 This module implements the observer pattern for the DataFinder. 
 Events can be told, and listeners can listen to these events.
 """
-
+import logging
 
 __version__ = "$Revision-Id:$" 
+_log = logging.getLogger("script")
     
-class Observer(object):
-    listeners={}
+class EventParent:
     
-    """
-    Registering an Listener
-    @param eventName: Name of the event the listener is registered for
-    @param callback: Function that is supposed to be called on firing the event
-    """
-    def register(self, eventName, callback):
-        listenDict = Observer.listeners
-        callbacks = listenDict.get(eventName)
-        if not callbacks:
-            callbacks = []
-            listenDict[eventName] = callbacks
-        elif callback not in callbacks:
-            callbacks.append(callback)
+    def __init__(self):
+        self._observers = []
+        
+    def register(self, observer):
+        """
+        Registering an Listener
+        @param eventName: Name of the event the listener is registered for
+        @param callback: Function that is supposed to be called on firing the event
+        """
+        if not observer in self._observers:
+            self._observers.append(observer)
     
-    """
-    Unregister an Listener
-    @param eventName: Name of the event the listener is registered for
-    @param callback: Function that is supposed to be called on firing the event
-    """
-    def unregister(self, eventName, callback):
-        listenDict = Observer.listeners
-        callbacks = listenDict.get(eventName)
-        if callbacks:
-            try: callbacks.remove(callback)
-            except: pass
+    def unregister(self, observer):
+        """
+        Unregister an Listener
+        @param eventName: Name of the event the listener is registered for
+        @param callback: Function that is supposed to be called on firing the event
+        """
+        try:
+            self._observers.remove(observer)
+        except ValueError:
+            pass
             
-    """
-    Sending an information to all listeners registered for an event
-    @param eventName: Name of the event the listener is registered for
-    @param callback: Function that is supposed to be called on firing the event
-    """
-    
-    def fireEvent(self, event):
-        if not event: return
-        callbacks = []
-        callbacks.extend(Observer.listeners.get(event.name,[]))
-        for cb in callbacks:
-            if cb: cb(event)
             
-"""
-Must be added to the item.factory or other factories, elements...  
-"""       
-class Event(object):
+   
+    def fireEvent(self, modifier= None):
+        """
+        Sending an information to all listeners registered for an event
+        @param eventName: Name of the event the listener is registered for
+        @param callback: Function that is supposed to be called on firing the event
+        """
+        for observer in self._observers:
+            if modifier != observer:
+                observer._callback(self)
+ 
+ #
+ #Things to be implemented into another class for the Observer Pattern
+ #           
+    
+class Event(EventParent):
+    '''
+    Must be added to the item.factory or other factories, elements...  
+    '''  
     def __init__(self, name, stuff=None):
+        EventParent.__init__(self)
         self.name = name
         self.stuff = stuff
 
     def __str__(self):
-        return '%s(%s)'%(self.name,self.stuff)   
+        return '%s(%s)'% (self.name, self.stuff)
+    
+
+
+class Listener:
+    """
+    Module template for implementing a listener, that can listens on an event
+    """
+        
+    def _callback(self, subject): 
+        print "something called me"
+
+
+def getEvent(): 
+    return Event("TestEvent")
+
