@@ -1,0 +1,455 @@
+<?xml version="1.0"?>
+<!--DOCTYPE PyObject SYSTEM "PyObjects.dtd"-->
+<PyObject module="datafinder.application.Configuration" class="Configuration" id="53426800">
+<attr name="dataTypes" type="list" id="53477544" >
+  <item type="PyObject" id="53477584" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="User" />
+    <attr name="iconName" type="string" value="Mitarbeiter" />
+    <attr name="properties" type="list" id="53477504" >
+      <item type="PyObject" id="53477704" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Name" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53477744" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Firstname" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53478024" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="E-Mail" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+    </attr>
+  </item>
+  <item type="PyObject" id="53477904" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Documentation" />
+    <attr name="iconName" type="string" value="Documentation" />
+    <attr name="properties" type="list" id="53477464" >
+      <item type="PyObject" id="53478104" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Description" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+    </attr>
+  </item>
+  <item type="PyObject" id="53478384" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Input" />
+    <attr name="iconName" type="string" value="Input" />
+    <attr name="properties" type="list" id="53477624" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53478624" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Output" />
+    <attr name="iconName" type="string" value="Output" />
+    <attr name="properties" type="list" id="53477784" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53478264" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Run" />
+    <attr name="iconName" type="string" value="export" />
+    <attr name="properties" type="list" id="53477864" >
+      <item type="PyObject" id="53478744" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Description" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53478824" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="ID" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+    </attr>
+  </item>
+  <item type="PyObject" id="53478864" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Archive" />
+    <attr name="iconName" type="string" value="hard_drive_" />
+    <attr name="properties" type="list" id="53477984" >
+      <item type="PyObject" id="53478944" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Description" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+    </attr>
+  </item>
+  <item type="PyObject" id="53479024" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Subproject" />
+    <attr name="iconName" type="string" value="Planner" />
+    <attr name="properties" type="list" id="53478064" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53479104" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="TRACE" />
+    <attr name="iconName" type="string" value="FlowSolution" />
+    <attr name="properties" type="list" id="53478424" >
+      <item type="PyObject" id="53479184" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Version" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53479224" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="CPUs" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53479264" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Blocks" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+    </attr>
+  </item>
+  <item type="PyObject" id="53479304" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Project" />
+    <attr name="iconName" type="string" value="Planner" />
+    <attr name="properties" type="list" id="53478504" >
+      <item type="PyObject" id="53479344" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Name" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53479384" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Description" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53479464" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Start" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53479504" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="End" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53479544" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Responsible" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53479624" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Editor" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+    </attr>
+  </item>
+  <item type="PyObject" id="53479664" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Meshquality" />
+    <attr name="iconName" type="string" value="verify_document_" />
+    <attr name="properties" type="list" id="53479704" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53479824" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Solverinfo" />
+    <attr name="iconName" type="string" value="verify_document_" />
+    <attr name="properties" type="list" id="53479864" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53479984" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Stdout" />
+    <attr name="iconName" type="string" value="verify_document_" />
+    <attr name="properties" type="list" id="53480024" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53480104" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Load-Balancing" />
+    <attr name="iconName" type="string" value="GridGeneration" />
+    <attr name="properties" type="list" id="53480144" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53480264" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Outflow-Distribution" />
+    <attr name="iconName" type="string" value="GridGeneration" />
+    <attr name="properties" type="list" id="53480304" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53480384" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Control-File" />
+    <attr name="iconName" type="string" value="GridGeneration" />
+    <attr name="properties" type="list" id="53480424" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53480544" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Flow-Initialisation" />
+    <attr name="iconName" type="string" value="GridGeneration" />
+    <attr name="properties" type="list" id="53480584" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53480664" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Inflow-Distribution" />
+    <attr name="iconName" type="string" value="GridGeneration" />
+    <attr name="properties" type="list" id="53480704" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53480784" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="CGNS-File" />
+    <attr name="iconName" type="string" value="Geometry" />
+    <attr name="properties" type="list" id="53480824" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53480904" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Monitoring" />
+    <attr name="iconName" type="string" value="monitor_" />
+    <attr name="properties" type="list" id="53480944" >
+      <item type="PyObject" id="53481024" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="PID" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481064" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Status" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481104" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Start" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481144" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="End" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481184" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Queue" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481224" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Workdir" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481264" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="ID" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481304" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="BackendType" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53481384" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="BackendName" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53489712" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="Memory" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+      <item type="PyObject" id="53489752" module="datafinder.application.PropertyDefinition" class="PropertyDefinition">
+        <attr name="mandatory" type="False" value="" />
+        <attr name="name" type="string" value="CPUs" />
+        <attr name="iconName" type="string"></attr>
+        <attr name="davFlag" type="False" value="" />
+        <attr name="valueType" type="string" value="" />
+        <attr name="defaultValue" type="string" value="" />
+      </item>
+    </attr>
+  </item>
+  <item type="PyObject" id="53489792" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Start-Script" />
+    <attr name="iconName" type="string" value="verify_document_" />
+    <attr name="properties" type="list" id="53489832" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53489952" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Panel" />
+    <attr name="iconName" type="string" value="graph_line_" />
+    <attr name="properties" type="list" id="53489992" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53490072" module="datafinder.application.DataType" class="DataType">
+    <attr name="name" type="string" value="Residual" />
+    <attr name="iconName" type="string" value="graph_line_" />
+    <attr name="properties" type="list" id="53490112" >
+    </attr>
+  </item>
+</attr>
+<attr name="relationTypes" type="list" id="53490192" >
+  <item type="PyObject" id="53490232" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53490312" >
+      <item type="string" value="Input" />
+      <item type="string" value="Output" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Level03_TRACE" />
+    <attr name="iconName" type="string" value="Relation" />
+    <attr name="sourceTypes" type="list" id="53490272" >
+      <item type="string" value="TRACE" />
+    </attr>
+  </item>
+  <item type="PyObject" id="53490352" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53490432" >
+      <item type="string" value="Project" />
+      <item type="string" value="Subproject" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Level01_User" />
+    <attr name="iconName" type="string" value="Relation" />
+    <attr name="sourceTypes" type="list" id="53490392" >
+      <item type="string" value="User" />
+    </attr>
+  </item>
+  <item type="PyObject" id="53490552" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53490632" >
+      <item type="string" value="Archive" />
+      <item type="string" value="Project" />
+      <item type="string" value="User" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Root_Node" />
+    <attr name="iconName" type="string" value="Relation" />
+    <attr name="sourceTypes" type="list" id="53490592" >
+    </attr>
+  </item>
+  <item type="PyObject" id="53490712" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53490792" >
+      <item type="string" value="Documentation" />
+      <item type="string" value="Run" />
+      <item type="string" value="User" />
+      <item type="string" value="Subproject" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Level01_Project" />
+    <attr name="iconName" type="string" value="Relation" />
+    <attr name="sourceTypes" type="list" id="53490752" >
+      <item type="string" value="Project" />
+    </attr>
+  </item>
+  <item type="PyObject" id="53490912" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53490992" >
+      <item type="string" value="Monitoring" />
+      <item type="string" value="TRACE" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Level02_Run" />
+    <attr name="iconName" type="string" value="Relation" />
+    <attr name="sourceTypes" type="list" id="53490952" >
+      <item type="string" value="Run" />
+    </attr>
+  </item>
+  <item type="PyObject" id="53491112" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53491192" >
+      <item type="string" value="User" />
+      <item type="string" value="Run" />
+      <item type="string" value="Documentation" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Level02_Subproject" />
+    <attr name="iconName" type="string" value="relationType" />
+    <attr name="sourceTypes" type="list" id="53491152" >
+      <item type="string" value="Subproject" />
+    </attr>
+  </item>
+  <item type="PyObject" id="53491352" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53491432" >
+      <item type="string" value="Residual" />
+      <item type="string" value="Panel" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Level04_Output" />
+    <attr name="iconName" type="string" value="Relation" />
+    <attr name="sourceTypes" type="list" id="53491392" >
+      <item type="string" value="Output" />
+    </attr>
+  </item>
+  <item type="PyObject" id="53491472" module="datafinder.application.RelationType" class="RelationType">
+    <attr name="targetTypes" type="list" id="53491552" >
+      <item type="string" value="CGNS-File" />
+      <item type="string" value="Control-File" />
+      <item type="string" value="Flow-Initialisation" />
+      <item type="string" value="Load-Balancing" />
+      <item type="string" value="Outflow-Distribution" />
+      <item type="string" value="Meshquality" />
+      <item type="string" value="Solverinfo" />
+      <item type="string" value="Stdout" />
+      <item type="string" value="Inflow-Distribution" />
+      <item type="string" value="Start-Script" />
+    </attr>
+    <attr name="name" type="string" value="Rel_Level04_Input" />
+    <attr name="iconName" type="string" value="Relation" />
+    <attr name="sourceTypes" type="list" id="53491512" >
+      <item type="string" value="Input" />
+    </attr>
+  </item>
+</attr>
+</PyObject>
