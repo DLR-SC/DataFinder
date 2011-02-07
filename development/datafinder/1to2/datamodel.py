@@ -74,9 +74,9 @@ class dataModelConvert:
                                 if attribute.name == "name":
                                     propertyname = attribute.value
                                 elif attribute.name == "valueType":
-                                    valueType = attribute.type
+                                    valueType = attribute.type.capitalize()
                                 elif attribute.name == "mandatory":
-                                    mandatory = attribute.type
+                                    mandatory = attribute.type.lower()
                                 elif attribute.name == "defaultValue":
                                     defaultValue = attribute.value
                             self.newXmlFile.write("\t\t<properties>\n")
@@ -125,8 +125,9 @@ class dataModelConvert:
                             sourceList.append(item.value)
                             
                     except AttributeError:
-                        pass
-            self.newXmlFile.write("\t<relation>\n")
+                        # if there is no source, root is the source and the name of the relation must be root relation
+                        name = "Root Relation"
+            self.newXmlFile.write("\t<relations>\n")
             self.newXmlFile.write("\t\t<name>"+name+"</name>\n")
             self.newXmlFile.write("\t\t<iconName>"+iconName+"</iconName>\n")
             for element in sourceList:
@@ -134,10 +135,10 @@ class dataModelConvert:
             for element in targetList:
                 self.newXmlFile.write("\t\t<targetDataTypeNames>"+element+"</targetDataTypeNames>\n")
 
-            self.newXmlFile.write("\t</relation>\n")
+            self.newXmlFile.write("\t</relations>\n")
                             
-old = "testfiles/trace_datamodel_old.xml"
-new = "testfiles/trace_datamodel_new.xml"
+old = "testfiles/as-datamodel.xml"
+new = "testfiles/as-datamodel-new.xml"
 
 conversion = dataModelConvert(old,new)
 print "mapped"
