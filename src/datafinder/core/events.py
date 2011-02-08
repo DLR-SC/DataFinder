@@ -1,4 +1,4 @@
-# $Filename$ 
+# $Filename$$
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
 #
@@ -36,8 +36,27 @@
 
 
 """ 
-The package implements core part of the DataFinder.
+This module implements an interface to access Events that happen in the core package
 """
 
 
 __version__ = "$Revision-Id:$" 
+
+import logging
+_log = logging.getLogger("script")
+
+from datafinder.core.repository import Repository
+
+class ImportEvent(object):
+    def __init__(self):
+        pass  
+    
+    def register(self, observer):
+        #static method
+        Repository.performImport += observer
+        
+    def unregister(self, observer):
+        #static method
+        Repository.performImport -= observer
+ 
+

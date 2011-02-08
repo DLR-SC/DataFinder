@@ -44,70 +44,76 @@ import logging
 __version__ = "$Revision-Id:$" 
 _log = logging.getLogger("script")
     
-class EventParent:
+class Observable(object):
     
-    def __init__(self):
-        self._observers = []
-        
-    def register(self, observer):
+    def __init__(self, method):
+        """ Takes a bound method and makes it observable by other object. """
+      
+        self.classObservable = None # Class-specific observable instance, None-> it is the class-spcific one
+        self.observers = list() # List of observers
+        self.instance = None # Instance the method is bound to
+        self.method = method # Method that is observed
+        self.__doc__ = self.method.__doc__ # Documentation
+        self.cls = None
+        try: 
+            self.name = " " + method.__name__ # Name that is used to attach observers to the instances
+        except AttributeError:
+            self.name = None
+  
+            
+    def __add__(self, observer):
         """
         Registering an Listener
         @param eventName: Name of the event the listener is registered for
         @param callback: Function that is supposed to be called on firing the event
         """
-        if not observer in self._observers:
-            self._observers.append(observer)
-    
-    def unregister(self, observer):
+        if not observer in self.observers:
+            self.observers.append(observer)
+        return self
+     
+    def __sub__(self, observer):
         """
         Unregister an Listener
         @param eventName: Name of the event the listener is registered for
         @param callback: Function that is supposed to be called on firing the event
         """
         try:
-            self._observers.remove(observer)
+            self.observers.remove(observer)
         except ValueError:
             pass
+        return self    
             
-            
-   
-    def fireEvent(self, modifier= None):
+    def __call__(self, *args, **kwargs):
+        """ Calls the observable method and handles observer notification. 
+        TODO: Think of exception handling and threading issues.
         """
-        Sending an information to all listeners registered for an event
-        @param eventName: Name of the event the listener is registered for
-        @param callback: Function that is supposed to be called on firing the event
-        """
-        for observer in self._observers:
-            if modifier != observer:
-                observer._callback(self)
- 
- #
- #Things to be implemented into another class for the Observer Pattern
- #           
-    
-class Event(EventParent):
-    '''
-    Must be added to the item.factory or other factories, elements...  
-    '''  
-    def __init__(self, name, stuff=None):
-        EventParent.__init__(self)
-        self.name = name
-        self.stuff = stuff
-
-    def __str__(self):
-        return '%s(%s)'% (self.name, self.stuff)
-    
-
-
-class Listener:
-    """
-    Module template for implementing a listener, that can listens on an event
-    """
         
-    def _callback(self, subject): 
-        print "something called me"
-
-
-def getEvent(): 
-    return Event("TestEvent")
-
+        if not hasattr(self.method, "__call__"):
+            methodToCall = self.method.__get__(self.instance, self.cls)
+            returnValue = methodToCall(*args, **kwargs)
+        else:
+            returnValue = self.method(self.instance, *args, **kwargs)
+        
+        if not self.classObservable is None: # Call all class-specific observers
+            for observer in self.classObservable.observers:
+                observer(args, kwargs, returnValue)
+        for observer in self.observers: # Call the instance-specific observers
+            observer(args, kwargs, returnValue)
+        return returnValue
+        
+    def __get__(self, instance, cls):
+        """ Returns the wrapped observed method. """
+        
+        observable = self #if instance is None the method is called from the class object
+        self.instance = instance
+        self.cls = cls    
+        if not instance is None and not self.name is None: 
+            try:
+                observable = self.instance.__dict__[self.name] # Retrieve the cached observable from the instance properties
+            except KeyError: # Create a new observable if it not exists
+                observable = Observable(self.method)
+                observable.classObservable = self
+                observable.cls = cls
+                observable.instance = instance
+                self.instance.__dict__[self.name] = observable
+        return observable

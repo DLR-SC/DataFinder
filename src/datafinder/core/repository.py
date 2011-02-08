@@ -48,7 +48,7 @@ from datafinder.core.item.property import Property
 from datafinder.core.item.visitor.importer import Importer
 from datafinder.core.item.visitor.walker import ItemTreeWalker
 from datafinder.persistence.error import PersistenceError
-from datafinder.core import getCreateItemEvent
+from datafinder.common.event_observer import Observable
 
 
 __version__ = "$Revision-Id:$" 
@@ -78,7 +78,9 @@ class Repository(object):
         self._privilegeSupport = None
         self._archiver = Archiver(self, repositoryManager)
         self.root = self._itemFactory.create("/")
-
+ 
+    
+    @Observable
     @staticmethod
     def performImport(sourceItem, targetCollection, targetItemName=None, 
                       defaultProperties=None, copyData=True, ignoreLinks=False, determinePropertiesCallback=None):
@@ -95,10 +97,7 @@ class Repository(object):
             defaultProperties = defaultProperties[:]
         importer.performImport(sourceItem, targetCollection, targetItemName, defaultProperties, 
                                copyData, ignoreLinks, determinePropertiesCallback)
-        'Fire event of a newly created Item '
-        createItemEvent = getCreateItemEvent()
-        createItemEvent.setNewItem(targetItemName, targetCollection)
-
+        
     @staticmethod
     def walk(item):
         """
@@ -286,3 +285,4 @@ class Repository(object):
         """
         
         return self._configuration
+
