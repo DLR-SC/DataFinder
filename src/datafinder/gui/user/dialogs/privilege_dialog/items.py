@@ -37,13 +37,14 @@
 
 
 """ 
-Provides QStandardItem implementations for principals and privileges.
+Provides QStandardItem implementations for principals and access levels.
 """
 
 
 from PyQt4.QtGui import QIcon, QStandardItem, QComboBox
 
 from datafinder.core.item.privileges.principal import USER_PRINCIPAL_TYPE
+from datafinder.core.item.privileges.privilege import ACCESS_LEVELS
 
 
 __version__ = "$Revision-Id$" 
@@ -86,19 +87,21 @@ class AccessLevelItem(QStandardItem):
     """ Access level specific item. """
 
     #@param accessLevels: Access levels that can be represented.
-    #@type accessLevels: C{list} of L{_AccessLevel<datafinder.core.item.privileges.privilege._AccessLevel>}
-    accessLevelNames = list()
+    #@type accessLevels: C{list} of C{unicode}
+    accessLevelNames = [accessLevel.displayName for accessLevel in ACCESS_LEVELS]
     
-    def __init__(self, levelName):
+    def __init__(self, levelName, isReadOnly=False):
         """ Constructor.
         
         @param level: The associated access level constant.
         @type level: C{unicode}
+        @param isReadOnly: Falg indicating whether the value should be changeable.
+        @type isReadOnly: C{bool}
         """
         
         QStandardItem.__init__(self, levelName)
         
-        self.setEditable(True)
+        self.setEditable(not isReadOnly)
 
     def createEditor(self, parent):
         """ Returns the correctly initialized editor for the item value. 

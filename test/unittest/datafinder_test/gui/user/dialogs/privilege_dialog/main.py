@@ -40,9 +40,11 @@ Allows simplified start of the privilege dialog.
 """
 
 
+import os
 import sys
 
-from PyQt4.QtGui import QApplication
+from PyQt4.QtCore import QModelIndex
+from PyQt4.QtGui import QApplication, QStandardItemModel, QStandardItem
 
 from datafinder.core.error import CoreError
 from datafinder.core.item.privileges.acl import AccessControlList
@@ -53,12 +55,67 @@ from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
 __version__ = "$Revision-Id$" 
 
 
-class RepositoryMock(object):
+class RepositoryMock(QStandardItemModel):
     """ Mocks the principal search functionality. """
     
     error = False
     searchMode = None
     
+    
+    def __init__(self, availableItems):
+        """ Initializes the model with the given items. """
+        
+        QStandardItemModel.__init__(self)
+        
+        # Determine all nested items
+        self._parentChildMap = dict()
+        self._allItems = dict()
+        root = None
+        for item in availableItems:
+            self._parentChildMap[item.path] = list()
+            currentItem = item
+            while not currentItem is None:
+                self._parentChildMap[item.path].append(currentItem)
+                if currentItem.parent is None:
+                    root = currentItem
+                    self._parentChildMap[item.path].reverse()
+                currentItem = currentItem.parent
+        self._parentChildMap[root.path] = [root]
+        
+        # Initializing the model
+        sRoot = self.invisibleRootItem()
+        sRoot.item = root
+        root.sItem = sRoot
+        self._allItems[root.path] = root
+        for items in self._parentChildMap.values():
+            parent = sRoot
+            for item in items:
+                if root != item:
+                    sItem = QStandardItem(item.name)
+                    sItem.item = item
+                    item.sItem = sItem
+                    self._allItems[item.path] = item
+                    parent.appendRow(sItem)
+                    parent = sItem
+
+    def nodeFromIndex(self, index):
+        """ Mocks the item retrieval operation of the original
+        repository model. """
+        
+        sItem = self.itemFromIndex(index)
+        if sItem is None:
+            sItem = self._allItems["/"].sItem
+        return sItem.item
+    
+    def indexFromPath(self, path):
+        """ Mocks the index from path retrieval method. """
+        
+        if path in self._allItems:
+            item = self._allItems[path]
+            return self.indexFromItem(item.sItem)
+        else:
+            return QModelIndex()
+        
     def searchPrincipal(self, _, searchMode):
         """ Raises an error or returns all special principals. """
 
@@ -71,11 +128,16 @@ class RepositoryMock(object):
 class ItemMock(object):
     """ Used to mock an item and its ACL. """
     
-    def __init__(self, error=CoreError("")):
+    def __init__(self, path, error=CoreError("")):
         """ Constructor. """
         
-        self.name = "test.pdf"
-        self.path = "/test/item/test.pdf"
+        self.childrenPopulated = True
+        self.path = path
+        self.name = os.path.basename(path)
+        if path != "/":
+            self.parent = ItemMock(os.path.dirname(path), None)
+        else:
+            self.parent = None
         self.acl = AccessControlList()
         self.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[0])
         self.error = error
@@ -89,10 +151,18 @@ class ItemMock(object):
         else:
             self.acl = acl
 
+    def __cmp__(self, another):
+        """ Compares items using the path. """
+        
+        return cmp(self.path, another.path)
+
 
 if __name__ == "__main__":
     application = QApplication(sys.argv)
-    dialog = PrivilegeDialog(RepositoryMock())
-    dialog.item = ItemMock(None)
+    selectedItem = ItemMock("/test/another/test.pdf", None)
+    anotherItem = ItemMock("/another/here/test3.pdf", None)
+    repository = RepositoryMock([selectedItem, anotherItem])
+    dialog = PrivilegeDialog(repository)
+    dialog.item = selectedItem
     dialog.show()
     sys.exit(application.exec_())

@@ -44,8 +44,10 @@ Implements the privilege dialog.
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QDialog, QDialogButtonBox
 
+from datafinder.gui.user.models.repository.filter.path_filter import PathFilter
 from datafinder.gui.user.dialogs.privilege_dialog.principal_search import PrincipalSearchController, \
                                                                           PrincipalSearchModel
+from datafinder.gui.user.dialogs.privilege_dialog.inherited_privileges import InheritedPrivilegeModel, InheritedPrivilegeController
 from datafinder.gui.user.dialogs.privilege_dialog.privileges import PrivilegeController, PrivilegeModel
 from datafinder.gui.gen.user.privilege_dialog_ui import Ui_PrivilegeDialog
 
@@ -58,11 +60,11 @@ class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
     
     _WINDOW_TITLE_TEMPLATE = "Editing Privileges of %s"
     
-    def __init__(self, model, parent=None):
+    def __init__(self, repositoryModel, parent=None):
         """ Constructor. 
         
-        @param model: The repository model.
-        @type model: L{<RepositoryModel>datafinder.gui.user.models.repository.repository.RepositoryModel} 
+        @param repositoryModel: The repository model.
+        @type repositoryModel: L{<RepositoryModel>datafinder.gui.user.models.repository.repository.RepositoryModel} 
         @param parent: The parent object of the property dialog.
         @type parent: L{QWidget<PyQt4.QtGui.QWidget>}
         """
@@ -72,10 +74,14 @@ class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
         self.setupUi(self)
         
         self._item = None
-        self._principalSearchModel = PrincipalSearchModel(model)
+        self._repositoryModel = repositoryModel
+        self._principalSearchModel = PrincipalSearchModel(self._repositoryModel)
         self._principalSearchController = PrincipalSearchController(self, self._principalSearchModel)
-        self._privilegeModel = PrivilegeModel(model)
+        self._privilegeModel = PrivilegeModel(self._repositoryModel)
         self._privilegeController = PrivilegeController(self, self._privilegeModel)
+        self._inheritedPrivilegesModel = InheritedPrivilegeModel()
+        self._inheritedPrivilegesController = InheritedPrivilegeController(self, self._repositoryModel, self._inheritedPrivilegesModel)
+        
         
         self.connect(self._principalSearchController, 
                      SIGNAL(self._principalSearchController.ADD_PRINCIPAL_SIGNAL),
@@ -89,6 +95,8 @@ class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
         self._item = item
         self.setWindowTitle(self._WINDOW_TITLE_TEMPLATE % item.path)
         self._privilegeController.item = item
+        self.selectItemWidget.repositoryModel = PathFilter(self._repositoryModel, item.parent)
+        self._inheritedPrivilegesController.item = item
     
     def _getItem(self):
         """ Returns the current displayed item. """

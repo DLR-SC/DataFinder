@@ -210,7 +210,7 @@ class _AccessLevelItemDelegate(QStyledItemDelegate):
             self._model.changeAccessLevel(item, levelName)
             self._controller.checkApplyEnabledState()
 
-        
+
 class PrivilegeModel(QStandardItemModel):
     """ Implements the privilege model. """
     
@@ -224,7 +224,6 @@ class PrivilegeModel(QStandardItemModel):
         self._acl = None
         
         self.setColumnCount(4) # principal, content, properties, administration
-        AccessLevelItem.accessLevelNames = [accessLevel.displayName for accessLevel in ACCESS_LEVELS]
 
     def _setItem(self, item):
         """ Sets the item. """
@@ -280,8 +279,9 @@ class PrivilegeModel(QStandardItemModel):
         
         principalItems.reverse()
         for principalItem in principalItems:
-            self._acl.clearPrivileges(principalItem.principal)
-            self.removeRow(principalItem.row())
+            if principalItem.principal in self._acl.principals:
+                self._acl.clearPrivileges(principalItem.principal)
+                self.removeRow(principalItem.row())
             
     def movePrincipalPosition(self, principalItem, newRow):
         """
@@ -294,9 +294,10 @@ class PrivilegeModel(QStandardItemModel):
         @type newRow: C{int}
         """
         
-        self._acl.setIndex(principalItem.principal, newRow)
-        items = self.takeRow(principalItem.row())
-        self.insertRow(newRow, items)
+        if principalItem.principal in self._acl.principals:
+            self._acl.setIndex(principalItem.principal, newRow)
+            items = self.takeRow(principalItem.row())
+            self.insertRow(newRow, items)
 
     def store(self):
         """ Stores the current ACL state. """
@@ -315,17 +316,18 @@ class PrivilegeModel(QStandardItemModel):
         @type levelName: C{unicode}
         """
         
-        level = None
-        for accessLevel in ACCESS_LEVELS:
-            if levelName == accessLevel.displayName:
-                level = accessLevel
-                break
-        if not level is None:
-            principal = self.item(levelItem.row()).principal
-            levelItem.setText(levelName)
-            if levelItem.column() == 1:
-                self._acl.setContentAccessLevel(principal, level)
-            elif levelItem.column() == 2:
-                self._acl.setPropertiesAccessLevel(principal, level)
-            elif levelItem.column() == 3:
-                self._acl.setAdministrationAccessLevel(principal, level)
+        principal = self.item(levelItem.row()).principal
+        if principal in self._acl.principals:
+            level = None
+            for accessLevel in ACCESS_LEVELS:
+                if levelName == accessLevel.displayName:
+                    level = accessLevel
+                    break
+            if not level is None:
+                levelItem.setText(levelName)
+                if levelItem.column() == 1:
+                    self._acl.setContentAccessLevel(principal, level)
+                elif levelItem.column() == 2:
+                    self._acl.setPropertiesAccessLevel(principal, level)
+                elif levelItem.column() == 3:
+                    self._acl.setAdministrationAccessLevel(principal, level)

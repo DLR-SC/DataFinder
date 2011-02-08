@@ -67,9 +67,10 @@ class PrincipalSearchTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates the test setup. """
         
-        self._repositoryMock = RepositoryMock()
+        selectedItem = ItemMock("/test/test.pdf")
+        self._repositoryMock = RepositoryMock([selectedItem])
         self._privilegeDialog = PrivilegeDialog(self._repositoryMock)
-        self._privilegeDialog.item = ItemMock()
+        self._privilegeDialog.item = selectedItem
         self._model = self._privilegeDialog._principalSearchModel
         self._controller = self._privilegeDialog._principalSearchController
 
