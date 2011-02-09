@@ -43,8 +43,9 @@ SVN errors.
 __version__ = "$Revision-Id:$" 
 
 
-class SVNError(Exception):
+class SubversionError(Exception):
     """
     Error class for the svn level.
     """
+    
     pass

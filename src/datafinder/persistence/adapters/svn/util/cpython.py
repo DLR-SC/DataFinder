@@ -49,13 +49,13 @@ import sys
 from pysvn._pysvn_2_6 import ClientError
 
 from datafinder.persistence.error import PersistenceError
-from datafinder.persistence.adapters.svn.error import SVNError
+from datafinder.persistence.adapters.svn.error import SubversionError
 
 
 __version__ = "$Revision-Id:$" 
 
 
-class CPythonSVNDataWrapper(object):
+class CPythonSubversionDataWrapper(object):
     """ 
     Implements a SVN specific data adapter for CPython.
     """
@@ -132,7 +132,7 @@ class CPythonSVNDataWrapper(object):
             else:
                 return False
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
     
     def isCollection(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
@@ -146,7 +146,7 @@ class CPythonSVNDataWrapper(object):
             else:
                 return False
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def update(self):
         """ Updates the working copy. """
@@ -154,7 +154,7 @@ class CPythonSVNDataWrapper(object):
         try:
             self._client.update(self._repoWorkingCopyPath)
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def checkin(self, path):
         """ 
@@ -167,7 +167,7 @@ class CPythonSVNDataWrapper(object):
         try:
             self._client.checkin(self._repoWorkingCopyPath + path, "",)
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def add(self, path):
         """ 
@@ -180,7 +180,7 @@ class CPythonSVNDataWrapper(object):
         try:
             self._client.add(self._repoWorkingCopyPath + path, recurse=True)
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def delete(self, path):
         """
@@ -193,7 +193,7 @@ class CPythonSVNDataWrapper(object):
         try:
             self._client.remove(path)
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def copy(self, path, destinationPath):
         """
@@ -208,7 +208,7 @@ class CPythonSVNDataWrapper(object):
         try:
             self._client.copy(path, destinationPath)
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def setProperty(self, path, key, value):
         """
@@ -225,7 +225,7 @@ class CPythonSVNDataWrapper(object):
         try:
             self._client.propset(key, value, self._repoWorkingCopyPath + path)
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def getProperty(self, path, key):
         """
@@ -238,10 +238,12 @@ class CPythonSVNDataWrapper(object):
         """
         
         try:
-            propertyValue = self._client.propget(key, path)
-            return propertyValue
+            propertyValue = self._client.propget(key, self._repoWorkingCopyPath + path)
+            return propertyValue[self._repoWorkingCopyPath.replace("\\", "/") + path]
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
+        except KeyError, error:
+            raise SubversionError(error)
     
     def getChildren(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
@@ -255,7 +257,7 @@ class CPythonSVNDataWrapper(object):
                 result.append(entry[0].repos_path) 
             return result
         except ClientError, error:
-            raise SVNError(error)
+            raise SubversionError(error)
 
     @property
     def repoWorkingCopyPath(self):

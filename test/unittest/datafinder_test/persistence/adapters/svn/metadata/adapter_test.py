@@ -51,7 +51,7 @@ from datafinder_test.mocks import SimpleMock
 __version__ = "$Revision-Id:$" 
 
 
-class MetadataSVNAdapterTestCase(unittest.TestCase):
+class MetadataSubversionAdapterTestCase(unittest.TestCase):
     """ Tests the meta data adapter implementation. """
 
     def setUp(self):
@@ -80,12 +80,12 @@ class MetadataSVNAdapterTestCase(unittest.TestCase):
         expectedResult = self._initValidRetrieveResult("")
         
         self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None)})
-        self._adapter = adapter.MetadataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertEquals(self._adapter.retrieve(), expectedResult)
         self.assertEquals(self._adapter.retrieve(list()), dict())
         
         self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None)})
-        self._adapter = adapter.MetadataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertEquals(self._adapter.retrieve(["1"]), {"1": MetadataValue("value")})
 
     def testUpdateSuccess(self):

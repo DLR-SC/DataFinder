@@ -42,19 +42,37 @@ Implements mapping of logical identifiers to SVN-specific identifiers.
 
 import platform
 
-from datafinder.persistence.adapters.svn.util.cpython import CPythonSVNDataWrapper
-#from datafinder.persistence.adapters.svn.util.jython import JythonSVNDataWrapper
+if platform.platform().lower().find("java") == -1:
+    cpython = __import__("datafinder.persistence.adapters.svn.util.cpython", globals(), locals(), ["CPythonSubversionDataWrapper"], -1)
+    CPythonSubversionDataWrapper = cpython.CPythonSubversionDataWrapper
+else:
+    jython = __import__("datafinder.persistence.adapters.svn.util.jython", globals(), locals(), ["JythonSubversionDataWrapper"], -1)
+    JythonSubversionDataWrapper = jython.JythonSubversionDataWrapper
 
 
 __version__ = "$Revision-Id:$" 
 
 
-def createSVNConnection(repoPath, workingCopyPath, username, password):
+def createSubversionConnection(repoPath, workingCopyPath, username, password):
+    """ 
+    Creates a SVN connection and determines which interpreter is used.
+        
+    @param repoPath: The path to the repository.
+    @type repoPath: C{unicode}
+    @param workingCopyPath: The path to the local working copy.
+    @type workingCopyPath: C{unicode}
+    @param username: The username.
+    @type username: C{unicode}
+    @param password: The password.
+    @type password: C{unicode}
+    
+    @return: SVN connection.
+    """
+    
     if platform.platform().lower().find("java") == -1:
-        connection = CPythonSVNDataWrapper(repoPath, workingCopyPath, username, password)
+        connection = CPythonSubversionDataWrapper(repoPath, workingCopyPath, username, password)
     else:
-        #connection= JythonSVNDataWrapper(repoPath, workingCopyPath, username, password)
-        pass
+        connection= JythonSubversionDataWrapper(repoPath, workingCopyPath, username, password)
     return connection
 
 def determineBaseName(identifier):
@@ -87,3 +105,19 @@ def mapIdentifier(identifier):
     else:
         persistenceId = "/" + identifier
     return persistenceId
+
+def determineParentPath(path):
+    """ 
+    Determines the parent path of the logical path. 
+       
+    @param path: The path.
+    @type path: C{unicode}
+      
+    @return: The parent path of the identifier.
+    @rtype: C{unicode}
+    """
+       
+    parentPath = "/".join(path.rsplit("/")[:-1])
+    if parentPath == "" and path.startswith("/") and path != "/":
+        parentPath = "/"
+    return parentPath

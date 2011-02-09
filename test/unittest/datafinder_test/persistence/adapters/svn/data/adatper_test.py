@@ -46,8 +46,8 @@ import unittest
 from io import StringIO
 
 from datafinder.persistence.adapters.svn.data import adapter
-from datafinder.persistence.adapters.svn.data.adapter import DataSVNAdapter
-from datafinder.persistence.adapters.svn.error import SVNError
+from datafinder.persistence.adapters.svn.data.adapter import DataSubversionAdapter
+from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock 
 
@@ -90,7 +90,7 @@ class _OpenMock(object):
             return StringIO("")
 
     
-class DataSVNAdapterTestCase(unittest.TestCase):
+class DataSubversionAdapterTestCase(unittest.TestCase):
     """ Tests the SVN - data adapter implementation. """
     
     def setUp(self):
@@ -101,17 +101,17 @@ class DataSVNAdapterTestCase(unittest.TestCase):
         adapter.os = self._osModuleMock
         self._openMock = _OpenMock()
         self._connectionMock = SimpleMock()
-        self._defaultAdapter = DataSVNAdapter("/path/identify", SimpleMock(self._connectionMock))
+        self._defaultAdapter = DataSubversionAdapter("/path/identify", SimpleMock(self._connectionMock))
            
     def testLinkTarget(self):
         """ Tests the link target property. """
         
         self._connectionMock = SimpleMock(methodNameResultMap={"update": (None, None), "getProperty": ("/thelinkTargetPath", None)})
-        adapter = DataSVNAdapter("/identifier.txt", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/identifier.txt", SimpleMock(self._connectionMock))
         self.assertEquals(adapter.linkTarget, "/thelinkTargetPath")
         self.assertTrue(adapter.isLink)
-        self._connectionMock = SimpleMock(methodNameResultMap={"update": (None, None), "getProperty": (None, SVNError)})
-        adapter = DataSVNAdapter("/identifier.txt", SimpleMock(self._connectionMock))
+        self._connectionMock = SimpleMock(methodNameResultMap={"update": (None, None), "getProperty": (None, SubversionError)})
+        adapter = DataSubversionAdapter("/identifier.txt", SimpleMock(self._connectionMock))
         self.assertEquals(adapter.linkTarget, None)
         self.assertFalse(adapter.isLink)
                 
@@ -119,20 +119,20 @@ class DataSVNAdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the isLeaf method. """
 
         self._connectionMock.value = True
-        adapter = DataSVNAdapter("/identifier.txt", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/identifier.txt", SimpleMock(self._connectionMock))
         self.assertTrue(adapter.isLeaf)
         self._connectionMock.value = False
-        adapter = DataSVNAdapter("", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("", SimpleMock(self._connectionMock))
         self.assertFalse(adapter.isLeaf)
         
     def testisCollection(self):
         """ Tests the normal behavior of the isResource method. """
         
         self._connectionMock.value = True
-        adapter = DataSVNAdapter("/identifier", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/identifier", SimpleMock(self._connectionMock))
         self.assertTrue(adapter.isCollection)
         self._connectionMock.value = False
-        adapter = DataSVNAdapter("", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("", SimpleMock(self._connectionMock))
         self.assertFalse(adapter.isCollection)
 
     def testcreateResource(self):
@@ -143,7 +143,7 @@ class DataSVNAdapterTestCase(unittest.TestCase):
             globals()["__builtins__"]["open"] = self._openMock
             self._openMock.error = False
             self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"add": (None, None), "checkin": (None, None)})
-            adapter = DataSVNAdapter("/identifier.txt", SimpleMock(self._connectionMock))
+            adapter = DataSubversionAdapter("/identifier.txt", SimpleMock(self._connectionMock))
             adapter.createResource()
         
             self._openMock.error = True
@@ -156,18 +156,18 @@ class DataSVNAdapterTestCase(unittest.TestCase):
         
         self._osModuleMock.error = None
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"add": (None, None), "checkin": (None, None)})
-        adapter = DataSVNAdapter("/anotherIdentifier/bla", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         adapter.createCollection()
-        adapter.createCollection(True)
+        #adapter.createCollection(True)
         
         self._osModuleMock.error = OSError("")
-        self.assertRaises(PersistenceError, self._adapter.createCollection)
+        self.assertRaises(PersistenceError, adapter.createCollection)
         
     def testgetChildren(self):
         """ Tests the normal behavior of the getChildren method. """
     
         self._connectionMock.value = ["/trunk/test/test.txt"]
-        adapter = DataSVNAdapter("/identifier", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/identifier", SimpleMock(self._connectionMock))
         self.assertEquals(["/trunk/test/test.txt"], adapter.getChildren())
     
     def testwriteData(self):
@@ -178,7 +178,7 @@ class DataSVNAdapterTestCase(unittest.TestCase):
             globals()["__builtins__"]["open"] = self._openMock
             self._openMock.error = False
             self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None)})
-            adapter = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+            adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
             adapter.writeData(StringIO(""))
         
             self._openMock.error = True
@@ -194,7 +194,7 @@ class DataSVNAdapterTestCase(unittest.TestCase):
             globals()["__builtins__"]["open"] = self._openMock
             self._openMock.error = False
             self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None)})
-            adapter = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+            adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
             adapter.readData()
         
             self._openMock.error = True
@@ -206,35 +206,35 @@ class DataSVNAdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the delete method. """
         
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "delete": (None, None), "checkin": (None, None)})
-        adapter = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         adapter.delete()
         
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "delete": (None, SVNError), "checkin": (None, None)})
-        adapter = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "delete": (None, SubversionError), "checkin": (None, None)})
+        adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.delete)
 
     def testmove(self):
         """ Tests the normal behavior of the move method. """
                 
-        destination = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+        destination = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, None), "checkin": (None, None), "delete": (None, None)})
-        adapter = DataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         adapter.move(destination)
         
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, SVNError), "checkin": (None, None), "delete": (None, None)})
-        adapter = DataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, SubversionError), "checkin": (None, None), "delete": (None, None)})
+        adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.move, destination)
         
     def testcopy(self):
         """ Tests the normal behavior of the copy method. """
         
-        destination = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+        destination = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, None), "checkin": (None, None)})
-        adapter = DataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         adapter.copy(destination)
         
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, SVNError), "checkin": (None, None)})
-        adapter = DataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, SubversionError), "checkin": (None, None)})
+        adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.copy, destination)
         
     def testexists(self):
@@ -242,13 +242,13 @@ class DataSVNAdapterTestCase(unittest.TestCase):
         
         self._osPathMock.value = True
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None)})
-        adapter = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self.assertTrue(adapter.exists()) 
         self._osPathMock.value = False
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None)})
-        adapter = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+        adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self.assertFalse(adapter.exists())
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, SVNError)})
-        adapter = DataSVNAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, SubversionError)})
+        adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.exists)
         

@@ -44,6 +44,11 @@ __version__ = "$Revision-Id:$"
 
 # Constants for connection pooling
 MAX_POOL_NUMBER = 10
-MAX_CONNECTION_NUMBER = 5 
+MAX_CONNECTION_NUMBER = 10 
 
 LINK_TARGET_PROPERTY = "svn:externals"
+
+DATAFINDER_JSON_PROPERTY ="datafinder:json"
+
+XPS_JSON_PROPERTY = "xps:json:de.dlr.xps.server.datafinder.model.XPSforCFDEntry"
+XPS_TITLE_PROPERTY = "xps:title"

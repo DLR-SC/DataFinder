@@ -48,7 +48,7 @@ from datafinder.persistence.adapters.svn.util import util
 __version__ = "$Revision-Id:$" 
 
 
-class SVNConnectionPool(ConnectionPool):
+class SubversionConnectionPool(ConnectionPool):
     """ Implements a SVN-specific connection pool. """
     
     def __init__(self, configuration):
@@ -57,7 +57,7 @@ class SVNConnectionPool(ConnectionPool):
         
         @param configurationContext: SVN connection parameters.
         @type configurationContext: L{Configuration<datafinder.persistence.
-        webdav.configuration.Configuration>}
+        svn.configuration.Configuration>}
         """
         
         self._configuration = configuration
@@ -71,7 +71,7 @@ class SVNConnectionPool(ConnectionPool):
         username = self._configuration.username
         password = self._configuration.password
         
-        connection = util.createSVNConnection(repoPath, workingCopyPath, username, password)
+        connection = util.createSubversionConnection(repoPath, workingCopyPath, username, password)
         
         return connection
     

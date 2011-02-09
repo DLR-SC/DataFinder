@@ -46,8 +46,8 @@ import unittest
 
 from datafinder.persistence.common.configuration import BaseConfiguration
 from datafinder.persistence.adapters.svn import factory
-from datafinder.persistence.adapters.svn.data.adapter import DataSVNAdapter
-from datafinder.persistence.adapters.svn.metadata.adapter import MetadataSVNAdapter
+from datafinder.persistence.adapters.svn.data.adapter import DataSubversionAdapter
+from datafinder.persistence.adapters.svn.metadata.adapter import MetadataSubversionAdapter
 from datafinder_test.mocks import SimpleMock
 
 
@@ -67,10 +67,10 @@ class FileSystemTestCase(unittest.TestCase):
     def testCreateDataStorer(self):
         """ Tests the creation of a SVN specific data storer. """
         
-        self.assertTrue(isinstance(self._factory.createDataStorer("identifier"), DataSVNAdapter))
+        self.assertTrue(isinstance(self._factory.createDataStorer("identifier"), DataSubversionAdapter))
 
     def testCreateMetadataStorer(self):
         """ Tests the creation of a SVN specific meta data storer. """
         
-        self.assertTrue(isinstance(self._factory.createMetadataStorer("identifier"), MetadataSVNAdapter))
+        self.assertTrue(isinstance(self._factory.createMetadataStorer("identifier"), MetadataSubversionAdapter))
     

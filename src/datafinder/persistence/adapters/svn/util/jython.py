@@ -56,13 +56,13 @@ from org.tmatesoft.svn.core.wc import SVNWCUtil, SVNCommitClient, \
                                       ISVNPropertyHandler
 
 from datafinder.persistence.error import PersistenceError    
-from datafinder.persistence.adapters.svn.error import SVNError
+from datafinder.persistence.adapters.svn.error import SubversionError
 
 
 __version__ = "$Revision-Id:$" 
 
 
-class JythonSVNDataWrapper(object):
+class JythonSubversionDataWrapper(object):
     """ 
     Implements a SVN specific data adapter for Jython.
     """
@@ -123,7 +123,7 @@ class JythonSVNDataWrapper(object):
             else:
                 return False
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
     
     def isCollection(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
@@ -135,7 +135,7 @@ class JythonSVNDataWrapper(object):
             else:
                 return False
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
     
     def update(self):
         """ Updates the working copy. """
@@ -143,7 +143,7 @@ class JythonSVNDataWrapper(object):
         try:
             self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def checkin(self, path):
         """ 
@@ -156,7 +156,7 @@ class JythonSVNDataWrapper(object):
         try:
             self._svnCommitClient.doCommit([self._repoWorkingCopyFile], False, "", False, True)
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def add(self, path):
         """ 
@@ -169,7 +169,7 @@ class JythonSVNDataWrapper(object):
         try:
             self._svnWorkingCopyClient.doAdd(self._repoWorkingCopyFile, True, False, False, SVNDepth.INFINITY, False, False, False)
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def delete(self, path):
         """
@@ -182,7 +182,7 @@ class JythonSVNDataWrapper(object):
         try:
             self._svnWorkingCopyClient.doDelete(File(path), True, False)
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def copy(self, path, destinationPath):
         """
@@ -198,7 +198,7 @@ class JythonSVNDataWrapper(object):
             self._svnCopyClient.doCopy([SVNCopySource(SVNRevision.HEAD, SVNRevision.HEAD, File(path))], \
                                        File(destinationPath), False, True, True)
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def setProperty(self, path, key, value):
         """
@@ -215,7 +215,7 @@ class JythonSVNDataWrapper(object):
         try:
             self._svnWorkingCopyClient.doSetProperty(File(path), key, SVNPropertyValue.create(value), False, SVNDepth.EMPTY, ISVNPropertyHandler, None)
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     def getProperty(self, path, key):
         """
@@ -231,7 +231,7 @@ class JythonSVNDataWrapper(object):
             propertyData = self._svnWorkingCopyClient.doGetProperty(File(path), key, SVNRevision.HEAD, SVNRevision.HEAD)
             return propertyData.getValue().getString()
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
 
     def getChildren(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
@@ -245,7 +245,7 @@ class JythonSVNDataWrapper(object):
                 result.append(entryPath) 
             return result
         except SVNException, error:
-            raise SVNError(error)
+            raise SubversionError(error)
         
     @property
     def repoWorkingCopyPath(self):

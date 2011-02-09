@@ -48,8 +48,9 @@ from datafinder.persistence.common.connection.manager import ConnectionPoolManag
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.adapters.svn.configuration import Configuration
-from datafinder.persistence.adapters.svn.connection_pool import SVNConnectionPool
-from datafinder.persistence.adapters.svn.data.adapter import DataSVNAdapter
+from datafinder.persistence.adapters.svn.connection_pool import SubversionConnectionPool
+from datafinder.persistence.adapters.svn.data.adapter import DataSubversionAdapter
+from datafinder.persistence.adapters.svn.metadata.adapter import MetadataSubversionAdapter
 from datafinder.persistence.adapters.svn.util import util
 
 
@@ -85,14 +86,14 @@ class FileSystem(BaseFileSystem):
         username = self._configuration.username
         password = self._configuration.password
         
-        self._connection = util.createSVNConnection(repoPath, workingCopyPath, username, password)
+        self._connection = util.createSubversionConnection(repoPath, workingCopyPath, username, password)
     
     def _getConnectionPool(self):
         """ Creates / retrieves a usable connection pool for the given configuration. """
         
         connectionPool = self._connectionManager.get(self._configuration.baseUrl)
         if connectionPool is None:
-            connectionPool = SVNConnectionPool(self._configuration)
+            connectionPool = SubversionConnectionPool(self._configuration)
             self._connectionManager.add(self._configuration.baseUrl, connectionPool)
         return connectionPool
     
@@ -112,11 +113,22 @@ class FileSystem(BaseFileSystem):
         Factory Method providing a SVN-specific data storer. 
         
         @return: SVN-specific implementation of the data interface.
-        @rtype: L{SVNAdapter<datafinder.persistence.adapters.svn.
-        data.adapter.SVNAdapter>
+        @rtype: L{DataSubversionAdapter<datafinder.persistence.adapters.svn.
+        data.adapter.DataSubversionAdapter>
         """
         
-        return DataSVNAdapter(identifier, self._connectionPool)    
+        return DataSubversionAdapter(identifier, self._connectionPool)    
+    
+    def createMetadataStorer(self, identifier):
+        """ 
+        Factory Method providing a SVN-specific meta data storer. 
+        
+        @return: SVN-specific implementation of the meta data interface.
+        @rtype: L{MetadataSubversionAdapter<datafinder.persistence.adapters.svn.
+        metadata.adapter.MetadataSubversionAdapter>
+        """
+
+        return MetadataSubversionAdapter(identifier, self._connectionPool)
     
     def release(self):
         """ Releases the acquired connection pool. """
