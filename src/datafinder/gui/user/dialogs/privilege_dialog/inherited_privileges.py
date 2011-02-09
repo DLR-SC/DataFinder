@@ -105,6 +105,7 @@ class InheritedPrivilegeController(QObject):
         
         self._model.item_ = item
         self._selectItemWidget.showPathEditor()
+        self._selectItemWidget.pathEditLabel.setText("Please, enter the item path.")
         index = self._repositoryModel.indexFromPath("/")
         self._selectItemWidget.selectedIndex = index
         self._itemWidgetSelectionChanged(index)

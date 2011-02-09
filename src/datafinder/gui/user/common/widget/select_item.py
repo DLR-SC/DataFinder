@@ -75,7 +75,7 @@ class SelectItemWidget(QtGui.QWidget, Ui_selectItemWidget):
         self._isSingleSelectionMode = False
         self.pathEditLabel.hide()
         self.pathLineEdit.hide()
-        self.disconnect(self.pathLineEdit, QtCore.SIGNAL("editingFinished()"), self._pathLineEditTextEditingFinishedSlot)
+        self.disconnect(self.pathLineEdit, QtCore.SIGNAL("textEdited(QString)"), self._pathLineEditTextEditingFinishedSlot)
 
     def showPathEditor(self):
         """ Hides the path editor. """
@@ -83,13 +83,16 @@ class SelectItemWidget(QtGui.QWidget, Ui_selectItemWidget):
         self._isSingleSelectionMode = True
         self.pathEditLabel.show()
         self.pathLineEdit.show()
-        self.connect(self.pathLineEdit, QtCore.SIGNAL("editingFinished()"), self._pathLineEditTextEditingFinishedSlot)
+        self.connect(self.pathLineEdit, QtCore.SIGNAL("textEdited(QString)"), self._pathLineEditTextEditingFinishedSlot)
 
     def _pathLineEditTextEditingFinishedSlot(self):
         """ Handles changes of the path line edit. """
         
-        index = self._repositoryModel.indexFromPath(unicode(self.pathLineEdit.text()))
-        self.selectedIndex = index
+        path = unicode(self.pathLineEdit.text())
+        index = self._repositoryModel.indexFromPath(path)
+        item = self._repositoryModel.nodeFromIndex(index)
+        if item.path == path:
+            self.selectedIndex = index
                 
     def _selectedIndexChangedSlot(self, currentIndex, _):
         """ Sets the path of the selected item. """

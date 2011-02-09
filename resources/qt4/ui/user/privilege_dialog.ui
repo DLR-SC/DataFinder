@@ -22,7 +22,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -238,40 +238,17 @@
        <item row="0" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QTreeWidget" name="treeWidget">
+          <widget class="SelectItemWidget" name="selectItemWidget" native="true">
            <property name="minimumSize">
             <size>
-             <width>150</width>
-             <height>0</height>
+             <width>220</width>
+             <height>100</height>
             </size>
            </property>
-           <column>
-            <property name="text">
-             <string>Path</string>
-            </property>
-           </column>
-           <item>
-            <property name="text">
-             <string>data</string>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/Simulation24.png</normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/Simulation24.png</iconset>
-            </property>
-            <item>
-             <property name="text">
-              <string>test</string>
-             </property>
-             <property name="icon">
-              <iconset>
-               <normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/Project24.png</normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/Project24.png</iconset>
-             </property>
-            </item>
-           </item>
           </widget>
          </item>
          <item>
-          <widget class="QTableWidget" name="tableWidget_3">
+          <widget class="QTableView" name="inheritedPrivilegeTable">
            <property name="minimumSize">
             <size>
              <width>335</width>
@@ -284,119 +261,15 @@
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
            </property>
-           <attribute name="horizontalHeaderDefaultSectionSize">
+           <attribute name="horizontalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="horizontalHeaderMinimumSectionSize">
             <number>80</number>
            </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
+           <attribute name="verticalHeaderMinimumSectionSize">
             <number>22</number>
            </attribute>
-           <row>
-            <property name="text">
-             <string/>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string/>
-            </property>
-           </row>
-           <row>
-            <property name="text">
-             <string/>
-            </property>
-           </row>
-           <column>
-            <property name="text">
-             <string>Principal</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Content</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Properties</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Administration</string>
-            </property>
-           </column>
-           <item row="0" column="0">
-            <property name="text">
-             <string>User</string>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/user_edit24.png</normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/user_edit24.png</iconset>
-            </property>
-           </item>
-           <item row="0" column="1">
-            <property name="text">
-             <string>All</string>
-            </property>
-           </item>
-           <item row="0" column="2">
-            <property name="text">
-             <string>Read</string>
-            </property>
-           </item>
-           <item row="0" column="3">
-            <property name="text">
-             <string>All</string>
-            </property>
-           </item>
-           <item row="1" column="0">
-            <property name="text">
-             <string>Group 3</string>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/users24.png</normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/users24.png</iconset>
-            </property>
-           </item>
-           <item row="1" column="1">
-            <property name="text">
-             <string>Write</string>
-            </property>
-           </item>
-           <item row="1" column="2">
-            <property name="text">
-             <string>Write</string>
-            </property>
-           </item>
-           <item row="1" column="3">
-            <property name="text">
-             <string>None</string>
-            </property>
-           </item>
-           <item row="2" column="0">
-            <property name="text">
-             <string>User 4</string>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/user_edit24.png</normaloff>C:/Dokumente und Einstellungen/schlauch/Desktop/user_edit24.png</iconset>
-            </property>
-           </item>
-           <item row="2" column="1">
-            <property name="text">
-             <string>Full</string>
-            </property>
-           </item>
-           <item row="2" column="2">
-            <property name="text">
-             <string>Full</string>
-            </property>
-           </item>
-           <item row="2" column="3">
-            <property name="text">
-             <string>Full</string>
-            </property>
-           </item>
           </widget>
          </item>
         </layout>
@@ -417,7 +290,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_7">
+          <widget class="QPushButton" name="editButton">
            <property name="text">
             <string>Edit</string>
            </property>
@@ -444,6 +317,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SelectItemWidget</class>
+   <extends>QWidget</extends>
+   <header>datafinder.gui.user.common.widget</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
