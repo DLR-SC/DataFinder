@@ -52,8 +52,6 @@ from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock 
 
 
-_PROPERTY_NOT_FOUND_MESSAGE = "Property is missing:"
-
 __version__ = "$Revision-Id:$" 
 
 

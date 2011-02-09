@@ -42,8 +42,7 @@ Tests the meta data adapter implementation.
 
 import unittest
 
-
-from datafinder.persistence.adapters.svn.metadata.adapter import MetadataSVNAdapter
+from datafinder.persistence.adapters.svn.metadata import adapter
 from datafinder.persistence.metadata import constants
 from datafinder.persistence.metadata.value_mapping import MetadataValue
 from datafinder_test.mocks import SimpleMock
@@ -52,35 +51,49 @@ from datafinder_test.mocks import SimpleMock
 __version__ = "$Revision-Id:$" 
 
 
-_VALID_SVN_PROPERTY_RESULT = {("1", "1"): SimpleMock("")}
-_VALID_PROPERTY_RESULT = {constants.CREATION_DATETIME: MetadataValue(""), 
-                          constants.MODIFICATION_DATETIME: MetadataValue(""),
-                          constants.SIZE: MetadataValue("0"), 
-                          constants.MIME_TYPE: MetadataValue(""), 
-                          constants.OWNER: MetadataValue("")}
-
-
 class MetadataSVNAdapterTestCase(unittest.TestCase):
     """ Tests the meta data adapter implementation. """
 
     def setUp(self):
         """ Creates a default object under test. """
         
-        #self._defaultAdapter = MetadataSVNAdapter("identifier", SimpleMock())
-        pass
+        # Mocks mimetypes module
+        self._mimetypesModuleMock = SimpleMock((None, None))
+        adapter.mimetypes = self._mimetypesModuleMock
+        
+        self._connectionMock = SimpleMock()
+        
+    def _initValidRetrieveResult(self, mimeType):
+        """ Creates the expected result. """
+        
+        mappedResult = dict()
+        mappedResult[constants.CREATION_DATETIME] = MetadataValue("")
+        mappedResult[constants.MODIFICATION_DATETIME] = MetadataValue("")
+        mappedResult[constants.SIZE] = MetadataValue("")
+        mappedResult[constants.MIME_TYPE] = MetadataValue(mimeType)
+        mappedResult[constants.OWNER] = MetadataValue("")
+        return mappedResult
 
     def testRetrieveSuccess(self):
         """ Tests successful meta data retrieval. """
         
-        pass
+        expectedResult = self._initValidRetrieveResult("")
+        
+        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None)})
+        self._adapter = adapter.MetadataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        self.assertEquals(self._adapter.retrieve(), expectedResult)
+        self.assertEquals(self._adapter.retrieve(list()), dict())
+        
+        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None)})
+        self._adapter = adapter.MetadataSVNAdapter("identifier", SimpleMock(self._connectionMock))
+        self.assertEquals(self._adapter.retrieve(["1"]), {"1": MetadataValue("value")})
 
     def testUpdateSuccess(self):
         """ Tests successful update of meta data. """
-        
-       #self._defaultAdapter.update({"1":"", "2":"", "3":""})
+
+        pass
     
     def testDeleteSuccess(self):
         """ Tests successful deletion of meta data. """
-        
-        #self._defaultAdapter.delete(["1", "2"])
-    
+
+        pass
