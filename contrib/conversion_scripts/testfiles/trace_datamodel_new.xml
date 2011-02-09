@@ -3,21 +3,9 @@
 		<name>User</name>
 		<iconName>Mitarbeiter</iconName>
 		<properties>
-			<name>Name</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Firstname</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
 			<name>E-Mail</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
 			<defaultValue></defaultValue>
 		</properties>
 	</datatypes>
@@ -26,8 +14,8 @@
 		<iconName>Documentation</iconName>
 		<properties>
 			<name>Description</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
 			<defaultValue></defaultValue>
 		</properties>
 	</datatypes>
@@ -43,15 +31,9 @@
 		<name>Run</name>
 		<iconName>export</iconName>
 		<properties>
-			<name>Description</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
 			<name>ID</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
 			<defaultValue></defaultValue>
 		</properties>
 	</datatypes>
@@ -60,8 +42,8 @@
 		<iconName>hard_drive_</iconName>
 		<properties>
 			<name>Description</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
 			<defaultValue></defaultValue>
 		</properties>
 	</datatypes>
@@ -73,21 +55,9 @@
 		<name>TRACE</name>
 		<iconName>FlowSolution</iconName>
 		<properties>
-			<name>Version</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>CPUs</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
 			<name>Blocks</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
 			<defaultValue></defaultValue>
 		</properties>
 	</datatypes>
@@ -95,39 +65,9 @@
 		<name>Project</name>
 		<iconName>Planner</iconName>
 		<properties>
-			<name>Name</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Description</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Start</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>End</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Responsible</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
 			<name>Editor</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
 			<defaultValue></defaultValue>
 		</properties>
 	</datatypes>
@@ -171,69 +111,9 @@
 		<name>Monitoring</name>
 		<iconName>monitor_</iconName>
 		<properties>
-			<name>PID</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Status</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Start</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>End</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Queue</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Workdir</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>ID</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>BackendType</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>BackendName</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
-			<name>Memory</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
-			<defaultValue></defaultValue>
-		</properties>
-		<properties>
 			<name>CPUs</name>
-			<valueType>string</valueType>
-			<mandatory>False</mandatory>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
 			<defaultValue></defaultValue>
 		</properties>
 	</datatypes>
@@ -249,28 +129,28 @@
 		<name>Residual</name>
 		<iconName>graph_line_</iconName>
 	</datatypes>
-	<relation>
+	<relations>
 		<name>Rel_Level03_TRACE</name>
 		<iconName>Relation</iconName>
 		<sourceDataTypeNames>TRACE</sourceDataTypeNames>
 		<targetDataTypeNames>Input</targetDataTypeNames>
 		<targetDataTypeNames>Output</targetDataTypeNames>
-	</relation>
-	<relation>
+	</relations>
+	<relations>
 		<name>Rel_Level01_User</name>
 		<iconName>Relation</iconName>
 		<sourceDataTypeNames>User</sourceDataTypeNames>
 		<targetDataTypeNames>Project</targetDataTypeNames>
 		<targetDataTypeNames>Subproject</targetDataTypeNames>
-	</relation>
-	<relation>
-		<name>Rel_Root_Node</name>
+	</relations>
+	<relations>
+		<name>Root Relation</name>
 		<iconName>Relation</iconName>
 		<targetDataTypeNames>Archive</targetDataTypeNames>
 		<targetDataTypeNames>Project</targetDataTypeNames>
 		<targetDataTypeNames>User</targetDataTypeNames>
-	</relation>
-	<relation>
+	</relations>
+	<relations>
 		<name>Rel_Level01_Project</name>
 		<iconName>Relation</iconName>
 		<sourceDataTypeNames>Project</sourceDataTypeNames>
@@ -278,30 +158,30 @@
 		<targetDataTypeNames>Run</targetDataTypeNames>
 		<targetDataTypeNames>User</targetDataTypeNames>
 		<targetDataTypeNames>Subproject</targetDataTypeNames>
-	</relation>
-	<relation>
+	</relations>
+	<relations>
 		<name>Rel_Level02_Run</name>
 		<iconName>Relation</iconName>
 		<sourceDataTypeNames>Run</sourceDataTypeNames>
 		<targetDataTypeNames>Monitoring</targetDataTypeNames>
 		<targetDataTypeNames>TRACE</targetDataTypeNames>
-	</relation>
-	<relation>
+	</relations>
+	<relations>
 		<name>Rel_Level02_Subproject</name>
 		<iconName>relationType</iconName>
 		<sourceDataTypeNames>Subproject</sourceDataTypeNames>
 		<targetDataTypeNames>User</targetDataTypeNames>
 		<targetDataTypeNames>Run</targetDataTypeNames>
 		<targetDataTypeNames>Documentation</targetDataTypeNames>
-	</relation>
-	<relation>
+	</relations>
+	<relations>
 		<name>Rel_Level04_Output</name>
 		<iconName>Relation</iconName>
 		<sourceDataTypeNames>Output</sourceDataTypeNames>
 		<targetDataTypeNames>Residual</targetDataTypeNames>
 		<targetDataTypeNames>Panel</targetDataTypeNames>
-	</relation>
-	<relation>
+	</relations>
+	<relations>
 		<name>Rel_Level04_Input</name>
 		<iconName>Relation</iconName>
 		<sourceDataTypeNames>Input</sourceDataTypeNames>
@@ -315,5 +195,5 @@
 		<targetDataTypeNames>Stdout</targetDataTypeNames>
 		<targetDataTypeNames>Inflow-Distribution</targetDataTypeNames>
 		<targetDataTypeNames>Start-Script</targetDataTypeNames>
-	</relation>
+	</relations>
 </datamodel>
