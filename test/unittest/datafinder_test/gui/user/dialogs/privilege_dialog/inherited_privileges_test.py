@@ -36,7 +36,6 @@
 #THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 
 
 """ 
@@ -49,8 +48,9 @@ import sys
 
 from PyQt4.QtGui import QApplication
 
+from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
-from datafinder_test.gui.user.dialogs.privilege_dialog.main import ItemMock, RepositoryMock
+from datafinder_test.gui.user.dialogs.privilege_dialog.main import PrivilegeItemMock, PrivilegeRepositoryMock
 
 
 __version__ = "$Revision-Id:$" 
@@ -64,39 +64,56 @@ class InheritedPrivilegeControllerTest(unittest.TestCase):
     def setUp(self):
         """ Creates the privilege dialog and all required mocks. """
         
-        selectedItem = ItemMock("/test/test.pdf", None)
-        selectedItem.parent.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[1])
-        self._repositoryMock = RepositoryMock([selectedItem])
+        # Setup repository
+        # "/" -> 2 principals, "/test" -> no principals 
+        selectedItem = PrivilegeItemMock("/test/test.pdf", None)
+        self._repositoryMock = PrivilegeRepositoryMock([selectedItem])
+        rootItem = self._repositoryMock.nodeFromPath("/")
+        rootItem.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[1])
+        middleItem = self._repositoryMock.nodeFromPath("/test")
+        middleItem.acl.clearPrivileges(SPECIAL_PRINCIPALS[0])
+
+        # Creating the dialog        
         self._privilegeDialog = PrivilegeDialog(self._repositoryMock)
         self._privilegeDialog.item = selectedItem
         self._principalController = self._privilegeDialog._principalSearchController
         self._model = self._privilegeDialog._inheritedPrivilegesModel
         self._controller = self._privilegeDialog._inheritedPrivilegesController
         
-        self.assertEquals(self._model.rowCount(), 3)
+        # Checking model content
+        self.assertEquals(self._model.rowCount(), 2)
         
     def testPrivilegeSelection(self):
         """ Tests correct handling of privilege table selection. """
 
+        # Selecting existing rows
         self._controller._privilegeWidget.selectRow(0)
         self.assertFalse(self._controller._selectItemWidget.hasEmptySelection)
+        self._controller._privilegeWidget.selectRow(1)
+        self.assertEquals(unicode(self._controller._selectItemWidget.pathLineEdit.text()), "/")
         
+        # Selecting non-existing row
         self._controller._privilegeWidget.selectRow(2)
-        self.assertFalse(self._controller._selectItemWidget.hasEmptySelection)
+        self._controller._privilegeWidget.selectionModel().clear()
+        self.assertFalse(len(self._controller._privilegeWidget.selectedIndexes()) > 0)
+        self.assertEquals(unicode(self._controller._selectItemWidget.pathLineEdit.text()), "/")
          
     def testTreeSelection(self):
         """ Tests correct handling of selections in the item tree. """
         
-        self.assertTrue(len(self._controller._privilegeWidget.selectedIndexes()) > 0)
+        # Testing initial selection of the root item
+        self.assertEquals(len(self._controller._privilegeWidget.selectedIndexes()), 8)
         
+        # Testing selection of the middle item with no table entries
         index = self._repositoryMock.indexFromPath("/test")
         self._controller._selectItemWidget.selectedIndexes = [index]
-        self.assertFalse(self._controller._selectItemWidget.hasEmptySelection)
-        self.assertTrue(len(self._controller._privilegeWidget.selectedIndexes()) > 0)
+        self.assertEquals(unicode(self._controller._selectItemWidget.pathLineEdit.text()), "/test")
+        self.assertEquals(len(self._controller._privilegeWidget.selectedIndexes()), 0)
         
     def testEdit(self):
         """ Tests the editing of an inherited item. """
         
-        self._controller._privilegeWidget.selectRow(2)
+        self._controller._privilegeWidget.selectRow(0)
         self._controller._editButton.click()
-        #self.assertEquals(len(self._model._itemRowMap), 1)
+        self.assertEquals(len(self._model._itemRowMap), 0)
+        self.assertEquals(self._privilegeDialog.item.path, "/")

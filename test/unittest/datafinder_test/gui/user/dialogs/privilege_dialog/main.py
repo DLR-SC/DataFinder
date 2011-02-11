@@ -1,3 +1,6 @@
+# pylint: disable=E0702
+# E0702: The error is checked to be not None before it is raised.
+#
 # $Filename$$
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -40,82 +43,26 @@ Allows simplified start of the privilege dialog.
 """
 
 
-import os
 import sys
 
-from PyQt4.QtCore import QModelIndex
-from PyQt4.QtGui import QApplication, QStandardItemModel, QStandardItem
+from PyQt4.QtGui import QApplication
 
 from datafinder.core.error import CoreError
 from datafinder.core.item.privileges.acl import AccessControlList
 from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
+from datafinder_test.gui.user.mocks import BaseRepositoryMock, BaseItemMock
 
 
 __version__ = "$Revision-Id$" 
 
 
-class RepositoryMock(QStandardItemModel):
-    """ Mocks the principal search functionality. """
-    
+class PrivilegeRepositoryMock(BaseRepositoryMock):
+    """ In addition mocks the principal search functionality. """
+              
     error = False
     searchMode = None
     
-    
-    def __init__(self, availableItems):
-        """ Initializes the model with the given items. """
-        
-        QStandardItemModel.__init__(self)
-        
-        # Determine all nested items
-        self._parentChildMap = dict()
-        self._allItems = dict()
-        root = None
-        for item in availableItems:
-            self._parentChildMap[item.path] = list()
-            currentItem = item
-            while not currentItem is None:
-                self._parentChildMap[item.path].append(currentItem)
-                if currentItem.parent is None:
-                    root = currentItem
-                    self._parentChildMap[item.path].reverse()
-                currentItem = currentItem.parent
-        self._parentChildMap[root.path] = [root]
-        
-        # Initializing the model
-        sRoot = self.invisibleRootItem()
-        sRoot.item = root
-        root.sItem = sRoot
-        self._allItems[root.path] = root
-        for items in self._parentChildMap.values():
-            parent = sRoot
-            for item in items:
-                if root != item:
-                    sItem = QStandardItem(item.name)
-                    sItem.item = item
-                    item.sItem = sItem
-                    self._allItems[item.path] = item
-                    parent.appendRow(sItem)
-                    parent = sItem
-
-    def nodeFromIndex(self, index):
-        """ Mocks the item retrieval operation of the original
-        repository model. """
-        
-        sItem = self.itemFromIndex(index)
-        if sItem is None:
-            sItem = self._allItems["/"].sItem
-        return sItem.item
-    
-    def indexFromPath(self, path):
-        """ Mocks the index from path retrieval method. """
-        
-        if path in self._allItems:
-            item = self._allItems[path]
-            return self.indexFromItem(item.sItem)
-        else:
-            return QModelIndex()
-        
     def searchPrincipal(self, _, searchMode):
         """ Raises an error or returns all special principals. """
 
@@ -125,21 +72,18 @@ class RepositoryMock(QStandardItemModel):
         return SPECIAL_PRINCIPALS
 
 
-class ItemMock(object):
+class PrivilegeItemMock(BaseItemMock):
     """ Used to mock an item and its ACL. """
     
-    def __init__(self, path, error=CoreError("")):
+    def __init__(self, path, error=None):
         """ Constructor. """
         
-        self.childrenPopulated = True
-        self.path = path
-        self.name = os.path.basename(path)
-        if path != "/":
-            self.parent = ItemMock(os.path.dirname(path), None)
-        else:
-            self.parent = None
+        BaseItemMock.__init__(self, path)
+        
         self.acl = AccessControlList()
         self.acl.addDefaultPrincipal(SPECIAL_PRINCIPALS[0])
+        if not self.parent is None:
+            self.parent.acl = self.acl
         self.error = error
         
     def updateAcl(self, acl):
@@ -159,9 +103,9 @@ class ItemMock(object):
 
 if __name__ == "__main__":
     application = QApplication(sys.argv)
-    selectedItem = ItemMock("/test/another/test.pdf", None)
-    anotherItem = ItemMock("/another/here/test3.pdf", None)
-    repository = RepositoryMock([selectedItem, anotherItem])
+    selectedItem = PrivilegeItemMock("/test/another/test.pdf", None)
+    anotherItem = PrivilegeItemMock("/another/here/test3.pdf", None)
+    repository = PrivilegeRepositoryMock([selectedItem, anotherItem])
     dialog = PrivilegeDialog(repository)
     dialog.item = selectedItem
     dialog.show()

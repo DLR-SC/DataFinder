@@ -51,7 +51,7 @@ from PyQt4.QtGui import QApplication, QItemSelectionModel
 
 from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
-from datafinder_test.gui.user.dialogs.privilege_dialog.main import RepositoryMock, ItemMock
+from datafinder_test.gui.user.dialogs.privilege_dialog.main import PrivilegeItemMock, PrivilegeRepositoryMock
 
 
 __version__ = "$Revision-Id$" 
@@ -67,8 +67,8 @@ class PrincipalSearchTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates the test setup. """
         
-        selectedItem = ItemMock("/test/test.pdf")
-        self._repositoryMock = RepositoryMock([selectedItem])
+        selectedItem = PrivilegeItemMock("/test/test.pdf")
+        self._repositoryMock = PrivilegeRepositoryMock([selectedItem])
         self._privilegeDialog = PrivilegeDialog(self._repositoryMock)
         self._privilegeDialog.item = selectedItem
         self._model = self._privilegeDialog._principalSearchModel

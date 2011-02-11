@@ -49,11 +49,12 @@ import sys
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QApplication
 
+from datafinder.core.error import CoreError
 from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.core.item.privileges.privilege import READ_ONLY_ACCESS_LEVEL, NONE_ACCESS_LEVEL
 from datafinder.gui.user.dialogs.privilege_dialog.items import PrincipalItem
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
-from datafinder_test.gui.user.dialogs.privilege_dialog.main import ItemMock, RepositoryMock
+from datafinder_test.gui.user.dialogs.privilege_dialog.main import PrivilegeItemMock, PrivilegeRepositoryMock
 
 
 __version__ = "$Revision-Id$" 
@@ -68,8 +69,8 @@ class PrivilegeControllerTest(unittest.TestCase):
     def setUp(self):
         """ Creates the test fixture. """
         
-        selectedItem = ItemMock("/test/test.pdf", None)
-        self._repositoryMock = RepositoryMock([selectedItem])
+        selectedItem = PrivilegeItemMock("/test/test.pdf", None)
+        self._repositoryMock = PrivilegeRepositoryMock([selectedItem])
         self._privilegeDialog = PrivilegeDialog(self._repositoryMock)
         self._privilegeDialog.item = selectedItem
         self._principalController = self._privilegeDialog._principalSearchController
@@ -211,7 +212,7 @@ class PrivilegeControllerTest(unittest.TestCase):
     def testApplyError(self):
         """ Tests apply error handling. """
         
-        self._privilegeDialog.item = ItemMock("/test/test.pdf")
+        self._privilegeDialog.item = PrivilegeItemMock("/test/test.pdf", CoreError(""))
         self._addTestPrincipals()
         self._controller._applyButton.click()
         self._waitUntilFinished()

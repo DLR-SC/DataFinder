@@ -267,7 +267,7 @@ class DefaultTableView(QtGui.QTableView):
         menu = QtGui.QMenu(self)
         lastCheckedAction = None
         numberOfCheckActions = 0
-        for section in range(self.model().columnCount(None)):
+        for section in range(self.model().columnCount(QtCore.QModelIndex())):
             text = self.model().headerData(section, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).toString()
             action = menu.addAction(text)
             action.setCheckable(True)

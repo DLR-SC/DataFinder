@@ -36,7 +36,7 @@
 
 
 """ 
-Implements a filter which just shows the path of a specific item.
+Implements a filter which just allows access to a specific item and its predecessors.
 """
 
 
@@ -51,23 +51,26 @@ __version__ = "$Revision-Id:$"
 
 class PathFilter(BaseRepositoryFilter, QSortFilterProxyModel):
     """
-    This Model wraps the L{RepositoryModel<datafinder.gui.user.models.repository.repository.RepositoryModel>}.
-    It filters files and links.
+    This Model wraps the L{RepositoryModel<datafinder.gui.user.models.repository.
+    repository.RepositoryModel>}. It just provides access to the given item and its 
+    predecessors. If no item is is provided the model is empty. 
     """
 
-    def __init__(self, repositoryModel, item):
+    def __init__(self, repositoryModel, item=None):
         """
         Constructor.
 
         @param repositoryModel: Repository model.
-        @type repositoryModel: L{RepositoryModel<datafinder.gui.user.models.repository.repository.RepositoryModel>}
+        @type repositoryModel: L{RepositoryModel<datafinder.gui.user.models.repository.
+        repository.RepositoryModel>}
+        @param item: Item to which the filter restricts the access.
+        @type item: L{ItemBase<datafinder.core.item.base.ItemBase>}
         """
 
         BaseRepositoryFilter.__init__(self, repositoryModel)
         QSortFilterProxyModel.__init__(self, None)
         
-        self._item = None
-        self._allowedItems = None
+        self._allowedItems = list()
         self.item = item
         
         self._columnCount = 1
@@ -76,12 +79,15 @@ class PathFilter(BaseRepositoryFilter, QSortFilterProxyModel):
     def _setItem(self, item):
         """ Sets the item and determines the allowed parents. """
         
-        self._allowedItems = [item]
-        currentItem = item.parent
-        while not currentItem is None:
-            self._allowedItems.append(currentItem)
-            currentItem = currentItem.parent
-    
+        self.reset()
+        if item is None:
+            self._allowedItems = list() 
+        else:
+            self._allowedItems = [item]
+            currentItem = item.parent
+            while not currentItem is None:
+                self._allowedItems.append(currentItem)
+                currentItem = currentItem.parent
     item = property(None, _setItem)
         
     def columnCount(self, _=QModelIndex()):

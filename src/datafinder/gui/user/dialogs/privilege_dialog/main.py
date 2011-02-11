@@ -44,7 +44,6 @@ Implements the privilege dialog.
 from PyQt4.QtCore import SIGNAL
 from PyQt4.QtGui import QDialog, QDialogButtonBox
 
-from datafinder.gui.user.models.repository.filter.path_filter import PathFilter
 from datafinder.gui.user.dialogs.privilege_dialog.principal_search import PrincipalSearchController, \
                                                                           PrincipalSearchModel
 from datafinder.gui.user.dialogs.privilege_dialog.inherited_privileges import InheritedPrivilegeModel, InheritedPrivilegeController
@@ -75,14 +74,15 @@ class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
         
         self._item = None
         self._repositoryModel = repositoryModel
+        
         self._principalSearchModel = PrincipalSearchModel(self._repositoryModel)
         self._principalSearchController = PrincipalSearchController(self, self._principalSearchModel)
         self._privilegeModel = PrivilegeModel(self._repositoryModel)
         self._privilegeController = PrivilegeController(self, self._privilegeModel)
         self._inheritedPrivilegesModel = InheritedPrivilegeModel()
-        self._inheritedPrivilegesController = InheritedPrivilegeController(self, self._repositoryModel, self._inheritedPrivilegesModel)
-        
-        
+        self._inheritedPrivilegesController = InheritedPrivilegeController(self, self._repositoryModel, 
+                                                                           self._inheritedPrivilegesModel)
+
         self.connect(self._principalSearchController, 
                      SIGNAL(self._principalSearchController.ADD_PRINCIPAL_SIGNAL),
                      self._privilegeController.addPrincipals)
@@ -94,9 +94,11 @@ class PrivilegeDialog(QDialog, Ui_PrivilegeDialog):
         
         self._item = item
         self.setWindowTitle(self._WINDOW_TITLE_TEMPLATE % item.path)
+        
         self._privilegeController.item = item
-        self.selectItemWidget.repositoryModel = PathFilter(self._repositoryModel, item.parent)
         self._inheritedPrivilegesController.item = item
+        
+        self.tabWidget.setCurrentIndex(0) # Selects the privilege editor tab
     
     def _getItem(self):
         """ Returns the current displayed item. """

@@ -44,9 +44,11 @@ __version__ = "$Revision-Id:$"
 
 
 from PyQt4.QtGui import QItemSelection, QItemSelectionModel, QStandardItemModel
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import Qt, QModelIndex, QObject, QVariant, SIGNAL
 
+from datafinder.gui.user.dialogs.privilege_dialog import constants
 from datafinder.gui.user.dialogs.privilege_dialog.items import AccessLevelItem, PrincipalItem
+from datafinder.gui.user.models.repository.filter.path_filter import PathFilter
 
 
 class InheritedPrivilegeController(QObject):
@@ -60,10 +62,15 @@ class InheritedPrivilegeController(QObject):
         self._editButton = privilegeDialog.editButton
         self._privilegeWidget = privilegeDialog.inheritedPrivilegeTable
         self._selectItemWidget = privilegeDialog.selectItemWidget
-        self._model = model
+        
+        self._privilegeDialog = privilegeDialog
         self._repositoryModel = repositoryModel
+        self._model = model
         
         self._privilegeWidget.setModel(self._model)
+        self._privilegeWidget.horizontalHeader().setVisible(True)
+        self._selectItemWidget.showPathEditor()
+        self._selectItemWidget.pathEditLabel.setText("Enter the item path or select it.")
         
         self.connect(self._privilegeWidget.selectionModel(), 
                      SIGNAL("currentRowChanged(QModelIndex, QModelIndex)"),
@@ -73,6 +80,15 @@ class InheritedPrivilegeController(QObject):
                      self._itemWidgetSelectionChanged)
         self.connect(self._editButton, SIGNAL("clicked()"), self._editClicked)
         
+    def _setItem(self, item):
+        """ Sets the item. """
+        
+        self._model.item_ = item
+        self._selectItemWidget.repositoryModel = PathFilter(self._repositoryModel, item.parent)
+        self._selectItemWidget.selectedIndex = QModelIndex()
+        self._itemWidgetSelectionChanged(QModelIndex())
+    item = property(None, _setItem)
+
     def _privilegeSelectionChanged(self, currentIndex, _):
         """ Handles changes of the privilege table selection. """
         
@@ -87,30 +103,21 @@ class InheritedPrivilegeController(QObject):
         
         item = self._repositoryModel.nodeFromIndex(index)
         rows = self._model.determineRows(item)
-        topLeft = self._model.index(rows[0], 0)
-        bottomRight = self._model.index(rows[len(rows )- 1], 3)
-        selection = QItemSelection(topLeft, bottomRight)
-        self._privilegeWidget.selectionModel().clearSelection()
-        self._privilegeWidget.selectionModel().setCurrentIndex(topLeft, QItemSelectionModel.Select)     
-        self._privilegeWidget.selectionModel().select(selection, QItemSelectionModel.Select)
+        if len(rows) > 0:
+            topLeft = self._model.index(rows[0], 0)
+            bottomRight = self._model.index(rows[len(rows )- 1], 3)
+            selection = QItemSelection(topLeft, bottomRight)
+            self._privilegeWidget.selectionModel().clearSelection()
+            self._privilegeWidget.selectionModel().setCurrentIndex(topLeft, QItemSelectionModel.Select)     
+            self._privilegeWidget.selectionModel().select(selection, QItemSelectionModel.Select)
+        else:
+            self._privilegeWidget.selectionModel().clearSelection()
             
     def _editClicked(self):
         """ Handles the editing of the new item. """
             
         item = self._repositoryModel.nodeFromIndex(self._selectItemWidget.selectedIndex)
-        self._privilegeWidget.item = item
-            
-    def _setItem(self, item):
-        """ Sets the item. """
-        
-        self._model.item_ = item
-        self._selectItemWidget.showPathEditor()
-        self._selectItemWidget.pathEditLabel.setText("Please, enter the item path.")
-        index = self._repositoryModel.indexFromPath("/")
-        self._selectItemWidget.selectedIndex = index
-        self._itemWidgetSelectionChanged(index)
-        
-    item = property(None, _setItem)
+        self._privilegeDialog.item = item
 
 
 class InheritedPrivilegeModel(QStandardItemModel):
@@ -124,9 +131,18 @@ class InheritedPrivilegeModel(QStandardItemModel):
         self._rowItemMap = dict()
         self._itemRowMap = dict()
         self.setColumnCount(4) # principal, content, properties, administration
+        self._headers = [self.tr(constants.PRINCIPAL_COLUMN_NAME),
+                         self.tr(constants.CONTENT_PRIVILEGE_COLUMN_NAME),
+                         self.tr(constants.PROPERTY_PRIVILEGE_COLUMN_NAME),
+                         self.tr(constants.ADMINISTRATION_PRIVILEGE_COLUMN_NAME)]
 
     def _setItem(self, item):
         """ Sets the item. """
+        
+        # Reset everything
+        self._rowItemMap.clear()
+        self._itemRowMap.clear()
+        self.clear()
         
         # Determines all parent items
         items = list()
@@ -149,8 +165,19 @@ class InheritedPrivilegeModel(QStandardItemModel):
                 row.append(AccessLevelItem(item.acl.propertiesAccessLevel(principal).displayName, True))
                 row.append(AccessLevelItem(item.acl.administrationAccessLevel(principal).displayName, True)) 
                 self.appendRow(row)
-
     item_ = property(None, _setItem) # item already exists as method
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        """
+        @see: L{headerData<PyQt4.QtCore.QAbstractTableModel.headerData>}
+        """
+
+        if orientation == Qt.Horizontal:
+            if role == Qt.DisplayRole:
+                return QVariant(self._headers[section])
+            if role == Qt.TextAlignmentRole:
+                return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
+        return QVariant()
 
     def determinePrivilegeSource(self, row):
         """ Returns the item which belongs to the given row.
@@ -174,4 +201,7 @@ class InheritedPrivilegeModel(QStandardItemModel):
         @rtype: C{list} of C{int}
         """
         
-        return self._itemRowMap[item.path]
+        rows = list()
+        if item.path in self._itemRowMap:
+            rows = self._itemRowMap[item.path][:]
+        return rows

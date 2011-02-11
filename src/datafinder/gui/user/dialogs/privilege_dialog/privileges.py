@@ -44,10 +44,11 @@ Implements privilege handling.
 from copy import deepcopy
 
 from PyQt4.QtGui import QStandardItemModel, QDialogButtonBox, QMessageBox, QStyledItemDelegate
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import QObject, Qt, SIGNAL, QVariant
 
 from datafinder.core.item.privileges.privilege import ACCESS_LEVELS
 from datafinder.gui.user.common.util import startNewQtThread
+from datafinder.gui.user.dialogs.privilege_dialog import constants
 from datafinder.gui.user.dialogs.privilege_dialog.items import AccessLevelItem, PrincipalItem
 
 
@@ -72,8 +73,8 @@ class PrivilegeController(QObject):
         self._messageBox = QMessageBox(QMessageBox.Critical, "Error during privilege storage", "", 
                                        QMessageBox.Ok, privilegeDialog)
         
-        
         self._privilegeWidget.setModel(self._model)
+        self._privilegeWidget.horizontalHeader().setVisible(True)
         self._setButtonEnabledState(False)
         self._privilegeWidget.setItemDelegate(_AccessLevelItemDelegate(self, self._model))
         
@@ -224,6 +225,10 @@ class PrivilegeModel(QStandardItemModel):
         self._acl = None
         
         self.setColumnCount(4) # principal, content, properties, administration
+        self._headers = [self.tr(constants.PRINCIPAL_COLUMN_NAME),
+                         self.tr(constants.CONTENT_PRIVILEGE_COLUMN_NAME),
+                         self.tr(constants.PROPERTY_PRIVILEGE_COLUMN_NAME),
+                         self.tr(constants.ADMINISTRATION_PRIVILEGE_COLUMN_NAME),]
 
     def _setItem(self, item):
         """ Sets the item. """
@@ -245,6 +250,18 @@ class PrivilegeModel(QStandardItemModel):
         """
         
         return self._acl != self._item.acl
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        """
+        @see: L{headerData<PyQt4.QtCore.QAbstractTableModel.headerData>}
+        """
+
+        if orientation == Qt.Horizontal:
+            if role == Qt.DisplayRole:
+                return QVariant(self._headers[section])
+            if role == Qt.TextAlignmentRole:
+                return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
+        return QVariant()
     
     def addPrincipals(self, principalItems):
         """ Adds the given principals with default access level. 
