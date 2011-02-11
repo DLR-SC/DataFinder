@@ -46,6 +46,10 @@ __version__ = "$Revision-Id:$"
 MAX_POOL_NUMBER = 10
 MAX_CONNECTION_NUMBER = 10 
 
+WIN32 = "win32"
+UTF8 = "UTF-8"
+LC_ALL = "LC_ALL"
+
 LINK_TARGET_PROPERTY = "svn:externals"
 
 DATAFINDER_JSON_PROPERTY ="datafinder:json"

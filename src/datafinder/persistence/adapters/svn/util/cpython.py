@@ -49,6 +49,7 @@ import sys
 from pysvn._pysvn_2_6 import ClientError
 
 from datafinder.persistence.error import PersistenceError
+from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.adapters.svn.error import SubversionError
 
 
@@ -80,7 +81,7 @@ class CPythonSubversionDataWrapper(object):
         except ClientError, error:
             raise PersistenceError(error)
         
-    def _get_login(self, realm, username, may_save):
+    def _get_login(self, _, _, _):
         """ Login callback function. """
         
         return True, self._username, self._password, False
@@ -93,25 +94,24 @@ class CPythonSubversionDataWrapper(object):
     def _initLocale(self):
         """ Init the locale. """
         
-        if sys.platform == "win32":
+        if sys.platform == constants.WIN32:
             locale.setlocale(locale.LC_ALL, "")
         else:
-            if "LC_ALL" in os.environ:
+            if constants.LC_ALL in os.environ:
                 try:
-                    locale.setlocale(locale.LC_ALL, os.environ["LC_ALL"])
+                    locale.setlocale(locale.LC_ALL, os.environ[constants.LC_ALL])
                     return
                 except locale.Error:
+                    # First try did not work, encoding must be set first then set locale.
                     pass
-                
             languageCode, encoding = locale.getdefaultlocale()
             if languageCode is None:
                 languageCode = "en_US"
-                
+            # Set the encoding of the Python environment if no encoding is set.
             if encoding is None:
-                encoding = "UTF-8"
+                encoding = constants.UTF8
             if encoding.lower() == "utf":
-                encoding = "UTF-8"
-                
+                encoding = constants.UTF8
             try:
                 locale.setlocale(locale.LC_ALL, "%s.%s" % (languageCode, encoding))
             except locale.Error:
@@ -123,11 +123,22 @@ class CPythonSubversionDataWrapper(object):
     def isLeaf(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
+        return self._determineItemKind(path, pysvn.node_kind.file)
+    
+    def _determineItemKind(self, path, kind):
+        """
+        Determines the item type.
+        
+        @param path: Path to determine.
+        @type path: C{unicode}
+        @param kind: Kind that should be determined. 
+        """
+        
         try:
             self._client.update(self._repoWorkingCopyPath + path)
             entryList = self._client.list(self._repoWorkingCopyPath + path, recurse=False)
             entry = entryList[0]
-            if entry[0].kind == pysvn.node_kind.file:
+            if entry[0].kind == kind:
                 return True
             else:
                 return False
@@ -137,17 +148,8 @@ class CPythonSubversionDataWrapper(object):
     def isCollection(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        try:
-            self._client.update(self._repoWorkingCopyPath + path)
-            entryList = self._client.list(self._repoWorkingCopyPath + path, recurse=False)
-            entry = entryList[0]
-            if entry[0].kind == pysvn.node_kind.dir:
-                return True
-            else:
-                return False
-        except ClientError, error:
-            raise SubversionError(error)
-        
+        return self._determineItemKind(path, pysvn.node_kind.dir)
+    
     def update(self):
         """ Updates the working copy. """
         

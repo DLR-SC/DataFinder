@@ -43,11 +43,11 @@ Implements mapping of logical identifiers to SVN-specific identifiers.
 import platform
 
 if platform.platform().lower().find("java") == -1:
-    cpython = __import__("datafinder.persistence.adapters.svn.util.cpython", globals(), locals(), ["CPythonSubversionDataWrapper"], -1)
-    CPythonSubversionDataWrapper = cpython.CPythonSubversionDataWrapper
+    from datafinder.persistence.adapters.svn.util.cpython import CPythonSubversionDataWrapper
+    SubversionDataWrapper = CPythonSubversionDataWrapper
 else:
-    jython = __import__("datafinder.persistence.adapters.svn.util.jython", globals(), locals(), ["JythonSubversionDataWrapper"], -1)
-    JythonSubversionDataWrapper = jython.JythonSubversionDataWrapper
+    from datafinder.persistence.adapters.svn.util.jython import JythonSubversionDataWrapper
+    SubversionDataWrapper = JythonSubversionDataWrapper
 
 
 __version__ = "$Revision-Id:$" 
@@ -69,24 +69,8 @@ def createSubversionConnection(repoPath, workingCopyPath, username, password):
     @return: SVN connection.
     """
     
-    if platform.platform().lower().find("java") == -1:
-        connection = CPythonSubversionDataWrapper(repoPath, workingCopyPath, username, password)
-    else:
-        connection= JythonSubversionDataWrapper(repoPath, workingCopyPath, username, password)
-    return connection
+    return SubversionDataWrapper(repoPath, workingCopyPath, username, password)
 
-def determineBaseName(identifier):
-    """ 
-    Determines the last component of the logical path - the base name. 
-        
-    @param identifier: The interface identifier.
-    @type identifier: C{unicode}
-        
-    @return: Last part of the identifier.
-    @rtype: C{unicode}
-    """
-        
-    return identifier.rsplit("/")[-1]
 
 def mapIdentifier(identifier):
     """ 
@@ -105,6 +89,7 @@ def mapIdentifier(identifier):
     else:
         persistenceId = "/" + identifier
     return persistenceId
+
 
 def determineParentPath(path):
     """ 

@@ -115,7 +115,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         self.assertEquals(adapter.linkTarget, None)
         self.assertFalse(adapter.isLink)
                 
-    def testisLeaf(self):
+    def testIsLeaf(self):
         """ Tests the normal behavior of the isLeaf method. """
 
         self._connectionMock.value = True
@@ -125,7 +125,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         adapter = DataSubversionAdapter("", SimpleMock(self._connectionMock))
         self.assertFalse(adapter.isLeaf)
         
-    def testisCollection(self):
+    def testIsCollection(self):
         """ Tests the normal behavior of the isResource method. """
         
         self._connectionMock.value = True
@@ -135,7 +135,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         adapter = DataSubversionAdapter("", SimpleMock(self._connectionMock))
         self.assertFalse(adapter.isCollection)
 
-    def testcreateResource(self):
+    def testCreateResource(self):
         """ Tests the normal behavior of the createResource createKey method."""     
         
         openFunction = globals()["__builtins__"]["open"]
@@ -151,26 +151,27 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         finally:
             globals()["__builtins__"]["open"] = openFunction
     
-    def testcreateCollection(self):
+    def testCreateCollection(self):
         """ Tests the normal behavior of the createCollection method. """
         
         self._osModuleMock.error = None
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"add": (None, None), "checkin": (None, None)})
         adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         adapter.createCollection()
-        #adapter.createCollection(True)
+        self._osPathMock.value = True
+        adapter.createCollection(True)
         
         self._osModuleMock.error = OSError("")
         self.assertRaises(PersistenceError, adapter.createCollection)
         
-    def testgetChildren(self):
+    def testGetChildren(self):
         """ Tests the normal behavior of the getChildren method. """
     
         self._connectionMock.value = ["/trunk/test/test.txt"]
         adapter = DataSubversionAdapter("/identifier", SimpleMock(self._connectionMock))
         self.assertEquals(["/trunk/test/test.txt"], adapter.getChildren())
     
-    def testwriteData(self):
+    def testWriteData(self):
         """ Tests the normal behavior of the writeData method. """
         
         openFunction = globals()["__builtins__"]["open"]
@@ -186,7 +187,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         finally:
             globals()["__builtins__"]["open"] = openFunction
         
-    def testreadData (self):
+    def testReadData (self):
         """ Tests the normal behavior of the readData method. """
 
         openFunction = globals()["__builtins__"]["open"]
@@ -202,7 +203,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         finally:
             globals()["__builtins__"]["open"] = openFunction
         
-    def testdelete (self):
+    def testDelete (self):
         """ Tests the normal behavior of the delete method. """
         
         self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "delete": (None, None), "checkin": (None, None)})
@@ -213,7 +214,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.delete)
 
-    def testmove(self):
+    def testMove(self):
         """ Tests the normal behavior of the move method. """
                 
         destination = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
@@ -225,7 +226,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.move, destination)
         
-    def testcopy(self):
+    def testCopy(self):
         """ Tests the normal behavior of the copy method. """
         
         destination = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
@@ -237,7 +238,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.copy, destination)
         
-    def testexists(self):
+    def testExists(self):
         """ Tests the normal behavior of the exists method. """
         
         self._osPathMock.value = True

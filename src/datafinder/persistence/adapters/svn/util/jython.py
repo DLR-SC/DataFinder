@@ -116,21 +116,25 @@ class JythonSubversionDataWrapper(object):
     def isLeaf(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
           
-        try:
-            nodeKind = self._repository.checkPath(path[1:], -1)
-            if nodeKind == SVNNodeKind.FILE:
-                return True
-            else:
-                return False
-        except SVNException, error:
-            raise SubversionError(error)
+        return self._determineItemKind(path, SVNNodeKind.FILE)
     
     def isCollection(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
+        return self._determineItemKind(path, SVNNodeKind.DIR)
+        
+    def _determineItemKind(self, path, kind):
+        """
+        Determines the item type.
+        
+        @param path: Path to determine.
+        @type path: C{unicode}
+        @param kind: Kind that should be determined. 
+        """
+        
         try:
             nodeKind = self._repository.checkPath(path[1:], -1)
-            if nodeKind == SVNNodeKind.DIR:
+            if nodeKind == kind:
                 return True
             else:
                 return False
