@@ -506,4 +506,17 @@ def getParentItemPath(path):
     
 def registerImportItemListener(observer):
     """ Register for the ImportEvent """
+    
     ImportEvent().register(observer)
+
+def listener(ItemEvent, observer):
+    """Register for an item event"""
+    _getEvent(ItemEvent).register(observer)
+
+def _getEvent(identifier):
+    """Maps different event identifiers to the corresponding Events"""
+    EventDict ={
+                "ImportItem": ImportEvent(),
+                "ChangeItem": ImportEvent(),
+                }
+    return EventDict.get(identifier)
