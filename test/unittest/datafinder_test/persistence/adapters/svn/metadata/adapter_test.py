@@ -42,7 +42,9 @@ Tests the meta data adapter implementation.
 
 import unittest
 
+from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.adapters.svn.metadata import adapter
+from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.metadata import constants
 from datafinder.persistence.metadata.value_mapping import MetadataValue
 from datafinder_test.mocks import SimpleMock
@@ -90,10 +92,14 @@ class MetadataSubversionAdapterTestCase(unittest.TestCase):
 
     def testUpdateSuccess(self):
         """ Tests successful update of meta data. """
-
-        pass
+        
+        self._connectionMock = SimpleMock(methodNameResultMap={"setProperty": (None, SubversionError)})
+        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
+        self.assertRaises(PersistenceError, self._adapter.update, {"1":"", "2":"", "3":""})
     
     def testDeleteSuccess(self):
         """ Tests successful deletion of meta data. """
 
-        pass
+        self._connectionMock = SimpleMock(methodNameResultMap={"setProperty": (None, SubversionError), "getProperty": (None, None)})
+        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
+        self.assertRaises(PersistenceError, self._adapter.update, ["1", "2"])
