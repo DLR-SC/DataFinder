@@ -94,7 +94,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         try:
             return connection.getProperty(self.__persistenceId, XPS_JSON_PROPERTY)
         except SubversionError, error:
-            errorMessage = "Problem during meta data retrieval." \
+            errorMessage = "Problem during meta data retrieval. " \
                            + "Reason: '%s'" % error 
             raise PersistenceError(errorMessage)
         
@@ -147,7 +147,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 jsonProperties = json.dumps(properties)
                 connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, jsonProperties)
             except SubversionError, error:
-                errorMessage = "Cannot update properties of item '%s'" % self.identifier \
+                errorMessage = "Cannot update properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
                 raise PersistenceError(errorMessage)
         finally:
@@ -159,9 +159,21 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         connection = self.__connectionPool.acquire()
         try:
             try:
-                pass
+                persistenceJsonProperties = self._retrieveXPSProperties(connection)
+                persistenceProperties = json.loads(persistenceJsonProperties)
+                for propertyId in propertyIds:
+                    if isinstance(persistenceProperties[propertyId], type(list())):
+                        persistenceProperties[propertyId] = []
+                    else:
+                        persistenceProperties[propertyId] = u""
+                persistenceJsonProperties = json.dumps(persistenceProperties)
+                connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, persistenceJsonProperties)
             except SubversionError, error:
-                errorMessage = "Cannot delete properties of item '%s'" % self.identifier \
+                errorMessage = "Cannot delete properties of item '%s'. " % self.identifier \
+                               + "Reason: '%s'" % error 
+                raise PersistenceError(errorMessage)
+            except KeyError, error:
+                errorMessage = "Cannot delete properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
                 raise PersistenceError(errorMessage)
         finally:
