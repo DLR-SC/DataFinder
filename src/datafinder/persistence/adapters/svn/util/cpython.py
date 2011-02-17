@@ -56,7 +56,7 @@ from datafinder.persistence.adapters.svn.error import SubversionError
 __version__ = "$Revision-Id:$" 
 
 
-class CPythonSubversionDataWrapper(object):
+class CPythonSubversionWrapper(object):
     """ 
     Implements a SVN specific data adapter for CPython.
     """
@@ -81,7 +81,7 @@ class CPythonSubversionDataWrapper(object):
         except ClientError, error:
             raise PersistenceError(error)
         
-    def _get_login(self, _, _, _):
+    def _get_login(self, realm, username, may_save):
         """ Login callback function. """
         
         return True, self._username, self._password, False
@@ -125,6 +125,11 @@ class CPythonSubversionDataWrapper(object):
         
         return self._determineItemKind(path, pysvn.node_kind.file)
     
+    def isCollection(self, path):
+        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        return self._determineItemKind(path, pysvn.node_kind.dir)
+    
     def _determineItemKind(self, path, kind):
         """
         Determines the item type.
@@ -144,11 +149,6 @@ class CPythonSubversionDataWrapper(object):
                 return False
         except ClientError, error:
             raise SubversionError(error)
-    
-    def isCollection(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        
-        return self._determineItemKind(path, pysvn.node_kind.dir)
     
     def update(self):
         """ Updates the working copy. """
@@ -226,6 +226,7 @@ class CPythonSubversionDataWrapper(object):
         
         try:
             self._client.propset(key, value, self._repoWorkingCopyPath + path)
+            self.checkin(path)
         except ClientError, error:
             raise SubversionError(error)
         

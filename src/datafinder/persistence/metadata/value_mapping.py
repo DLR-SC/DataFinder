@@ -76,6 +76,7 @@ class MetadataValue(object):
         self.__conversionFunctions.append(self._convertToDatetime)
         self.__conversionFunctions.append(self._convertToList)
         self.__conversionFunctions.append(self._convertToUnicode)
+        self.__conversionFunctions.append(self._convertToDict)
         
     def __getPersistedValue(self):
         """ Simple getter. """
@@ -116,8 +117,16 @@ class MetadataValue(object):
         
     def _convertToList(self, value):
         """ Converts value to a list. """
-        
-        if _LIST_SEPARATOR in value:
+        if isinstance(value, type(list())):
+            typedList = list()
+            for item in value:
+                for conversionFunction in self.__conversionFunctions:
+                    convertedValue = conversionFunction(item)
+                    if not convertedValue is None:
+                        break
+                typedList.append(convertedValue)
+            return typedList
+        elif _LIST_SEPARATOR in value:
             stringList = value.split(_LIST_SEPARATOR)[:-1]
             typedList = list()
             for item in stringList:
@@ -132,6 +141,12 @@ class MetadataValue(object):
             return typedList
         elif value == _EMPTY_LIST_REPRESENTATION:
             return  list()
+        
+    def _convertToDict(self, value):
+        """ Converts value to a dict. """
+        
+        if isinstance(value, type(dict())):
+            return value
 
     @staticmethod
     def _convertToUnicode(value):
@@ -147,6 +162,8 @@ class MetadataValue(object):
             intValue = int(value)
         except ValueError:
             return None
+        except TypeError:
+            return  None
         else:
             if intValue in [0, 1]:
                 return bool(intValue)
@@ -159,6 +176,10 @@ class MetadataValue(object):
             return decimal.Decimal(value)
         except decimal.InvalidOperation:
             return None
+        except ValueError:
+            return None
+        except TypeError:
+            return None
         
     def _convertToDatetime(self, value):
         """ Converts value to date time. """
@@ -167,10 +188,13 @@ class MetadataValue(object):
         datetimeConversionFunctions = [self._convertToDatetimeFromIso8601,
                                        self._convertToDatetimeFromRfc822,
                                        self._convertToDatetimeFromFloat]
-        for datetimeConversionFunction in datetimeConversionFunctions:
-            datetimeInstance = datetimeConversionFunction(value)
-            if not datetimeInstance is None:
-                return datetimeInstance.replace(tzinfo=None)
+        try:
+            for datetimeConversionFunction in datetimeConversionFunctions:
+                datetimeInstance = datetimeConversionFunction(value)
+                if not datetimeInstance is None:
+                    return datetimeInstance.replace(tzinfo=None)
+        except TypeError:
+            return None
     
     @staticmethod
     def _convertToDatetimeFromFloat(value):

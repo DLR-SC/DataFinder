@@ -62,7 +62,7 @@ from datafinder.persistence.adapters.svn.error import SubversionError
 __version__ = "$Revision-Id:$" 
 
 
-class JythonSubversionDataWrapper(object):
+class JythonSubversionWrapper(object):
     """ 
     Implements a SVN specific data adapter for Jython.
     """

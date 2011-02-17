@@ -53,19 +53,6 @@ from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
 
 __version__ = "$Revision-Id:$" 
 
-
-# XPSforCFDEntry model
-xpsForCFDEntry = dict()
-xpsForCFDEntry["keywords"] = list()
-xpsForCFDEntry["filePath"] = ""
-xpsForCFDEntry["documentType"] = ""
-xpsForCFDEntry["authors"] = list()
-xpsForCFDEntry["summary"] = ""
-xpsForCFDEntry["nasaCategories"] = list()
-xpsForCFDEntry["tauCategories"] = list()
-xpsForCFDEntry["title"] = ""
-xpsForCFDEntry["version"] = ""
-
  
 class MetadataSubversionAdapter(NullMetadataStorer):
     
@@ -77,12 +64,14 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         @type identifier: C{unicode}
         @param connectionPool: Connection pool.
         @type connectionPool: L{Connection<datafinder.persistence.svn.connection_pool.SVNConnectionPool>}
+        @param modelIdentifier: Logical identifier of the model.
+        @type modelIdentifier: C{unicode}
         """
         
         NullMetadataStorer.__init__(self, identifier)
         self.__connectionPool = connectionPool
         self.__persistenceId = util.mapIdentifier(identifier)
-    
+
     def retrieve(self, propertyIds=None):
         """ @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}"""
 
@@ -132,8 +121,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
             mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType[0])
         
         for key, value in rawResult.iteritems():
-            if key != "authors":
-                mappedResult[key] = value_mapping.MetadataValue(value)
+            mappedResult[key] = value_mapping.MetadataValue(value)
                 
         return mappedResult
     
@@ -155,13 +143,9 @@ class MetadataSubversionAdapter(NullMetadataStorer):
 
         connection = self.__connectionPool.acquire()
         try:
-            persistencePropertyValueMapping = dict()
-            for propertyId, value in properties.iteritems():
-                persistenceId = self.__metadataIdMapper.mapMetadataId(propertyId)
-                persistenceValue = value_mapping.getPersistenceRepresentation(value)
-                persistencePropertyValueMapping[persistenceId] = persistenceValue
             try:
-                connection.setProperties(self.__persistenceId, XPS_JSON_PROPERTY, persistencePropertyValueMapping)
+                jsonProperties = json.dumps(properties)
+                connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, jsonProperties)
             except SubversionError, error:
                 errorMessage = "Cannot update properties of item '%s'" % self.identifier \
                                + "Reason: '%s'" % error 
@@ -174,10 +158,8 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         
         connection = self.__connectionPool.acquire()
         try:
-            persistenceIds = [self.__metadataIdMapper.mapMetadataId(propertyId) for propertyId in propertyIds]
-            webdavStorer = self.__connectionHelper.createResourceStorer(self._persistenceId, connection)
             try:
-                webdavStorer.deleteProperties(None, *persistenceIds)
+                pass
             except SubversionError, error:
                 errorMessage = "Cannot delete properties of item '%s'" % self.identifier \
                                + "Reason: '%s'" % error 

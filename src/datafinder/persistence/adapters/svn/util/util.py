@@ -43,11 +43,11 @@ Implements mapping of logical identifiers to SVN-specific identifiers.
 import platform
 
 if platform.platform().lower().find("java") == -1:
-    from datafinder.persistence.adapters.svn.util.cpython import CPythonSubversionDataWrapper
-    SubversionDataWrapper = CPythonSubversionDataWrapper
+    from datafinder.persistence.adapters.svn.util.cpython import CPythonSubversionWrapper
+    SubversionWrapper = CPythonSubversionWrapper
 else:
-    from datafinder.persistence.adapters.svn.util.jython import JythonSubversionDataWrapper
-    SubversionDataWrapper = JythonSubversionDataWrapper
+    from datafinder.persistence.adapters.svn.util.jython import JythonSubversionWrapper
+    SubversionWrapper = JythonSubversionWrapper
 
 
 __version__ = "$Revision-Id:$" 
@@ -69,7 +69,7 @@ def createSubversionConnection(repoPath, workingCopyPath, username, password):
     @return: SVN connection.
     """
     
-    return SubversionDataWrapper(repoPath, workingCopyPath, username, password)
+    return SubversionWrapper(repoPath, workingCopyPath, username, password)
 
 
 def mapIdentifier(identifier):
@@ -106,3 +106,65 @@ def determineParentPath(path):
     if parentPath == "" and path.startswith("/") and path != "/":
         parentPath = "/"
     return parentPath
+
+
+def import2(from_name, fromlist=None, globals={}, locals={}):
+    """
+    An easy wrapper around ``__import__``.
+
+    >>> import sys
+    >>> sys2 = import2("sys")
+    >>> sys is sys2
+    True
+
+    >>> import os.path
+    >>> ospath2 = import2("os.path")
+    >>> os.path is ospath2
+    True
+
+    >>> from time import time
+    >>> time2 = import2("time", "time")
+    >>> time is time2
+    True
+
+    >>> from os.path import sep
+    >>> sep2 = import2("os.path", "sep")
+    >>> sep is sep2
+    True
+
+    >>> from os import sep, pathsep
+    >>> sep2, pathsep2 = import2("os", ["sep", "pathsep"])
+    >>> sep is sep2; pathsep is pathsep2
+    True
+    True
+
+    >>> import2("existiertnicht")
+    Traceback (most recent call last):
+        ...
+    ImportError: No module named existiertnicht
+
+    >>> import2("os", "gibtsnicht")
+    Traceback (most recent call last):
+        ...
+    ImportError: cannot import name gibtsnicht
+    """
+
+    oneonly = False
+    if isinstance(fromlist, basestring):
+        oneonly = True
+        fromlist = [fromlist]
+
+    obj = __import__(from_name, globals, locals, ["foo"])
+    if fromlist is None:
+        return obj
+
+    result = []
+    for object_name in fromlist:
+        try:
+            result.append(getattr(obj, object_name))
+        except AttributeError:
+            raise ImportError("cannot import name " + object_name)
+
+    if oneonly:
+        return result[0]
+    return result
