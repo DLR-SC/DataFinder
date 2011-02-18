@@ -59,6 +59,56 @@ class MetadataValueTestCase(unittest.TestCase):
         
         pass
     
+    def testValue(self):
+        """ Tests the behavior of the value property. """
+        
+        # Tests for a bool value.
+        persistedValue = u"1"
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, True)
+ 
+        # Tests for an unicode value.
+        persistedValue = u"test"
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, u"test")
+        
+        # Tests for a decimal value.
+        persistedValue = u"4.5"
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, decimal.Decimal("4.5"))
+        persistedValue = u"5"
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, decimal.Decimal("5"))
+        
+        # Tests for a datetime.
+        # From float.
+        persistedValue = u"34794.57"
+        metdataValue = MetadataValue(persistedValue, expectedType=datetime)
+        self.assertEquals(metdataValue.value, datetime(1970, 1, 1, 10, 39, 54, 570000))
+        # From RFC 822.
+        persistedValue = u"Wed, 02 Oct 2002 13:00:00 GMT"
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, datetime(2002, 10, 2, 15, 0))
+        # From Iso8601.
+        persistedValue = u"2006-10-16T08:19:39Z"
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, datetime(2006, 10, 16, 10, 19, 39))
+        
+        # Tests for a list value.
+        # Empty list.
+        persistedValue = []
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, [])
+        persistedValue = u"____EMPTY____LIST____"
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, [])
+
+        # Tests for a dict value.
+        # Empty dict.
+        persistedValue = {}
+        metdataValue = MetadataValue(persistedValue)
+        self.assertEquals(metdataValue.value, {})
+        
     def testGuessRepresentation(self):
         """ Tests the behavior of the guessRepresentation method. """
         
