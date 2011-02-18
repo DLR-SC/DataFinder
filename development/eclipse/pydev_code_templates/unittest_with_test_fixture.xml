@@ -43,7 +43,7 @@ Tests of ...
 import unittest
 
 
-__version__ = "$$Revision-Id:$$" 
+__version__ = "$$Revision-Id$$" 
 
 
 class Test(unittest.TestCase):

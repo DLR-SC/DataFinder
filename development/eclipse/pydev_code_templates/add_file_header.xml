@@ -40,6 +40,6 @@ Module Comment.
 """
 
 
-__version__ = "$$Revision-Id:$$" 
+__version__ = "$$Revision-Id$$" 
 
 </template></templates>
