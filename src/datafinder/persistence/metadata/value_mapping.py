@@ -134,6 +134,7 @@ class MetadataValue(object):
                     convertedValue = None
                 else:
                     for conversionFunction in self.__conversionFunctions:
+                        print conversionFunction
                         convertedValue = conversionFunction(item)
                         if not convertedValue is None:
                             break
@@ -146,13 +147,21 @@ class MetadataValue(object):
         """ Converts value to a dict. """
         
         if isinstance(value, type(dict())):
-            return value
+            typedDict = dict()
+            for key in value:
+                for conversionFunction in self.__conversionFunctions:
+                    convertedValue = conversionFunction(value[key])
+                    if not convertedValue is None:
+                        break
+                typedDict[key] = convertedValue
+            return typedDict
 
     @staticmethod
     def _convertToUnicode(value):
         """ Converts to a unicode value. """
         
-        return value
+        if not (isinstance(value, type(dict())) or isinstance(value, type(list()))):
+            return value
     
     @staticmethod
     def _convertToBool(value):
@@ -311,6 +320,10 @@ def _convertFromList(value):
     if len(listAsString) == 0:
         listAsString = _EMPTY_LIST_REPRESENTATION
     return listAsString
+
+
+def _convertFromDict(value):
+    """ Converts a dict to a json string. """
 
 
 def _convertFromUnicode(value):
