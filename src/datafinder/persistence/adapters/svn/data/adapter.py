@@ -48,7 +48,7 @@ from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.adapters.svn.util import util
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 _BLOCK_SIZE = 30000

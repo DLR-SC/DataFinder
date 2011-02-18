@@ -50,7 +50,7 @@ from datafinder.persistence.metadata.value_mapping import MetadataValue
 from datafinder_test.mocks import SimpleMock
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class MetadataSubversionAdapterTestCase(unittest.TestCase):

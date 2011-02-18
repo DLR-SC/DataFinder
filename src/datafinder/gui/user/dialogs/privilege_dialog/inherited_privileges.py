@@ -40,7 +40,7 @@ Implements handling of the inherited privileges of an item.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 from PyQt4.QtGui import QItemSelection, QItemSelectionModel, QStandardItemModel

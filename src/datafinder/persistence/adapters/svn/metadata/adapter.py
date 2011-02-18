@@ -51,7 +51,7 @@ from datafinder.persistence.metadata import constants, value_mapping
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
  
 class MetadataSubversionAdapter(NullMetadataStorer):

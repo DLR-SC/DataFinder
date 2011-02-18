@@ -44,4 +44,4 @@ adapter - Adapts the general data-related interface to the SVN library.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

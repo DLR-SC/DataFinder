@@ -46,7 +46,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class _Tab(object):

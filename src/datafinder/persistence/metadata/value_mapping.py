@@ -48,7 +48,7 @@ import rfc822
 import decimal
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 _LIST_SEPARATOR = ";"

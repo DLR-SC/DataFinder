@@ -40,4 +40,4 @@ Implements test cases for the SVN data adapter.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

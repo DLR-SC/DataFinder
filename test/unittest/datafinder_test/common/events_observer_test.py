@@ -107,9 +107,9 @@ if __name__ == "__main__":
     # Remove a class specific observer
     MyClassEvent().unregister(consumer)
     print c.do_it(2, 4) # Just one observer is called
-    print c2.do_it(2,4)
+    print c2.do_it(2, 4)
     MyClassEvent().unregister(consumer, c2)
-    print c2.do_it(2,4)
+    print c2.do_it(2, 4)
 
     
 

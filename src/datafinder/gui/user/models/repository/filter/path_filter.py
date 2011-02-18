@@ -46,7 +46,7 @@ from PyQt4.QtGui import QSortFilterProxyModel
 from datafinder.gui.user.models.repository.filter.base_filter import BaseRepositoryFilter
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class PathFilter(BaseRepositoryFilter, QSortFilterProxyModel):

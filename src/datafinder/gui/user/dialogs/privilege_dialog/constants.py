@@ -40,7 +40,7 @@ Privilege dialog specific constants.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 PRINCIPAL_COLUMN_NAME = "Principal"

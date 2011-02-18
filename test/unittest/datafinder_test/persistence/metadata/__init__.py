@@ -40,4 +40,4 @@ Tests of the metadata package of the persistence layer.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

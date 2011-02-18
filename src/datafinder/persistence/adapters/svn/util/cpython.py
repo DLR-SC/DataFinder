@@ -53,7 +53,7 @@ from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.adapters.svn.error import SubversionError
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class CPythonSubversionWrapper(object):

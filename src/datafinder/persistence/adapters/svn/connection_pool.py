@@ -45,7 +45,7 @@ from datafinder.persistence.common.connection.pool import ConnectionPool
 from datafinder.persistence.adapters.svn.util import util
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class SubversionConnectionPool(ConnectionPool):

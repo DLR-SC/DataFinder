@@ -36,41 +36,53 @@
 
 
 """ 
-This module implements an interface to access events 
-that can happen in the core package.
+Module to enable registering for events within DataFinder core
 """
 
 
-import logging
-
-from datafinder.core.repository import Repository
+from datafinder.core import events
+from datafinder.script_api.error import ScriptApiError
 
 
 __version__ = "$Revision-Id:$" 
 
 
-_log = logging.getLogger("script")
+#Constants defining the events 
+IMPORT_EVENT = "ImportEvent"
 
 
-class ImportEvent(object):
-    """ Interface to register and unregister to an import 
-    event with a callback function """
- 
-    def register(self, callback):
-        """ 
-        Register a callback to the event
-        
-        @param callback: function/method to be called on event
-        """
-        
-        Repository.performImport += callback
-        
-        
-    def unregister(self, callback):
-        """ 
-        Unregister a callback to the event
-        
-        @param callback: function/method to be called on event
-        """
-        
-        Repository.performImport -= callback
+#mapping events to classes
+_eventMap = {IMPORT_EVENT: events.ImportEvent()}
+
+
+def registerListener(event, callback):
+    """ Register for an event 
+    
+    @raise ScriptApiError: If the event is not supported.
+    """
+    
+    _getEvent(event).register(callback)
+
+
+def unregisterListener(event, callback):
+    """ Unregister the event 
+    
+    @raise ScriptApiError: If the event is not supported
+                           or the function has not formerly been registered.
+    """
+
+    try:
+        _getEvent(event).unregister(callback)
+    except ValueError:
+        raise ScriptApiError()
+
+
+def _getEvent(identifier):
+    """ Retrieves event class for the given ID and 
+    raises a ScriptError if an corresponding event 
+    cannot be found. """
+    
+    try:
+        return _eventMap[identifier]
+    except KeyError:
+        raise ScriptApiError("The event '%s' does not exist." % identifier)

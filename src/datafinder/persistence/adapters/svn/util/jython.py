@@ -59,7 +59,7 @@ from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.adapters.svn.error import SubversionError
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class JythonSubversionWrapper(object):

@@ -41,7 +41,7 @@ Defines SVN-specific connection parameters.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class Configuration(object):

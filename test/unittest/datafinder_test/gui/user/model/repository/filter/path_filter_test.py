@@ -46,7 +46,7 @@ from datafinder.gui.user.models.repository.filter.path_filter import PathFilter
 from datafinder_test.gui.user.mocks import BaseRepositoryMock, BaseItemMock
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class PathFilterTest(unittest.TestCase):

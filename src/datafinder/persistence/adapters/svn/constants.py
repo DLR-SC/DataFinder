@@ -40,7 +40,7 @@ Constant definitions for connection handling.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 # Constants for connection pooling
 MAX_POOL_NUMBER = 10

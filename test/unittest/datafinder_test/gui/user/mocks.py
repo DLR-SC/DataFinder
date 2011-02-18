@@ -46,7 +46,7 @@ from PyQt4.QtGui import QStandardItem, QStandardItemModel
 from PyQt4.QtCore import QModelIndex
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class BaseRepositoryMock(QStandardItemModel):

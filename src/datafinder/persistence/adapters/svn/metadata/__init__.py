@@ -43,4 +43,4 @@ svn - Implements the persistence of meta data by using SVN.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

@@ -40,4 +40,4 @@ Implements tests for the meta data related adapter.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

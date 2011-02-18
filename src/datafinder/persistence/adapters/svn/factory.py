@@ -54,7 +54,7 @@ from datafinder.persistence.adapters.svn.metadata.adapter import MetadataSubvers
 from datafinder.persistence.adapters.svn.util import util
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class FileSystem(BaseFileSystem):

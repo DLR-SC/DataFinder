@@ -46,7 +46,7 @@ from PyQt4 import QtGui, QtCore
 from datafinder.gui.gen.widgets.select_item_widget_ui import Ui_selectItemWidget
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class SelectItemWidget(QtGui.QWidget, Ui_selectItemWidget):

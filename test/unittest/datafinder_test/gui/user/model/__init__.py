@@ -40,4 +40,4 @@ Provides GUI model related test cases.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

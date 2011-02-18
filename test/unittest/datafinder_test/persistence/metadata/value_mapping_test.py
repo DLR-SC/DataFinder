@@ -48,7 +48,7 @@ from datetime import datetime
 from datafinder.persistence.metadata.value_mapping import MetadataValue
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class MetadataValueTestCase(unittest.TestCase):

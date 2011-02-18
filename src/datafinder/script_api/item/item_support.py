@@ -86,14 +86,14 @@ def createCollection(path, properties=None):
     """
     
     try:
-        childName, parentItemPath = __getChildParentPath(path)
+        childName, parentItemPath = getChildParentPath(path)
         cwr = repositoryManagerInstance.workingRepository
         parentItem = cwr.getItem(parentItemPath)
         item = cwr.createCollection(childName, parentItem)
     except ItemError, error:
         raise ItemSupportError("Collection cannot be created.\nReason: '%s'" % error.message)
     else:
-        __createItem(item, properties)
+        _createItem(item, properties)
 
     
 def createLeaf(path, properties=None):
@@ -109,14 +109,14 @@ def createLeaf(path, properties=None):
     """
     
     try:
-        childName, parentItemPath = __getChildParentPath(path)
+        childName, parentItemPath = getChildParentPath(path)
         cwr = repositoryManagerInstance.workingRepository
         parentItem = cwr.getItem(parentItemPath)
         item = cwr.createLeaf(childName, parentItem)
     except ItemError, error:
         raise ItemSupportError("Leaf cannot be created.\nReason: '%s'" % error.message)
     else:
-        __createItem(item, properties)
+        _createItem(item, properties)
 
 
 def createLink(path, linkTargetPath):
@@ -132,7 +132,7 @@ def createLink(path, linkTargetPath):
     """
     
     try:
-        childItemPath, parentItemPath = __getChildParentPath(path)
+        childItemPath, parentItemPath = getChildParentPath(path)
         cwr = repositoryManagerInstance.workingRepository
         parentItem = cwr.getItem(parentItemPath)
         targetItem = cwr.getItem(linkTargetPath)
@@ -140,10 +140,10 @@ def createLink(path, linkTargetPath):
     except ItemError, error:
         raise ItemSupportError("Link cannot be created.\nReason: '%s'" % error.message)
     else:
-        __createItem(item)
+        _createItem(item)
     
 
-def __createItem(item, properties=None):
+def _createItem(item, properties=None):
     """
     Creates the given item object.
 
@@ -168,7 +168,7 @@ def __createItem(item, properties=None):
             raise ItemSupportError("Item cannot be created.\nReason: %s" % error.message)
     
 
-def __getChildParentPath(path):
+def getChildParentPath(path):
     """
     Returns the child name and parent path.
     
@@ -230,7 +230,7 @@ def copy(sourcePath, targetPath):
     """
         
     try:
-        item, targetItem = __getItemHelper(sourcePath, targetPath) 
+        item, targetItem = _getItemHelper(sourcePath, targetPath) 
     except ItemError:
         raise ItemSupportError("One of the items cannot be found.")
     else:
@@ -254,7 +254,7 @@ def move(sourcePath, targetPath):
     """
         
     try:
-        item, targetItem = __getItemHelper(sourcePath, targetPath)
+        item, targetItem = _getItemHelper(sourcePath, targetPath)
     except ItemError:
         raise ItemSupportError("One of the items cannot be found.")
     else:
@@ -265,7 +265,7 @@ def move(sourcePath, targetPath):
             raise ItemSupportError("Item cannot be moved.\nReason: '%s'" % error.message)
 
 
-def __getItemHelper(sourcePath, targetPath):
+def _getItemHelper(sourcePath, targetPath):
     """
     Helper which fetches an item and an empty targetItem.
     
@@ -277,7 +277,7 @@ def __getItemHelper(sourcePath, targetPath):
     
     cwr = repositoryManagerInstance.workingRepository
     item = cwr.getItem(sourcePath)
-    childName, parentItemPath = __getChildParentPath(targetPath)
+    childName, parentItemPath = getChildParentPath(targetPath)
     parentItem = cwr.getItem(parentItemPath)
             
     if item.isCollection:
@@ -498,23 +498,17 @@ def getChildren(path):
             raise ItemSupportError(errorMessage)
         else:
             return [item.path for item in children]
-        
-def getParentItemPath(path):
-    """ Determines the path of the parent of the given item"""
-    childItemPath, parentItemPath = __getChildParentPath(path)
-    return parentItemPath
+      
+   
+def registerListener(event, observer):
+    """ Register for an item event """
     
-def registerImportItemListener(observer):
-    """ Register for the ImportEvent """
-    
-    ImportEvent().register(observer)
+    _getEvent(event).register(observer)
 
-def listener(ItemEvent, observer):
-    """Register for an item event"""
-    _getEvent(ItemEvent).register(observer)
 
 def _getEvent(identifier):
-    """Maps different event identifiers to the corresponding Events"""
+    """ Maps different event identifiers to the corresponding Events """
+    
     EventDict ={
                 "ImportItem": ImportEvent(),
                 "ChangeItem": ImportEvent(),

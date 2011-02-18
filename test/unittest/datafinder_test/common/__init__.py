@@ -35,42 +35,9 @@
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 
 
-""" 
-This module implements an interface to access events 
-that can happen in the core package.
+"""
+Implements test for the common package.
 """
 
 
-import logging
-
-from datafinder.core.repository import Repository
-
-
-__version__ = "$Revision-Id:$" 
-
-
-_log = logging.getLogger("script")
-
-
-class ImportEvent(object):
-    """ Interface to register and unregister to an import 
-    event with a callback function """
- 
-    def register(self, callback):
-        """ 
-        Register a callback to the event
-        
-        @param callback: function/method to be called on event
-        """
-        
-        Repository.performImport += callback
-        
-        
-    def unregister(self, callback):
-        """ 
-        Unregister a callback to the event
-        
-        @param callback: function/method to be called on event
-        """
-        
-        Repository.performImport -= callback
+__version__ = "$Revision-Id:$"

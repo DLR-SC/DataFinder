@@ -46,4 +46,4 @@ factory - Implements supported generic factory methods SVN-specific.
 util - Provides some helper functionality.
 """
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

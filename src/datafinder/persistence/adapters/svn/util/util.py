@@ -50,7 +50,7 @@ else:
     SubversionWrapper = JythonSubversionWrapper
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 def createSubversionConnection(repoPath, workingCopyPath, username, password):
