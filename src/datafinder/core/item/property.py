@@ -136,7 +136,7 @@ class Property(object):
                     foundValidRepresentation = True
                 else:
                     additionalValueRepresentations.append(valueRepresentation)
-            except PropertyError:
+            except PropertyError, error:
                 continue
         if not foundValidRepresentation:
             value = propertyDefinition.defaultValue

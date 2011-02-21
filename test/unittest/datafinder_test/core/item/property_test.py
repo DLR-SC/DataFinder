@@ -42,6 +42,9 @@ Provides tests for the property representation.
 
 import unittest
 
+from datafinder.core.configuration.properties import property_type
+from datafinder.core.configuration.properties.property_definition import PropertyDefinition
+from datafinder.core.configuration.properties.validators.base_validators import ObjectTypeValidator
 from datafinder.core.error import PropertyError
 from datafinder.core.item.property import Property
 from datafinder_test.mocks import SimpleMock
@@ -105,6 +108,14 @@ class PropertyTestCase(unittest.TestCase):
         self._property = Property.create(propertyDefMock, SimpleMock([True, 0, "0"]))
         self.assertEquals(self._property.value, "Test")
         self.assertEquals(self._property.additionalValueRepresentations, list())
+        
+        propertyDef = PropertyDefinition("identifier", "category", property_type.ObjectType("datafinder_test.core.item.property_test.AuthorPropertyMock"))
+        propertyDef.defaultValue = "Test"
+        self._property = Property.create(propertyDef, SimpleMock([{"firstName": "Patrick", "lastName": "Schaefer", "email": "lordpatman@gmail.com"}]))
+        self.assertEquals(self._property.value, {"firstName": "Patrick", "lastName": "Schaefer", "email": "lordpatman@gmail.com"})
+        self.assertEquals(self._property.additionalValueRepresentations, list())
+        
+        self.assertRaises(PropertyError, Property.create, propertyDef, SimpleMock([{"lastName": "Schaefer", "email": "lordpatman@gmail.com"}]))
 
     def testComparison(self):
         """ Tests the comparison of two instances. """
@@ -112,3 +123,17 @@ class PropertyTestCase(unittest.TestCase):
         self.assertEquals(self._property, self._property)
         self.assertEquals(self._property, Property(self._property.propertyDefinition, "value"))
         self.assertNotEquals(self._property, Property(SimpleMock(), "value"))
+
+
+class AuthorPropertyMock(ObjectTypeValidator):
+    """ A simple property model class. """
+    
+    def __init__(self):
+        """
+        Constructor.
+        """
+        
+        self.firstName = ""
+        self.lastName = ""
+        self.email = ""
+        

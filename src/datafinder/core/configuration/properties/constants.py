@@ -50,6 +50,7 @@ DATAMODEL_PROPERTY_CATEGORY = u"____datamodel____"
 USER_PROPERTY_CATEGORY = u"____user____" 
 
 # definition of property types
+OBJECT_TYPE = u"Object"
 ANY_TYPE = u"Any"
 BOOLEAN_TYPE = u"Boolean"
 DATETIME_TYPE = u"Date Time"
