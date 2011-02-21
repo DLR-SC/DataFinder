@@ -39,8 +39,10 @@
 Script to convert properties from a df 1.x repository to an df 2.x repository
 """
 
+import logging
+import os
+from datetime import datetime
 
-from datafinder.common.logger import getDefaultLogger
 from datafinder.core.configuration.dataformats import registry
 from datafinder.persistence import factory
 from datafinder.persistence.common.configuration import BaseConfiguration
@@ -48,13 +50,28 @@ from datafinder.persistence.adapters.webdav_.metadata import identifier_mapping
 
 
 __version__ = "$Revision-Id:$" 
+_FILE_LOG_FORMAT = "%(asctime)s: %(levelname)s: %(message)s"
+_LOG_FILE_NAME = "conversion.log"
+LINK_PROPERTY_OLD = "DataFinderOriginalResource"
 
+
+def getDefaultLogger():
+    """returns a configured logger"""
+    
+    myLogger = logging.getLogger("conversion_script")
+    if len(myLogger.handlers) == 0:
+        myLogger.level = logging.INFO
+        formatter = logging.Formatter(_FILE_LOG_FORMAT)
+        fileHandler = logging.FileHandler(os.path.join(_LOG_FILE_NAME), "wb")
+        fileHandler.setFormatter(formatter)
+        myLogger.addHandler(fileHandler)
+    return myLogger
 
 class PropertyConversion(object):
     """ Module to convert properties"""   
     _log = getDefaultLogger()
     
-    def __init__(self, repositoryUri, user, password):
+    def __init__(self, repositoryUri, user, password, dryRun, deleteOld):
         self._conversionMap = {
                           "DataFinderType": u"____datatype____",
                           "DataFinderDataStore": u"____datastorename____",
@@ -65,8 +82,12 @@ class PropertyConversion(object):
                           "DataFinderArchiveRetentionExeededDate": u"____archiveretentionexceededdatetime____",
                           "DataFinderArchiveRootCollection": u"____archiverootcollection____",
                           }
+        self.datetypes = ["DataFinderModificationDate", "DataFinderCreationDate", "DataFinderArchiveRetentionExeededDate"]
         
         self._dataFormatRegistry = registry.DataFormatRegistry()
+        self._dataFormatRegistry.load()
+        self._dryRun = dryRun
+        self._deleteOld = deleteOld
         # Little trick to correctly set the link target WebDAV property
         identifier_mapping._logicalToPersistenceIdMapping["linkTarget"] = ("http://dlr.de/system/", 
                                                                            "linkTarget")
@@ -75,6 +96,7 @@ class PropertyConversion(object):
                                       BaseConfiguration(repositoryUri, username=user, password=password))
         items = fs.getChildren()
         self._walk(items)
+        
    
     def _walk(self, items):
         """ walk trough each element in the specified file system"""
@@ -83,44 +105,53 @@ class PropertyConversion(object):
             mappedProperties = self._handle(item)
             if item.isCollection:
                 self._walk(item.getChildren())
-            item.updateMetaData(mappedProperties) #AttributeError: 'FileStorer' object has no attribute 'updateMetaData'
+            if not self._dryRun:
+                item.updateMetadata(mappedProperties)
+                if self._deleteOld: 
+                    deleteList = self._conversionMap.keys()[:]
+                    deleteList.append(LINK_PROPERTY_OLD)
+                    item.deleteMetadata(deleteList)
 
                            
     def _handle(self, item):
         """ convert the properties to the updated constants"""
         properties = item.retrieveMetadata()
-        mappedProperties = item.retrieveMetadata()
+        mappedProperties = dict()
         
         for key, value in properties.iteritems():
-            if key in self._conversionMap:
-                mappedProperties[self._conversionMap[key]] = value.value
-            elif key == "DataFinderType" and not item.isCollection: # in 1.X exists no data format
+            if key == "DataFinderType" and not item.isCollection: # in 1.X exists no data format
                 dataFormat = self._dataFormatRegistry.determineDataFormat(baseName=item.name)
-                mappedProperties[u"____dataformat____"] = dataFormat
-            elif key == "DataFinderOriginalResource": # it is a link in 1.X
+                mappedProperties[u"____dataformat____"] = dataFormat.name
+            elif key == LINK_PROPERTY_OLD: # it is a link in 1.X
                 mappedProperties["linkTarget"] = value.value
+    
+            else:
+                if key in self._conversionMap:
+                    if key in self.datetypes:
+                        value._expectedType = datetime
+                    mappedProperties[self._conversionMap[key]] = value.value
         
-        # For log file
+        # Logging the changes to the log file
         self._log.info(item.uri)
         self._log.info(properties)
         self._log.info(mappedProperties)
         self._log.info("Successfully updated item.")
         self._log.info("")
-        
-        # For console
-        print item.uri
-        print properties
-        print mappedProperties
-        print "item success"
-        print ""
         return mappedProperties
-       
+
 
 if __name__ == "__main__":
     import sys
-              
-    if len(sys.argv) != 4:
-        print("Usage: repositoryurl = <string>, username = <string>, password = <string>")
+    
+    if not ( 4 <= len(sys.argv) <=  6 ) :
+        print("Usage: repositoryurl <string>, username <string>, password <string>, [--dryRun] [--deleteOld]" )
     else:
-        PropertyConversion(sys.argv[1], sys.argv[2],  sys.argv[3])
-        print("Successfully mapped")       
+        if "--dryRun" in sys.argv:
+            PropertyConversion(sys.argv[1], sys.argv[2],  sys.argv[3], True, False )
+        else:
+            if "--deleteOld" in sys.argv:
+                PropertyConversion(sys.argv[1], sys.argv[2],  sys.argv[3], False, True )
+            else:
+                PropertyConversion(sys.argv[1], sys.argv[2],  sys.argv[3], False, False )   
+            
+        print("Successfully mapped")   

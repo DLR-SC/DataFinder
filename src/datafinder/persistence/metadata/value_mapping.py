@@ -260,6 +260,12 @@ class MetadataValue(object):
             return 0
         else:
             return 1
+        
+        
+    def __repr__(self):
+        """returns the representation of the value"""
+        
+        return self.value
 
     
 def getPersistenceRepresentation(value):

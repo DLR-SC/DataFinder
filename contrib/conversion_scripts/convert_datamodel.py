@@ -160,8 +160,7 @@ if __name__ == "__main__":
     import sys
               
     if len(sys.argv) != 3:
-        print("Usage: oldFilePath = <string>, newFilePath = <string> ") # TODO: complete it
-        DataModelConverter("testfiles/trace_datamodel_old.xml", "testfiles/trace_datamodel_new.xml")
+        print("Usage: oldFilePath <string>, newFilePath  <string> ") # TODO: complete it
     else:
         DataModelConverter(sys.argv[1], sys.argv[2])
         print("Successfully mapped")

@@ -77,7 +77,7 @@ class DataFormat(object):
         self.editScriptName = None
         self.viewScriptName = None
 
-    def __str__(self):
+    def __repr__(self):
         """ Provides a readable string representation. """
         
         return self.name + " " + self.type
