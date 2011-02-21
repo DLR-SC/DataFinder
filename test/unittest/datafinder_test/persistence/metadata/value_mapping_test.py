@@ -45,7 +45,7 @@ import unittest
 
 from datetime import datetime
 
-from datafinder.persistence.metadata.value_mapping import MetadataValue
+from datafinder.persistence.metadata.value_mapping import MetadataValue, getPersistenceRepresentation
 
 
 __version__ = "$Revision-Id$" 
@@ -197,3 +197,42 @@ class MetadataValueTestCase(unittest.TestCase):
         persistedValue = {"a": u"Wed, 02 Oct 2002 13:00:00 GMT", "b": u"2006-10-16T08:19:39Z"}
         metdataValue = MetadataValue(persistedValue)
         self.assertEquals(metdataValue.guessRepresentation(), [{"a": datetime(2002, 10, 2, 15, 0), "b": datetime(2006, 10, 16, 10, 19, 39)}])
+
+    def testGetPersistenceRepresentation(self):
+        """ Tests the behavior of the getPersistenceRepresentation method. """
+        
+        # Tests for a bool value.
+        persistedValue = True
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"1")
+        persistedValue = False
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"0")
+        
+        # Tests for an unicode value.
+        persistedValue = u"test"
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"test")
+        
+        # Tests for a decimal value.
+        persistedValue = decimal.Decimal("4.5")
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"4.5")
+        persistedValue = decimal.Decimal("5")
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"5")
+        
+        # Tests for a datetime.
+        persistedValue = datetime(2006, 10, 16, 10, 19, 39)
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"2006-10-16T08:19:39Z")
+        
+        # Tests for a list value.
+        persistedValue = [decimal.Decimal("2006"), decimal.Decimal("10"), decimal.Decimal("16"), decimal.Decimal("10")]
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"2006;10;16;10;")
+        persistedValue = []
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"____EMPTY____LIST____")
+
+        # Tests for a dict value.
+        persistedValue = {"a": decimal.Decimal("134"), "b": decimal.Decimal("45.32")}
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"{\"a\": \"134\", \"b\": \"45.32\"}")
+        persistedValue = {}
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"{}")
+        persistedValue = {"a": []}
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"{\"a\": []}")
+        persistedValue = {"a": [decimal.Decimal("2006"), decimal.Decimal("10")]}
+        self.assertEquals(getPersistenceRepresentation(persistedValue), u"{\"a\": [\"2006\", \"10\"]}")

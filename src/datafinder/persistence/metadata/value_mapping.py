@@ -42,6 +42,7 @@ Python types to the persistence format and vice versa.
 """
 
 
+import json
 import time
 from datetime import datetime, timedelta, tzinfo
 import rfc822
@@ -282,7 +283,8 @@ def getPersistenceRepresentation(value):
                                      bool: _convertFromBool,
                                      decimal.Decimal: _convertFromDecimal,
                                      list: _convertFromList,
-                                     datetime: _convertFromDatetime} 
+                                     datetime: _convertFromDatetime,
+                                     dict: _convertFromDict} 
         valueType = type(value)
         if valueType in typeConversionFunctionMap:
             return typeConversionFunctionMap[valueType](value)
@@ -322,8 +324,26 @@ def _convertFromList(value):
     return listAsString
 
 
+def _convertFromListToJson(value):
+    """ Converts a list to a json list. """
+    
+    listJson = []
+    for item in value:
+        convertedItem = getPersistenceRepresentation(item)
+        listJson.append(convertedItem)
+    return listJson
+
+
 def _convertFromDict(value):
     """ Converts a dict to a json string. """
+    
+    convertedDict = {}
+    for key in value:
+        if isinstance(value[key], type(list())):
+            convertedDict[key] = _convertFromListToJson(value[key])
+        else:
+            convertedDict[key] = getPersistenceRepresentation(value[key])
+    return unicode(json.dumps(convertedDict))
 
 
 def _convertFromUnicode(value):
