@@ -443,11 +443,15 @@ class ObjectTypeValidator(object):
         if len(self.__dict__) == len(value):
             try:
                 for key in self.__dict__:
-                    if type(self.__dict__[key]) == type(value[key]):
-                        self.__dict__[key] = value[key]
+                    if isinstance(self.__dict__[key], type(ObjectTypeValidator())) and isinstance(value[key], type(dict())):
+                        self.__dict__[key](value[key])
+                    elif type(self.__dict__[key]) == type(value[key]):
+                        pass
                     else:
                         raise ValidationError("The given object does not match the defined object.")
             except KeyError:
+                raise ValidationError("The given object does not match the defined object.")
+            except TypeError:
                 raise ValidationError("The given object does not match the defined object.")
         else:
             raise ValidationError("The given object does not match the defined object.")

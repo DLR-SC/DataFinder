@@ -111,11 +111,18 @@ class PropertyTestCase(unittest.TestCase):
         
         propertyDef = PropertyDefinition("identifier", "category", property_type.ObjectType("datafinder_test.core.item.property_test.AuthorPropertyMock"))
         propertyDef.defaultValue = "Test"
-        self._property = Property.create(propertyDef, SimpleMock([{"firstName": "Patrick", "lastName": "Schaefer", "email": "lordpatman@gmail.com"}]))
-        self.assertEquals(self._property.value, {"firstName": "Patrick", "lastName": "Schaefer", "email": "lordpatman@gmail.com"})
+        self._property = Property.create(propertyDef, SimpleMock([{"firstName": "Patrick", "lastName": "Schaefer", "email": "lordpatman@gmail.com", \
+                                                                   "adress": {"street": "Teststreet", "city": "New York"}}]))
+        self.assertEquals(self._property.value, {"firstName": "Patrick", "adress": {"city": "New York", "street": "Teststreet"}, "lastName": "Schaefer", \
+                                                 "email": "lordpatman@gmail.com"})
         self.assertEquals(self._property.additionalValueRepresentations, list())
         
-        self.assertRaises(PropertyError, Property.create, propertyDef, SimpleMock([{"lastName": "Schaefer", "email": "lordpatman@gmail.com"}]))
+        self.assertRaises(PropertyError, Property.create, propertyDef, SimpleMock([{"lastName": "Schaefer", "email": "lordpatman@gmail.com", \
+                                                                                    "adress": {"street": "Teststreet", "city": "New York"}}]))
+        self.assertRaises(PropertyError, Property.create, propertyDef, SimpleMock([{"firstName": "Patrick", "lastName": "Schaefer", "email": "lordpatman@gmail.com", \
+                                                                                    "adress": {"street": "Teststreet"}}]))
+        self.assertRaises(PropertyError, Property.create, propertyDef, SimpleMock([{"name": "Patrick", "lastName": "Schaefer", "email": "lordpatman@gmail.com", \
+                                                                                    "adress": {"street": "Teststreet", "city": "New York"}}]))
 
     def testComparison(self):
         """ Tests the comparison of two instances. """
@@ -136,4 +143,17 @@ class AuthorPropertyMock(ObjectTypeValidator):
         self.firstName = ""
         self.lastName = ""
         self.email = ""
+        self.adress = AdressPropertyMock()
+        
+        
+class AdressPropertyMock(ObjectTypeValidator):
+    """ A simple property model class. """
+    
+    def __init__(self):
+        """
+        Constructor.
+        """
+        
+        self.street = ""
+        self.city = ""
         
