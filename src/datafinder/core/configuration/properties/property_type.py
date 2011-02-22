@@ -215,7 +215,16 @@ class ObjectType(object):
         self._modulIdentifier = modelIdentifier[:modelIdentifier.rfind(".")]
         self._classIdentifier = modelIdentifier[modelIdentifier.rfind(".")+1:]
         self._model = self._importModel(self._modulIdentifier, self._classIdentifier)
-        self.validator = self._model()
+        self._instance = self._model()
+        
+    @property
+    def instance(self):
+        """ Returns the instance of an ObjectType model. """
+        
+        return self._instance
+        
+    def validator(self, value):
+        self._instance.validate(value)
         
     def _importModel(self, fromName, fromList=None, globals={}, locals={}):
         """

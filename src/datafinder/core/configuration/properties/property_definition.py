@@ -113,6 +113,12 @@ class PropertyDefinition(object):
         """ Returns the type constant of the property. """
         
         return self._propertyType.NAME
+    
+    @property
+    def propertyType(self):
+        """ Returns the type of the property. """
+        
+        return self._propertyType
 
     @property
     def restrictions(self):

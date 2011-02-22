@@ -83,7 +83,12 @@ class Property(object):
     def __getValue(self):
         """ Getter of the value attribute. """
         
-        return self._value
+        if isinstance(self._value, type(dict())):
+            print self._propertyDefinition.propertyType.instance.fromDict(self._value)
+            print self._propertyDefinition.propertyType.instance.fromDict(self._value).__dict__
+            return self._propertyDefinition.propertyType.instance.fromDict(self._value)
+        else:
+            return self._value
         
     def __setValue(self, value):
         """ Setter of the value attribute. """        
@@ -136,7 +141,7 @@ class Property(object):
                     foundValidRepresentation = True
                 else:
                     additionalValueRepresentations.append(valueRepresentation)
-            except PropertyError, error:
+            except PropertyError:
                 continue
         if not foundValidRepresentation:
             value = propertyDefinition.defaultValue

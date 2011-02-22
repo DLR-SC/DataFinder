@@ -427,31 +427,3 @@ class AndValidator(object):
         for validator in self.validators:
             validator(value)
       
-        
-class ObjectTypeValidator(object):
-    """ 
-    Checks whether a given value is a representation of a predefined object.
-    """ 
-
-    def __call__(self, value):
-        """ 
-        Calls all checks on the given value.
-        
-        @param value: A dict representing an object. 
-        """
-
-        if len(self.__dict__) == len(value):
-            try:
-                for key in self.__dict__:
-                    if isinstance(self.__dict__[key], type(ObjectTypeValidator())) and isinstance(value[key], type(dict())):
-                        self.__dict__[key](value[key])
-                    elif type(self.__dict__[key]) == type(value[key]):
-                        pass
-                    else:
-                        raise ValidationError("The given object does not match the defined object.")
-            except KeyError:
-                raise ValidationError("The given object does not match the defined object.")
-            except TypeError:
-                raise ValidationError("The given object does not match the defined object.")
-        else:
-            raise ValidationError("The given object does not match the defined object.")
