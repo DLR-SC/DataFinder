@@ -54,6 +54,16 @@ __version__ = "$Revision-Id:$"
 _context = None
 
 
+def mainWidget():
+    """ Returns the main widget of the user client.
+    
+    @return: The main widget.
+    @rtype: L{MainWindow<datafinder.gui.user.application.MainWindow>}
+    """
+    
+    return _context.mainWidget
+
+
 def unmanagedRepositoryDescription():
     """ 
     Returns the context of the unmanaged repository.

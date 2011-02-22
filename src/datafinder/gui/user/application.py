@@ -1,4 +1,4 @@
-# pylint: disable=R0902
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -369,6 +369,7 @@ class Application(QtGui.QApplication):
 
         # initialize script API
         scriptApiContext = _ScriptApiContext()
+        scriptApiContext.mainWidget = self.__mainWindow
         scriptApiContext.repositoryManager = repositoryManager
         scriptApiContext.managedRepositoryController = self.__managedRepositoryController
         scriptApiContext.unmanagedRepositoryController = self.__unmanagedRepositoryController
@@ -388,6 +389,7 @@ class _ScriptApiContext(object):
     def __init__(self):
         """ Constructor. """
         
+        self.mainWidget = None
         self.managedRepositoryController = None
         self.unmanagedRepositoryController = None
         self.repositoryManager = None
