@@ -136,11 +136,11 @@ class ScriptRegistry(object):
             if location == constants.LOCAL_SCRIPT_LOCATION:
                 self._preferences.addScriptUri(script.uri)
             if isinstance(script, Script):              
-                if script.automatic == True:
+                if script.automatic:
                     script.execute()
             else:
                 for script in script.scripts: # the script collection needs to be opened
-                    if script.automatic == True:
+                    if script.automatic:
                         script.execute()
                         
     def unregister(self, location, script):
