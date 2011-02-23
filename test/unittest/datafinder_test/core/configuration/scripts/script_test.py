@@ -105,6 +105,7 @@ class ScriptTestCase(unittest.TestCase):
      # @dataformats: MimeType1,  MimeType2,   , MimeType3
         # @icon:   AnIconName   
      # @version:   1.2.0  
+     # @automatic
     """
                         
     def setUp(self):
@@ -125,6 +126,7 @@ class ScriptTestCase(unittest.TestCase):
         self.assertEquals(self._script.dataformats, ["MimeType1", "MimeType2", "MimeType3"])
         self.assertEquals(self._script.iconName, "AnIconName")
         self.assertEquals(self._script.version, "1.2.0")
+        self.assertEquals(self._script.automatic, True)
         self.assertTrue(self._script.isBound)
         
     def testScriptCreationErrorHandling(self):

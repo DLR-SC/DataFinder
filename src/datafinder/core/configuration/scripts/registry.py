@@ -44,7 +44,7 @@ from copy import copy
 
 from datafinder.common.logger import getDefaultLogger
 from datafinder.core.configuration.scripts import constants
-from datafinder.core.configuration.scripts.script import createScript
+from datafinder.core.configuration.scripts.script import createScript, Script
 from datafinder.core.error import ConfigurationError
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.factory import createFileStorer
@@ -126,7 +126,7 @@ class ScriptRegistry(object):
         @param location: Represents the scope / location of the icons.
         @type location: C{unicode}
         @param scripts: List of script that a registered.
-        @type scripts: C{list} of C{Script}
+        @type scripts: C{list} of C{Script} or C{ScriptCollection}
         """
         
         if not location in self._registeredScripts:
@@ -135,7 +135,14 @@ class ScriptRegistry(object):
             self._registeredScripts[location][script.uri] = copy(script)
             if location == constants.LOCAL_SCRIPT_LOCATION:
                 self._preferences.addScriptUri(script.uri)
-
+            if isinstance(script, Script):              
+                if script.automatic == True:
+                    script.execute()
+            else:
+                for script in script.scripts: # the script collection needs to be opened
+                    if script.automatic == True:
+                        script.execute()
+                        
     def unregister(self, location, script):
         """ 
         Unregisters the given script.

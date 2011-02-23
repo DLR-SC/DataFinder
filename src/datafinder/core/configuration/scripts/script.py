@@ -79,10 +79,11 @@ class Script(object):
         
         self.title = None          # scrtitle
         self.description = None    # scrdesc
-        self.datatypes = list()  # scrdatatypes
+        self.datatypes = list()    # scrdatatypes
         self.dataformats = list()  # scrmimetypes
-        self.iconName = None           # scricon
+        self.iconName = None       # scricon
         self.version = None        # scrversion
+        self.automatic = False     #automatic execution of script
         
         self._parse()
         
@@ -122,6 +123,8 @@ class Script(object):
                             self.version = line.split(constants.VERSION_KEYWORD)[1].strip()
                         elif constants.DESCRIPTION_KEYWORD in line:
                             self.description = line.split(constants.DESCRIPTION_KEYWORD)[1].strip()
+                        elif constants.AUTOMATIC_EXECUTE_KEYWORD in line:
+                            self.automatic = True
                     line = dataStream.readline()
             finally:
                 dataStream.close()
