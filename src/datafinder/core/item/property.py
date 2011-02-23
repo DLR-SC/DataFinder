@@ -40,6 +40,7 @@ Represents a property, i.e. property definition and value.
 """
 
 
+from datafinder.core.configuration.properties.property_type import ObjectType
 from datafinder.core.error import PropertyError
 
 
@@ -86,7 +87,10 @@ class Property(object):
         if isinstance(self._value, type(dict())):
             print self._propertyDefinition.propertyType.instance.fromDict(self._value)
             print self._propertyDefinition.propertyType.instance.fromDict(self._value).__dict__
-            return self._propertyDefinition.propertyType.instance.fromDict(self._value)
+            try:
+                return self._propertyDefinition.propertyType.instance.fromDict(self._value)
+            except AttributeError, error:
+                raise PropertyError("Cannot get value. Reason: %s" % error)
         else:
             return self._value
         
@@ -119,6 +123,15 @@ class Property(object):
         except AttributeError:
             return 1
         
+    def toPersistenceFormat(self):
+        value = self.value
+        if isinstance(self._propertyDefinition.propertyType, ObjectType):
+            try:
+                value = self.value.toDict()
+            except AttributeError, error:
+                raise PropertyError("Cannot convert to persistence format. Reason: %s" % error)
+        return self.identifier, value
+        
     @staticmethod
     def create(propertyDefinition, persistedValue):
         """ 
@@ -135,6 +148,10 @@ class Property(object):
         valueRepresentations = persistedValue.guessRepresentation()
         for valueRepresentation in valueRepresentations:
             try:
+                
+                if isinstance(valueRepresentation, dict): #AttributeError?
+                    classObj = propertyDefinition.propertyType.cls
+                    valueRepresentation = classObj.fromDict(valueRepresentation)
                 propertyDefinition.validate(valueRepresentation)
                 if not foundValidRepresentation:
                     value = valueRepresentation

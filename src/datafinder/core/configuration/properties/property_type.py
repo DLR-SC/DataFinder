@@ -34,7 +34,6 @@
 #THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-from types import ObjectType
 
 
 """ 
@@ -47,6 +46,7 @@ from decimal import Decimal
 
 from datafinder.core.configuration.properties import constants
 from datafinder.core.configuration.properties.validators import type_validators
+from datafinder.core.configuration.properties.validators.error import ValidationError
 from datafinder.core.error import ConfigurationError
 
 
@@ -200,92 +200,48 @@ class AnyType(object):
 class ObjectType(object):
     """ Represents a object values. """
 
-    NAME = constants.OBJECT_TYPE
+    NAME = "" # Here you find the concrete class identifier.
 
-    def __init__(self, modelIdentifier):
+    def __init__(self, fullDottedClassName):
         """
         Constructor.
         
-        @param restrictions: Dict of restrictions the object has to be taken from.
-        @type restrictions: C{dict}
+        @param fullDottedClassName: 
+        @type fullDottedClassName: C{unicode}
         """
         
-        self.restrictions = dict()
-        
-        self._modulIdentifier = modelIdentifier[:modelIdentifier.rfind(".")]
-        self._classIdentifier = modelIdentifier[modelIdentifier.rfind(".")+1:]
-        self._model = self._importModel(self._modulIdentifier, self._classIdentifier)
-        self._instance = self._model()
+        self.NAME = fullDottedClassName        
+        self._fullDottedModuleName = fullDottedClassName[:fullDottedClassName.rfind(".")]
+        self._className = fullDottedClassName[fullDottedClassName.rfind(".") + 1:]
+        self._cls = self._importClass()
         
     @property
-    def instance(self):
+    def cls(self):
         """ Returns the instance of an ObjectType model. """
         
-        return self._instance
+        return self._cls
         
     def validator(self, value):
-        self._instance.validate(value)
+        """ Delegates the validation to the actual instance. """
         
-    def _importModel(self, fromName, fromList=None, globals={}, locals={}):
+        try:
+            value.validate()
+        except AttributeError, error:
+            raise ValidationError("Cannot validate property value. Reason %s" % error)
+        
+    def _importClass(self):
         """
-        An easy wrapper around ``__import__``.
-
-        >>> import sys
-        >>> sys2 = _importModel("sys")
-        >>> sys is sys2
-        True
-
-        >>> import os.path
-        >>> ospath2 = _importModel("os.path")
-        >>> os.path is ospath2
-        True
-
-        >>> from time import time
-        >>> time2 = _importModel("time", "time")
-        >>> time is time2
-        True
-
-        >>> from os.path import sep
-        >>> sep2 = _importModel("os.path", "sep")
-        >>> sep is sep2
-        True
-
-        >>> from os import sep, pathsep
-        >>> sep2, pathsep2 = _importModel("os", ["sep", "pathsep"])
-        >>> sep is sep2; pathsep is pathsep2
-        True
-        True
-
-        >>> _importModel("existiertnicht")
-        Traceback (most recent call last):
-        ...
-        ImportError: No module named existiertnicht
-
-        >>> _importModel("os", "gibtsnicht")
-        Traceback (most recent call last):
-        ...
-        ImportError: cannot import name gibtsnicht
+        Tries to import the associated class and raises a configuration 
+        error if something goes wrong.
+        
+        @raise ConfigurationError: 
         """
 
-        oneonly = False
-        if isinstance(fromList, basestring):
-            oneonly = True
-            fromList = [fromList]
-
-        obj = __import__(fromName, globals, locals, ["foo"])
-        if fromList is None:
-            return obj
-
-        result = []
-        for objectName in fromList:
-            try:
-                result.append(getattr(obj, objectName))
-            except AttributeError:
-                raise ImportError("cannot import name " + objectName)
-
-        if oneonly:
-            return result[0]
-        return result
+        try:
+            moduleInstance = __import__(self._fullDottedModuleName, globals(), dict(), [""])
+            return getattr(moduleInstance, self._className)
+        except (ImportError, AttributeError), error:
+            raise ConfigurationError("Cannot import '%s'. Reason: '%s'" % (self.NAME, repr(error)))
 
 
 _propertyNameClassMap = {StringType.NAME: StringType,
@@ -293,8 +249,7 @@ _propertyNameClassMap = {StringType.NAME: StringType,
                          NumberType.NAME: NumberType,
                          DatetimeType.NAME: DatetimeType,
                          ListType.NAME: ListType,
-                         AnyType.NAME: AnyType,
-                         ObjectType.NAME: ObjectType}
+                         AnyType.NAME: AnyType}
 PROPERTY_TYPE_NAMES = _propertyNameClassMap.keys()[:]
 
 
@@ -314,15 +269,14 @@ def createPropertyType(propertyTypeName, restrictions=dict()):
         except TypeError:
             raise ConfigurationError("Restrictions for property type '%s' are invalid." % propertyTypeName)
     else:
-        raise ConfigurationError("The property type name '%s' is not supported." % propertyTypeName)
+        return ObjectType(propertyTypeName)
 
 
 _typeConstantsPythonTypeMap = {constants.BOOLEAN_TYPE: bool,
                                constants.DATETIME_TYPE: datetime,
                                constants.LIST_TYPE: list,
                                constants.NUMBER_TYPE: Decimal,
-                               constants.STRING_TYPE: unicode,
-                               constants.OBJECT_TYPE: object}
+                               constants.STRING_TYPE: unicode}
 _pythonTypeTypeConstantsMap = dict((value, key) for key, value in _typeConstantsPythonTypeMap.items())
 
 
@@ -343,5 +297,5 @@ def determinePropertyTypeConstant(value):
     try:
         displayPropertyTypeName = _pythonTypeTypeConstantsMap[type(value)]
     except KeyError:
-        raise ValueError("Property value is unsupported.")
+        displayPropertyTypeName = value.__class__.name
     return displayPropertyTypeName
