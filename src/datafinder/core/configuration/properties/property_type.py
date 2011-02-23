@@ -221,7 +221,8 @@ class ObjectType(object):
         
         return self._cls
         
-    def validator(self, value):
+    @staticmethod
+    def validator(value):
         """ Delegates the validation to the actual instance. """
         
         try:
@@ -297,5 +298,8 @@ def determinePropertyTypeConstant(value):
     try:
         displayPropertyTypeName = _pythonTypeTypeConstantsMap[type(value)]
     except KeyError:
-        displayPropertyTypeName = value.__class__.name
+        try:
+            displayPropertyTypeName = value.__class__.name
+        except AttributeError:
+            raise ValueError("Values of type '%s' are not supported." % type(value))
     return displayPropertyTypeName
