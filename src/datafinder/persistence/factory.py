@@ -117,29 +117,29 @@ class FileSystem(object):
         """
 
         self._baseConfiguration = baseConfiguration
+        self._isWebdav = False
         if not baseConfiguration is None:
             try:
                 self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
             except PersistenceError:
-                self._factory = self._getFactory(baseConfiguration.uriScheme, isWebdav=True)(baseConfiguration)
+                self._isWebdav = True
+                self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
             if basePrincipalSearchConfiguration is None:
                 self._principalSearchFactory = self._factory
             else:
-                self._principalSearchFactory = self._getFactory(baseConfiguration.uriScheme, isWebdav=True)(basePrincipalSearchConfiguration)
+                self._principalSearchFactory = self._getFactory(baseConfiguration.uriScheme)(basePrincipalSearchConfiguration)
         else:
             self._factory = BaseFileSystem()
             self._principalSearchFactory = BaseFileSystem()
             
-    def _getFactory(self, uriScheme, isWebdav=False):
+    def _getFactory(self, uriScheme):
         """ Determines dynamically the concrete factory implementation. """
         
         try:
             if uriScheme == "http" or uriScheme == "https":
-                if isWebdav:
-                    print "webdav"
+                if self._isWebdav:
                     adapterPackageName = self._uriSchemeAdapterMap[uriScheme][0]
                 else:
-                    print "svn"
                     adapterPackageName = self._uriSchemeAdapterMap[uriScheme][1]
             else:
                 adapterPackageName = self._uriSchemeAdapterMap[uriScheme]
