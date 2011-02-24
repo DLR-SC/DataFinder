@@ -286,7 +286,8 @@ class DataSubversionAdapter(NullDataStorer):
             try:
                 destinationPersistenceId = util.mapIdentifier(destination.identifier)
                 connection.update()
-                connection.copy(connection.repoWorkingCopyPath + self._persistenceId, connection.repoWorkingCopyPath + destinationPersistenceId)
+                connection.copy(connection.repoWorkingCopyPath + self._persistenceId, connection.repoWorkingCopyPath + \
+                                destinationPersistenceId)
                 connection.checkin(self._persistenceId)
                 connection.checkin(destinationPersistenceId)
             except SubversionError, error:

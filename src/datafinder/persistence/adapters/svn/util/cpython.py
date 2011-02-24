@@ -71,8 +71,8 @@ class CPythonSubversionWrapper(object):
         self._password = password
         self._md5 = hashlib.md5()
         self._client = pysvn.Client()
-        self._client.callback_get_login = self._get_login
-        self._client.callback_get_log_message = self._get_log_message
+        self._client.callback_get_login = self._getLogin
+        self._client.callback_get_log_message = self._getLogMessage
         self._repoPath = repoPath
         self._md5.update(self._repoPath)
         self._repoWorkingCopyPath = workingCopyPath + "/" + self._md5.hexdigest()
@@ -81,12 +81,12 @@ class CPythonSubversionWrapper(object):
         except ClientError, error:
             raise PersistenceError(error)
         
-    def _get_login(self, realm, username, may_save):
+    def _getLogin(self, realm, username, may_save):
         """ Login callback function. """
         
         return True, self._username, self._password, False
     
-    def _get_log_message(self):
+    def _getLogMessage(self):
         """ Log message callback function. """
         
         return True, "datafinder"

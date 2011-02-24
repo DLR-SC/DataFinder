@@ -84,7 +84,6 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 rawResult.update(json.loads(persistenceDatafinderProperties))
             mappedResult = self._mapRawResult(rawResult)
             return self._filterResult(propertyIds, mappedResult)
-            return mappedResult
         finally:
             self.__connectionPool.release(connection)
 

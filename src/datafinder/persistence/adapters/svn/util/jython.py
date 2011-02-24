@@ -44,15 +44,15 @@ import hashlib
 
 from java.io import File
 
-from org.tmatesoft.svn.core import SVNException, SVNURL, SVNNodeKind, SVNDepth,\
+from org.tmatesoft.svn.core import SVNException, SVNURL, SVNNodeKind, SVNDepth, \
                                    SVNPropertyValue
 from org.tmatesoft.svn.core.io import SVNRepositoryFactory
 from org.tmatesoft.svn.core.internal.io.dav import DAVRepositoryFactory
 from org.tmatesoft.svn.core.internal.io.fs import FSRepositoryFactory
 from org.tmatesoft.svn.core.internal.io.svn import SVNRepositoryFactoryImpl
 from org.tmatesoft.svn.core.wc import SVNWCUtil, SVNCommitClient, \
-                                      SVNUpdateClient, SVNWCClient, SVNRevision,\
-                                      SVNCopyClient, SVNCopySource,\
+                                      SVNUpdateClient, SVNWCClient, SVNRevision, \
+                                      SVNCopyClient, SVNCopySource, \
                                       ISVNPropertyHandler
 
 from datafinder.persistence.error import PersistenceError    
@@ -104,15 +104,6 @@ class JythonSubversionWrapper(object):
         except SVNException, error:
             raise PersistenceError(error)  
     
-    def isLink(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        
-        linkTarget = self.linkTarget(path)
-        if linkTarget is None:
-            return False
-        else:
-            return True
-    
     def isLeaf(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
           
@@ -149,7 +140,7 @@ class JythonSubversionWrapper(object):
         except SVNException, error:
             raise SubversionError(error)
         
-    def checkin(self, path):
+    def checkin(self, _):
         """ 
         Checkins to the repository.
         
@@ -162,7 +153,7 @@ class JythonSubversionWrapper(object):
         except SVNException, error:
             raise SubversionError(error)
         
-    def add(self, path):
+    def add(self, _):
         """ 
         Marks changes in the working copy for checking in. 
         
@@ -217,7 +208,8 @@ class JythonSubversionWrapper(object):
         """
         
         try:
-            self._svnWorkingCopyClient.doSetProperty(File(path), key, SVNPropertyValue.create(value), False, SVNDepth.EMPTY, ISVNPropertyHandler, None)
+            self._svnWorkingCopyClient.doSetProperty(File(path), key, SVNPropertyValue.create(value), False, \
+                                                     SVNDepth.EMPTY, ISVNPropertyHandler, None)
         except SVNException, error:
             raise SubversionError(error)
         
