@@ -252,14 +252,16 @@ class CPythonSubversionWrapper(object):
     
     def getChildren(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-
+        
         try:
             result = list()
             self._client.update(self._repoWorkingCopyPath + path)
             entryList = self._client.list(self._repoWorkingCopyPath + path, recurse=False)
             entryList = entryList[1:]
+            rootUrl = self._client.root_url_from_path(self._repoPath)
+            partToRemoveFromEntry = self._repoPath.replace(rootUrl + "/", "")
             for entry in entryList:
-                result.append(entry[0].repos_path) 
+                result.append(entry[0].repos_path.replace(partToRemoveFromEntry, "")) 
             return result
         except ClientError, error:
             raise SubversionError(error)
