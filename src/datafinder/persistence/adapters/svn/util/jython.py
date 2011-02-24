@@ -1,3 +1,6 @@
+# pylint: disable=F0401
+# F0401: java imports are needed but Pylint
+#        cannot correctly determine theme.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
