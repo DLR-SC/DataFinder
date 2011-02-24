@@ -88,14 +88,14 @@ class JythonSubversionWrapper(object):
         self._repositoryURL = SVNURL.parseURIEncoded(self._repoPath)
         self._md5 = hashlib.md5()
         self._md5.update(self._repoPath)
-        self._repoWorkingCopyPath = workingCopyPath + self._md5.hexdigest()
-        self._repoWorkingCopyFile = File(self._repoWorkingCopyPath)
         self._repository = None
         self._svnWorkingCopyClient = None
         self._svnCommitClient = None
         self._svnCopyClient = None
         self._svnUpdateClient = None
         try:
+            self._repoWorkingCopyPath = workingCopyPath + self._md5.hexdigest()
+            self._repoWorkingCopyFile = File(self._repoWorkingCopyPath)
             self._repository = SVNRepositoryFactory.create(SVNURL.parseURIDecoded(self._repoPath))
             self._authManager = SVNWCUtil.createDefaultAuthenticationManager(self._username, self._password)
             self._repository.setAuthenticationManager(self._authManager)
@@ -105,7 +105,9 @@ class JythonSubversionWrapper(object):
             self._svnUpdateClient = SVNUpdateClient(self._authManager, None)
             self._svnUpdateClient.doCheckout(self._repositoryURL, self._repoWorkingCopyFile, SVNRevision.HEAD, SVNRevision.HEAD, True)
         except SVNException, error:
-            raise PersistenceError(error)  
+            raise PersistenceError(error) 
+        except TypeError, error:
+            raise PersistenceError(error) 
     
     def isLeaf(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """

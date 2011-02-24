@@ -75,10 +75,12 @@ class CPythonSubversionWrapper(object):
         self._client.callback_get_log_message = self._getLogMessage
         self._repoPath = repoPath
         self._md5.update(self._repoPath)
-        self._repoWorkingCopyPath = workingCopyPath + "/" + self._md5.hexdigest()
         try: 
+            self._repoWorkingCopyPath = workingCopyPath + "/" + self._md5.hexdigest()
             self._client.checkout(repoPath, self._repoWorkingCopyPath)
         except ClientError, error:
+            raise PersistenceError(error)
+        except TypeError, error:
             raise PersistenceError(error)
         
     def _getLogin(self, realm, username, may_save):

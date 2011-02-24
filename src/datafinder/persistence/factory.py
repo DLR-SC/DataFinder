@@ -94,8 +94,8 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
 class FileSystem(object):
     """ Implements a generic file system interface. """
     
-    _uriSchemeAdapterMap = {"http": "webdav_",
-                            "https": "webdav_",
+    _uriSchemeAdapterMap = {"http": ["webdav_", "svn"],
+                            "https": ["webdav_", "svn"],
                             "file": "filesystem",
                             "ldap": "ldap_",
                             "tsm": "tsm",
@@ -118,20 +118,31 @@ class FileSystem(object):
 
         self._baseConfiguration = baseConfiguration
         if not baseConfiguration is None:
-            self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
+            try:
+                self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
+            except PersistenceError:
+                self._factory = self._getFactory(baseConfiguration.uriScheme, isWebdav=True)(baseConfiguration)
             if basePrincipalSearchConfiguration is None:
                 self._principalSearchFactory = self._factory
             else:
-                self._principalSearchFactory = self._getFactory(baseConfiguration.uriScheme)(basePrincipalSearchConfiguration)
+                self._principalSearchFactory = self._getFactory(baseConfiguration.uriScheme, isWebdav=True)(basePrincipalSearchConfiguration)
         else:
             self._factory = BaseFileSystem()
             self._principalSearchFactory = BaseFileSystem()
             
-    def _getFactory(self, uriScheme):
+    def _getFactory(self, uriScheme, isWebdav=False):
         """ Determines dynamically the concrete factory implementation. """
         
         try:
-            adapterPackageName = self._uriSchemeAdapterMap[uriScheme]
+            if uriScheme == "http" or uriScheme == "https":
+                if isWebdav:
+                    print "webdav"
+                    adapterPackageName = self._uriSchemeAdapterMap[uriScheme][0]
+                else:
+                    print "svn"
+                    adapterPackageName = self._uriSchemeAdapterMap[uriScheme][1]
+            else:
+                adapterPackageName = self._uriSchemeAdapterMap[uriScheme]
         except KeyError:
             raise PersistenceError("The URI scheme '%s' is unsupported." % uriScheme)
         else:
@@ -316,4 +327,3 @@ class FileSystem(object):
 if __name__ == "__main__":
     fs = createFileStorer("http://localhost/webdav", BaseConfiguration("http://localhost/webdav", username="wampp", password="xampp")) 
     print fs.getChildren()
-    
