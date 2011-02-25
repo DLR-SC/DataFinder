@@ -64,8 +64,6 @@ class ItemSupportTestCase(unittest.TestCase):
         self._repositoryMock = SimpleMock(self._itemMock)
         self._repositoryManagerInstanceMock = SimpleMock(workingRepository=self._repositoryMock)
         item_support.repositoryManagerInstance = self._repositoryManagerInstanceMock
-        self._createItemMock = SimpleMock()
-        item_support._createItem = self._createItemMock
         
     def testRefresh(self):
         """ Test for the refresh method. """
