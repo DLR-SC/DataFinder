@@ -250,14 +250,24 @@ class DefaultTableView(QtGui.QTableView):
         self.connect(self.horizontalHeader(),
                      QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
                      self.showHeaderMenu)
+        self.installEventFilter(self)
         
-    def keyPressEvent(self, keyEvent):
-        """ Signals that the return key is pressed and provides the specific the current model index. """
+    def eventFilter(self, _, event):
+        """ Custom event filter which:
+        - emits a "returnPressed" event with additional currently selected index
+          if the Qt.Key_Return key is pressed.
+        - ensures that the content of the current cell is copied to the 
+          clip board if <Ctrl>+C is pressed
+        """
         
-        if keyEvent.key() == Qt.Key_Return:
-            self.emit(QtCore.SIGNAL("returnPressed"), self.selectionModel().currentIndex())
-        QtGui.QTableView.keyPressEvent(self, keyEvent)
-        
+        if event.type() == QtCore.QEvent.KeyPress:
+            if event.key() == Qt.Key_Return:
+                self.emit(QtCore.SIGNAL("returnPressed"), self.currentIndex())
+        elif event.type() == QtCore.QEvent.KeyRelease:
+            if event.matches(QtGui.QKeySequence.Copy):
+                QtGui.QApplication.clipboard().setText(self.currentIndex().data().toString())
+        return False
+    
     def showHeaderMenu(self, _):
         """
         Shows the header content menu at the current cursor position.

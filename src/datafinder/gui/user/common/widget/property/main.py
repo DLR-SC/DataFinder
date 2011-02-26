@@ -73,11 +73,10 @@ class PropertyWidget(QtGui.QWidget, Ui_propertyWidget):
     def _propertyStateChangedSlot(self):
         """ 
         Handles changes of properties of the model and updates
-        the button enabled states in accordance to the selected entry.
+        the button enabled states in accordance to the selection.
         """
         
-        index = self.propertiesTableView.selectionModel().currentIndex()
-        self._updateButtonStates(index)
+        self._updateButtonStates()
         
     def _updateSlot(self, index):
         """ 
@@ -90,37 +89,37 @@ class PropertyWidget(QtGui.QWidget, Ui_propertyWidget):
         if index.isValid():
             self.propertiesTableView.selectionModel().setCurrentIndex(index, QtGui.QItemSelectionModel.ClearAndSelect)
 
-    def _selectionChangedSlot(self, selected):
+    def _selectionChangedSlot(self, _):
         """
-        Slot is called when the selected property entry has changed.
-
-        @param selected: The index of the selected property entry.
-        @type selected: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
+        Slot is called when the selected property entries changed.
         """
 
-        indexes = selected.indexes()
-        if len(indexes) > 0:
-            index = indexes[0]
-            self._updateButtonStates(index)
+        self._updateButtonStates()
             
-    def _updateButtonStates(self, index):
+    def _updateButtonStates(self):
         """ 
-        Updates the state of the add, edit and delete button
-        in accordance to the property state. 
-        
-        @param index: The index of the selected index.
-        @type index: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
+        Updates the enabled state of the add, edit, clear, revert and delete buttons
+        in accordance to the selected properties. 
         """
         
-        if index.isValid() and not self._model.isReadOnly:
-            self.addButton.setEnabled(True)
-            self.editButton.setEnabled(self._model.flags(index) & QtCore.Qt.ItemIsEditable)
-            self.clearValueButton.setEnabled(self._model.canBeCleared(index))
-            self.deleteButton.setEnabled(self._model.isDeleteable(index))
-            self.revertButton.setEnabled(self._model.isRevertable(index))
-        else:
-            self._setInitialButtonState()
+        indexes = self.propertiesTableView.selectionModel().selectedIndexes()
+        self._setInitialButtonState()
+        if not self._model.isReadOnly and len(indexes) > 0:
+            canBeCleared = isDeletable = isRevertable = True
+            for index in indexes:
+                if index.isValid():
+                    canBeCleared &= self._model.canBeCleared(index)
+                    isDeletable &= self._model.isDeleteable(index)
+                    isRevertable &= self._model.isRevertable(index)
             
+            # Enable / disable buttons
+            if len(indexes) == 1:
+                self.editButton.setEnabled(self._model.flags(indexes[0]) & QtCore.Qt.ItemIsEditable)
+            self.clearValueButton.setEnabled(canBeCleared)
+            self.deleteButton.setEnabled(isDeletable)
+            self.revertButton.setEnabled(isRevertable)
+            self.addButton.setEnabled(True)
+                
     def _setInitialButtonState(self):
         """ Sets the initial button state. """
         
@@ -135,6 +134,7 @@ class PropertyWidget(QtGui.QWidget, Ui_propertyWidget):
 
         index = self._model.add()
         self.propertiesTableView.selectionModel().setCurrentIndex(index, QtGui.QItemSelectionModel.ClearAndSelect)
+        self.addButton.setEnabled(False) # We have to wait until editing is finished to avoid an invalid model
         self._editClickedSlot()
         
     def _editClickedSlot(self):
@@ -147,21 +147,38 @@ class PropertyWidget(QtGui.QWidget, Ui_propertyWidget):
     def _clearValueClickedSlot(self):
         """ Slot is called when the set empty button is used. """
 
-        index = self.propertiesTableView.selectionModel().currentIndex()
-        if index.isValid():
-            self._model.clearValue(index)
+        selectedIndexes = self._determinePropertyRows()
+        for index in selectedIndexes:
+            if index.isValid():
+                self._model.clearValue(index)
 
+    def _determinePropertyRows(self):
+        """ Determines the indexes of the property rows selected by the user. """
+        
+        selectedIndexes = list()
+        rows = list()  # used to check for / avoid multiple entries
+        for index in self.propertiesTableView.selectionModel().selectedIndexes():
+            if not index.row() in rows:
+                selectedIndexes.append(index)
+                rows.append(index.row())
+        selectedIndexes.sort(cmp=lambda x, y: cmp(x.row(), y.row()), reverse=True)
+        return selectedIndexes
+    
     def _deleteClickedSlot(self):
         """ Slot is called when the delete button is used. """
-
-        index = self.propertiesTableView.selectionModel().currentIndex()
-        self._model.remove(index)
+        
+        selectedIndexes = self._determinePropertyRows()
+        for index in selectedIndexes:
+            if index.isValid():
+                self._model.remove(index)
 
     def _revertClickedSlot(self):
         """ Slot is called when the revert button is used. """
-
-        index = self.propertiesTableView.selectionModel().currentIndex()
-        self._model.revert(index)
+        
+        selectedIndexes = self._determinePropertyRows()
+        for index in selectedIndexes:
+            if index.isValid():
+                self._model.revert(index)
 
     def _refreshClickedSlot(self):
         """ Slot is called when the refresh button is used. """

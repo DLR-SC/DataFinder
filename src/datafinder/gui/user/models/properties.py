@@ -281,7 +281,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         """
 
         state = self._properties[index.row()][-1]
-        flags = QtCore.Qt.ItemIsSelectable
+        flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
         if not self.isReadOnly:
             if state & self._NEW \
                or (state & (self._DATA|self._PROP) and index.column() == 2) \
@@ -470,7 +470,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         """
 
         flags = self._properties[index.row()][-1]
-        return flags & (self._NEW | self._PROP) and not flags & self._DELETED
+        return bool(flags & (self._NEW | self._PROP)) and not bool(flags & self._DELETED)
 
     def isRevertable(self, index):
         """
@@ -483,7 +483,9 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         @rtype: C{bool}
         """
 
-        return self._properties[index.row()][-1] & (self._DELETED | self._EDITED)
+        flags = self._properties[index.row()][-1]
+        return bool(flags & (self._DELETED | self._EDITED)) \
+               and not bool(flags & self._NEW)
 
     def canBeCleared(self, index):
         """

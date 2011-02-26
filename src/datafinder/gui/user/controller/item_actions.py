@@ -311,7 +311,7 @@ class ItemActionController(object):
         propertyModel = PropertiesModel(self._sourceRepositoryModel)
         propertyModel.itemIndex = index
         dialog = PropertiesDialog(propertyModel, self._mainWindow)
-        dialog.exec_()
+        dialog.show()
 
     def openAction(self):
         """ Opens the selected item in a specific editor. """
