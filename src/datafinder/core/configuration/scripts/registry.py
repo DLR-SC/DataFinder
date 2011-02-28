@@ -135,13 +135,12 @@ class ScriptRegistry(object):
             self._registeredScripts[location][script.uri] = copy(script)
             if location == constants.LOCAL_SCRIPT_LOCATION:
                 self._preferences.addScriptUri(script.uri)
-            if isinstance(script, Script):              
+            try:
+                for script in script.scripts: 
+                    script.execute()
+            except TypeError: #It is a script and not a collection                 
                 if script.automatic:
                     script.execute()
-            else:
-                for script in script.scripts: # the script collection needs to be opened
-                    if script.automatic:
-                        script.execute()
                         
     def unregister(self, location, script):
         """ 

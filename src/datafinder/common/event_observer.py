@@ -36,69 +36,94 @@
 
 
 """ 
-This module implements the observer pattern for the DataFinder. 
-Events can be told, and listeners can listen to these events.
+This module provides an annotation to make methods observable.. 
 """
+
+
 import logging
 
+
 __version__ = "$Revision-Id:$" 
+
+
 _log = logging.getLogger("script")
+
     
 class Observable(object):
-    
+    """ Implements the observable annotation for bound
+    methods, static methods and class methods. """
+        
     def __init__(self, method):
-        """ Takes a bound method and makes it observable by other object. """
+        """ Takes a method and makes it 
+        observable by another object. """
       
         self.classObservable = None # Class-specific observable instance, None-> it is the class-spcific one
-        self.observers = list() # List of observers
+        self.callbacks = list() # List of observer functions / methods
         self.instance = None # Instance the method is bound to
         self.method = method # Method that is observed
         self.__doc__ = self.method.__doc__ # Documentation
         self.cls = None
         try: 
-            self.name = " " + method.__name__ # Name that is used to attach observers to the instances
+            self.name = " " + method.__name__ # Name that is used to attach callbacks to the instances
         except AttributeError:
             self.name = None
   
-            
-    def __add__(self, observer):
+    def __add__(self, callback):
         """
-        Registering an Listener
-        @param eventName: Name of the event the listener is registered for
-        @param callback: Function that is supposed to be called on firing the event
+        Registering a callback function which is called after method invocation.
+
+        @param callback: Function that is supposed to be called on firing the event.
+        @type callback: Function object which receives the following arguments:
+                        args: Arguments the observed method received.
+                        kwargs: Keyword arguments the observed method received.
+                        returnValue: The returned value of the observed method.
+                        error: Error which may be raised by the observed method.
         """
-        if not observer in self.observers:
-            self.observers.append(observer)
+
+        if not callback in self.callbacks:
+            self.callbacks.append(callback)
         return self
      
-    def __sub__(self, observer):
+    def __sub__(self, callback):
         """
-        Unregister an Listener
-        @param eventName: Name of the event the listener is registered for
-        @param callback: Function that is supposed to be called on firing the event
+        Removes the callback function from the observed method.
+        
+        @param callback: Function that has been formerly registered.
+        
+        @raise ValueError: If the callback function has not been registered before.
         """
-        try:
-            self.observers.remove(observer)
-        except ValueError:
-            pass
+
+        self.callbacks.remove(callback)
         return self    
             
     def __call__(self, *args, **kwargs):
-        """ Calls the observable method and handles observer notification. 
-        TODO: Think of exception handling and threading issues.
-        """
+        """ Calls the observed method and handles callback notification. """
         
-        if not hasattr(self.method, "__call__"):
-            methodToCall = self.method.__get__(self.instance, self.cls)
-            returnValue = methodToCall(*args, **kwargs)
-        else:
-            returnValue = self.method(self.instance, *args, **kwargs)
+        error = None
+        returnValue = None
         
-        if not self.classObservable is None: # Call all class-specific observers
-            for observer in self.classObservable.observers:
-                observer(args, kwargs, returnValue)
-        for observer in self.observers: # Call the instance-specific observers
-            observer(args, kwargs, returnValue)
+        # call the method and handle error
+        try:
+            if not hasattr(self.method, "__call__"):
+                methodToCall = self.method.__get__(self.instance, self.cls)
+                returnValue = methodToCall(*args, **kwargs)
+            else:
+                if self.instance is None: # Simulate standard error if the instance is None
+                    returnValue = self.method(*args, **kwargs)
+                returnValue = self.method(self.instance, *args, **kwargs)
+        except Exception, error_:
+            error = error_
+
+        # call back
+        if not self.classObservable is None: # Call all class-specific callbacks
+            for callback in self.classObservable.callbacks:
+                callback(args, kwargs, returnValue, error)
+        for callback in self.callbacks: # Call the instance-specific callbacks
+            callback(args, kwargs, returnValue, error)
+        
+        # Raise error if exists
+        if not error is None:
+            raise error
         return returnValue
         
     def __get__(self, instance, cls):

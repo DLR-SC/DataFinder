@@ -36,81 +36,115 @@
 
 
 """ 
-tests the observer implementation of the datafinder
+Tests the observer implementation.
 """
 
-
-__version__ = "$Revision-Id:$" 
 
 import unittest
 
 from datafinder.common.event_observer import Observable
 
-#Test Modules     
-class MyClass(object):
+
+__version__ = "$Revision-Id:$" 
+
+
+class _TestClass(object):
     """ Simple test class which gets observed. """
     
-    def __init__(self):
-        self._para = 2
+    _clsParameter = 2
     
-    @Observable # Indicates an observable method
+    def __init__(self):
+        self._parameter = 2
+    
+    @Observable
+    def doItBound(self, test):
+        return test * self._parameter
+
+    @Observable
+    @staticmethod
+    def doItStatic(test):
+        return test * 2
+    
+    @Observable
     @classmethod
-    def do_it(cls, test, test2):
-        return test * test2 * 2
+    def doitClass(cls, test):
+        return test * cls._clsParameter
+
+
+class _Consumer(object):
+    """ Simple test consumer for events. """
     
-class MyClassEvent(object):
-    "TestEvent"  
     def __init__(self):
-        pass    
+        self.params = None
+        
+        
+    def testConsumer(self, args, kwargs, returnValue, error):
+        """ Just sets arguments. """
     
-    def register(self,observer, instance = False):
-        """
-        Register an Observer to this event. 
-        To get an instance of the object: instance = True
-        """
-        if instance:
-            setInstance = MyClass()
-            setInstance.do_it += observer
-            return setInstance
-        else:
-            MyClass.do_it += observer
-    
-    def unregister(self, observer, instance = None):
-        if instance: 
-            instance.do_it -= observer
-        else:
-            MyClass.do_it -= observer  
-    
-    
-def consumer(args, kwargs, retVal):
-    """ Just prints the arguments and result on console. """
-    
-    print args, kwargs, retVal
+        self.params = args, kwargs, returnValue, error
 
 
-if __name__ == "__main__":
-    # Register two class-specific observers
-    MyClassEvent().register(consumer)
-    #MyClassEvent().register(consumer)
-    #MyClass.do_it += consumer
-    
-    c = MyClass()
-   
-    # Register a instance-specific observer
-    c2 = MyClassEvent().register(consumer, True)
-    print c.do_it(2, 4) # Two observers are called
-    
-    MyClass.do_it(2,4)   
-    #c2.do_it += consumer
-    print c2.do_it(2, 4) # Three observers are called
-    
-    # Remove a class specific observer
-    MyClassEvent().unregister(consumer)
-    print c.do_it(2, 4) # Just one observer is called
-    print c2.do_it(2, 4)
-    MyClassEvent().unregister(consumer, c2)
-    print c2.do_it(2, 4)
+class ObserverTestCase(unittest.TestCase):
+    """
+    Test cases of the observer mechanism.
+    """
 
-    
-
-  
+    def setUp(self):
+        """ Creates the observed object. """
+        
+        self._consumer = _Consumer()
+        self._observedInstance = _TestClass()
+        
+    def testCallableHandling(self):
+        """ Tests adding and removing of callbacks. """
+        
+        # Standard mechanism
+        _TestClass.doItBound += self._consumer.testConsumer
+        _TestClass.doItStatic += self._consumer.testConsumer
+        _TestClass.doitClass += self._consumer.testConsumer
+        self._observedInstance.doItBound += self._consumer.testConsumer
+        
+        _TestClass.doItBound -= self._consumer.testConsumer
+        _TestClass.doItStatic -= self._consumer.testConsumer
+        _TestClass.doitClass -= self._consumer.testConsumer
+        self._observedInstance.doItBound -= self._consumer.testConsumer
+        
+        # Removing not registered callback
+        try:
+            self._observedInstance.doItBound -= self._consumer.testConsumer
+            self.fail("ValueError not raised")
+        except ValueError:
+            self.assertTrue(True)
+        try:
+            _TestClass.doItBound -= self._consumer.testConsumer
+            self.fail("ValueError not raised")
+        except ValueError:
+            self.assertTrue(True)
+        
+        # Adding a callback to static method (same for class) of an instance
+        self._observedInstance.doItStatic += self._consumer.testConsumer
+        self._observedInstance.doItStatic -= self._consumer.testConsumer
+        self._observedInstance.doItStatic += self._consumer.testConsumer
+        _TestClass.doItStatic -= self._consumer.testConsumer
+        
+    def testCalling(self):
+        """ Test the invocation of the observed methods. """
+        
+        # Adding callbacks and creating an additional consumer
+        anotherConsumer = _Consumer()
+        _TestClass.doItBound += self._consumer.testConsumer
+        _TestClass.doItStatic += self._consumer.testConsumer
+        
+        # Success case
+        self._observedInstance.doItBound += anotherConsumer.testConsumer
+        self._observedInstance.doItBound(2)
+        self.assertEquals(anotherConsumer.params, ((2,), {}, 4, None))
+        self.assertEquals(self._consumer.params, ((2,), {}, 4, None))
+        self._observedInstance.doItStatic(4)
+        self.assertEquals(self._consumer.params, ((4,), {}, 8, None))
+        _TestClass.doItStatic(2)
+        self.assertEquals(self._consumer.params, ((2,), {}, 4, None))
+        
+        # Error case
+        self.assertRaises(TypeError, _TestClass.doItBound, 2)
+        self.assertEquals(self._consumer.params[3].__class__, TypeError)
