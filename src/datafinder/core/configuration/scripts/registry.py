@@ -138,7 +138,7 @@ class ScriptRegistry(object):
             try:
                 for script in script.scripts: 
                     script.execute()
-            except TypeError: #It is a script and not a collection                 
+            except AttributeError: #It is a script and not a collection                 
                 if script.automatic:
                     script.execute()
                         

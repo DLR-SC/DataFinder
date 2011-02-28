@@ -66,7 +66,7 @@ class ScriptRegistryTestCase(unittest.TestCase):
     def testLoad(self):
         """ Tests the initialization of the script registry. """
         
-        self._createScriptMock.value = SimpleMock(uri="uri")
+        self._createScriptMock.value = _ScriptMock(uri="uri")
         self._registry.load()
         self.assertEquals(len(self._registry.scripts), 1)
         
@@ -81,9 +81,9 @@ class ScriptRegistryTestCase(unittest.TestCase):
     def testScriptHandling(self):
         """ Tests the management of script extensions. """
         
-        firstScript = SimpleMock(uri="uri1")
-        anotherScript = SimpleMock(uri="uri2")
-        thirdScript = SimpleMock(uri="uri3")
+        firstScript = _ScriptMock(uri="uri1")
+        anotherScript = _ScriptMock(uri="uri2")
+        thirdScript = _ScriptMock(uri="uri3")
         self.assertFalse(self._registry.hasScript("test", "uri1"))
         self.assertEquals(self._registry.getScript("test", "uri1"), None)
         self._registry.register("anotherTest", [firstScript])
@@ -99,7 +99,7 @@ class ScriptRegistryTestCase(unittest.TestCase):
         self.assertEquals(len(self._registry.getScripts("test")), 2)
         self.assertEquals(len(self._registry.scripts), 3)
         
-        self._registry.unregister("test", SimpleMock(uri="unknown"))
+        self._registry.unregister("test", _ScriptMock(uri="unknown"))
         self.assertEquals(len(self._registry.getScripts("anotherTest")), 1)
         self.assertEquals(len(self._registry.getScripts("test")), 2)
         self.assertEquals(len(self._registry.scripts), 3)
@@ -115,3 +115,12 @@ class ScriptRegistryTestCase(unittest.TestCase):
         self.assertEquals(len(self._registry.getScripts("anotherTest")), 0)
         self.assertEquals(len(self._registry.getScripts("test")), 0)
         self.assertEquals(len(self._registry.scripts), 0)
+
+
+class _ScriptMock(object):
+    def __init__(self, uri):
+        self.uri = uri
+        self.automatic = True
+        
+    def execute(self):
+        pass
