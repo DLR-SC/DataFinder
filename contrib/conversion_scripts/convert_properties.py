@@ -101,56 +101,61 @@ class PropertyConversion(object):
                 
         fs = factory.createFileStorer(repositoryUri, 
                                       BaseConfiguration(repositoryUri, username=user, password=password))
-        items = fs.getChildren()
-        self._walk(items)
+        self._walk([fs])
         
    
     def _walk(self, items):
         """ walk trough each element in the specified file system"""
                 
         for item in items:
-            mappedProperties, properties = self._handle(item)
+            self._handle(item)
             if item.isCollection:
                 self._walk(item.getChildren())
-            if not self._dryRun:
-                item.updateMetadata(mappedProperties)
-                if self._deleteOld: 
-                    propertiesToDelete = list()
-                    for propertyId in self._oldPropertyIds:
-                        if propertyId in properties:
-                            propertiesToDelete.append(propertyId)
-                    item.deleteMetadata(propertiesToDelete)
-
+            
     def _handle(self, item):
         """ convert the properties to the updated constants. """
         
         properties = item.retrieveMetadata()
         mappedProperties = dict()
         
-        for key, value in properties.iteritems():
-            if key == "DataFinderType" and not item.isCollection: # in 1.X exists no data format
-                dataFormat = self._dataFormatRegistry.determineDataFormat(baseName=item.name)
-                mappedProperties[u"____dataformat____"] = dataFormat.name
-            elif key == LINK_PROPERTY_OLD: # it is a link in 1.X
-                linkTarget = value.value
-                if not self._removeLinkPrefix is None:
-                    if linkTarget.startswith(self._removeLinkPrefix):
-                        linkTarget = linkTarget[len(self._removeLinkPrefix):]
-                mappedProperties["linkTarget"] = linkTarget
-    
-            else:
-                if key in self._conversionMap:
-                    if key in self._datetypes:
-                        value._expectedType = datetime
-                    mappedProperties[self._conversionMap[key]] = value.value
+        if not self._deleteOld:
+            for key, value in properties.iteritems():
+                if key == "DataFinderType" and not item.isCollection: # in 1.X exists no data format
+                    dataFormat = self._dataFormatRegistry.determineDataFormat(baseName=item.name)
+                    mappedProperties[u"____dataformat____"] = dataFormat.name
+                elif key == LINK_PROPERTY_OLD: # it is a link in 1.X
+                    linkTarget = value.value
+                    if not self._removeLinkPrefix is None:
+                        if linkTarget.startswith(self._removeLinkPrefix):
+                            linkTarget = linkTarget[len(self._removeLinkPrefix):]
+                    mappedProperties["linkTarget"] = linkTarget
         
-        # Logging the changes to the log file
-        self._log.info(item.uri)
-        self._log.info(properties)
-        self._log.info(mappedProperties)
-        self._log.info("Successfully updated item.")
-        self._log.info("")
-        return mappedProperties, properties
+                else:
+                    if key in self._conversionMap:
+                        if key in self._datetypes:
+                            value._expectedType = datetime
+                        mappedProperties[self._conversionMap[key]] = value.value
+            
+            if item.isCollection and "____datastorename____" in mappedProperties:
+                del mappedProperties["____datastorename____"]
+            
+            # Logging the changes to the log file
+            self._log.info(item.uri)
+            self._log.info(properties)
+            self._log.info(mappedProperties)
+            self._log.info("Successfully updated item.")
+            self._log.info("")
+            if not self._dryRun:
+                item.updateMetadata(mappedProperties)
+        else:
+            propertiesToDelete = list()
+            for propertyId in self._oldPropertyIds:
+                if propertyId in properties:
+                    propertiesToDelete.append(propertyId)
+            self._log.info("Deleted:")
+            self._log.info(propertiesToDelete)
+            if not self._dryRun:
+                item.deleteMetadata(propertiesToDelete)
 
 
 if __name__ == "__main__":
