@@ -46,10 +46,10 @@ to be implemented - erstellt einen Datastore des Typs S3
 __version__ = "$Revision-Id:$" 
 
 
-from datafinder.persistence.adapters.amazonS3.configuration import Configuration
-from datafinder.persistence.adapters.amazonS3.connection_pool import S3ConnectionPool
-from datafinder.persistence.adapters.amazonS3.data.adapter import DataS3Adapter
-from datafinder.persistence.adapters.amazonS3 import constants
+from datafinder.persistence.adapters.amazons3.configuration import Configuration
+from datafinder.persistence.adapters.amazons3.connection_pool import S3ConnectionPool
+from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
+from datafinder.persistence.adapters.amazons3 import constants
 
 from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.common.connection.manager import ConnectionPoolManager

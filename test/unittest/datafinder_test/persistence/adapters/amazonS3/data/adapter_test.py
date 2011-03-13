@@ -44,7 +44,7 @@ Tests the data adapter implementation.
 import unittest
 
 
-from datafinder.persistence.adapters.amazonS3.data.adapter import DataS3Adapter
+from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
 from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock 
 

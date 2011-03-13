@@ -1,8 +1,3 @@
-# pylint: disable=R0201
-# R0201: This class defines the interface and the "Null" object specific
-# implementation. Thus, to correctly define the interface we have to
-# ignore pylint warnings concerning function-like methods.
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -80,6 +75,7 @@ class NullDataStorer(object):
         @rtype: C{unicode} or C{None}
         """
         
+        self = self # silent pylint
         return None
     
     @property
@@ -92,6 +88,7 @@ class NullDataStorer(object):
         @rtype: C{bool}
         """
         
+        self = self # silent pylint
         return False
     
     @property
@@ -103,6 +100,7 @@ class NullDataStorer(object):
         @rtype: C{bool}
         """
         
+        self = self # silent pylint
         return False
     
     @property
@@ -114,6 +112,7 @@ class NullDataStorer(object):
         @rtype: C{bool}
         """
         
+        self = self # silent pylint
         return False
 
     @property
@@ -125,6 +124,7 @@ class NullDataStorer(object):
         @rtype: C{bool}
         """
            
+        self = self # silent pylint
         return False
     
     def createCollection(self, recursively):
@@ -163,6 +163,7 @@ class NullDataStorer(object):
         @rtype: C{list} of C{unicode} 
         """
         
+        self = self # silent pylint
         return list()
     
     def exists(self):
@@ -173,6 +174,7 @@ class NullDataStorer(object):
         @rtype: C{bool}
         """
         
+        self = self # silent pylint
         return False
     
     def delete(self):
@@ -210,6 +212,7 @@ class NullDataStorer(object):
         @rtype: C{object} implementing the file protocol.
         """
         
+        self = self # silent pylint
         return StringIO("")
     
     def writeData(self, data):

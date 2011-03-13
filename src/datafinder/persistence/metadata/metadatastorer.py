@@ -1,8 +1,3 @@
-# pylint: disable=R0201
-# R0201: This class defines the interface and the "Null" object specific
-# implementation. Thus, to correctly define the interface we have to
-# ignore pylint warnings concerning function-like methods.
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -78,7 +73,7 @@ class NullMetadataStorer(object):
         value_mapping.MetaddataValue>}
         """
         
-        propertyIds = propertyIds
+        self, propertyIds = self, propertyIds # silent pylint
         return dict()
 
     def update(self, properties):
@@ -114,5 +109,5 @@ class NullMetadataStorer(object):
         @rtype: C{list} of C{unicode}
         """
         
-        restrictions = restrictions # silent pylint
+        self, restrictions = self, restrictions # silent pylint
         return list()

@@ -45,8 +45,8 @@ import unittest
 
 
 from datafinder.persistence.common.configuration import BaseConfiguration
-from datafinder.persistence.adapters.amazonS3 import factory
-from datafinder.persistence.adapters.amazonS3.data.adapter import DataS3Adapter
+from datafinder.persistence.adapters.amazons3 import factory
+from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
 from datafinder_test.mocks import SimpleMock
 
 

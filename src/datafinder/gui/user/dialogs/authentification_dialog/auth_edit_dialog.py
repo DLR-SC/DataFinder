@@ -192,9 +192,6 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
     
     comment = property (_getComment, _setComment )
     
-    
-
-    
     def _preferencesActionSlot(self):
         """ Shows the preferences dialog for connection settings. """
 

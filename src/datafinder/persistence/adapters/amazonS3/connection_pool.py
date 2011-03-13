@@ -43,7 +43,7 @@ Implements Amazon S3-specific connection pool.
 from boto.s3.connection import S3Connection
 
 from datafinder.persistence.common.connection.pool import ConnectionPool
-from datafinder.persistence.adapters.amazonS3.constants import MAX_CONNECTION_NUMBER
+from datafinder.persistence.adapters.amazons3.constants import MAX_CONNECTION_NUMBER
 
 
 __version__ = "$Revision-Id:$" 

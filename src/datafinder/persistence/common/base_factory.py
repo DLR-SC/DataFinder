@@ -1,8 +1,3 @@
-# pylint: disable=R0201
-# R0201: This class defines the interface and the "Null" object specific
-# implementation. Thus, to correctly define the interface we have to
-# ignore pylint warnings concerning function-like methods.
-#    
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -65,6 +60,7 @@ class BaseFileSystem(object):
         @rtype: instanceOf L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
         """
         
+        self = self # silent pylint
         return NullDataStorer(identifier)
     
     def createMetadataStorer(self, identifier):
@@ -75,6 +71,7 @@ class BaseFileSystem(object):
         @rtype: instanceOf L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}
         """
         
+        self = self # silent pylint
         return NullMetadataStorer(identifier)
     
     def createPrivilegeStorer(self, identifier):
@@ -85,6 +82,7 @@ class BaseFileSystem(object):
         @rtype: instanceOf L{NullMetadataStorer<datafinder.persistence.privileges.privilegestorer.NullPrivilegeStorer>}
         """
         
+        self = self # silent pylint
         return NullPrivilegeStorer(identifier)
     
     def createPrincipalSearcher(self):
@@ -95,6 +93,7 @@ class BaseFileSystem(object):
         @rtype: instanceOf L{NullMetadataStorer<datafinder.persistence.privileges.privilegestorer.NullPrivilegeStorer>}
         """
         
+        self = self # silent pylint
         return NullPrincipalSearcher()
 
     def release(self):
@@ -127,7 +126,7 @@ class BaseFileSystem(object):
         @note: This implementation always returns C{True}, C{None}.
         """
         
-        name = name # silent pylint
+        self, name = self, name # silent pylint
         return True, None
 
     def isValidMetadataIdentifier(self, name): # W0613
@@ -136,7 +135,7 @@ class BaseFileSystem(object):
         @note: This implementation always returns C{True}, C{None}.
         """
         
-        name = name # silent pylint
+        self, name = self, name # silent pylint
         return True, None
     
     @property
@@ -146,6 +145,7 @@ class BaseFileSystem(object):
         @note: This implementation always returns C{False}.
         """
         
+        self = self # silent pylint
         return False
     
     @property
@@ -155,6 +155,7 @@ class BaseFileSystem(object):
         @note: This implementation always returns C{False}.
         """
         
+        self = self # silent pylint
         return False
     
     @property
@@ -164,4 +165,5 @@ class BaseFileSystem(object):
         @note: This implementation always returns C{False}.
         """
     
+        self = self # silent pylint
         return False

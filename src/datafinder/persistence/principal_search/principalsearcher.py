@@ -1,8 +1,3 @@
-# pylint: disable=R0201
-# R0201: This class defines the interface and the "Null" object specific
-# implementation. Thus, to correctly define the interface we have to
-# ignore pylint warnings concerning function-like methods.
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -70,5 +65,5 @@ class NullPrincipalSearcher(object):
         @rtype: C{list} of L{Principal<datafinder.interface.principal_search.principal.Principal>}
         """
         
-        pattern, searchMode = pattern, searchMode # silent pylint
+        self, pattern, searchMode = self, pattern, searchMode # silent pylint
         return list()

@@ -1,8 +1,3 @@
-# pylint: disable=R0201
-# R0201: This class defines the interface and the "Null" object specific
-# implementation. Thus, to correctly define the interface we have to
-# ignore pylint warnings concerning function-like methods.
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -92,6 +87,7 @@ class NullPrivilegeStorer(object):
         @rtype: C{list} of C{unicode}
         """
         
+        self = self # silent pylint
         return [ALL_PRIVILEGE]
     
     def retrieveAcl(self):
@@ -104,4 +100,5 @@ class NullPrivilegeStorer(object):
         @rtype C{list} of L{AccessControlEntry<datafinder.persistence.privileges.ace.AccessControlListEntry>}
         """
         
+        self = self # silent pylint
         return list()

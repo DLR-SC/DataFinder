@@ -71,6 +71,9 @@ class AuthPrefDialogView(QtGui.QDialog, Ui_auth_pref_dialog):
        
         self.setupUi(self)
         
+        self.useLdap = ""
+        self.ldapBaseDn = ""
+        self.ldapServerUri = ""
         self._preferences = preferences
         self.connect(self.cancelButton, QtCore.SIGNAL("clicked()"), self.reject)
         self.connect(self.okButton, QtCore.SIGNAL("clicked()"), self.accept)
