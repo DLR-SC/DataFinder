@@ -1,4 +1,3 @@
-# pylint: disable=W0511
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -39,6 +38,7 @@
 """ 
 Implements Amazon S3-specific connection pool.
 """
+
 
 from boto.s3.connection import S3Connection
 

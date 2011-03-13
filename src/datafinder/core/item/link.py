@@ -66,7 +66,6 @@ class ItemLink(ItemBase):
         self._isLink = True
         self._created = False
         self._linkTarget = None
-        self._linkTargetPath = None
         self._refreshLinkTarget = True
         
         self.linkTarget = linkTargetItem
@@ -102,10 +101,8 @@ class ItemLink(ItemBase):
         if self._refreshLinkTarget:
             try:
                 targetFileStorer = self._fileStorer.linkTarget
-                if not targetFileStorer is None:
-                    self._linkTargetPath = targetFileStorer.identifier
             except PersistenceError:
-                self._linkTargetPath = None
+                self._linkTarget = None
             else:
                 if not targetFileStorer is None:
                     try:
@@ -117,8 +114,8 @@ class ItemLink(ItemBase):
                     self._linkTarget = None
             self._refreshLinkTarget = False
             
-        if not self._linkTarget is None: # checks for removed parent
-            if self._linkTarget.parent is None:
+        if not self._linkTarget is None:
+            if self._linkTarget.parent is None: # checks for removed parent
                 self._linkTarget = None
         return self._linkTarget 
 
@@ -133,9 +130,3 @@ class ItemLink(ItemBase):
         else:
             self._linkTarget = linkTarget
     linkTarget = property(_getLinkTarget, _setLinkTarget)
-
-    @property
-    def linkTargetPath(self):
-        """ Returns the link target path. """
-        
-        return self._linkTargetPath

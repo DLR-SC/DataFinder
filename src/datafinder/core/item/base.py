@@ -1,4 +1,3 @@
-# pylint: disable=R0201, R0904, R0902, C0302
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -77,7 +76,7 @@ class ItemBase(object):
         
         self.name = name
         self.path = None
-        self.linkTarget = None
+        self._linkTarget = None
         self._fileStorer = fileStorer
         if not fileStorer is None:
             self.path = fileStorer.identifier
@@ -90,6 +89,7 @@ class ItemBase(object):
         self._isRoot = False
         self._isCollection = False
         self._childrenPopulated = True
+        self._children = list()
         self._isLeaf = False
         self._isLink = False
         self._created = False
@@ -305,7 +305,7 @@ class ItemBase(object):
         @rtype: C{list}
         """
         
-        return list()
+        return self._children
 
     def addChild(self, item):
         """
@@ -530,10 +530,17 @@ class ItemBase(object):
         return self._isLink
     
     @property
+    def linkTarget(self):
+        """ Returns the actual item this item points to. """
+        
+        return self._linkTarget
+    
+    @property
     def linkTargetPath(self):
         """ Getter for the link target path. """
         
-        return None
+        if not self.linkTarget is None:
+            return self.linkTarget.path
     
     @property
     def state(self):
@@ -634,3 +641,9 @@ class ItemBase(object):
         if not self.dataFormat is None:
             requiredPropertyDefinitions += self.dataFormat.propertyDefinitions
         return requiredPropertyDefinitions
+
+    @property
+    def ignoreChecks(self):
+        """ Returns whether sanity checks are ignored or not. """
+        
+        return self._ignoreChecks

@@ -1,4 +1,3 @@
-# pylint: disable=W0122
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -40,6 +39,7 @@
 
 
 import atexit
+import imp
 import sys
 import tarfile
 import tempfile
@@ -77,15 +77,16 @@ class Script(object):
         self.name = self._fileStorer.name
         self.location = None
         
-        self.title = None          # scrtitle
-        self.description = None    # scrdesc
-        self.datatypes = list()    # scrdatatypes
-        self.dataformats = list()  # scrmimetypes
-        self.iconName = None       # scricon
-        self.version = None        # scrversion
-        self.automatic = False     #automatic execution of script
+        # Script options
+        self.title = None
+        self.description = None
+        self.datatypes = list()
+        self.dataformats = list()
+        self.iconName = None
+        self.version = None
+        self.automatic = False
         
-        self._parse()
+        self._parseScript()
         
         if self.iconName is None:
             self.iconName = "lightning_bolt"
@@ -93,7 +94,7 @@ class Script(object):
         if self.title is None:
             self.title = fileStorer.name
     
-    def _parse(self):
+    def _parseScript(self):
         """ Parse the script and extract the meta data. """
 
         dataStream = self._fileStorer.readData()
@@ -102,35 +103,40 @@ class Script(object):
                 line = dataStream.readline()
                 while line:
                     line = line.strip()
-                    if line.startswith(_COMMENT_CHARACTER):
-                        if constants.TITLE_KEYWORD in line:
-                            self.title = line.split(constants.TITLE_KEYWORD)[1].strip()
-                        elif constants.DATATYPES_KEYWORD in line:
-                            datatypes = line.split(constants.DATATYPES_KEYWORD)[1].split(_LIST_SEPARATOR)
-                            for datatype in datatypes:
-                                datatype = datatype.strip()
-                                if len(datatype) > 0:
-                                    self.datatypes.append(datatype)
-                        elif constants.DATAFORMATS_KEYWORD in line:
-                            dataformats = line.split(constants.DATAFORMATS_KEYWORD)[1].split(_LIST_SEPARATOR)
-                            for dataformat in dataformats:
-                                dataformat = dataformat.strip()
-                                if len(dataformat) > 0:
-                                    self.dataformats.append(dataformat)
-                        elif constants.ICON_KEYWORD in line:
-                            self.iconName = line.split(constants.ICON_KEYWORD)[1].strip()
-                        elif constants.VERSION_KEYWORD in line:
-                            self.version = line.split(constants.VERSION_KEYWORD)[1].strip()
-                        elif constants.DESCRIPTION_KEYWORD in line:
-                            self.description = line.split(constants.DESCRIPTION_KEYWORD)[1].strip()
-                        elif constants.AUTOMATIC_EXECUTE_KEYWORD in line:
-                            self.automatic = True
+                    self._parse(line)
                     line = dataStream.readline()
             finally:
                 dataStream.close()
         except IOError:
             raise ConfigurationError("Cannot read script data.")
     
+    def _parse(self, line):
+        """ Evaluates the line and sets the corresponding script attribute. """
+        
+        if line.startswith(_COMMENT_CHARACTER):
+            if constants.TITLE_KEYWORD in line:
+                self.title = line.split(constants.TITLE_KEYWORD)[1].strip()
+            elif constants.DATATYPES_KEYWORD in line:
+                datatypes = line.split(constants.DATATYPES_KEYWORD)[1].split(_LIST_SEPARATOR)
+                for datatype in datatypes:
+                    datatype = datatype.strip()
+                    if len(datatype) > 0:
+                        self.datatypes.append(datatype)
+            elif constants.DATAFORMATS_KEYWORD in line:
+                dataformats = line.split(constants.DATAFORMATS_KEYWORD)[1].split(_LIST_SEPARATOR)
+                for dataformat in dataformats:
+                    dataformat = dataformat.strip()
+                    if len(dataformat) > 0:
+                        self.dataformats.append(dataformat)
+            elif constants.ICON_KEYWORD in line:
+                self.iconName = line.split(constants.ICON_KEYWORD)[1].strip()
+            elif constants.VERSION_KEYWORD in line:
+                self.version = line.split(constants.VERSION_KEYWORD)[1].strip()
+            elif constants.DESCRIPTION_KEYWORD in line:
+                self.description = line.split(constants.DESCRIPTION_KEYWORD)[1].strip()
+            elif constants.AUTOMATIC_EXECUTE_KEYWORD in line:
+                self.automatic = True
+        
     def execute(self):
         """
         Execute the script.
@@ -144,21 +150,12 @@ class Script(object):
         """
 
         try:
-            dataStream = self._fileStorer.readData()
+            fileObject = self._fileStorer.readData()
         except PersistenceError, error:
             raise ConfigurationError("Cannot access script.\nReason: '%s'" % error.message)
         else:
-            try:
-                content = dataStream.read()
-                content = content.replace("\r", "")
-                exec(content, dict())
-            except Exception, exc:
-                for line in traceback.format_exception(sys.exc_info()[1], sys.exc_info()[0], sys.exc_info()[2]):
-                    self._logger.debug(line)
-                raise ConfigurationError("Script terminated with error-code '%s'." % str(exc))
-            finally:
-                dataStream.close()
-                
+            _loadModule(fileObject, self.name, self._logger)
+            
     @property
     def isBound(self):
         """ 
@@ -242,17 +239,27 @@ class ScriptCollection(object):
         
         if self.hasPreferences:
             try:
-                dataStream = self._baseDirFileStorer.getChild(constants.PREFERENCES_PAGE_MODULE_NAME).readData()
-                content = dataStream.read()
-                content = content.replace("\r", "")
-                exec(content, dict())
-            except Exception:
-                for line in traceback.format_exception(sys.exc_info()[1], sys.exc_info()[0], sys.exc_info()[2]):
-                    self._logger.debug(line)
-                raise ConfigurationError("Unable to execute the preferences page of the script extension.")
-            finally:
-                dataStream.close()
-       
+                fileObject = self._baseDirFileStorer.getChild(constants.PREFERENCES_PAGE_MODULE_NAME).readData()
+            except PersistenceError, error:
+                raise ConfigurationError("Cannot access script.\nReason: '%s'" % error.message)
+            else:
+                _loadModule(fileObject, constants.PREFERENCES_PAGE_MODULE_NAME, self._logger)
+
+
+def _loadModule(fileObject, moduleName, logger):
+    """ Loads the content of the file object as Python module.
+    It only works with real file objects.
+    """
+    
+    try:
+        imp.load_module(moduleName, fileObject, fileObject.name, (".py", "r", imp.PY_SOURCE))
+    except Exception, error:
+        for line in traceback.format_exception(sys.exc_info()[1], sys.exc_info()[0], sys.exc_info()[2]):
+            logger.debug(line)
+        raise ConfigurationError("Script '%s' terminated with error-code '%s'." % (moduleName, str(error)))
+    finally:
+        fileObject.close()
+           
          
 def createScript(scriptFileStorer, location=constants.LOCAL_SCRIPT_LOCATION):
     """

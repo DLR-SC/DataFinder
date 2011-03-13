@@ -1,4 +1,3 @@
-# pylint: disable=R0201
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -286,11 +285,12 @@ class _TreeItemDelegate(QtGui.QItemDelegate):
         QtGui.QItemDelegate.__init__(self, parent)
         self.actionController = None
 
-    def setEditorData(self, editor, index): # R0201
+    def setEditorData(self, editor, index):
         """
         @see: L{setEditorData<PyQt4.QtGui.QItemDelegate.setEditorData>}
         """
 
+        self = self # silent pylint as we have to keep the interface for Qt
         data = index.model().data(index, QtCore.Qt.DisplayRole).toString()
         editor.setText(data)
     

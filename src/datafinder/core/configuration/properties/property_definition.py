@@ -112,7 +112,7 @@ class PropertyDefinition(object):
     def type(self):
         """ Returns the type constant of the property. """
         
-        return self._propertyType.NAME
+        return self._propertyType.name
     
     @property
     def propertyType(self):
@@ -176,7 +176,7 @@ class PropertyDefinition(object):
     def toPersistenceRepresentation(self):
         """ Returns a property in persistence format. """
         
-        return property_(self.identifier, self._propertyType.NAME, 
+        return property_(self.identifier, self._propertyType.name, 
                          self.notNull, self.defaultValue)
 
 

@@ -1,4 +1,3 @@
-# pylint: disable=R0201, R0913
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -57,7 +56,7 @@ class StackedCollectionsController(AbstractController):
     """ 
 
     def __init__(self, stackedWidget, tableView, listView, viewsListAction, 
-                 viewsTableAction, viewsIconsAction, mainWindow, parentController): # R0913
+                 viewsTableAction, viewsIconsAction, mainWindow, parentController):
         """
         Constructor.
         """

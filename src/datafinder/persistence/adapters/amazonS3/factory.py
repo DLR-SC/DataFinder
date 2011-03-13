@@ -1,4 +1,3 @@
-# pylint: disable=R0201, W0511
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -85,7 +84,8 @@ class FileSystem(BaseFileSystem):    """
         
     def updateCredentials(self, credentials):
         """ @see: L{updateCredentials<datafinder.persistence.factory.FileSystem.updateCredentials>} """
-        #TODO: correctCredential implementation
+        
+        #CorrectCredential implementation
         try:
             self._configuration.username = credentials["username"]
             self._configuration.password = credentials["password"]

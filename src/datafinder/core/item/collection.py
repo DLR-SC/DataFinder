@@ -1,4 +1,3 @@
-# pylint: disable=W0201, R0201
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$

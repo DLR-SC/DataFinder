@@ -1,4 +1,3 @@
-# pylint: disable=R0913
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -92,7 +91,7 @@ class CreationWizard(QtGui.QWizard, Ui_Wizard):
         @type parent: L{QWidget<PyQt4.QtGui.QWidget>}
         """
 
-        QtGui.QDialog.__init__(self, parent)
+        QtGui.QWizard.__init__(self, parent)
         Ui_Wizard.__init__(self)
         self.setupUi(self)
         
@@ -173,7 +172,7 @@ class CreationWizard(QtGui.QWizard, Ui_Wizard):
     def _configureItemChoserPage(choserWizardPage, filteredRepositoryModel, preSelectedIndexes, itemNameLabelText="", 
                                  checkTargetDataTypesExistence=False, disableItemNameSpecification=False,
                                  selectionMode=QtGui.QAbstractItemView.SingleSelection, targetIndex=None, 
-                                 itemCheckFunction=None): # R0913
+                                 itemCheckFunction=None):
         """ Prepares the item wizard page. """
 
         choserWizardPage.filteredRepositoryModel = filteredRepositoryModel

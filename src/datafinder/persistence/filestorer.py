@@ -1,4 +1,8 @@
 # pylint: disable=R0904
+# R0904: pylint warns about too many public methods (>30). 
+# However, the methods used for read-only access to attributes are counted as well.
+# So it is fine to disable this warning..
+# 
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$

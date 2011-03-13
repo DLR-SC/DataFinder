@@ -41,6 +41,7 @@ Implements tests of the script representations.
 
 
 from StringIO import StringIO
+from tempfile import NamedTemporaryFile
 import unittest
 
 from datafinder.core.configuration.scripts import script
@@ -140,8 +141,8 @@ class ScriptTestCase(unittest.TestCase):
         
     def testExecute(self):
         """ Tests the execution of a script. """
-
-        self._fileStorerMock.methodNameResultMap = {"readData": (StringIO(""), None)}
+                
+        self._fileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile().file, None)}
         self._script.execute()
         
         self._fileStorerMock.methodNameResultMap = {"readData": (None, PersistenceError(""))}
@@ -182,7 +183,7 @@ class ScriptCollectionTestCase(unittest.TestCase):
         self._scriptCollection.executePreferences()
         
         self._scriptCollection.hasPreferences = True
-        self._configFileStorerMock.methodNameResultMap = {"readData": (StringIO(""), None)}
+        self._configFileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile().file, None)}
         self._scriptCollection.executePreferences()
         
         self._scriptCollection.hasPreferences = True

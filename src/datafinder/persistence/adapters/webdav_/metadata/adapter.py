@@ -1,4 +1,6 @@
 # pylint: disable=W0142
+# W0142: The use of * / ** magic is required by the webdav library interface
+# - namely deleteProperties and readProperties
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$

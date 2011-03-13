@@ -56,7 +56,8 @@ class ImportEvent(object):
     """ Interface to register and unregister to an import 
     event with a callback function """
  
-    def register(self, callback):
+    @staticmethod
+    def register(callback):
         """ 
         Register a callback to the event
         
@@ -65,8 +66,8 @@ class ImportEvent(object):
         
         Repository.performImport += callback
         
-        
-    def unregister(self, callback):
+    @staticmethod
+    def unregister(callback):
         """ 
         Unregister a callback to the event
         

@@ -1,4 +1,3 @@
-# pylint: disable=W0212
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -255,7 +254,7 @@ class ItemFactory(object):
             item.parent = parent
         item._created = False
         if not parent is None:
-            item._ignoreChecks = parent._ignoreChecks # W0212
+            item._ignoreChecks = parent.ignoreChecks
         self._itemCache[item.path] = item
 
         return item 

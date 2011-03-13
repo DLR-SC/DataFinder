@@ -369,7 +369,7 @@ class AccessControlList(object):
 
     def __cmp__(self, other):
         """ Compares two ACLs. """
-        # TODO: ensure that the order is correct
+
         result = 0
         if len(self.principals) != len(other.principals):
             result = 1

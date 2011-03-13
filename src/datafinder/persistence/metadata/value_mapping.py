@@ -183,13 +183,10 @@ class MetadataValue(object):
         """ Converts value to decimal. """
         
         try:
-            return decimal.Decimal(value)
-        except decimal.InvalidOperation:
-            return None
-        except ValueError:
-            return None
-        except TypeError:
-            return None
+            value =  decimal.Decimal(value)
+        except (decimal.InvalidOperation, ValueError, TypeError):
+            value = None
+        return value
         
     def _convertToDatetime(self, value):
         """ Converts value to date time. """

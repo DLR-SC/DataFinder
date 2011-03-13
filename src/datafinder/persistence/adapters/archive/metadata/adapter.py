@@ -45,10 +45,7 @@ __version__ = "$Revision-Id:$"
 
 
 import codecs
-try:
-    from lxml import etree
-except ImportError:
-    from xml.etree import ElementTree as etree
+from xml.etree import ElementTree as etree
 from zipfile import ZipInfo
 
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer

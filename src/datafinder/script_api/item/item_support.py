@@ -509,8 +509,6 @@ def registerListener(event, observer):
 def _getEvent(identifier):
     """ Maps different event identifiers to the corresponding Events """
     
-    EventDict ={
-                "ImportItem": ImportEvent(),
-                "ChangeItem": ImportEvent(),
-                }
+    EventDict = {"ImportItem": ImportEvent(),
+                 "ChangeItem": ImportEvent()}
     return EventDict.get(identifier)

@@ -1,4 +1,3 @@
-# pylint: disable=W0511
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -45,4 +44,4 @@ __version__ = "$Revision-Id:$"
 
 
 MAX_POOL_NUMBER = 10
-MAX_CONNECTION_NUMBER = 1 
+MAX_CONNECTION_NUMBER = 1

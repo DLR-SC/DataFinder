@@ -1,4 +1,3 @@
-# pylint: disable=W0511
 # $Filename$ 
 # $Authors$
 #
@@ -35,14 +34,16 @@
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 
+
 """ 
 Implements the functionality of the s3 storage option page. 
 """
-import qt
+
 
 from qt import SIGNAL
 
 from datafinder.gui.admin.datastore_configuration_wizard.abstract_option_controller import AbstractOptionController
+
 
 __version__ = "$Revision-Id:$" 
 
@@ -57,7 +58,7 @@ class StorageOptionController(AbstractOptionController):
         DFDataStoreConfigurationWizard.AbstractOptionController.__init__>}
         """
         
-        #TODO: Adjust to S3 (keys in User! Bucket as Admin)
+        #Adjust to S3 (keys in User! Bucket as Admin)
         AbstractOptionController.__init__(self, wizardView, wizardController, pageType)
         self.wizardView.connect(self.wizardView.dataLocationLineEdit, SIGNAL("textChanged(const QString&)"), 
                                 self._dataLocationTextChangedSlot)

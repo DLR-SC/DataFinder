@@ -1,4 +1,3 @@
-# pylint: disable=R0201, W0142, W0611
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -49,8 +48,8 @@ from qt import QMimeSourceFactory, QCustomEvent, QObject, qApp, QEvent, \
 
 from datafinder.core.configuration import constants
 try:
-    from datafinder.gui.gen import static_images
-    _haveImagesAsModule = True
+    from datafinder.gui.gen import static_images # Everything is done on import time
+    _haveImagesAsModule = not static_images is None # Alawys is "True", used to silent pylint
 except ImportError:
     _haveImagesAsModule = False
 
@@ -145,10 +144,10 @@ class CallbackEventHandler(QObject):
         self.__mainThreadIdentifier = get_ident()
 
     def customEvent(self, event):
-        """ @ see L{customEvent<QObject.customEvent>}"""
+        """ @see L{customEvent<QObject.customEvent>}"""
 
         if isinstance(event, _MyCustomEvent):
-            _performCall(event.functionToCall, event.callback, event.arguments)
+            self._performCall(event.functionToCall, event.callback, event.arguments)
 
     def callFunctionInQtThread(self, functionToCall, blocking, *arguments):
         """
@@ -164,7 +163,7 @@ class CallbackEventHandler(QObject):
         """
 
         if get_ident() == self.__mainThreadIdentifier: # call directly
-            _performCall(functionToCall, None, arguments)
+            self._performCall(functionToCall, None, arguments)
         else: # post event in the main Qt thread
             event = _MyCustomEvent(functionToCall, arguments)
             if blocking:
@@ -180,6 +179,17 @@ class CallbackEventHandler(QObject):
                 conditionVar.release()
             else:
                 qApp.postEvent(self, event)
+    
+    @staticmethod
+    def _performCall(functionToCall, callback, arguments):
+        """ Performs the function call. 
+        W0142: Using */** magic is the only ways to perform these generic calls.
+        """ # pylint: disable=W0142
+    
+        if not functionToCall is None and not arguments is None:
+            functionToCall(*arguments)
+        if not callback is None:
+            callback()
 
 
 class _MyCustomEvent(QCustomEvent):
@@ -194,15 +204,6 @@ class _MyCustomEvent(QCustomEvent):
         self.functionToCall = functionToCall
         self.callback = None
         self.arguments = arguments
-
-
-def _performCall(functionToCall, callback, arguments):
-    """ Performs the function call. """
-
-    if not functionToCall is None and not arguments is None:
-        functionToCall(*arguments)
-    if not callback is None:
-        callback()
 
 
 def binaryStringToUnicodeStringDecoding(binaryString):

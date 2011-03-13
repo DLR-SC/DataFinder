@@ -91,15 +91,15 @@ class SearchQueryEditor(QtGui.QTextEdit):
         """ Highlights the invalid parts of the search restrictions. """
         
         if len(self.toPlainText()) > 0:
-            format = QtGui.QTextCharFormat()
-            format.setFontUnderline(not valid)
+            format_ = QtGui.QTextCharFormat()
+            format_.setFontUnderline(not valid)
             startPosition = 0
             if valid:
-                format.setUnderlineStyle(QtGui.QTextCharFormat.NoUnderline)
+                format_.setUnderlineStyle(QtGui.QTextCharFormat.NoUnderline)
             else:
                 startPosition = self._searchQueryAnalyzer.errorResult[0]
-                format.setUnderlineColor(QtCore.Qt.red)
-                format.setUnderlineStyle(QtGui.QTextCharFormat.WaveUnderline)
+                format_.setUnderlineColor(QtCore.Qt.red)
+                format_.setUnderlineStyle(QtGui.QTextCharFormat.WaveUnderline)
                 
             textCursor = self.textCursor()
             textCursor.setPosition(startPosition)
@@ -107,7 +107,7 @@ class SearchQueryEditor(QtGui.QTextEdit):
             
             extraSelection = QtGui.QTextEdit.ExtraSelection()
             extraSelection.cursor = textCursor
-            extraSelection.format = format
+            extraSelection.format = format_
             self.setExtraSelections([extraSelection])
         
     def registerCompleter(self, completer, tokenType):

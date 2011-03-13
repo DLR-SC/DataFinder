@@ -1,3 +1,5 @@
+# pylint: disable=E1101
+# E1101: pylint could not resolve the node_kind attribute. 
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -83,17 +85,19 @@ class CPythonSubversionWrapper(object):
         except TypeError, error:
             raise PersistenceError(error)
         
-    def _getLogin(self, realm, username, may_save):
+    def _getLogin(self, _, __, ___):
         """ Login callback function. """
         
         return True, self._username, self._password, False
     
-    def _getLogMessage(self):
+    @staticmethod
+    def _getLogMessage():
         """ Log message callback function. """
         
         return True, "datafinder"
     
-    def _initLocale(self):
+    @staticmethod
+    def _initLocale():
         """ Init the locale. """
         
         if sys.platform == constants.WIN32:
@@ -123,12 +127,12 @@ class CPythonSubversionWrapper(object):
                     locale.setlocale(locale.LC_ALL, "C")
     
     def isLeaf(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}. """
         
         return self._determineItemKind(path, pysvn.node_kind.file)
     
     def isCollection(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}. """
         
         return self._determineItemKind(path, pysvn.node_kind.dir)
     

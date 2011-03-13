@@ -1,4 +1,8 @@
-#pylint: disable=W0612,W0142
+#pylint: disable=W0612
+# W0612: The accept attribute of methods _walkAny, _walkCollection, _walkBase
+# is used later to find out the acceptable visitors. So they are not really unused as 
+# warned by pylint.
+#
 # $Filename$ 
 # $Authors$
 #
@@ -185,7 +189,7 @@ class ItemTreeWalkerBase(object):
         else:
             self._walkCollection(node, *args, **kw)
     _walkBase.accept = ItemBase,
-
+    
     walk = VisitSlot(_walkCollection, _walkAny, _walkBase)
     
     handle = VisitSlot()

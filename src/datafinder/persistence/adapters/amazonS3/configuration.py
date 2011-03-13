@@ -1,4 +1,3 @@
-# pylint: disable=W0511
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -73,4 +72,3 @@ class Configuration(object):
         
         splitUrl = bucketAndKey.split("/")
         return splitUrl[1], splitUrl[2]
-       

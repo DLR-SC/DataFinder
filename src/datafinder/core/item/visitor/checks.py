@@ -1,4 +1,8 @@
-# pylint: disable=W0612,W0212
+#pylint: disable=W0612
+# W0612: The accept attribute of methods _walkAny, _walkCollection, _walkBase
+# is used later to find out the acceptable visitors. So they are not really unused as 
+# warned by pylint.
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -118,7 +122,7 @@ class ActionCheckVisitor(object):
         """
         
         self._initCapabilities()
-        if not item._ignoreChecks: # W0212
+        if not item.ignoreChecks:
             self.handle(item)
     
     def _initCapabilities(self):
@@ -421,7 +425,7 @@ class ActionCheckTreeWalker(ItemTreeWalkerBase, ActionCheckVisitor):
         """
         
         self._initCapabilities()
-        if not item._ignoreChecks: # W0212
+        if not item.ignoreChecks:
             self.affectedItems = list()
             self.walk(item)
             self.affectedItems.remove(item)

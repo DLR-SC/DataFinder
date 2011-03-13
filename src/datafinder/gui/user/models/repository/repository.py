@@ -1,4 +1,3 @@
-# pylint: disable=W0201, C0302
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -50,6 +49,7 @@ from types import StringTypes
 
 from PyQt4 import QtCore
 
+from datafinder.common.logger import getDefaultLogger
 from datafinder.core.error import ItemError
 from datafinder.core.item.base import ItemBase
 from datafinder.core.item.data_persister.constants import ITEM_STATE_ARCHIVED, \
@@ -564,6 +564,7 @@ class _ChildrenPopulator(object):
         
         self._repositoryModel = repositoryModel
         self._workerThreads = dict()
+        self._logger = getDefaultLogger()
         
     def childrenPopulated(self, item):
         """

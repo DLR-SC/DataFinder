@@ -1,4 +1,3 @@
-# pylint: disable=R0921
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -45,10 +44,6 @@ pages of the wizard.
 __version__ = "$Revision-Id:$" 
 
 
-# error message for missing implementation of abstract methods.
-_implementationErrorMessage = "You have to provide a suitable implementation."
-
-
 class AbstractOptionController(object):
     """ Abstract class that defines the interface of the form controller classes. """
         
@@ -73,7 +68,7 @@ class AbstractOptionController(object):
     def showModelPart(self):
         """ Initializes the according form elements from the DataStore model. """       
         
-        raise NotImplementedError(_implementationErrorMessage)
+        pass
     
     def setDatastoreProperty(self, myProperty, value, source=None):
         """ Validate and set the given property of the DataStore. """

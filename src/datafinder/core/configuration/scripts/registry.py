@@ -44,7 +44,7 @@ from copy import copy
 
 from datafinder.common.logger import getDefaultLogger
 from datafinder.core.configuration.scripts import constants
-from datafinder.core.configuration.scripts.script import createScript, Script
+from datafinder.core.configuration.scripts.script import createScript
 from datafinder.core.error import ConfigurationError
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.factory import createFileStorer

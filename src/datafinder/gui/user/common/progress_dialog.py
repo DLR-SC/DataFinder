@@ -1,4 +1,3 @@
-# pylint: disable=W0142
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -73,6 +72,8 @@ class ProgressDialog(QtCore.QObject):
         @type parent: L{QWidget<PyQt4.QtGui.QWidget>}
         """
         
+        QtCore.QObject.__init__(self)
+         
         self._updateTriggerInterval = updateTriggerInterval
         self._interval = interval
         self._maximum = maximum

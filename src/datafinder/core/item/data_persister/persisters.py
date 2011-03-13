@@ -311,7 +311,7 @@ class HierarchicalDataPersister(DefaultDataPersister):
             self._createParentCollection(self._fileStorer.parent)
             self._fileStorer.createResource()
         else:
-            errorMessage = "The data persister for item '%s' does already exist." % (self._item.path)
+            errorMessage = "The data persister '%s' does already exist." % (self._fileStorer.identifier)
             raise ItemError(errorMessage)
         
     def delete(self):

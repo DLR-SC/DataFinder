@@ -41,10 +41,10 @@ Edit dialog to change authentification information such as url, username, passwo
 """
 
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 from datafinder.gui.gen.user.authentification_edit_wizard_ui import Ui_editAuth
-#from datafinder.gui.user.dialogs.authentification_dialog.auth_pref_dialog import AuthPrefDialogView
+from datafinder.gui.user.dialogs.authentification_dialog.auth_pref_dialog import AuthPrefDialogView
 
 
 __version__ = "$Revision-Id:$" 
@@ -71,6 +71,8 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
         self.setupUi(self)
                
         self._preferences = preferences
+        self.savePasswordFlag = False
+        
         self._urlChangedSlot(currentUri)
                      
     def _urlChangedSlot(self, newUri):

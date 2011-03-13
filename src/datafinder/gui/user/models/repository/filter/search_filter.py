@@ -89,7 +89,6 @@ class SearchFilter(BaseRepositoryFilter, QtCore.QAbstractTableModel):
         """ Removes invalid items (removed from source model) from the current result. """
         
         invalids = list()
-        counter = 0
         for item_ in self._result:
             path = item_.path
             item = self._repositoryModel.nodeFromPath(path)
@@ -97,7 +96,6 @@ class SearchFilter(BaseRepositoryFilter, QtCore.QAbstractTableModel):
                 invalids.append(item_)
             elif not item.path == path:
                 invalids.append(item_)
-            counter += 1
         if len(invalids) > 0:
             invalids.reverse()
             for invalid in invalids:

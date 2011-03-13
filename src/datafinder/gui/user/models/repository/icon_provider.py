@@ -109,7 +109,7 @@ class IconProvider(object):
             if icon.isNull() and not defaultIconName is None:
                 icon = QIcon(_ICON_RESOURCE_PREFIX + defaultIconName + SMALL_ICONFILENAME_SUFFIX)
             
-            if icon.pixmap(1,1).isNull():
+            if icon.pixmap(1, 1).isNull():
                 icon = None
             else:
                 self._loadedIcons[iconName] = icon

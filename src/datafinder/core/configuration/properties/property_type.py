@@ -1,4 +1,3 @@
-# pylint: disable=W0142, disable=C103
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -56,7 +55,7 @@ __version__ = "$Revision-Id:$"
 class StringType(object):
     """ Represents string values. """
 
-    NAME = constants.STRING_TYPE
+    name = constants.STRING_TYPE
 
     def __init__(self, minimum=None, maximum=None, pattern=None, options=None, optionsMandatory=None):
         """
@@ -84,7 +83,7 @@ class StringType(object):
 class BooleanType(object):
     """ Represents a boolean values. """
 
-    NAME = constants.BOOLEAN_TYPE
+    name = constants.BOOLEAN_TYPE
 
     def __init__(self):
         """
@@ -105,7 +104,7 @@ class BooleanType(object):
 class NumberType(object):
     """ Represents numeric values. """
     
-    NAME = constants.NUMBER_TYPE
+    name = constants.NUMBER_TYPE
 
     def __init__(self, minimum=None, maximum=None, minDecimalPlaces=None, 
                  maxDecimalPlaces=None, options=None, optionsMandatory=None):
@@ -133,7 +132,7 @@ class NumberType(object):
 class DatetimeType(object):
     """ Represents date and time values. """
     
-    NAME = constants.DATETIME_TYPE
+    name = constants.DATETIME_TYPE
 
     def __init__(self, minimum=None, maximum=None, options=None, optionsMandatory=None):
         """
@@ -158,7 +157,7 @@ class DatetimeType(object):
 class ListType(object):
     """ Represents list of primitive values. """
     
-    NAME = constants.LIST_TYPE
+    name = constants.LIST_TYPE
 
     def __init__(self, minimum=None, maximum=None):
         """
@@ -188,7 +187,7 @@ class ListType(object):
 class AnyType(object):
     """ Represents an unspecific property type. """
     
-    NAME = constants.ANY_TYPE
+    name = constants.ANY_TYPE
     
     def __init__(self):
         """ Constructor. """
@@ -200,17 +199,17 @@ class AnyType(object):
 class ObjectType(object):
     """ Represents a object values. """
 
-    NAME = "" # Here you find the concrete class identifier.
+    name = "" # Here you find the concrete class identifier after initialization
 
     def __init__(self, fullDottedClassName):
         """
         Constructor.
         
-        @param fullDottedClassName: 
+        @param fullDottedClassName: Consists of package, module, and class name.
         @type fullDottedClassName: C{unicode}
         """
         
-        self.NAME = fullDottedClassName        
+        self.name = fullDottedClassName        
         self._fullDottedModuleName = fullDottedClassName[:fullDottedClassName.rfind(".")]
         self._className = fullDottedClassName[fullDottedClassName.rfind(".") + 1:]
         self._cls = self._importClass()
@@ -242,15 +241,15 @@ class ObjectType(object):
             moduleInstance = __import__(self._fullDottedModuleName, globals(), dict(), [""])
             return getattr(moduleInstance, self._className)
         except (ImportError, AttributeError), error:
-            raise ConfigurationError("Cannot import '%s'. Reason: '%s'" % (self.NAME, repr(error)))
+            raise ConfigurationError("Cannot import '%s'. Reason: '%s'" % (self.name, repr(error)))
 
 
-_propertyNameClassMap = {StringType.NAME: StringType,
-                         BooleanType.NAME: BooleanType,
-                         NumberType.NAME: NumberType,
-                         DatetimeType.NAME: DatetimeType,
-                         ListType.NAME: ListType,
-                         AnyType.NAME: AnyType}
+_propertyNameClassMap = {StringType.name: StringType,
+                         BooleanType.name: BooleanType,
+                         NumberType.name: NumberType,
+                         DatetimeType.name: DatetimeType,
+                         ListType.name: ListType,
+                         AnyType.name: AnyType}
 PROPERTY_TYPE_NAMES = _propertyNameClassMap.keys()[:]
 
 
@@ -262,8 +261,11 @@ def createPropertyType(propertyTypeName, restrictions=dict()):
     @type propertyTypeName: C{unicode}
     @param restrictions: Map of restriction parameters and corresponding values.
     @type restrictions: C{dict} keys: C{unicode}, C{object}
-    """
-
+    
+    W0142: Here the */** magic is useful to simplify the property type 
+    creation. Other approaches would "blow up" the code here.
+    """ # pylint: disable=W0142
+    
     if propertyTypeName in _propertyNameClassMap:
         try:
             return _propertyNameClassMap[propertyTypeName](**restrictions)

@@ -33,6 +33,8 @@
 #THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+
+
 """
 Connect dialog for entering the url, username, password of the WebDAV Server.
 """
@@ -43,6 +45,7 @@ from PyQt4 import QtCore, QtGui
 from datafinder.gui.user.dialogs.authentification_dialog.auth_edit_dialog import AuthEditDialogView
 
 from datafinder.gui.gen.user.authentification_preferences_wizard_ui import Ui_auth_pref_dialog
+
 
 __version__ = "$Revision-Id:$" 
 
@@ -64,6 +67,7 @@ class AuthPrefDialogView(QtGui.QDialog, Ui_auth_pref_dialog):
         """
 
         QtGui.QDialog.__init__(self, parent)
+        Ui_auth_pref_dialog.__init__(self)
        
         self.setupUi(self)
         
@@ -84,7 +88,7 @@ class AuthPrefDialogView(QtGui.QDialog, Ui_auth_pref_dialog):
         item = self.authTable.item(rowcount, 0)
         
         
-        editDialog = AuthEditDialogView (None, self._preferences,item.text())
+        editDialog = AuthEditDialogView(None, self._preferences, item.text())
     
         if editDialog.exec_() == QtGui.QDialog.Accepted:
             print "good job"   
@@ -107,14 +111,11 @@ class AuthPrefDialogView(QtGui.QDialog, Ui_auth_pref_dialog):
                 # self.authTable.setItem(rowcount, 4, connection)
                 # Adding comment information 
                 # self.authTable.setItem(rowcount, 5, connection)
-                rowcount +1            
+                rowcount += 1            
     
-    
-    def getNewTableWidget(self, tableString):
+    @staticmethod
+    def getNewTableWidget(tableString):
         widgetItem = QtGui.QTableWidgetItem()
         widgetItem.setText(tableString)
         
         return widgetItem
-        
-        
-        

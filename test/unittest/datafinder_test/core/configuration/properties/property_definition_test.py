@@ -81,12 +81,12 @@ class PropertyTypeTestCase(unittest.TestCase):
     def testTypeAttribute(self):
         """ Demonstrates the usage of the type attribute. """
         
-        self.assertEquals(self._propertyDef.type, property_type.StringType.NAME)
+        self.assertEquals(self._propertyDef.type, property_type.StringType.name)
         try:
             self._propertyDef.type = ""
             self.fail("Expected an AttributeError")
         except AttributeError:
-            self.assertEquals(self._propertyDef.type, property_type.StringType.NAME)
+            self.assertEquals(self._propertyDef.type, property_type.StringType.name)
             
     def testRestrictions(self):
         """ Demonstrates the restriction attribute. """

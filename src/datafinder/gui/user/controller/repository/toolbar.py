@@ -1,4 +1,3 @@
-# pylint: disable=R0913 
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -56,7 +55,7 @@ class ToolbarController(AbstractController):
     """ Controls the tool bar view including navigation in item history. """
 
     def __init__(self, forwardAction, backwardAction, parentDirectoryAction, 
-                 refreshAction, toolbarAction, widget, mainWindow, parentController): # R0913
+                 refreshAction, toolbarAction, widget, mainWindow, parentController):
         """
         Constructor.
         """

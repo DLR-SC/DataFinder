@@ -1,4 +1,7 @@
 # pylint: disable=W0212
+# W0212: We can need to access the _repository attribute of the
+# repository description only for internal usage.
+#
 # $Filename$ 
 # $Authors$
 #

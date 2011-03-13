@@ -1,4 +1,3 @@
-# pylint: disable=W0511, W0221
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -134,8 +133,9 @@ class DataS3Adapter(NullDataStorer):
                 raise PersistenceError(errorMessage)
     
             
-    def createCollection(self, recursively = False):
+    def createCollection(self, _=False):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        
         connection = self._connectionPool.acquire()
         try:
             if self._bucketname == '':
@@ -145,7 +145,7 @@ class DataS3Adapter(NullDataStorer):
                     self._bucket = connection.lookup(self, self._bucketname)   
                 except S3ResponseError, error:
                     raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.reason)
-                finally:
+                else:
                     if self._bucket is None: 
                         try:
                             self._bucket = connection.create_bucket(self._bucketname)
@@ -153,8 +153,6 @@ class DataS3Adapter(NullDataStorer):
                         except (S3ResponseError, S3CreateError), error:
                             errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error.reason)
                             raise PersistenceError(errorMessage)
-                    self._connectionPool.release(connection)                  
-                    
         finally:
             self._connectionPool.release(connection)
               
@@ -171,7 +169,7 @@ class DataS3Adapter(NullDataStorer):
                 errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" % (self.identifier, error.reason)
                 raise PersistenceError(errorMessage)
             else:
-                result = rawresult # TODO: map to correct return type 
+                result = rawresult # Mapping to correct return type not done yet 
                 return result.keyset
         elif self.isCollection:
             
@@ -183,7 +181,7 @@ class DataS3Adapter(NullDataStorer):
                 errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" % (self.identifier, error.reason)
                 raise PersistenceError(errorMessage)
             else:
-                result = rawresult #  TODO: map to correct return type 
+                result = rawresult # Mapping to correct return type not done yet 
                 return result.keyset
             finally: 
                 self._connectionPool.release(connection)
@@ -288,6 +286,7 @@ class DataS3Adapter(NullDataStorer):
 
     def exists(self):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        
         exists = True
         collection = self.isCollection
         if (self.identifier =="/" or collection == True):
@@ -312,4 +311,3 @@ class DataS3Adapter(NullDataStorer):
         else:
             exists = False
         return exists 
-    
