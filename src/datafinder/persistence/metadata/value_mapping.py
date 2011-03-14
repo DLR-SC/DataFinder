@@ -93,7 +93,10 @@ class MetadataValue(object):
             for representation in representations:
                 if type(representation) == self._expectedType:
                     return representation
-        return representations[0]
+        try:
+            return representations[0]
+        except IndexError:
+            return None
     value = property(__getValue)
         
     def guessRepresentation(self):
@@ -118,34 +121,42 @@ class MetadataValue(object):
         
     def _convertToList(self, value):
         """ Converts value to a list. """
-        if isinstance(value, type(list())):
-            typedList = list()
-            for item in value:
-                for conversionFunction in self.__conversionFunctions:
-                    convertedValue = conversionFunction(item)
-                    if not convertedValue is None:
-                        break
-                typedList.append(convertedValue)
-            return typedList
-        elif value is not None and _LIST_SEPARATOR in value:
-            stringList = value.split(_LIST_SEPARATOR)[:-1]
-            typedList = list()
-            for item in stringList:
-                if item == _NONE_PERSISTENCE_REPRESENTATION:
-                    convertedValue = None
-                else:
+        
+        try:
+            if isinstance(value, type(list())):
+                typedList = list()
+                for item in value:
                     for conversionFunction in self.__conversionFunctions:
-                        print conversionFunction
                         convertedValue = conversionFunction(item)
                         if not convertedValue is None:
                             break
-                typedList.append(convertedValue)
-            return typedList
-        elif value == _EMPTY_LIST_REPRESENTATION:
-            return  list()
+                    typedList.append(convertedValue)
+                return typedList
+            elif _LIST_SEPARATOR in value:
+                stringList = value.split(_LIST_SEPARATOR)[:-1]
+                typedList = list()
+                for item in stringList:
+                    if item == _NONE_PERSISTENCE_REPRESENTATION:
+                        convertedValue = None
+                    else:
+                        for conversionFunction in self.__conversionFunctions:
+                            print conversionFunction
+                            convertedValue = conversionFunction(item)
+                            if not convertedValue is None:
+                                break
+                        typedList.append(convertedValue)
+                        return typedList
+            elif value == _EMPTY_LIST_REPRESENTATION:
+                return  list()
+        except TypeError:
+            return None
         
     def _convertToDict(self, value):
-        """ Converts value to a dict. """
+        """ 
+        Converts value to a dict. 
+        
+        Dicts and strings are supported. Dirty hack!
+        """
         
         if isinstance(value, type(dict())):
             typedDict = dict()
@@ -156,6 +167,13 @@ class MetadataValue(object):
                         break
                 typedDict[key] = convertedValue
             return typedDict
+        else:
+            try:
+                return json.loads(value)
+            except ValueError:
+                return None
+            except TypeError:
+                return None
 
     @staticmethod
     def _convertToUnicode(value):

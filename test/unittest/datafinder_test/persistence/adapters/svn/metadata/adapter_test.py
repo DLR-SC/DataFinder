@@ -59,21 +59,17 @@ class MetadataSubversionAdapterTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates a default object under test. """
         
-        # Mocks mimetypes module
-        self._mimetypesModuleMock = SimpleMock((None, None))
-        adapter.mimetypes = self._mimetypesModuleMock
-        
         self._connectionMock = SimpleMock()
         
     def _initValidRetrieveResult(self, mimeType):
         """ Creates the expected result. """
         
         mappedResult = dict()
-        mappedResult[constants.CREATION_DATETIME] = MetadataValue("")
         mappedResult[constants.MODIFICATION_DATETIME] = MetadataValue("")
+        mappedResult[constants.CREATION_DATETIME] = MetadataValue("")
         mappedResult[constants.SIZE] = MetadataValue("")
-        mappedResult[constants.MIME_TYPE] = MetadataValue(mimeType)
         mappedResult[constants.OWNER] = MetadataValue("")
+        mappedResult[constants.MIME_TYPE] = MetadataValue("{}")
         return mappedResult
 
     def testRetrieveSuccess(self):
@@ -81,12 +77,12 @@ class MetadataSubversionAdapterTestCase(unittest.TestCase):
         
         expectedResult = self._initValidRetrieveResult("")
         
-        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None)})
+        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None), "info": ({"lastChangedDate": "", "lastChangedAuthor": ""}, None)})
         self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertEquals(self._adapter.retrieve(), expectedResult)
         self.assertEquals(self._adapter.retrieve(list()), dict())
         
-        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None)})
+        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None), "info": ({"lastChangedDate": "", "lastChangedAuthor": ""}, None)})
         self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertEquals(self._adapter.retrieve(["1"]), {"1": MetadataValue("value")})
 

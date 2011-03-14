@@ -42,7 +42,6 @@ This module implements how the meta data is persisted on the SVN server.
 
 import datetime
 import json
-import mimetypes
 
 from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY,\
     SVN_MIME_TYPE
@@ -102,12 +101,15 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         infoDict = connection.info(self.__persistenceId)
         mappedResult = dict()
         mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue("")
-        mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"], expectedType=datetime.datetime)
+        mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"])
         mappedResult[constants.SIZE] = value_mapping.MetadataValue("")
         mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
 
         mimeType = connection.getProperty(self.__persistenceId, SVN_MIME_TYPE)
         mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
+        
+        for key, value in rawResult.iteritems():
+            mappedResult[key] = value_mapping.MetadataValue(value)
 
         return mappedResult
     

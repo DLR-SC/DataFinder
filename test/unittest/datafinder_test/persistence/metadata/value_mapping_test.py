@@ -54,11 +54,6 @@ __version__ = "$Revision-Id$"
 class MetadataValueTestCase(unittest.TestCase):
     """ Test cases for the meta data value. """
     
-    def setUp(self):
-        """ Set up for the test cases. """
-        
-        pass
-    
     def testValue(self):
         """ Tests the behavior of the value property. """
         
@@ -115,89 +110,12 @@ class MetadataValueTestCase(unittest.TestCase):
         # Tests for a bool value.
         persistedValue = u"1"
         metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [True, decimal.Decimal("1"), datetime(1970, 1, 1, 1, 0, 1), u"1"])
+        self.assertEquals(metdataValue.guessRepresentation(), [True, decimal.Decimal("1"), datetime(1970, 1, 1, 1, 0, 1), u"1", 1])
         persistedValue = u"0"
         metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [False, decimal.Decimal("0"), datetime(1970, 1, 1, 1, 0), u"0"])
-        
-        # Tests for an unicode value.
-        persistedValue = u"test"
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [u"test"])
-        
-        # Tests for a decimal value.
-        persistedValue = u"4.5"
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [decimal.Decimal("4.5"), datetime(1970, 1, 1, 1, 0, 4, 500000), u"4.5"])
-        persistedValue = u"5"
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [decimal.Decimal("5"), datetime(1970, 1, 1, 1, 0, 5), u"5"])
-        
-        # Tests for a datetime.
-        # From float.
-        persistedValue = u"34794.57"
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [decimal.Decimal("34794.57"), datetime(1970, 1, 1, 10, 39, 54, 570000), u"34794.57"])
-        # From RFC 822.
-        persistedValue = u"Wed, 02 Oct 2002 13:00:00 GMT"
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [datetime(2002, 10, 2, 15, 0), u"Wed, 02 Oct 2002 13:00:00 GMT"])
-        # From Iso8601.
-        persistedValue = u"2006-10-16T08:19:39Z"
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [datetime(2006, 10, 16, 10, 19, 39), u"2006-10-16T08:19:39Z"])
-        
-        # Tests for a list value.
-        # Empty list.
-        persistedValue = []
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [[]])
-        persistedValue = u"____EMPTY____LIST____"
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [[], u"____EMPTY____LIST____"])
-        # List with dict.
-        persistedValue = [{}]
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [[{}]])
-        # List with bools.
-        persistedValue = [u"1", u"0"]
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [[True, False]])
-        # List with decimals.
-        persistedValue = [u"134", u"45.32"]
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [[decimal.Decimal("134"), decimal.Decimal("45.32")]])
-        # List with unicodes.
-        persistedValue = [u"test", u"test2"]
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [[u"test", u"test2"]])
-        # List with datetimes.
-        persistedValue = [u"Wed, 02 Oct 2002 13:00:00 GMT", u"2006-10-16T08:19:39Z"]
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [[datetime(2002, 10, 2, 15, 0), datetime(2006, 10, 16, 10, 19, 39)]])
-        
-        # Tests for a dict value.
-        # Empty dict.
-        persistedValue = {}
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [{}])
-        # Dict with bools.
-        persistedValue = {"a": u"1", "b": u"0"}
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [{"a": True, "b": False}])
-        # Dict with decimals.
-        persistedValue = {"a": u"134", "b": u"45.32"}
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [{"a": decimal.Decimal("134"), "b": decimal.Decimal("45.32")}])
-        # Dict with unicodes.
-        persistedValue = {"a": u"test", "b": u"test2"}
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [{"a": u"test", "b": u"test2"}])
-        # Dict with datetimes.
-        persistedValue = {"a": u"Wed, 02 Oct 2002 13:00:00 GMT", "b": u"2006-10-16T08:19:39Z"}
-        metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [{"a": datetime(2002, 10, 2, 15, 0), "b": datetime(2006, 10, 16, 10, 19, 39)}])
-
+        self.assertEquals(metdataValue.guessRepresentation(), [False, decimal.Decimal("0"), datetime(1970, 1, 1, 1, 0), u"0", 0])
+      
+      
     def testGetPersistenceRepresentation(self):
         """ Tests the behavior of the getPersistenceRepresentation method. """
         
