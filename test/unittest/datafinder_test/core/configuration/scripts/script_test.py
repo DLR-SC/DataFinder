@@ -40,8 +40,9 @@ Implements tests of the script representations.
 """
 
 
+import os
 from StringIO import StringIO
-from tempfile import NamedTemporaryFile
+from tempfile import mkstemp
 import unittest
 
 from datafinder.core.configuration.scripts import script
@@ -141,16 +142,24 @@ class ScriptTestCase(unittest.TestCase):
         
     def testExecute(self):
         """ Tests the execution of a script. """
-                
-        self._fileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile("r").file, None)}
-        self._script.execute()
+        
+        fileObject = _getFile()
+        try:   
+            self._fileStorerMock.methodNameResultMap = {"readData": (fileObject, None)}
+            self._script.execute()
+        finally:
+            os.remove(fileObject.name)
         
         self._fileStorerMock.methodNameResultMap = {"readData": (None, PersistenceError(""))}
         self.assertRaises(ConfigurationError, self._script.execute)
-        
-        self._fileStorerMock.methodNameResultMap = {"readData": (StringIO(" jjj"), None)}
-        self.assertRaises(ConfigurationError, self._script.execute)
-        
+            
+        fileObject = _getFile()
+        try:   
+            self._fileStorerMock.methodNameResultMap = {"readData": (fileObject, None)}
+            self.assertRaises(ConfigurationError, self._script.execute)
+        finally:
+            os.remove(fileObject.name)
+
 
 class ScriptCollectionTestCase(unittest.TestCase):
     """ Implements tests for script collections. """
@@ -182,10 +191,28 @@ class ScriptCollectionTestCase(unittest.TestCase):
         self._scriptCollection.hasPreferences = False
         self._scriptCollection.executePreferences()
         
-        self._scriptCollection.hasPreferences = True
-        self._configFileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile("r").file, None)}
-        self._scriptCollection.executePreferences()
+        fileObject = _getFile()
+        try:
+            self._scriptCollection.hasPreferences = True
+            self._configFileStorerMock.methodNameResultMap = {"readData": (fileObject, None)}
+            self._scriptCollection.executePreferences()
+        finally:
+            os.remove(fileObject.name)
         
-        self._scriptCollection.hasPreferences = True
-        self._configFileStorerMock.methodNameResultMap = {"readData": (StringIO(" jjj"), None)}
-        self.assertRaises(ConfigurationError, self._scriptCollection.executePreferences)
+        fileObject = _getFile()
+        try:
+            fileObject.write(" jjj")
+            self._scriptCollection.hasPreferences = True
+            self._configFileStorerMock.methodNameResultMap = {"readData": (fileObject, None)}
+            self.assertRaises(ConfigurationError, self._scriptCollection.executePreferences)
+        finally:
+            os.remove(fileObject.name)
+
+
+def _getFile():
+    """ Returns a temporary real file which is required for imp.load_module.
+    On Linux platforms an os.fdopen created file object seems not to be sufficient. """
+    
+    fd, fileName = mkstemp()
+    os.close(fd)
+    return open(fileName, "w+b")

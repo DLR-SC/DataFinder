@@ -40,8 +40,7 @@ Implements adapter for manipulating a AmazonS3 file system.
 """
 
 
-import types
-import tempfile
+from tempfile import NamedTemporaryFile
 
 from boto.exception import S3ResponseError, S3CreateError, BotoClientError, S3DataError
 
@@ -185,11 +184,7 @@ class DataS3Adapter(NullDataStorer):
     
         try:
             self._key = self.createResource()
-            if isinstance(data, types.FileType):
-                self._key.set_contents_from_file(data)
-            else:
-                self._key.set_contents_from_string(data)
-           
+            self._key.set_contents_from_file(data)
         except (S3ResponseError, S3DataError), error:
             errorMessage = "Unable to write data to '%s'. " % self.identifier + \
                                "Reason: %s" % error.reason 
@@ -200,11 +195,10 @@ class DataS3Adapter(NullDataStorer):
         """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         try:
-            path = tempfile.gettempdir() + self._keyname.replace("/", "_") 
-            testfile = file(path, "w+b")
+            fileObject = NamedTemporaryFile()
             self.createResource()
-            self._key.get_contents_to_filename(path)
-            return testfile 
+            self._key.get_contents_to_filename(fileObject.name)
+            return fileObject 
         except (PersistenceError, S3ResponseError, BotoClientError), error:
             errorMessage = "Unable to read data from '%s'. " % self.identifier + \
                                "Reason: %s" % error.reason
