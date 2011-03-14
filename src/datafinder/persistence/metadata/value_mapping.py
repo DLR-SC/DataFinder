@@ -127,7 +127,7 @@ class MetadataValue(object):
                         break
                 typedList.append(convertedValue)
             return typedList
-        elif _LIST_SEPARATOR in value:
+        elif value is not None and _LIST_SEPARATOR in value:
             stringList = value.split(_LIST_SEPARATOR)[:-1]
             typedList = list()
             for item in stringList:

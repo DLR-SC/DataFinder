@@ -247,6 +247,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
+            self._client.update(self._repoWorkingCopyPath + path)
             propertyValue = self._client.propget(key, self._repoWorkingCopyPath + path)
             return propertyValue[self._repoWorkingCopyPath.replace("\\", "/") + path]
         except ClientError, error:
@@ -267,6 +268,26 @@ class CPythonSubversionWrapper(object):
             for entry in entryList:
                 result.append(entry[0].repos_path.replace(partToRemoveFromEntry, "")) 
             return result
+        except ClientError, error:
+            raise SubversionError(error)
+        
+    def info(self, path):
+        """
+        Gets the information about a file or directory.
+        
+        @param path: Path to the file or directory information is needed.
+        @type path: C{unicode}
+        """
+        
+        try:
+            resultDict = dict()
+            self._client.update(self._repoWorkingCopyPath + path)
+            infoDict = self._client.info2(self._repoWorkingCopyPath + path, recurse=False)
+            infoDict = infoDict[0]
+            infoDict = infoDict[1]
+            resultDict["lastChangedAuthor"] = infoDict.last_changed_author
+            resultDict["lastChangedDate"] = infoDict.last_changed_date
+            return resultDict
         except ClientError, error:
             raise SubversionError(error)
 

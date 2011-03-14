@@ -40,10 +40,12 @@ This module implements how the meta data is persisted on the SVN server.
 """
 
 
+import datetime
 import json
 import mimetypes
 
-from datafinder.persistence.adapters.svn.constants import DATAFINDER_JSON_PROPERTY, XPS_JSON_PROPERTY
+from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY,\
+    SVN_MIME_TYPE
 from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.adapters.svn.util import util
 from datafinder.persistence.error import PersistenceError
@@ -77,17 +79,14 @@ class MetadataSubversionAdapter(NullMetadataStorer):
 
         connection = self.__connectionPool.acquire()
         try:
-            persistenceXPSJsonProperties = self._retrieveXPSProperties(connection)
-            persistenceDatafinderProperties = self._retrieveDatafinderProperties(connection)
-            rawResult = json.loads(persistenceXPSJsonProperties)
-            if persistenceDatafinderProperties is not None:
-                rawResult.update(json.loads(persistenceDatafinderProperties))
-            mappedResult = self._mapRawResult(rawResult)
+            persistenceJsonProperties = self._retrieveProperties(connection)
+            rawResult = json.loads(persistenceJsonProperties)
+            mappedResult = self._mapRawResult(connection, rawResult)
             return self._filterResult(propertyIds, mappedResult)
         finally:
             self.__connectionPool.release(connection)
 
-    def _retrieveXPSProperties(self, connection):
+    def _retrieveProperties(self, connection):
         """ Retrieves all properties. """
         
         try:
@@ -97,31 +96,19 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                            + "Reason: '%s'" % error 
             raise PersistenceError(errorMessage)
         
-    def _retrieveDatafinderProperties(self, connection):
-        try:
-            return connection.getProperty(self.__persistenceId, DATAFINDER_JSON_PROPERTY)
-        except SubversionError:
-            # There are no specific Datafinder properties.
-            return None
-        
-    def _mapRawResult(self, rawResult):
+    def _mapRawResult(self, connection, rawResult):
         """ Maps the SVN specific result to interface format. """
         
+        infoDict = connection.info(self.__persistenceId)
         mappedResult = dict()
         mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue("")
-        mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue("")
+        mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"], expectedType=datetime.datetime)
         mappedResult[constants.SIZE] = value_mapping.MetadataValue("")
-        mappedResult[constants.OWNER] = value_mapping.MetadataValue("")
+        mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
 
-        mimeType = mimetypes.guess_type(self.__persistenceId, False)
-        if mimeType[0] is None:
-            mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue("")
-        else:
-            mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType[0])
-        
-        for key, value in rawResult.iteritems():
-            mappedResult[key] = value_mapping.MetadataValue(value)
-                
+        mimeType = connection.getProperty(self.__persistenceId, SVN_MIME_TYPE)
+        mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
+
         return mappedResult
     
     @staticmethod
@@ -143,7 +130,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         connection = self.__connectionPool.acquire()
         try:
             try:
-                jsonProperties = json.dumps(properties)
+                jsonProperties = value_mapping.getPersistenceRepresentation(properties)
                 connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, jsonProperties)
             except SubversionError, error:
                 errorMessage = "Cannot update properties of item '%s'. " % self.identifier \
@@ -158,7 +145,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         connection = self.__connectionPool.acquire()
         try:
             try:
-                persistenceJsonProperties = self._retrieveXPSProperties(connection)
+                persistenceJsonProperties = self._retrieveProperties(connection)
                 persistenceProperties = json.loads(persistenceJsonProperties)
                 for propertyId in propertyIds:
                     if isinstance(persistenceProperties[propertyId], type(list())):

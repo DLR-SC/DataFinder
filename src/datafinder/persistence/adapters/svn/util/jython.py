@@ -248,6 +248,23 @@ class JythonSubversionWrapper(object):
         except SVNException, error:
             raise SubversionError(error)
         
+    def info(self, path):
+        """
+        Gets the information about a file or directory.
+        
+        @param path: Path to the file or directory information is needed.
+        @type path: C{unicode}
+        """
+        
+        try:
+            resultDict = dict()
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            resultDict["lastChangedAuthor"] = ""
+            resultDict["lastChangedDate"] = ""
+            return resultDict
+        except SVNException, error:
+            raise SubversionError(error)
+        
     @property
     def repoWorkingCopyPath(self):
         """ Returns the working copy path. """

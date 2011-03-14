@@ -54,5 +54,7 @@ LINK_TARGET_PROPERTY = "svn:externals"
 
 DATAFINDER_JSON_PROPERTY = "datafinder:json"
 
-XPS_JSON_PROPERTY = "xps:json:de.dlr.xps.server.datafinder.model.XPSforCFDEntry"
+XPS_JSON_PROPERTY = "xps:json:de.dlr.xps.server.datafinder.model.as.XPSforCFDEntry"
 XPS_TITLE_PROPERTY = "xps:title"
+
+SVN_MIME_TYPE = "svn:mime-type"
