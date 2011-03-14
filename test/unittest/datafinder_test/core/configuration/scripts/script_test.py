@@ -142,7 +142,7 @@ class ScriptTestCase(unittest.TestCase):
     def testExecute(self):
         """ Tests the execution of a script. """
                 
-        self._fileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile().file, None)}
+        self._fileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile("r").file, None)}
         self._script.execute()
         
         self._fileStorerMock.methodNameResultMap = {"readData": (None, PersistenceError(""))}
@@ -183,10 +183,9 @@ class ScriptCollectionTestCase(unittest.TestCase):
         self._scriptCollection.executePreferences()
         
         self._scriptCollection.hasPreferences = True
-        self._configFileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile().file, None)}
+        self._configFileStorerMock.methodNameResultMap = {"readData": (NamedTemporaryFile("r").file, None)}
         self._scriptCollection.executePreferences()
         
         self._scriptCollection.hasPreferences = True
         self._configFileStorerMock.methodNameResultMap = {"readData": (StringIO(" jjj"), None)}
         self.assertRaises(ConfigurationError, self._scriptCollection.executePreferences)
-        
