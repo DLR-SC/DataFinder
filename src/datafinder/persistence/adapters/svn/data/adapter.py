@@ -74,7 +74,7 @@ class DataSubversionAdapter(NullDataStorer):
 
     @property
     def linkTarget(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -92,7 +92,7 @@ class DataSubversionAdapter(NullDataStorer):
         
     @property
     def isLink(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         linkTarget = self.linkTarget
         if linkTarget is None:
@@ -102,7 +102,7 @@ class DataSubversionAdapter(NullDataStorer):
         
     @property
     def isLeaf(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -122,7 +122,7 @@ class DataSubversionAdapter(NullDataStorer):
 
     @property
     def isCollection(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -135,7 +135,7 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
 
     def createLink(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         self.createResource()
         connection = self._connectionPool.acquire()
@@ -151,7 +151,7 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
             
     def createResource(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         connection = self._connectionPool.acquire()
         try:
@@ -171,7 +171,7 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
             
     def createCollection(self, recursively=False):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         connection = self._connectionPool.acquire()
         try:
@@ -199,7 +199,7 @@ class DataSubversionAdapter(NullDataStorer):
         return DataSubversionAdapter(parentId, self._connectionPool)
 
     def getChildren(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -212,7 +212,7 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
             
     def writeData(self, dataStream):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -239,7 +239,7 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
 
     def readData(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -257,7 +257,7 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
  
     def delete(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -273,13 +273,13 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
 
     def move(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         self.copy(destination)
         self.delete()
             
     def copy(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -298,7 +298,7 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
         
     def exists(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         try:
             connection = self._connectionPool.acquire()

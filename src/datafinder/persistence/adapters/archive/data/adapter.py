@@ -41,7 +41,7 @@ ZIP compressed archives.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 import codecs
@@ -79,7 +79,7 @@ class DataArchiveAdapter(NullDataStorer, object):
         self._persistenceId = _ZIP_FILENAME_CODEC.encode(self.identifier, errors="ignore")[0] #identifier used to access item in zip archive
     
     def getChildren(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         if not self._children:
             self._children = list()
@@ -94,12 +94,12 @@ class DataArchiveAdapter(NullDataStorer, object):
     
     @property
     def canAddChildren(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         return not self._readonly
     
     def exists(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             self._archive.getinfo(self._persistenceId)
@@ -108,7 +108,7 @@ class DataArchiveAdapter(NullDataStorer, object):
         return True
     
     def writeData(self, data):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         if self._readonly:
             raise PersistenceError(u"Tried to write to read-only archive.")
@@ -123,7 +123,7 @@ class DataArchiveAdapter(NullDataStorer, object):
             raise PersistenceError(errorMessage)
 
     def readData(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         try:
             return self._archive.open(self._persistenceId, "r", self._password)

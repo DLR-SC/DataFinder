@@ -48,7 +48,7 @@ from datafinder.persistence.data.datastorer import NullDataStorer
 from datafinder.persistence.error import PersistenceError
 
                                                 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 _BLOCK_SIZE = 30000
@@ -73,7 +73,7 @@ class DataFileSystemAdapter(NullDataStorer):
 
     @property
     def linkTarget(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         link = util.ShortCut(self._persistenceId)
         if link.isLink():
@@ -82,19 +82,19 @@ class DataFileSystemAdapter(NullDataStorer):
 
     @property
     def isLink(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         return util.createShortcut(self._persistenceId).isLink()
 
     @property
     def isCollection(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         return os.path.isdir(self._persistenceId)
 
     @property
     def isLeaf(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         return os.path.isfile(self._persistenceId)
     
@@ -110,7 +110,7 @@ class DataFileSystemAdapter(NullDataStorer):
         return canAddChildren 
 
     def createCollection(self, recursively=False):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             if recursively:
@@ -123,7 +123,7 @@ class DataFileSystemAdapter(NullDataStorer):
             raise PersistenceError(errorMessage)
 
     def createResource(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             fd = open(self._persistenceId, "wb")
@@ -134,13 +134,13 @@ class DataFileSystemAdapter(NullDataStorer):
             raise PersistenceError(errorMessage)
 
     def createLink(self, source):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         link = util.createShortcut(self._persistenceId)
         link.create(self._itemIdMapper.mapIdentifier(source.identifier))
 
     def getChildren(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         mappedIds = list()
         rawResult = list()
@@ -156,12 +156,12 @@ class DataFileSystemAdapter(NullDataStorer):
         return mappedIds
 
     def exists(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         return os.path.exists(self._persistenceId)
 
     def delete(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             if self.isCollection:
@@ -177,7 +177,7 @@ class DataFileSystemAdapter(NullDataStorer):
             raise PersistenceError(errorMessage)
 
     def copy(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             targetPersistenceId = self._itemIdMapper.mapIdentifier(destination.identifier)
@@ -191,7 +191,7 @@ class DataFileSystemAdapter(NullDataStorer):
             raise PersistenceError(errorMessage)
         
     def move(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             os.rename(self._persistenceId, self._itemIdMapper.mapIdentifier(destination.identifier))
@@ -201,7 +201,7 @@ class DataFileSystemAdapter(NullDataStorer):
             raise PersistenceError(errorMessage)
  
     def readData(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             return open(self._persistenceId, "rb")
@@ -211,7 +211,7 @@ class DataFileSystemAdapter(NullDataStorer):
             raise PersistenceError(errorMessage)
 
     def writeData(self, dataStream):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         try:
             fd = open(self._persistenceId, "wb")

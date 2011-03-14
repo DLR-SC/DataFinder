@@ -50,7 +50,7 @@ from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.data.datastorer import NullDataStorer
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 _PROPERTY_NOT_FOUND_MESSAGE = "Property is missing"
@@ -82,7 +82,7 @@ class DataS3Adapter(NullDataStorer):
         
     @property
     def isLeaf(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         if self._keyname == "":
             return False
         else: 
@@ -94,7 +94,6 @@ class DataS3Adapter(NullDataStorer):
     @property
     def isCollection(self):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorenr.NullDataStorer>} """
-     
         if self._keyname == "":
             if self._bucketname == "":
                 return False
@@ -106,13 +105,13 @@ class DataS3Adapter(NullDataStorer):
     @property
     def canAddChildren(self):
         """
-        @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
+        @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
         """
         
         return self.isCollection
 
     def createResource(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         if self._bucketname == "":
             raise PersistenceError("Cannot create item with empty bucket name.")
@@ -122,7 +121,6 @@ class DataS3Adapter(NullDataStorer):
             try:
                 self.createCollection()
                 if not self._keyname ==  "/":
-                    print self._keyname
                     key = self._bucket.new_key(self._keyname)
                     self._key = key 
                 else:
@@ -134,7 +132,7 @@ class DataS3Adapter(NullDataStorer):
     
             
     def createCollection(self, _=False):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         connection = self._connectionPool.acquire()
         try:
@@ -157,7 +155,7 @@ class DataS3Adapter(NullDataStorer):
             self._connectionPool.release(connection)
               
     def getChildren(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         if self.isLeaf:
             result = list()
@@ -190,7 +188,7 @@ class DataS3Adapter(NullDataStorer):
 
 
     def writeData(self, dataStream):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
     
         try:
             self._key = self.createResource()
@@ -206,7 +204,7 @@ class DataS3Adapter(NullDataStorer):
           
 
     def readData(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         try:
             temporaryFileObject = tempfile.TemporaryFile()
@@ -219,7 +217,7 @@ class DataS3Adapter(NullDataStorer):
             raise PersistenceError(errorMessage)
         
     def delete(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
 
         if self.isLeaf:
             try:
@@ -246,50 +244,44 @@ class DataS3Adapter(NullDataStorer):
         else:
             raise PersistenceError("Specified identifier is not available and cannot be deleted")
        
-    def move(self, destBucket, destKey):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+    def move(self, destinationKey):
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        self.copy(destBucket, destKey)
-        if self.isCollection:
-            self.delete()
+        self.copy(destinationKey)
+        #if self.isCollection:
+        self.delete()
         
-            
-    def copy(self, destinationBucket, destKey):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+    def copy(self, destinationKey):
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        if self._bucketname == destinationBucket:
-            raise PersistenceError('Source and destination are the same resource')
         connection = self._connectionPool.acquire()
         try:
-            destBucket = connection.create_bucket(destinationBucket) 
+            if not self._bucket:
+                self._bucket = self.createCollection()
             if self.isCollection:
-                if not self._bucket:
-                    self._bucket = self.createCollection()
                 allKeys = self._bucket.get_all_keys()
                 for key in allKeys:
-                    key.copy(destBucket)
+                    key.copy(self._bucket)
             elif self.isLeaf:
-                if not self._bucket:
-                    self._bucket = self.createCollection()
-                    if not self._key:
-                        self._key = self.createResource()
-                        self._key.copy(destBucket, destKey)   
+                if not self._key:
+                    self._key = self.createResource()
+                    self._key.copy(self._bucket, destinationKey)   
             else:
                 raise PersistenceError("No valid bucket or key specified") 
        
         except (S3ResponseError, S3CreateError, PersistenceError), error:
-            errorMessage = "Unable to move item '%s' to '%s'. " % (self.identifier, destBucket.identifier) \
+            errorMessage = "Unable to move item '%s' to '%s'. " % (self.identifier, self._bucket.identifier) \
                                + "Reason: %s" % error.reason
             raise PersistenceError(errorMessage)
         finally:
-            self._connectionPool.release()
+            self._connectionPool.release() 
 
     def exists(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         exists = True
         collection = self.isCollection
-        if (self.identifier =="/" or collection == True):
+        if (self.identifier == "/" or collection == True):
             connection = self._connectionPool.acquire()
             try:
                 bucket = connection.lookup(self, self._bucketname)   

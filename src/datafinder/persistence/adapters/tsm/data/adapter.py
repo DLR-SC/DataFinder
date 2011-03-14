@@ -53,7 +53,7 @@ from datafinder.persistence.data.datastorer import NullDataStorer
 from datafinder.persistence.error import PersistenceError
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 _BLOCK_SIZE = 30000

@@ -50,7 +50,7 @@ from datafinder.persistence.data.datastorer import NullDataStorer
 from datafinder.persistence.adapters.webdav_ import constants, util
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 
@@ -86,13 +86,13 @@ class DataWebdavAdapter(NullDataStorer):
 
     @property
     def linkTarget(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         return self._determineResourceType()[1]
         
     @property
     def isLink(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         linkTargetPath = self._determineResourceType()[1]
         if not linkTargetPath is None:
@@ -102,7 +102,7 @@ class DataWebdavAdapter(NullDataStorer):
         
     @property
     def isLeaf(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         isCollection, linkTargetPath = self._determineResourceType()
         if not linkTargetPath is None:
@@ -138,7 +138,7 @@ class DataWebdavAdapter(NullDataStorer):
     
     @property
     def isCollection(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         isCollection, linkTargetPath = self._determineResourceType()
         if not linkTargetPath is None:
@@ -147,7 +147,7 @@ class DataWebdavAdapter(NullDataStorer):
             return isCollection
 
     def createLink(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         self.createResource()
         connection = self._connectionPool.acquire()
@@ -161,7 +161,7 @@ class DataWebdavAdapter(NullDataStorer):
             self._connectionPool.release(connection)
             
     def createResource(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         if len(self._name) == 0:
             raise PersistenceError("Cannot create item with empty resource name.")
@@ -185,7 +185,7 @@ class DataWebdavAdapter(NullDataStorer):
         return self._connectionHelper.createCollectionStorer(parentPersistenceId, connection)
 
     def createCollection(self, recursively=False):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         if len(self._name) == 0:
             raise PersistenceError("Cannot create item with empty resource name.")
@@ -212,7 +212,7 @@ class DataWebdavAdapter(NullDataStorer):
         return DataWebdavAdapter(parentId, self._connectionPool, self._itemIdMapper, self._connectionHelper, self._resourceTypeCache)
 
     def getChildren(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
         connection = self._connectionPool.acquire()
         try:
@@ -235,7 +235,7 @@ class DataWebdavAdapter(NullDataStorer):
             self._connectionPool.release(connection)
             
     def writeData(self, dataStream):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -259,7 +259,7 @@ class DataWebdavAdapter(NullDataStorer):
             self._connectionPool.release(connection)
 
     def readData(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -274,7 +274,7 @@ class DataWebdavAdapter(NullDataStorer):
             self._connectionPool.release(connection)
  
     def delete(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -291,7 +291,7 @@ class DataWebdavAdapter(NullDataStorer):
             self._connectionPool.release(connection)
 
     def move(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -309,7 +309,7 @@ class DataWebdavAdapter(NullDataStorer):
             self._connectionPool.release(connection)
             
     def copy(self, destination):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         connection = self._connectionPool.acquire()
         try:
@@ -325,7 +325,7 @@ class DataWebdavAdapter(NullDataStorer):
             self._connectionPool.release(connection)
         
     def exists(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorer.NullDataStorer>} """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
         exists = True
         try:
