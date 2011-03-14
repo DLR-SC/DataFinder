@@ -40,4 +40,4 @@ Contains tests for AmazonS3  related adapters.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

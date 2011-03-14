@@ -1,4 +1,3 @@
-# pylint: disable=W0511
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -51,7 +50,7 @@ from datafinder_test.mocks import SimpleMock
 
 _PROPERTY_NOT_FOUND_MESSAGE = "Property is missing:"
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
     
 class DataS3AdapterTestCase(unittest.TestCase):
@@ -98,7 +97,7 @@ class DataS3AdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the getChildren method. """
     
         adapter = DataS3Adapter("/identifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock(keyset = 1)))), SimpleMock())
-        self.assertEquals(adapter.getChildren(), 1)
+        self.assertEquals(adapter.getChildren(), list())
     
     def testwriteData(self):
         """ Tests the normal behavior of the writeData method. """
@@ -120,15 +119,13 @@ class DataS3AdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the move method. """
                 
         destinationBucket = SimpleMock(SimpleMock(SimpleMock()))
-        destinationKey = SimpleMock(SimpleMock())
         #source = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock(), SimpleMock())
-        self._defaultAdapter.move(destinationBucket, destinationKey)
+        self._defaultAdapter.move(destinationBucket)
         
     def testcopy(self):
         """ Tests the normal behavior of the copy method. """
         destinationBucket = SimpleMock(SimpleMock(SimpleMock(SimpleMock())))
-        destinationKey = SimpleMock()
-        self._defaultAdapter.copy(destinationBucket, destinationKey)
+        self._defaultAdapter.copy(destinationBucket)
         
     def testexists(self):
         """ Tests the normal behavior of the exists method. """

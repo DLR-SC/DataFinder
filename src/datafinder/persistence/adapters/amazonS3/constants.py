@@ -44,4 +44,4 @@ __version__ = "$Revision-Id:$"
 
 
 MAX_POOL_NUMBER = 10
-MAX_CONNECTION_NUMBER = 1
+MAX_CONNECTION_NUMBER = 5

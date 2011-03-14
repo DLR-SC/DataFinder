@@ -40,4 +40,4 @@ Implements test cases for the AmazonS3 data adapter.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 

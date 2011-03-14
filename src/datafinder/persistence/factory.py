@@ -54,7 +54,7 @@ from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.filestorer import FileStorer
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
@@ -100,7 +100,7 @@ class FileSystem(object):
                             "ldap": "ldap_",
                             "tsm": "tsm",
                             "arch": "archive",
-                            "s3": "amazonS3"}
+                            "s3": "amazons3"}
     
     _BASE_IMPL_PACKAGE_PATTERN = "datafinder.persistence.adapters.%s.factory"
     
