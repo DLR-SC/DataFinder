@@ -195,10 +195,10 @@ class DataS3Adapter(NullDataStorer):
         """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         try:
-            fileObject = NamedTemporaryFile()
+            fileObject = NamedTemporaryFile(delete = False)
             self.createResource()
             self._key.get_contents_to_filename(fileObject.name)
-            return fileObject 
+            return fileObject
         except (PersistenceError, S3ResponseError, BotoClientError), error:
             errorMessage = "Unable to read data from '%s'. " % self.identifier + \
                                "Reason: %s" % error.reason
