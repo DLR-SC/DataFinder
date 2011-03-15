@@ -295,10 +295,10 @@ _temporaryFiles = list()
 @atexit.register
 def _cleanupTemporaryFile():
     """Cleaning up TemporaryFiles for a """
-    for file in _temporaryFiles:
+    for tempFile in _temporaryFiles:
         try:
-            file.close()
-            os.remove(file.name)
+            tempFile.close()
+            os.remove(tempFile.name)
         except (OSError, PersistenceError):
-           raise PersistenceError("Cannot clean up temporary file '%s'" % file.name)
+            raise PersistenceError("Cannot clean up temporary file '%s'" % tempFile.name)
         
