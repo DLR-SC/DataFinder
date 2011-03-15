@@ -1,8 +1,3 @@
-#pylint: disable=W0612
-# W0612: The accept attribute of methods _walkAny, _walkCollection, _walkBase
-# is used later to find out the acceptable visitors. So they are not really unused as 
-# warned by pylint.
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -174,8 +169,6 @@ class ActionCheckVisitor(object):
         if not (item.isCollection and item.state == constants.ITEM_STATE_NULL):
             self._disable((ActionCheckVisitor.CAPABILITY_ARCHIVE,))
             
-    handleDataNode.accept = ItemRoot, ItemCollection, ItemLeaf
-    
     def _checkDataState(self, item):
         """ Helper method checking the data state of the item. """
     
@@ -247,7 +240,6 @@ class ActionCheckVisitor(object):
         else:
             self._checkDataState(item)
             self._checkPrivileges(item)
-    handleLink.accept = ItemLink,
     
     def handleBase(self, item):
         """
@@ -258,9 +250,10 @@ class ActionCheckVisitor(object):
             self.handleLink(item)
         else:
             self.handleDataNode(item)
-    handleBase.accept = ItemBase,
     
-    handle = VisitSlot(handleDataNode, handleLink, handleBase)
+    handle = VisitSlot((handleDataNode, [ItemRoot, ItemCollection, ItemLeaf]), 
+                       (handleLink, [ItemLink]), 
+                       (handleBase, [ItemBase]))
     
     def canAddChildren(self, item):
         """
@@ -458,9 +451,8 @@ class ActionCheckTreeWalker(ItemTreeWalkerBase, ActionCheckVisitor):
             item = item.linkTarget
             self.walk(item)
             self._path = self._path[:-1]
-    handleLink.accept = ItemLink,
     
-    handle = VisitSlot(handleLink, inherits="handle")
+    handle = VisitSlot((handleLink, [ItemLink]), inherits="handle")
     
 
 class ItemCapabilityChecker(object):

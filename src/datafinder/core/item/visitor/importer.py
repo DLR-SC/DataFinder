@@ -1,8 +1,3 @@
-#pylint: disable=W0612
-# W0612: The accept attribute of methods _walkAny, _walkCollection, _walkBase
-# is used later to find out the acceptable visitors. So they are not really unused as 
-# warned by pylint.
-#
 # $Filename$ 
 # $Authors$
 #
@@ -184,7 +179,6 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
                     self._copyLink(link, importName, self._pwd)
                 except ItemError:
                     self._deferredLinks.append((link, importName, self._pwd))
-    _importLink.accept = ItemLink, # W0612
     
     def _determineImportName(self, item):
         """ Determines the name used importing the given item. """
@@ -210,7 +204,6 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
                 if self._copyData:
                     importedLeaf.storeData(leaf.retrieveData())
                     self.importedLeafs.append(leaf)
-    _importLeaf.accept = ItemLeaf, # W0612
     
     def _determineLeafProperties(self, leaf):
         """ Determines the properties when importing a leaf item. """
@@ -248,9 +241,8 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
             importedCollection.invalidate()
             raise error
         self._pwd = importedCollection
-    _importCollection.accept = ItemCollection, # W0612
     
-    _importRoot = lambda self, _: None
-    _importRoot.accept = ItemRoot, # W0612
-    
-    handle = VisitSlot(_importLink, _importLeaf, _importCollection, _importRoot)
+    handle = VisitSlot((_importLink, [ItemLink]), 
+                       (_importLeaf, [ItemLeaf]), 
+                       (_importCollection, [ItemCollection]), 
+                       (lambda self, _: None, [ItemRoot]))

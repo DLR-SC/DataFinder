@@ -1,4 +1,6 @@
-#pylint: disable=R0201,W0612
+# pylint: disable=R0201
+# R0201: For testing methods which could be functions are fine.
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -50,7 +52,9 @@ from datafinder.core.item.link import ItemLink
 from datafinder.core.item.visitor.base import ItemTreeWalkerBase, VisitSlot
 from datafinder_test.mocks import SimpleMock
 
+
 __version__ = "$Revision-Id:$" 
+
 
 class _TestItem(object):
     """
@@ -60,6 +64,7 @@ class _TestItem(object):
     def __init__(self):
         """ Constructor. """
         pass
+
 
 class _TestItemVisitor(object):
     """
@@ -79,7 +84,6 @@ class _TestItemVisitor(object):
         @return: The value of the node (C{node.value}).
         """
         return node.value
-    test1ReturnsNodeValue.accept = SimpleMock,
     
     def test1ReturnsFalse(self, _):
         """
@@ -91,9 +95,9 @@ class _TestItemVisitor(object):
         @return: C{False}
         """
         return False
-    test1ReturnsFalse.accept = _TestItem,
 
-    test1 = VisitSlot(test1ReturnsNodeValue, test1ReturnsFalse)
+    test1 = VisitSlot((test1ReturnsNodeValue, [SimpleMock]), 
+                      (test1ReturnsFalse, [_TestItem]))
     
     def test2ChecksNodeValueForPara(self, node, para):
         """
@@ -110,22 +114,19 @@ class _TestItemVisitor(object):
         @rtype: Boolean
         """
         return node.value == para
-    test2ChecksNodeValueForPara.accept = SimpleMock,
     
-    test2 = VisitSlot(test2ChecksNodeValueForPara)
+    test2 = VisitSlot((test2ChecksNodeValueForPara, [SimpleMock]))
 
 class _DerivedTestItemVisitor(_TestItemVisitor, object):
     def test1Overridden(self, _):
         return False
-    test1Overridden.accept = SimpleMock,
     
-    test1 = VisitSlot(test1Overridden, inherits="test1")
+    test1 = VisitSlot((test1Overridden, (SimpleMock, )), inherits="test1")
     
     def test2Hidden(self, node, para):
         return node.value == para
-    test2Hidden.accept = _TestItem,
     
-    test2 = VisitSlot(test2Hidden)
+    test2 = VisitSlot((test2Hidden, [_TestItem]))
 
 class ItemVisitorBaseTestCase(unittest.TestCase):
     """
@@ -188,7 +189,6 @@ class _TestItemTreeWalker(ItemTreeWalkerBase):
         Visitor slot C{handle} for all nodes expect links.
         """
         self.sequence.append(node.name)
-    handleData.accept = ItemBase, ItemRoot, ItemCollection, ItemLeaf
     
     def handleLink(self, node):
         """
@@ -197,10 +197,11 @@ class _TestItemTreeWalker(ItemTreeWalkerBase):
         @return: False
         """
         self.sequence.append("*" + node.name)
-    handleLink.accept = ItemLink,
     
-    handle = VisitSlot(handleData, handleLink)
-    
+    handle = VisitSlot((handleData, [ItemBase, ItemRoot, ItemCollection, ItemLeaf]), 
+                       (handleLink, [ItemLink]))
+
+
 class _EmptyItemTreeWalker(ItemTreeWalkerBase):
     """
     Another mock up tree walker where the C{handle} slot has been disabled.
@@ -208,6 +209,7 @@ class _EmptyItemTreeWalker(ItemTreeWalkerBase):
     def __init__(self, mode=-1):
         """ Constructor. """
         ItemTreeWalkerBase.__init__(self, mode=mode)
+
     
 class ItemTreeWalkerTestCase(unittest.TestCase):
     """

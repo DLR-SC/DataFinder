@@ -1,8 +1,3 @@
-#pylint: disable=W0612
-# W0612: The accept attribute of methods _walkAny, _walkCollection, _walkBase
-# is used later to find out the acceptable visitors. So they are not really unused as 
-# warned by pylint.
-#
 # $Filename$ 
 # $Authors$
 #
@@ -71,8 +66,9 @@ class VisitSlot(object):
         Constructor. Takes a list of handlers and optionally the name of a
         method of any base class to use as fallback.
         
-        @param handlers: A list of valid handlers.
-        @type handlers: Tuple of callables.
+        @param handlers: Describes the handlers: callable, list of accepted classes, 
+        e.g. (_walkItem, [ItemBase], _walkCollection, [ItemCollection])
+        @type handlers: Tuples of callables, list of classes.
         @param inherits: The handler to call on the base class if all own handlers fail.
         @type inherits: str.
         """
@@ -85,8 +81,8 @@ class VisitSlot(object):
         
         def visitClosure(node, *args, **kw):
             clazz = node.__class__
-            for method in self._handlers:
-                if clazz in getattr(method, "accept", list()):
+            for method, classes in self._handlers:
+                if clazz in classes:
                     return method(instance, node, *args, **kw)
             
             if self._inherits:
@@ -161,7 +157,6 @@ class ItemTreeWalkerBase(object):
         if self._mode > 0:
             if not node.state in self._stopTraversalStates:
                 self.handle(node, *args, **kw) # POST-Order
-    _walkCollection.accept = ItemRoot, ItemCollection
     
     def _walkAny(self, node, *args, **kw):
         """
@@ -174,7 +169,6 @@ class ItemTreeWalkerBase(object):
         
         if not node.state in self._stopProcessStates:
             self.handle(node, *args, **kw)
-    _walkAny.accept = ItemLeaf, ItemLink
     
     def _walkBase(self, node, *args, **kw):
         """
@@ -188,8 +182,9 @@ class ItemTreeWalkerBase(object):
             self._walkAny(node, *args, **kw)
         else:
             self._walkCollection(node, *args, **kw)
-    _walkBase.accept = ItemBase,
     
-    walk = VisitSlot(_walkCollection, _walkAny, _walkBase)
+    walk = VisitSlot((_walkCollection, [ItemRoot, ItemCollection]), 
+                     (_walkAny, [ItemLeaf, ItemLink]), 
+                     (_walkBase, [ItemBase]))
     
     handle = VisitSlot()
