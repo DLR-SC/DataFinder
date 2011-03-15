@@ -41,6 +41,8 @@ This module implements how the meta data is persisted on the SVN server.
 
 
 import json
+import logging
+import mimetypes
 
 from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY, SVN_MIME_TYPE
 from datafinder.persistence.adapters.svn.error import SubversionError
@@ -52,8 +54,12 @@ from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
 
 __version__ = "$Revision-Id$" 
 
+
+_log = logging.getLogger()
+
  
 class MetadataSubversionAdapter(NullMetadataStorer):
+    """ Implements meta data storer interface for subversion. """
     
     def __init__(self, identifier, connectionPool):
         """
@@ -76,8 +82,12 @@ class MetadataSubversionAdapter(NullMetadataStorer):
 
         connection = self.__connectionPool.acquire()
         try:
-            persistenceJsonProperties = self._retrieveProperties(connection)
-            rawResult = json.loads(persistenceJsonProperties)
+            rawResult = dict()
+            try:
+                persistenceJsonProperties = self._retrieveProperties(connection)
+                rawResult = json.loads(persistenceJsonProperties)
+            except SubversionError:
+                _log.debug("No subversion property is set!")
             mappedResult = self._mapRawResult(connection, rawResult)
             return self._filterResult(propertyIds, mappedResult)
         finally:
@@ -85,26 +95,34 @@ class MetadataSubversionAdapter(NullMetadataStorer):
 
     def _retrieveProperties(self, connection):
         """ Retrieves all properties. """
-        
-        try:
-            return connection.getProperty(self.__persistenceId, XPS_JSON_PROPERTY)
-        except SubversionError, error:
-            errorMessage = "Problem during meta data retrieval. " \
-                           + "Reason: '%s'" % error 
-            raise PersistenceError(errorMessage)
+
+        return connection.getProperty(self.__persistenceId, XPS_JSON_PROPERTY)
         
     def _mapRawResult(self, connection, rawResult):
         """ Maps the SVN specific result to interface format. """
         
-        infoDict = connection.info(self.__persistenceId)
+        try:
+            infoDict = connection.info(self.__persistenceId)
+        except SubversionError, error:
+            errorMessage = "Problem during meta data retrieval. " \
+                           + "Reason: '%s'" % error 
+            raise PersistenceError(errorMessage)  
         mappedResult = dict()
         mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue("")
         mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"])
         mappedResult[constants.SIZE] = value_mapping.MetadataValue("")
         mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
 
-        mimeType = connection.getProperty(self.__persistenceId, SVN_MIME_TYPE)
-        mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
+        try:
+            mimeType = connection.getProperty(self.__persistenceId, SVN_MIME_TYPE)
+            mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
+        except SubversionError:
+            _log.debug("No subversion property for mimetype is set! Trying to determine mimetype by persitenceId.")
+            mimeType = mimetypes.guess_type(self.__persistenceId, False)
+            if mimeType[0] is None:
+                mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue("")
+            else:
+                mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType[0])
         
         for key, value in rawResult.iteritems():
             mappedResult[key] = value_mapping.MetadataValue(value)

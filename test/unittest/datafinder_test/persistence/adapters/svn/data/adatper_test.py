@@ -142,7 +142,8 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         try:
             globals()["__builtins__"]["open"] = self._openMock
             self._openMock.error = False
-            self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"add": (None, None), "checkin": (None, None)})
+            self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"add": (None, None), \
+                                              "checkin": (None, None)})
             adapter = DataSubversionAdapter("/identifier.txt", SimpleMock(self._connectionMock))
             adapter.createResource()
         
@@ -155,7 +156,8 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the createCollection method. """
         
         self._osModuleMock.error = None
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"add": (None, None), "checkin": (None, None)})
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"add": (None, None), \
+                                          "checkin": (None, None)})
         adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         adapter.createCollection()
         self._osPathMock.value = True
@@ -206,11 +208,13 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
     def testDelete (self):
         """ Tests the normal behavior of the delete method. """
         
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "delete": (None, None), "checkin": (None, None)})
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), \
+                                          "delete": (None, None), "checkin": (None, None)})
         adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         adapter.delete()
         
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "delete": (None, SubversionError), "checkin": (None, None)})
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), \
+                                          "delete": (None, SubversionError), "checkin": (None, None)})
         adapter = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.delete)
 
@@ -218,11 +222,13 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the move method. """
                 
         destination = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, None), "checkin": (None, None), "delete": (None, None)})
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), \
+                                          "copy": (None, None), "checkin": (None, None), "delete": (None, None)})
         adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         adapter.move(destination)
         
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, SubversionError), "checkin": (None, None), "delete": (None, None)})
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), \
+                                          "copy": (None, SubversionError), "checkin": (None, None), "delete": (None, None)})
         adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.move, destination)
         
@@ -230,11 +236,13 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the copy method. """
         
         destination = DataSubversionAdapter("/anotherIdentifier", SimpleMock(self._connectionMock))
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, None), "checkin": (None, None)})
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), \
+                                          "copy": (None, None), "checkin": (None, None)})
         adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         adapter.copy(destination)
         
-        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), "copy": (None, SubversionError), "checkin": (None, None)})
+        self._connectionMock = SimpleMock(repoWorkingCopyPath = "", methodNameResultMap={"update": (None, None), \
+                                          "copy": (None, SubversionError), "checkin": (None, None)})
         adapter = DataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
         self.assertRaises(PersistenceError, adapter.copy, destination)
         

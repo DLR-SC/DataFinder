@@ -300,8 +300,8 @@ class DataSubversionAdapter(NullDataStorer):
     def exists(self):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
+        connection = self._connectionPool.acquire()
         try:
-            connection = self._connectionPool.acquire()
             try:
                 connection.update()
                 return os.path.exists(connection.repoWorkingCopyPath + self._persistenceId)

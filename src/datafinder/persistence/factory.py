@@ -1,3 +1,6 @@
+# pylint: disable=E1103
+# E1103: urlsplit produces the required results but Pylint
+#        cannot correctly determine it.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -51,7 +54,7 @@ from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.filestorer import FileStorer
 
 
-__version__ = "$Revision-Id$" 
+__version__ = "$Revision-Id:$" 
 
 
 def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
@@ -68,10 +71,7 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
     @note: When setting C{itemUri} to C{None} a null pattern conform file storer 
            implementation is returned. 
     """
-    # pylint: disable=E1103
-    # E1103: urlsplit produces the required results but Pylint
-    # cannot correctly determine it.
-
+    
     if itemUri is None:
         return FileSystem(None).createFileStorer("/")
     else:
@@ -94,13 +94,13 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
 class FileSystem(object):
     """ Implements a generic file system interface. """
     
-    _uriSchemeAdapterMap = {"http": ["webdav_", "svn"],
-                            "https": ["webdav_", "svn"],
-                            "file": "filesystem",
-                            "ldap": "ldap_",
-                            "tsm": "tsm",
-                            "arch": "archive",
-                            "s3": "amazons3"}
+    _uriSchemeAdapterMap = {"http": ["svn", "webdav_"],
+                            "https": ["svn", "webdav_"],
+                            "file": ["filesystem"],
+                            "ldap": ["ldap_"],
+                            "tsm": ["tsm"],
+                            "arch": ["archive"],
+                            "s3": ["amazonS3"]}
     
     _BASE_IMPL_PACKAGE_PATTERN = "datafinder.persistence.adapters.%s.factory"
     
@@ -117,13 +117,8 @@ class FileSystem(object):
         """
 
         self._baseConfiguration = baseConfiguration
-        self._isWebdav = False
         if not baseConfiguration is None:
-            try:
-                self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
-            except PersistenceError:
-                self._isWebdav = True
-                self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
+            self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
             if basePrincipalSearchConfiguration is None:
                 self._principalSearchFactory = self._factory
             else:
@@ -136,24 +131,21 @@ class FileSystem(object):
         """ Determines dynamically the concrete factory implementation. """
         
         try:
-            if uriScheme == "http" or uriScheme == "https":
-                if self._isWebdav:
-                    adapterPackageName = self._uriSchemeAdapterMap[uriScheme][0]
-                else:
-                    adapterPackageName = self._uriSchemeAdapterMap[uriScheme][1]
-            else:
-                adapterPackageName = self._uriSchemeAdapterMap[uriScheme]
+            for location in self._uriSchemeAdapterMap[uriScheme]:
+                adapterPackageName = location
+                fullDottedModuleName = self._BASE_IMPL_PACKAGE_PATTERN % adapterPackageName
+                try:
+                    moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
+                    factory = getattr(moduleInstance, self.__class__.__name__)
+                    filesystem = factory(self._baseConfiguration)
+                    if filesystem.canHandleLocation():
+                        return factory
+                except (ImportError, AttributeError), error:
+                    errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
+                                   % (adapterPackageName, str(error))
+                    raise PersistenceError(errorMessage)
         except KeyError:
-            raise PersistenceError("The URI scheme '%s' is unsupported." % uriScheme)
-        else:
-            fullDottedModuleName = self._BASE_IMPL_PACKAGE_PATTERN % adapterPackageName
-            try:
-                moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
-                return getattr(moduleInstance, self.__class__.__name__)
-            except (ImportError, AttributeError), error:
-                errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
-                               % (adapterPackageName, str(error))
-                raise PersistenceError(errorMessage)
+            raise PersistenceError("The URI scheme '%s' is unsupported." % uriScheme)            
 
     def createFileStorer(self, identifier):
         """ 
@@ -327,3 +319,4 @@ class FileSystem(object):
 if __name__ == "__main__":
     fs = createFileStorer("http://localhost/webdav", BaseConfiguration("http://localhost/webdav", username="wampp", password="xampp")) 
     print fs.getChildren()
+    

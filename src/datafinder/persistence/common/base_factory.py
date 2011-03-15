@@ -52,6 +52,15 @@ __version__ = "$Revision-Id:$"
 class BaseFileSystem(object):
     """ Base class for the adaptor specific file system factory implementations. """
     
+    def canHandleLocation(self):
+        """
+        Indicates if the FileSystem can handle the location.
+        
+        @return: True if FileSystem can handle the location, False if not.
+        """
+        
+        return True
+    
     def createDataStorer(self, identifier):
         """ 
         Factory method an adapter specific data storer. 
