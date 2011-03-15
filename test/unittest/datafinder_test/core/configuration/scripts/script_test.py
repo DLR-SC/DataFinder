@@ -154,7 +154,9 @@ class ScriptTestCase(unittest.TestCase):
         self.assertRaises(ConfigurationError, self._script.execute)
             
         fileObject = _getFile()
-        try:   
+        try:
+            fileObject.write(" jjj")
+            fileObject.seek(0)
             self._fileStorerMock.methodNameResultMap = {"readData": (fileObject, None)}
             self.assertRaises(ConfigurationError, self._script.execute)
         finally:
@@ -202,6 +204,7 @@ class ScriptCollectionTestCase(unittest.TestCase):
         fileObject = _getFile()
         try:
             fileObject.write(" jjj")
+            fileObject.seek(0)
             self._scriptCollection.hasPreferences = True
             self._configFileStorerMock.methodNameResultMap = {"readData": (fileObject, None)}
             self.assertRaises(ConfigurationError, self._scriptCollection.executePreferences)
