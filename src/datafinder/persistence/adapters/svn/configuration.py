@@ -40,6 +40,9 @@ Defines SVN-specific connection parameters.
 """
 
 
+import tempfile
+
+
 __version__ = "$Revision-Id$" 
 
 
@@ -60,4 +63,4 @@ class Configuration(object):
         self.username = baseConfiguration.username
         self.password = baseConfiguration.password
 
-        self.workingCopyPath = baseConfiguration.workingCopyPath
+        self.workingCopyPath = baseConfiguration.workingCopyPath or tempfile.tempdir

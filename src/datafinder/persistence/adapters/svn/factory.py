@@ -36,10 +36,7 @@
 
 
 """ 
-Implements factory methods for objects that can be used to
-access a Amazon s3 file system.
-
-to be implemented - erstellt einen Datastore des Typs S3
+Implements the Subversion factory.
 """
 
 
@@ -51,7 +48,6 @@ from datafinder.persistence.adapters.svn.configuration import Configuration
 from datafinder.persistence.adapters.svn.connection_pool import SubversionConnectionPool
 from datafinder.persistence.adapters.svn.data.adapter import DataSubversionAdapter
 from datafinder.persistence.adapters.svn.metadata.adapter import MetadataSubversionAdapter
-from datafinder.persistence.adapters.svn.util import util
 
 
 __version__ = "$Revision-Id$" 
@@ -75,19 +71,8 @@ class FileSystem(BaseFileSystem):
         
         BaseFileSystem.__init__(self)
         self._configuration = Configuration(baseConfiguration)
-        self._connection = self._getConnection()
         self._connectionPool = self._getConnectionPool()
         
-    def _getConnection(self):
-        """ Creates / retrieves a usable connection for the given configuration. """
-        
-        repoPath = self._configuration.baseUrl
-        workingCopyPath = self._configuration.workingCopyPath
-        username = self._configuration.username
-        password = self._configuration.password
-        
-        self._connection = util.createSubversionConnection(repoPath, workingCopyPath, username, password)
-    
     def _getConnectionPool(self):
         """ Creates / retrieves a usable connection pool for the given configuration. """
         
@@ -135,3 +120,14 @@ class FileSystem(BaseFileSystem):
         
         self._connectionManager.remove(self._configuration.baseUrl)
     
+    @property
+    def canHandleLocation(self):
+        """ Checks whether the location is accessible. """
+        
+        try:
+            connection = self._getConnectionPool().acquire()
+        except PersistenceError:
+            return False
+        else:
+            self._getConnectionPool().release(connection)
+            return True

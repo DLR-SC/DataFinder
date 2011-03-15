@@ -1,6 +1,3 @@
-# pylint: disable=E1103
-# E1103: urlsplit produces the required results but Pylint
-#        cannot correctly determine it.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -71,7 +68,10 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
     @note: When setting C{itemUri} to C{None} a null pattern conform file storer 
            implementation is returned. 
     """
-    
+    # pylint: disable=E1103
+    # E1103: urlsplit produces the required results but pylint
+    # cannot correctly determine it.
+
     if itemUri is None:
         return FileSystem(None).createFileStorer("/")
     else:
@@ -100,7 +100,7 @@ class FileSystem(object):
                             "ldap": ["ldap_"],
                             "tsm": ["tsm"],
                             "arch": ["archive"],
-                            "s3": ["amazonS3"]}
+                            "s3": ["amazons3"]}
     
     _BASE_IMPL_PACKAGE_PATTERN = "datafinder.persistence.adapters.%s.factory"
     
@@ -138,7 +138,7 @@ class FileSystem(object):
                     moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
                     factory = getattr(moduleInstance, self.__class__.__name__)
                     filesystem = factory(self._baseConfiguration)
-                    if filesystem.canHandleLocation():
+                    if filesystem.canHandleLocation:
                         return factory
                 except (ImportError, AttributeError), error:
                     errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
