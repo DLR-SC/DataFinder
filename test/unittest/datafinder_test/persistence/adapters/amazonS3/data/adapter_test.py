@@ -107,13 +107,13 @@ class DataS3AdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the readData method. """
 
         adapter = DataS3Adapter("identifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock())
-        self.assertEquals(adapter.readData().read(), "")
+        fileObject = adapter.readData()
+        self.assertEquals(fileObject.read(), "")
         
     def testdelete (self):
         """ Tests the normal behavior of the delete method. """
         
         self._defaultAdapter.delete()
-        
 
     def testmove(self):
         """ Tests the normal behavior of the move method. """
