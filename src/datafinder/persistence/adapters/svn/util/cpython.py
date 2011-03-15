@@ -1,5 +1,3 @@
-# pylint: disable=E1101
-# E1101: pylint could not resolve the node_kind attribute. 
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -128,12 +126,16 @@ class CPythonSubversionWrapper(object):
     
     def isLeaf(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}. """
-        
+        # pylint: disable=E1101
+        # E1101: pylint could not resolve the node_kind attribute. 
+
         return self._determineItemKind(path, pysvn.node_kind.file)
     
     def isCollection(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}. """
-        
+        # pylint: disable=E1101
+        # E1101: pylint could not resolve the node_kind attribute. 
+
         return self._determineItemKind(path, pysvn.node_kind.dir)
     
     def _determineItemKind(self, path, kind):

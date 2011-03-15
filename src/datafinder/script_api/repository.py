@@ -1,7 +1,3 @@
-# pylint: disable=W0212
-# W0212: We can need to access the _repository attribute of the
-# repository description only for internal usage.
-#
 # $Filename$ 
 # $Authors$
 #
@@ -87,7 +83,10 @@ def disconnectRepository(repositoryDescription):
     @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     
     @raise ScriptApiError: Raised when an error occurred.
-    """  
+    """
+    # pylint: disable=W0212
+    # W0212: We need to access the _repository attribute of the
+    # repository description only for internal usage.
 
     try:
         repositoryManagerInstance.disconnectRepository(repositoryDescription._repository)
@@ -110,7 +109,10 @@ def setWorkingRepository(repositoryDescription):
     @param repositoryDescription: Repository to set.
     @type repositoryDescription: L{RepositoryDescription<datafinder.script_api.repository.RepositoryDescription>}
     """
-    
+    # pylint: disable=W0212
+    # W0212: We need to access the _repository attribute of the
+    # repository description only for internal usage.
+
     repositoryManagerInstance.workingRepository = repositoryDescription._repository
 
 
@@ -197,5 +199,8 @@ class RepositoryDescription(object):
 
     def __cmp__(self, other):
         """ Implements comparison. """
-        
+        # pylint: disable=W0212
+        # W0212: We need to access the _repository attribute of the
+        # repository description only for internal usage.
+
         return cmp(self._repository, other._repository)

@@ -55,8 +55,11 @@ class Observable(object):
         
     def __init__(self, method):
         """ Takes a method and makes it 
-        observable by another object. """
-      
+        observable by another object. 
+        """
+        # pylint: disable=C0103
+        # C0103: __doc__ is a special method so it's name is fine.
+        
         self.classObservable = None # Class-specific observable instance, None-> it is the class-spcific one
         self.callbacks = list() # List of observer functions / methods
         self.instance = None # Instance the method is bound to
@@ -98,6 +101,10 @@ class Observable(object):
             
     def __call__(self, *args, **kwargs):
         """ Calls the observed method and handles callback notification. """
+        # pylint: disable=W0703, E0702
+        #W0703: Catching Exception is fine as this is a generic notification code and we re-raise
+        #the exception.
+        #E0702: It is ensured the error is not None before the error is re-raised.
         
         error = None
         returnValue = None

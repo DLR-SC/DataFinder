@@ -53,7 +53,7 @@ disable-checker=SIMILARITIES
 #enable-msg=
 
 # Disable the message(s) with the given id(s).
-disable=SIMILARITIES
+disable=I0011,SIMILARITIES
 
 
 [REPORTS]

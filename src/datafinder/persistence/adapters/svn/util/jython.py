@@ -248,7 +248,7 @@ class JythonSubversionWrapper(object):
         except SVNException, error:
             raise SubversionError(error)
         
-    def info(self, path):
+    def info(self, _):
         """
         Gets the information about a file or directory.
         

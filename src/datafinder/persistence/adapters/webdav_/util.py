@@ -1,6 +1,3 @@
-# pylint: disable=E1103
-# E1103: urlsplit produces the required results but Pylint
-#        cannot correctly determine it.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -66,7 +63,10 @@ class ItemIdentifierMapper(object):
         @param baseUrl: WebDAV base URL.
         @type baseUrl: C{unicode}
         """
-        
+        # pylint: disable=E1103
+        # E1103: urlsplit produces the required results but Pylint
+        # cannot correctly determine it.
+
         self.__baseUrl = baseUrl
         if self.__baseUrl.endswith("/"):
             self.__baseUrl = self.__baseUrl[:-1]
@@ -131,7 +131,10 @@ class ItemIdentifierMapper(object):
         @return: Path relative to the configured base URL.
         @rtype: C{unicode}
         """
-        
+        # pylint: disable=E1103
+        # E1103: urlsplit produces the required results but Pylint
+        # cannot correctly determine it.
+
         parsedUrl = urlparse.urlsplit(identifier)
         result = parsedUrl.path
         if result.startswith(self.__basePath):

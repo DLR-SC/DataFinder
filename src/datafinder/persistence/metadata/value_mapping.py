@@ -122,6 +122,7 @@ class MetadataValue(object):
     def _convertToList(self, value):
         """ Converts value to a list. """
         
+        returnValue = None
         try:
             if isinstance(value, type(list())):
                 typedList = list()
@@ -131,7 +132,7 @@ class MetadataValue(object):
                         if not convertedValue is None:
                             break
                     typedList.append(convertedValue)
-                return typedList
+                returnValue = typedList
             elif _LIST_SEPARATOR in value:
                 stringList = value.split(_LIST_SEPARATOR)[:-1]
                 typedList = list()
@@ -145,11 +146,12 @@ class MetadataValue(object):
                             if not convertedValue is None:
                                 break
                         typedList.append(convertedValue)
-                        return typedList
+                        returnValue = typedList
             elif value == _EMPTY_LIST_REPRESENTATION:
-                return  list()
+                returnValue = list()
         except TypeError:
-            return None
+            returnValue = None
+        return returnValue
         
     def _convertToDict(self, value):
         """ 
@@ -170,9 +172,7 @@ class MetadataValue(object):
         else:
             try:
                 return json.loads(value)
-            except ValueError:
-                return None
-            except TypeError:
+            except (TypeError, ValueError):
                 return None
 
     @staticmethod

@@ -1,6 +1,3 @@
-# pylint: disable=W0142
-# W0142: The use of * / ** magic is required by the webdav library interface
-# - namely deleteProperties and readProperties
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -125,7 +122,9 @@ class MetadataWebdavAdapter(NullMetadataStorer):
         
     def _retrieveProperties(self, connection, propertyIds):
         """ Retrieves the specified set of properties. """
-        
+        # pylint: disable=W0142
+        # W0142: The use of * / ** magic is required by the webdav library interface.
+
         result = dict()
         if len(propertyIds) > 0:
             webdavStorer = self.__connectionHelper.createResourceStorer(self._persistenceId, connection)
@@ -183,7 +182,9 @@ class MetadataWebdavAdapter(NullMetadataStorer):
 
     def delete(self, propertyIds):
         """ @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}"""
-        
+        # pylint: disable=W0142
+        # W0142: The use of * / ** magic is required by the webdav library interface.
+
         connection = self.__connectionPool.acquire()
         try:
             persistenceIds = [self.__metadataIdMapper.mapMetadataId(propertyId) for propertyId in propertyIds]

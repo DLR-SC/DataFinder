@@ -1,4 +1,3 @@
-# pylint: disable=E1103,R0901
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -56,7 +55,9 @@ __version__ = "$Revision-Id:$"
 
 
 class ContextMenu(QPopupMenu):
-
+    # pylint: disable=R0901
+    # There too many parent classes as it inherits from QPopupMenu
+    
     def __init__(self, theFrame, parent, context, widgetName = 0):
         QPopupMenu.__init__(self, parent, widgetName)
         self.myFrame = theFrame
@@ -236,8 +237,10 @@ class CanvasView(QCanvasView):
         If mouse is moved the marked icon is dragged relatively to
         mouse movement.
         """
+        # pylint: disable=E1103
+        # It is ensured that self.__marked is not an integer
 
-        if  self.__marked :
+        if self.__marked :
             point = self.inverseWorldMatrix().map(e.pos())
             self.__marked.moveBy(point.x() - self.__markedStart.x(), point.y() - self.__markedStart.y())
             self.__markedStart = point
@@ -325,6 +328,8 @@ class CanvasView(QCanvasView):
 
     def markIcon(self, iconLabel, iconType = 1):
         """ Marks an icon with type iconType. """
+        # pylint: disable=E1103
+        # It is ensured that self.__marked is not an integer
 
         self.__marked  = 0
         for eachItem in self.canvas().allItems():
@@ -357,6 +362,8 @@ class CanvasView(QCanvasView):
 
     def removeIcon(self):
         """ Removes the marked icon from the canvas. """
+        # pylint: disable=E1103
+        # It is ensured that self.__marked is not an integer
 
         if self.getMarkedIcon() != 0:
             self.getMarkedIcon().destroyIcon()

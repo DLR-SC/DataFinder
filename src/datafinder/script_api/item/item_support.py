@@ -1,6 +1,3 @@
-# pylint: disable=W0212
-# W0212: For internal purposes it is fine to access the 
-#        internally used repository instance. 
 # $Filename$ 
 # $Authors$
 #
@@ -402,6 +399,9 @@ def performImport(sourcePath, targetParentPath, targetRepository,
     
     @raise ItemSupportError: Raised when errors during the import occur.
     """
+    # pylint: disable=W0212
+    # W0212: We need to access the _repository attribute of the
+    # repository description only for internal usage.
 
     cwr = repositoryManagerInstance.workingRepository
     try:

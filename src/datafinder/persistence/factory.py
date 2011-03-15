@@ -1,6 +1,3 @@
-# pylint: disable=E1103
-# E1103: urlsplit produces the required results but Pylint
-#        cannot correctly determine it.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -71,7 +68,10 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
     @note: When setting C{itemUri} to C{None} a null pattern conform file storer 
            implementation is returned. 
     """
-    
+    # pylint: disable=E1103
+    # E1103: urlsplit produces the required results but Pylint
+    # cannot correctly determine it.
+
     if itemUri is None:
         return FileSystem(None).createFileStorer("/")
     else:

@@ -120,7 +120,7 @@ class BaseFileSystem(object):
     
         pass
     
-    def isValidIdentifier(self, name): # W0613
+    def isValidIdentifier(self, name):
         """ 
         @see: L{FileSystem.isValidIdentifier<datafinder.persistence.factory.FileSystem.metadataIdentifierPattern>}
         @note: This implementation always returns C{True}, C{None}.

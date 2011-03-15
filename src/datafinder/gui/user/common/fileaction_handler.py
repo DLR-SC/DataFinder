@@ -1,8 +1,3 @@
-# pylint: disable=E1101,E0611,F0401
-# E1101: Pylint cannot resolve specific win32 modules.
-# E0611: "shell" exists in win32com but Pylint cannot detect it.
-# F0401: "win32com.shell" exists but Pylint cannot import.
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -49,7 +44,10 @@ import os
 import logging
    
 _platformNotSupported = False
-try:             
+try: 
+# pylint: disable=E0611,F0401 
+# E0611: "shell" exists in win32com but Pylint cannot detect it.
+# F0401: "win32com.shell" exists but Pylint cannot import.          
     import pywintypes
     from win32com.shell import shell, shellcon
     from win32event import WaitForSingleObject, INFINITE
@@ -104,7 +102,9 @@ class FileActionHandler(object):
     
     def _performFileAction(self, item, command):
         """ Performs the given command on the specific file. """
-
+        # pylint: disable=E1101
+        # E1101: Pylint cannot resolve specific win32 modules.
+        
         if _platformNotSupported:
             raise ItemError("The '%s' action for files is currently only supported on Windows." % command)
         localContentPath, alreadyLocal = self._getContent(item)

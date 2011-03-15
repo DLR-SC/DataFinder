@@ -58,7 +58,9 @@ _errorRgbColorCode = (255, 0, 0)
 
 class DataStoreConfigurationWizardView(DataStoreConfigurationWizard):
     """ This class visualizes the Data Store configuration options. """
-
+    # pylint: disable=R0901
+    # There too many parent classes as it inherits from QPopupMenu
+    
     def __init__(self, parentFrame):
         """
         Contructor.

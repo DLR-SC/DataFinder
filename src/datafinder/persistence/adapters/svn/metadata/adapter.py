@@ -40,11 +40,9 @@ This module implements how the meta data is persisted on the SVN server.
 """
 
 
-import datetime
 import json
 
-from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY,\
-    SVN_MIME_TYPE
+from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY, SVN_MIME_TYPE
 from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.adapters.svn.util import util
 from datafinder.persistence.error import PersistenceError

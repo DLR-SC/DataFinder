@@ -1,7 +1,3 @@
-# pylint: disable=E1101
-# E1101: "pythoncom" has a "CoInitialize" member but Pylint cannot detect it.
-#
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -96,7 +92,11 @@ class _PyQtThread(QtCore.QThread):
         """
         @see: L{run<PyQt4.QtCore.QThread.run>}
         """
-        
+        # pylint: disable=E1101, W0703
+        # E1101: "pythoncom" has a "CoInitialize" member but Pylint cannot detect it.
+        # W0703: Here it is fine to catch Exception as this is a generic thread implementation
+        # and the error is later available to the client code.
+
         if sys.platform == "win32":
             import pythoncom
             pythoncom.CoInitialize()

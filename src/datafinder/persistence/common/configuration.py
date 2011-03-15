@@ -1,6 +1,3 @@
-# pylint: disable=E1103
-# E1103: urlsplit produces the required results but Pylint
-#        cannot correctly determine it.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -80,7 +77,10 @@ class BaseConfiguration(object):
         
     def __setBaseUri(self, baseUri):
         """ Sets the base URI. """
-        
+        # pylint: disable=E1103
+        # E1103: urlsplit produces the required results but Pylint
+        # cannot correctly determine it.
+
         if not baseUri is None:
             parsedUri = urlsplit(baseUri)
             self._baseUri = parsedUri.geturl()

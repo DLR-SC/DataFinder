@@ -1,6 +1,3 @@
-# pylint: disable=E1103
-# E1103: urlsplit produces the required results but Pylint
-#        cannot correctly determine it.
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -75,6 +72,9 @@ class Configuration(object):
         URI scheme and thus host name and path are not correctly split.
         Just changing the scheme to a supported one.
         """
-        
+        # pylint: disable=E1103
+        # E1103: urlsplit produces the required results but Pylint
+        # cannot correctly determine it.
+
         splitUrl = urlsplit("http:" + hostAndPath)
         return splitUrl.hostname, splitUrl.path

@@ -1,4 +1,3 @@
-#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -398,7 +397,10 @@ class _ScriptApiContext(object):
 
     def determineRepositoryController(self, repositoryDescription=None):
         """ Determines the current repository. """
-        
+        # pylint: disable=W0212
+        # W0212: We need to access the _repository attribute of the
+        # repository description only for internal usage.
+
         rm = None
         if not repositoryDescription is None:
             workingRepository = repositoryDescription._repository
