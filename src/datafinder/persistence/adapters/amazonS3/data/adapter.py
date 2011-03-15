@@ -39,12 +39,11 @@
 Implements adapter for manipulating a AmazonS3 file system.
 """
 
-
+import atexit
+import os
 from tempfile import NamedTemporaryFile
 
 from boto.exception import S3ResponseError, S3CreateError, BotoClientError, S3DataError
-
-
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.data.datastorer import NullDataStorer
 
@@ -198,12 +197,16 @@ class DataS3Adapter(NullDataStorer):
             fileObject = NamedTemporaryFile(delete = False)
             self.createResource()
             self._key.get_contents_to_filename(fileObject.name)
+            _temporaryFiles.append(fileObject)
             return fileObject
         except (PersistenceError, S3ResponseError, BotoClientError), error:
             errorMessage = "Unable to read data from '%s'. " % self.identifier + \
                                "Reason: %s" % error.reason
             raise PersistenceError(errorMessage)
+    
+
         
+           
     def delete(self):
         """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
 
@@ -287,3 +290,15 @@ class DataS3Adapter(NullDataStorer):
         else:
             exists = False
         return exists 
+
+_temporaryFiles = list()
+@atexit.register
+def _cleanupTemporaryFile():
+    """Cleaning up TemporaryFiles for a """
+    for file in _temporaryFiles:
+        try:
+            file.close()
+            os.remove(file.name)
+        except (OSError, PersistenceError):
+           raise PersistenceError("Cannot clean up temporary file '%s'" % file.name)
+        
