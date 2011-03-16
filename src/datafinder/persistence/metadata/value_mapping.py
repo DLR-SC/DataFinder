@@ -141,7 +141,6 @@ class MetadataValue(object):
                         convertedValue = None
                     else:
                         for conversionFunction in self.__conversionFunctions:
-                            print conversionFunction
                             convertedValue = conversionFunction(item)
                             if not convertedValue is None:
                                 break
