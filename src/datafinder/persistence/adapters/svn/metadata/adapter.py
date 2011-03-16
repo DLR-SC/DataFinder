@@ -148,7 +148,10 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         connection = self.__connectionPool.acquire()
         try:
             try:
-                jsonProperties = value_mapping.getPersistenceRepresentation(properties)
+                persistenceJsonProperties = self._retrieveProperties(connection)
+                persistenceProperties = json.loads(persistenceJsonProperties)
+                persistenceProperties.update(properties)
+                jsonProperties = value_mapping.getPersistenceRepresentation(persistenceProperties)
                 connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, jsonProperties)
             except SubversionError, error:
                 errorMessage = "Cannot update properties of item '%s'. " % self.identifier \
