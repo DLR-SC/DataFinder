@@ -119,6 +119,16 @@ class FileSystem(BaseFileSystem):
         """ Releases the acquired connection pool. """
         
         self._connectionManager.remove(self._configuration.baseUrl)
+        
+    @property
+    def hasCustomMetadataSupport(self):
+        """ 
+        This is the SVN-specific implementation.
+        @note: Always returns C{True} because custom meta data support is a built-in SVN feature.
+        @see: L{FileSystem.hasCustomMetadataSupport<datafinder.persistence.factory.FileSystem.hasCustomMetadataSupport>}
+        """
+        
+        return True
     
     @property
     def canHandleLocation(self):
