@@ -56,11 +56,6 @@ __version__ = "$Revision-Id$"
 
 class MetadataSubversionAdapterTestCase(unittest.TestCase):
     """ Tests the meta data adapter implementation. """
-
-    def setUp(self):
-        """ Creates a default object under test. """
-        
-        connectionMock = SimpleMock()
         
     def _initValidRetrieveResult(self):
         """ Creates the expected result. """
