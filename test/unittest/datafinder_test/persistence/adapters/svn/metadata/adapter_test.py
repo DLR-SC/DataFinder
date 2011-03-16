@@ -1,3 +1,4 @@
+# pylint: disable=R0201
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -59,9 +60,9 @@ class MetadataSubversionAdapterTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates a default object under test. """
         
-        self._connectionMock = SimpleMock()
+        connectionMock = SimpleMock()
         
-    def _initValidRetrieveResult(self, mimeType):
+    def _initValidRetrieveResult(self):
         """ Creates the expected result. """
         
         mappedResult = dict()
@@ -75,29 +76,31 @@ class MetadataSubversionAdapterTestCase(unittest.TestCase):
     def testRetrieveSuccess(self):
         """ Tests successful meta data retrieval. """
         
-        expectedResult = self._initValidRetrieveResult("")
+        expectedResult = self._initValidRetrieveResult()
         
-        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None), \
+        connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None), \
                                           "info": ({"lastChangedDate": "", "lastChangedAuthor": ""}, None)})
-        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
-        self.assertEquals(self._adapter.retrieve(), expectedResult)
-        self.assertEquals(self._adapter.retrieve(list()), dict())
+        defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
+        self.assertEquals(defaultAdapter.retrieve(), expectedResult)
+        self.assertEquals(defaultAdapter.retrieve(list()), dict())
         
-        self._connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None), \
+        connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None), \
                                           "info": ({"lastChangedDate": "", "lastChangedAuthor": ""}, None)})
-        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
-        self.assertEquals(self._adapter.retrieve(["1"]), {"1": MetadataValue("value")})
+        defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
+        self.assertEquals(defaultAdapter.retrieve(["1"]), {"1": MetadataValue("value")})
 
     def testUpdateSuccess(self):
         """ Tests successful update of meta data. """
         
-        self._connectionMock = SimpleMock(methodNameResultMap={"setProperty": (None, SubversionError)})
-        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
-        self.assertRaises(PersistenceError, self._adapter.update, {"1":"", "2":"", "3":""})
+        connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None), \
+                                    "setProperty": (None, SubversionError)})
+        defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
+        self.assertRaises(PersistenceError, defaultAdapter.update, {"1":"", "2":"", "3":""})
     
     def testDeleteSuccess(self):
         """ Tests successful deletion of meta data. """
 
-        self._connectionMock = SimpleMock(methodNameResultMap={"setProperty": (None, SubversionError), "getProperty": (None, None)})
-        self._adapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(self._connectionMock))
-        self.assertRaises(PersistenceError, self._adapter.update, ["1", "2"])
+        connectionMock = SimpleMock(methodNameResultMap={"setProperty": (None, SubversionError), \
+                                    "getProperty": ("{\"1\": \"value\"}", None)})
+        defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
+        self.assertRaises(PersistenceError, defaultAdapter.delete, ["1", "2"])
