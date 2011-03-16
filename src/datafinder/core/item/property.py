@@ -149,9 +149,12 @@ class Property(object):
         for valueRepresentation in valueRepresentations:
             try:
                 
-                if isinstance(valueRepresentation, dict): #AttributeError?
-                    classObj = propertyDefinition.propertyType.cls
-                    valueRepresentation = classObj.fromDict(valueRepresentation)
+                if isinstance(valueRepresentation, dict): 
+                    try:
+                        classObj = propertyDefinition.propertyType.cls
+                        valueRepresentation = classObj.fromDict(valueRepresentation)
+                    except AttributeError, error:
+                        raise PropertyError("Cannot create property. Reason: %s" % error)
                 propertyDefinition.validate(valueRepresentation)
                 if not foundValidRepresentation:
                     value = valueRepresentation
