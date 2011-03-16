@@ -71,6 +71,7 @@ class CPythonSubversionWrapper(object):
         self._password = password
         self._md5 = hashlib.md5()
         self._client = pysvn.Client()
+        self._loginTries = 0
         self._client.callback_get_login = self._getLogin
         self._client.callback_get_log_message = self._getLogMessage
         self._repoPath = repoPath
@@ -86,7 +87,11 @@ class CPythonSubversionWrapper(object):
     def _getLogin(self, _, __, ___):
         """ Login callback function. """
         
-        return True, self._username, self._password, False
+        if self._loginTries > 0:
+            return (False, "", "", False)
+        else:
+            self._loginTries += 1
+            return True, self._username, self._password, False
     
     @staticmethod
     def _getLogMessage():
