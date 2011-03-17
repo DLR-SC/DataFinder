@@ -43,6 +43,7 @@ This module implements how the meta data is persisted on the SVN server.
 import json
 import logging
 import mimetypes
+import os
 
 from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY, SVN_MIME_TYPE
 from datafinder.persistence.adapters.svn.error import SubversionError
@@ -103,14 +104,19 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         
         try:
             infoDict = connection.info(self.__persistenceId)
+            fileInfo = os.stat(connection.repoWorkingCopyPath + self.__persistenceId)
         except SubversionError, error:
             errorMessage = "Problem during meta data retrieval. " \
                            + "Reason: '%s'" % error 
+            raise PersistenceError(errorMessage)
+        except OSError, error:
+            reason = os.strerror(error.errno)
+            errorMessage = "Cannot retrieve properties of collection '%s'. Reason: '%s'" % (self.identifier, reason)
             raise PersistenceError(errorMessage)  
         mappedResult = dict()
         mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue("")
         mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"])
-        mappedResult[constants.SIZE] = value_mapping.MetadataValue("")
+        mappedResult[constants.SIZE] = value_mapping.MetadataValue(str(fileInfo.st_size))
         mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
 
         try:
@@ -148,9 +154,13 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         connection = self.__connectionPool.acquire()
         try:
             try:
-                persistenceJsonProperties = self._retrieveProperties(connection)
-                persistenceProperties = json.loads(persistenceJsonProperties)
-                persistenceProperties.update(properties)
+                persistenceProperties = dict()
+                try:
+                    persistenceJsonProperties = self._retrieveProperties(connection)
+                    persistenceProperties = json.loads(persistenceJsonProperties)
+                    persistenceProperties.update(properties)
+                except SubversionError:
+                    _log.debug("No subversion property is set!")
                 jsonProperties = value_mapping.getPersistenceRepresentation(persistenceProperties)
                 connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, jsonProperties)
             except SubversionError, error:

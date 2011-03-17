@@ -160,6 +160,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
+            self._client.cleanup(self._repoWorkingCopyPath)
             self._client.update(self._repoWorkingCopyPath + path)
             entryList = self._client.list(self._repoWorkingCopyPath + path, recurse=False)
             entry = entryList[0]
@@ -189,7 +190,7 @@ class CPythonSubversionWrapper(object):
         
         try:
             self._client.resolved(self._repoWorkingCopyPath, recurse=True)
-            self._client.cleanup(self._repoWorkingCopyPath + path)
+            self._client.cleanup(self._repoWorkingCopyPath)
             self._client.checkin(self._repoWorkingCopyPath + path, "",)
         except ClientError, error:
             raise SubversionError(error)
@@ -203,7 +204,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.add(self._repoWorkingCopyPath + path, recurse=True, force=True)
+            self._client.add(self._repoWorkingCopyPath + path, recurse=True)
         except ClientError, error:
             raise SubversionError(error)
         
@@ -251,6 +252,7 @@ class CPythonSubversionWrapper(object):
             self._client.propset(key, value, self._repoWorkingCopyPath + path)
             self.checkin(path)
         except ClientError, error:
+            print error
             raise SubversionError(error)
         
     def getProperty(self, path, key):
@@ -264,7 +266,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.cleanup(self._repoWorkingCopyPath + path)
+            self._client.cleanup(self._repoWorkingCopyPath)
             self._client.update(self._repoWorkingCopyPath + path)
             propertyValue = self._client.propget(key, self._repoWorkingCopyPath + path)
             return propertyValue[self._repoWorkingCopyPath.replace("\\", "/") + path]
@@ -278,7 +280,7 @@ class CPythonSubversionWrapper(object):
         
         try:
             result = list()
-            self._client.cleanup(self._repoWorkingCopyPath + path)
+            self._client.cleanup(self._repoWorkingCopyPath)
             self._client.update(self._repoWorkingCopyPath + path)
             entryList = self._client.list(self._repoWorkingCopyPath + path, recurse=False)
             entryList = entryList[1:]
@@ -300,7 +302,7 @@ class CPythonSubversionWrapper(object):
         
         try:
             resultDict = dict()
-            self._client.cleanup(self._repoWorkingCopyPath + path)
+            self._client.cleanup(self._repoWorkingCopyPath)
             self._client.update(self._repoWorkingCopyPath + path)
             infoDict = self._client.info2(self._repoWorkingCopyPath + path, recurse=False)
             infoDict = infoDict[0]
