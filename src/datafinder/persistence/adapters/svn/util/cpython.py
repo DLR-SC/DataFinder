@@ -191,7 +191,7 @@ class CPythonSubversionWrapper(object):
         try:
             self._client.resolved(self._repoWorkingCopyPath, recurse=True)
             self._client.cleanup(self._repoWorkingCopyPath)
-            self._client.checkin(self._repoWorkingCopyPath + path, "",)
+            self._client.checkin(self._repoWorkingCopyPath + path, "")
         except ClientError, error:
             raise SubversionError(error)
         
