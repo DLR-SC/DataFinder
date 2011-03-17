@@ -63,4 +63,4 @@ class Configuration(object):
         self.username = baseConfiguration.username
         self.password = baseConfiguration.password
 
-        self.workingCopyPath = baseConfiguration.workingCopyPath or tempfile.tempdir
+        self.workingCopyPath = baseConfiguration.workingCopyPath or tempfile.gettempdir()

@@ -65,7 +65,7 @@ class CPythonSubversionWrapper(object):
         """
         Constructor.
         """
-        
+  
         self._initLocale()        
         self._username = username
         self._password = password
@@ -74,6 +74,7 @@ class CPythonSubversionWrapper(object):
         self._loginTries = 0
         self._client.callback_get_login = self._getLogin
         self._client.callback_get_log_message = self._getLogMessage
+        self._client.callback_ssl_server_trust_prompt = self._sslServerTrustPrompt
         self._repoPath = repoPath
         self._md5.update(self._repoPath)
         try: 
@@ -98,6 +99,12 @@ class CPythonSubversionWrapper(object):
         """ Log message callback function. """
         
         return True, "datafinder"
+    
+    @staticmethod
+    def _sslServerTrustPrompt(trustData):
+        """ SSL trust prompt callback. """
+        
+        return True, trustData["failures"], True
     
     @staticmethod
     def _initLocale():
@@ -181,6 +188,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
+            self._client.resolved(self._repoWorkingCopyPath, recurse=True)
             self._client.cleanup(self._repoWorkingCopyPath + path)
             self._client.checkin(self._repoWorkingCopyPath + path, "",)
         except ClientError, error:
@@ -195,7 +203,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.add(self._repoWorkingCopyPath + path, recurse=True)
+            self._client.add(self._repoWorkingCopyPath + path, recurse=True, force=True)
         except ClientError, error:
             raise SubversionError(error)
         
