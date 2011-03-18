@@ -61,7 +61,8 @@ _typeDataStoreClassMap = {constants.DEFAULT_STORE: datastore.DefaultDataStore,
                           constants.OFFLINE_STORE: datastore.OfflineDataStore,
                           constants.TSM_CONNECTOR_STORE: datastore.TsmDataStore,
                           constants.WEBDAV_STORE: datastore.WebdavDataStore,
-                          constants.S3_STORE: datastore.S3DataStore}
+                          constants.S3_STORE: datastore.S3DataStore,
+                          constants.SUBVERSION_STORE: datastore.SubversionDataStore}
 
   
 _DEFAULT_ENCODING = "UTF-8"

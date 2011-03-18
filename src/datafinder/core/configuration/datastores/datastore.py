@@ -395,8 +395,19 @@ class WebdavDataStore(DefaultDataStore):
         store = DefaultDataStore.toPersistenceRepresentation(self)
         store.password = self._password
         return store
+
+
+class SubversionDataStore(WebdavDataStore):
+    """ Restricts properties of a Subversion data store configuration. """
+
+    _xmlBindingClass = datastores.svn
     
-    
+    def __init__(self, name=None, storeType=None, iconName="dataStore", url=None, isDefault=False, owner=None, persistedStore=None):
+        """ Constructor. """
+        
+        WebdavDataStore.__init__(self, name, storeType, iconName, url, isDefault, owner, persistedStore)
+
+
 class S3DataStore(DefaultDataStore):
     """  Restricts properties of a S3 data store configuration """
     
@@ -437,7 +448,3 @@ class S3DataStore(DefaultDataStore):
         store = DefaultDataStore.toPersistenceRepresentation(self)
         store.password = self._password
         return store
- 
-    
- 
-        

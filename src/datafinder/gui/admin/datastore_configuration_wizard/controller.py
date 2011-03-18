@@ -82,7 +82,9 @@ datastores.DEFAULT_STORE: [standardOptionsPage],
 datastores.TSM_CONNECTOR_STORE: [standardOptionsPage, storageOptionsPage,
                                 authenticationOptionsPage],
 datastores.S3_STORE: [standardOptionsPage, storageOptionsPage,
-                                authenticationOptionsPage]
+                                authenticationOptionsPage],
+datastores.SUBVERSION_STORE: [standardOptionsPage, storageOptionsPage, 
+                              authenticationOptionsPage],
 }
 
 
@@ -140,8 +142,10 @@ class DataStoreConfigurationWizardController(object):
             webdav.authentication_option_controller.AuthenticationOptionController(self.wizardView, self, authenticationOptionsPage),
            datastores.TSM_CONNECTOR_STORE: 
             tsm.authentication_option_controller.AuthenticationOptionController(self.wizardView, self, authenticationOptionsPage),
-            datastores.S3_STORE:
+           datastores.S3_STORE:
             s3.authentication_option_controller.AuthenticationOptionController(self.wizardView, self, authenticationOptionsPage),
+           datastores.SUBVERSION_STORE: 
+            webdav.authentication_option_controller.AuthenticationOptionController(self.wizardView, self, authenticationOptionsPage), 
            _defaultForAllDataStores: 
             default.authentication_option_controller.AuthenticationOptionController(self.wizardView, self, authenticationOptionsPage)
          },
