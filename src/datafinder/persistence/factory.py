@@ -43,6 +43,7 @@ ACL).
 """
 
 
+import logging
 from urlparse import urlsplit
         
 from datafinder.persistence.common.base_factory import BaseFileSystem
@@ -52,6 +53,9 @@ from datafinder.persistence.filestorer import FileStorer
 
 
 __version__ = "$Revision-Id:$" 
+
+
+_logger = logging.getLogger()
 
 
 def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
@@ -139,6 +143,7 @@ class FileSystem(object):
                     factory = getattr(moduleInstance, self.__class__.__name__)
                     filesystem = factory(self._baseConfiguration)
                     if filesystem.canHandleLocation:
+                        _logger.debug("Using adapter '%s'." % fullDottedModuleName)
                         return factory
                 except (ImportError, AttributeError), error:
                     errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
@@ -318,5 +323,4 @@ class FileSystem(object):
 
 if __name__ == "__main__":
     fs = createFileStorer("http://localhost/webdav", BaseConfiguration("http://localhost/webdav", username="wampp", password="xampp")) 
-    print fs.getChildren()
-    
+    _logger.info(fs.getChildren())

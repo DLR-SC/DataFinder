@@ -52,6 +52,8 @@ class BaseConfiguration(object):
     Additional configuration parameters can be specified using keyword arguments.
     """
     
+    baseWorkingDirectory = None
+    
     def __init__(self, baseUri=None, **kwargs):
         """ 
         Constructor.
@@ -68,6 +70,7 @@ class BaseConfiguration(object):
         self.uriPath = None
     
         self.baseUri = baseUri
+        
         self.__dict__.update(kwargs)
         
     def __getBaseUri(self):

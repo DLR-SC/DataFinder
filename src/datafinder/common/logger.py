@@ -43,7 +43,7 @@ Module provides access to a configured logger instance.
 import logging
 import os
 
-from datafinder.core.configuration.constants import USER_HOME
+from datafinder.core.configuration import constants
 
 
 __version__ = "$Revision-Id:$" 
@@ -76,8 +76,8 @@ def _getFileHandler(fileName):
     """ Initializes a file handler with the given file name. """
      
     formatter = logging.Formatter(_fileLogFormat)
-    if not os.path.exists(USER_HOME):
-        os.mkdir(USER_HOME)
-    fileHandler = logging.FileHandler(os.path.join(USER_HOME, fileName), "wb")
+    if not os.path.exists(constants.WORKING_PATH):
+        os.mkdir(constants.WORKING_PATH)
+    fileHandler = logging.FileHandler(os.path.join(constants.WORKING_PATH, fileName), "wb")
     fileHandler.setFormatter(formatter)
     return fileHandler

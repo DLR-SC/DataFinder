@@ -77,11 +77,13 @@ class RepositoryManager(object):
         self.iconRegistry = IconRegistry()
         self.dataFormatRegistry = DataFormatRegistry()
         self.workingRepository = None
+        BaseConfiguration.baseWorkingDirectory = constants.WORKING_PATH
         
         try:
-            self._localBaseConfigurationCollection = createFileStorer("file:///" + constants.USER_HOME)
+            self._localBaseConfigurationCollection = createFileStorer("file:///" + constants.WORKING_PATH)
         except PersistenceError, error:
-            raise CoreError("Cannot access local configuration directory '%s'. Reason: '%s'" % (constants.USER_HOME, error.message))
+            raise CoreError("Cannot access local configuration directory '%s'. Reason: '%s'" \
+                            % (constants.WORKING_PATH, error.message))
         else:
             self.preferences = PreferencesHandler(self._localBaseConfigurationCollection)
             self.scriptRegistry = ScriptRegistry(self.preferences)

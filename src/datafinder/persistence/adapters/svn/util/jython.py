@@ -43,8 +43,6 @@ Implements a SVN specific data adapter for Jython.
 """
 
 
-import hashlib
-
 from java.io import File
 
 from org.tmatesoft.svn.core import SVNException, SVNURL, SVNNodeKind, SVNDepth, \
@@ -86,15 +84,13 @@ class JythonSubversionWrapper(object):
         self._password = password
         self._repoPath = repoPath
         self._repositoryURL = SVNURL.parseURIEncoded(self._repoPath)
-        self._md5 = hashlib.md5()
-        self._md5.update(self._repoPath)
         self._repository = None
         self._svnWorkingCopyClient = None
         self._svnCommitClient = None
         self._svnCopyClient = None
         self._svnUpdateClient = None
         try:
-            self._repoWorkingCopyPath = workingCopyPath + self._md5.hexdigest()
+            self._repoWorkingCopyPath = workingCopyPath
             self._repoWorkingCopyFile = File(self._repoWorkingCopyPath)
             self._repository = SVNRepositoryFactory.create(SVNURL.parseURIDecoded(self._repoPath))
             self._authManager = SVNWCUtil.createDefaultAuthenticationManager(self._username, self._password)

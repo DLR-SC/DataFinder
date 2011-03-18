@@ -40,6 +40,8 @@ Implements the Subversion factory.
 """
 
 
+import logging
+
 from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.common.connection.manager import ConnectionPoolManager
 from datafinder.persistence.error import PersistenceError
@@ -60,7 +62,8 @@ class FileSystem(BaseFileSystem):
     """
     
     _connectionManager = ConnectionPoolManager(constants.MAX_POOL_NUMBER)
-     
+    _logger = logging.getLogger()
+        
     def __init__(self, baseConfiguration):
         """ 
         Constructor. 
@@ -136,7 +139,8 @@ class FileSystem(BaseFileSystem):
         
         try:
             connection = self._getConnectionPool().acquire()
-        except PersistenceError:
+        except PersistenceError, error:
+            self._logger.debug(error)
             return False
         else:
             self._getConnectionPool().release(connection)

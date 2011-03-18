@@ -40,7 +40,11 @@ Defines SVN-specific connection parameters.
 """
 
 
+import hashlib
+import os
 import tempfile
+
+from datafinder.persistence.error import PersistenceError
 
 
 __version__ = "$Revision-Id$" 
@@ -62,5 +66,10 @@ class Configuration(object):
 
         self.username = baseConfiguration.username
         self.password = baseConfiguration.password
-
-        self.workingCopyPath = baseConfiguration.workingCopyPath or tempfile.gettempdir()
+        
+        baseWorkingCopyPath = baseConfiguration.baseWorkingDirectory or tempfile.gettempdir()
+        if not baseWorkingCopyPath is None:
+            hash_ = hashlib.sha1(self.baseUrl).hexdigest()
+            self.workingCopyPath = os.path.join(baseWorkingCopyPath, hash_, "working_copy")
+        else:
+            raise PersistenceError("Cannot determine temporary working copy directory.")

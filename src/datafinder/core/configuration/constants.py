@@ -51,8 +51,8 @@ DATASTORE_FILENAME = "datastores.xml"
 ICON_DIRECTORYNAME = "icons"
 SCRIPT_DIRECTORYNAME = "scripts"
 
-# Homedir for the user
-USER_HOME = os.path.join(os.path.expanduser("~"), ".datafinder")
+# Path to the working directory
+WORKING_PATH = os.environ.get("DF_WORKING_PATH") or os.path.join(os.path.expanduser("~"), ".datafinder")
 
 # DataFinder install directory
 INSTALLATION_HOME = os.environ.get("DF_HOME")

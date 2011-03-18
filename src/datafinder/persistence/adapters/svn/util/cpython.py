@@ -40,7 +40,6 @@ Implements a SVN specific data adapter for CPython.
 """
 
 
-import hashlib
 import locale
 import os
 import pysvn
@@ -69,16 +68,14 @@ class CPythonSubversionWrapper(object):
         self._initLocale()        
         self._username = username
         self._password = password
-        self._md5 = hashlib.md5()
         self._client = pysvn.Client()
         self._loginTries = 0
         self._client.callback_get_login = self._getLogin
         self._client.callback_get_log_message = self._getLogMessage
         self._client.callback_ssl_server_trust_prompt = self._sslServerTrustPrompt
         self._repoPath = repoPath
-        self._md5.update(self._repoPath)
         try: 
-            self._repoWorkingCopyPath = workingCopyPath + "/" + self._md5.hexdigest()
+            self._repoWorkingCopyPath = workingCopyPath
             self._client.checkout(repoPath, self._repoWorkingCopyPath)
         except ClientError, error:
             raise PersistenceError(error)
