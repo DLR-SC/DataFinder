@@ -252,7 +252,6 @@ class CPythonSubversionWrapper(object):
             self._client.propset(key, value, self._repoWorkingCopyPath + path)
             self.checkin(path)
         except ClientError, error:
-            print error
             raise SubversionError(error)
         
     def getProperty(self, path, key):
@@ -313,7 +312,6 @@ class CPythonSubversionWrapper(object):
         resultDict["lastChangedAuthor"] = entry.last_author
         resultDict["lastChangedDate"] = str(entry.time)
         resultDict["size"] = str(entry.size)
-        #print entry.time
         return resultDict
 
     @property

@@ -118,9 +118,6 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         try:
             mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"], \
                                                                                         expectedType=datetime.datetime)
-            test =  value_mapping.MetadataValue(infoDict["lastChangedDate"], expectedType=datetime.datetime).value
-            print test
-            print type(test)
             mappedResult[constants.SIZE] = value_mapping.MetadataValue(infoDict["size"])
             mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
         except KeyError, error:
