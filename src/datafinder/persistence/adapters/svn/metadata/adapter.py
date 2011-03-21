@@ -40,6 +40,7 @@ This module implements how the meta data is persisted on the SVN server.
 """
 
 
+import datetime
 import json
 import logging
 import mimetypes
@@ -104,7 +105,6 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         
         try:
             infoDict = connection.info(self.__persistenceId)
-            fileInfo = os.stat(connection.repoWorkingCopyPath + self.__persistenceId)
         except SubversionError, error:
             errorMessage = "Problem during meta data retrieval. " \
                            + "Reason: '%s'" % error 
@@ -115,10 +115,18 @@ class MetadataSubversionAdapter(NullMetadataStorer):
             raise PersistenceError(errorMessage)  
         mappedResult = dict()
         mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue("")
-        mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"])
-        mappedResult[constants.SIZE] = value_mapping.MetadataValue(str(fileInfo.st_size))
-        mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
-
+        try:
+            mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"], \
+                                                                                        expectedType=datetime.datetime)
+            test =  value_mapping.MetadataValue(infoDict["lastChangedDate"], expectedType=datetime.datetime).value
+            print test
+            print type(test)
+            mappedResult[constants.SIZE] = value_mapping.MetadataValue(infoDict["size"])
+            mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
+        except KeyError, error:
+            errorMessage = "Cannot get properties of item '%s'. " % self.identifier \
+                           + "Reason: '%s'" % error 
+            raise PersistenceError(errorMessage)
         try:
             mimeType = connection.getProperty(self.__persistenceId, SVN_MIME_TYPE)
             mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
@@ -129,10 +137,8 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue("")
             else:
                 mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType[0])
-        
         for key, value in rawResult.iteritems():
             mappedResult[key] = value_mapping.MetadataValue(value)
-
         return mappedResult
     
     @staticmethod

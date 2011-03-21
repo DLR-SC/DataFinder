@@ -43,6 +43,7 @@ Implements a SVN specific data adapter for CPython.
 import locale
 import os
 import pysvn
+from pysvn import depth
 import sys
 
 from pysvn._pysvn_2_6 import ClientError
@@ -74,6 +75,9 @@ class CPythonSubversionWrapper(object):
         self._client.callback_get_log_message = self._getLogMessage
         self._client.callback_ssl_server_trust_prompt = self._sslServerTrustPrompt
         self._repoPath = repoPath
+        self._rootUrl = self._client.root_url_from_path(self._repoPath)
+        self._cache = dict() # path: kind, size, has props, created rev, 
+        # last changed time, last author
         try: 
             self._repoWorkingCopyPath = workingCopyPath
             self._client.checkout(repoPath, self._repoWorkingCopyPath)
@@ -156,17 +160,16 @@ class CPythonSubversionWrapper(object):
         @param kind: Kind that should be determined. 
         """
         
-        try:
-            self._client.cleanup(self._repoWorkingCopyPath)
-            self._client.update(self._repoWorkingCopyPath + path)
-            entryList = self._client.list(self._repoWorkingCopyPath + path, recurse=False)
-            entry = entryList[0]
-            if entry[0].kind == kind:
-                return True
-            else:
-                return False
-        except ClientError, error:
-            raise SubversionError(error)
+        if path in self._cache:
+            entry = self._cache[path]
+        else:
+            try:
+                self._client.update(self._repoWorkingCopyPath + path, depth=depth.empty)
+                entry = self._client.list(self._repoWorkingCopyPath + path, recurse=False)[0]
+                entry = entry[0]
+            except ClientError, error:
+                raise SubversionError(error)
+        return entry.kind == kind
     
     def update(self):
         """ Updates the working copy. """
@@ -214,7 +217,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.remove(path)
+            self._client.remove(self._repoPath + path, force=True)
         except ClientError, error:
             raise SubversionError(error)
         
@@ -229,7 +232,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.copy(path, destinationPath)
+            self._client.copy(self._repoPath + path, self._repoPath + destinationPath)
         except ClientError, error:
             raise SubversionError(error)
         
@@ -260,13 +263,14 @@ class CPythonSubversionWrapper(object):
         @type path: C{unicode}
         @param key: Name of the property.
         @type key: C{unicode}
-        """
+        """  
+        # pylint: disable=E1101
+        # E1101: pylint could not resolve the Revision attribute.
         
         try:
-            self._client.cleanup(self._repoWorkingCopyPath)
-            self._client.update(self._repoWorkingCopyPath + path)
-            propertyValue = self._client.propget(key, self._repoWorkingCopyPath + path)
-            return propertyValue[self._repoWorkingCopyPath.replace("\\", "/") + path]
+            propertyValue = self._client.propget(key, self._repoPath + path, revision=pysvn.Revision(pysvn.opt_revision_kind.head), \
+                                                 peg_revision=pysvn.Revision(pysvn.opt_revision_kind.head))
+            return propertyValue[self._repoPath + path]
         except ClientError, error:
             raise SubversionError(error)
         except KeyError, error:
@@ -277,14 +281,13 @@ class CPythonSubversionWrapper(object):
         
         try:
             result = list()
-            self._client.cleanup(self._repoWorkingCopyPath)
-            self._client.update(self._repoWorkingCopyPath + path)
-            entryList = self._client.list(self._repoWorkingCopyPath + path, recurse=False)
-            entryList = entryList[1:]
-            rootUrl = self._client.root_url_from_path(self._repoPath)
-            partToRemoveFromEntry = self._repoPath.replace(rootUrl + "/", "")
-            for entry in entryList:
-                result.append(entry[0].repos_path.replace(partToRemoveFromEntry, "")) 
+            self._client.update(self._repoWorkingCopyPath + path, depth=depth.files)
+            entries = self._client.list(self._repoWorkingCopyPath + path, recurse=False)[1:]
+            partToRemoveFromEntry = self._repoPath.replace(self._rootUrl, "")
+            for entry in entries:
+                path = entry[0].repos_path.replace(partToRemoveFromEntry, "")
+                self._cache[path] = entry[0]
+                result.append(path) 
             return result
         except ClientError, error:
             raise SubversionError(error)
@@ -297,18 +300,21 @@ class CPythonSubversionWrapper(object):
         @type path: C{unicode}
         """
         
-        try:
-            resultDict = dict()
-            self._client.cleanup(self._repoWorkingCopyPath)
-            self._client.update(self._repoWorkingCopyPath + path)
-            infoDict = self._client.info2(self._repoWorkingCopyPath + path, recurse=False)
-            infoDict = infoDict[0]
-            infoDict = infoDict[1]
-            resultDict["lastChangedAuthor"] = infoDict.last_changed_author
-            resultDict["lastChangedDate"] = infoDict.last_changed_date
-            return resultDict
-        except ClientError, error:
-            raise SubversionError(error)
+        if path in self._cache:
+            entry = self._cache[path]
+        else:
+            try:
+                self._client.update(self._repoWorkingCopyPath + path, depth=depth.empty)
+                entry = self._client.list(self._repoWorkingCopyPath + path, recurse=False)[0]
+                entry = entry[0]
+            except ClientError, error:
+                raise SubversionError(error)
+        resultDict = dict()
+        resultDict["lastChangedAuthor"] = entry.last_author
+        resultDict["lastChangedDate"] = str(entry.time)
+        resultDict["size"] = str(entry.size)
+        #print entry.time
+        return resultDict
 
     @property
     def repoWorkingCopyPath(self):

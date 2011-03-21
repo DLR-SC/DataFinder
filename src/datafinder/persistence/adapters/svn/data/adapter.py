@@ -262,9 +262,7 @@ class DataSubversionAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.update()
-                connection.delete(connection.repoWorkingCopyPath + self._persistenceId)
-                connection.checkin(self._persistenceId)
+                connection.delete(self._persistenceId)
             except SubversionError, error:
                 errorMessage = u"Unable to delete item '%s'. " % self.identifier \
                                + u"Reason: %s" % error
@@ -285,11 +283,7 @@ class DataSubversionAdapter(NullDataStorer):
         try:
             try:
                 destinationPersistenceId = util.mapIdentifier(destination.identifier)
-                connection.update()
-                connection.copy(connection.repoWorkingCopyPath + self._persistenceId, connection.repoWorkingCopyPath + \
-                                destinationPersistenceId)
-                connection.checkin(self._persistenceId)
-                connection.checkin(destinationPersistenceId)
+                connection.copy(self._persistenceId, destinationPersistenceId)
             except SubversionError, error:
                 errorMessage = u"Unable to copy item '%s' to '%s'. " % (self.identifier, destination.identifier) \
                                + u"Reason: %s" % error
