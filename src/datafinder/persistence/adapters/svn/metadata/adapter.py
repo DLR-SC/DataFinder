@@ -115,12 +115,13 @@ class MetadataSubversionAdapter(NullMetadataStorer):
             errorMessage = "Cannot retrieve properties of collection '%s'. Reason: '%s'" % (self.identifier, reason)
             raise PersistenceError(errorMessage)  
         mappedResult = dict()
-        mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue("")
+        mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue(infoDict["creationDate"], \
+                                                                                        expectedType=datetime.datetime)
         try:
             mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"], \
                                                                                         expectedType=datetime.datetime)
             mappedResult[constants.SIZE] = value_mapping.MetadataValue(infoDict["size"])
-            mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["lastChangedAuthor"])
+            mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["owner"])
         except KeyError, error:
             errorMessage = "Cannot get properties of item '%s'. " % self.identifier \
                            + "Reason: '%s'" % error 

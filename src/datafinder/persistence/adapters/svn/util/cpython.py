@@ -44,6 +44,7 @@ import locale
 import os
 import pysvn
 import sys
+import urllib
 # pylint: disable=E1101
 # E1101: pylint could not resolve the depth attribute.
 from pysvn._pysvn_2_6 import ClientError
@@ -79,7 +80,7 @@ class CPythonSubversionWrapper(object):
         # path: (kind, size, has props, created rev,
         #     last changed time, last author)
         self._cache = dict()
-        
+        self._logCache = dict()
         # Create or update the working copy
         try: 
             self._repoWorkingCopyPath = workingCopyPath
@@ -294,6 +295,9 @@ class CPythonSubversionWrapper(object):
             partToRemoveFromEntry = self._repoPath.replace(self._rootUrl, "")
             for entry in entries:
                 path = entry[0].repos_path.replace(partToRemoveFromEntry, "")
+                path2Url = urllib.pathname2url(path)
+                logMessages = self._client.log(self._repoPath + path2Url, revision_start=pysvn.Revision(pysvn.opt_revision_kind.number, 1),
+                                               revision_end=pysvn.Revision(pysvn.opt_revision_kind.head), limit=1)[0]
                 self._cache[path] = entry[0]
                 result.append(path) 
             return result
@@ -320,6 +324,18 @@ class CPythonSubversionWrapper(object):
         resultDict["lastChangedAuthor"] = entry.last_author
         resultDict["lastChangedDate"] = str(entry.time)
         resultDict["size"] = str(entry.size)
+        if path in self._logCache:
+            logMessages = self._logCache[path]
+        else:
+            try:
+                path2Url = urllib.pathname2url(path)
+                logMessages = self._client.log(self._repoPath + path2Url, revision_start=pysvn.Revision(pysvn.opt_revision_kind.number, 1),
+                                               revision_end=pysvn.Revision(pysvn.opt_revision_kind.head), limit=1)[0]
+                self._logCache[path] = logMessages
+            except ClientError, error:
+                raise SubversionError(error)
+        resultDict["owner"] = logMessages["author"]
+        resultDict["creationDate"] = str(logMessages["date"])
         return resultDict
 
     @property
