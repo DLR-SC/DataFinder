@@ -80,7 +80,8 @@ class CPythonSubversionWrapper(object):
         # last changed time, last author
         try: 
             self._repoWorkingCopyPath = workingCopyPath
-            self._client.checkout(repoPath, self._repoWorkingCopyPath)
+            if not os.path.exists(self._repoWorkingCopyPath):
+                self._client.checkout(repoPath, self._repoWorkingCopyPath)
         except ClientError, error:
             raise PersistenceError(error)
         except TypeError, error:
@@ -164,8 +165,7 @@ class CPythonSubversionWrapper(object):
             entry = self._cache[path]
         else:
             try:
-                self._client.update(self._repoWorkingCopyPath + path, depth=depth.empty)
-                entry = self._client.list(self._repoWorkingCopyPath + path, recurse=False)[0]
+                entry = self._client.list(self._repoPath + path, recurse=False)[0]
                 entry = entry[0]
             except ClientError, error:
                 raise SubversionError(error)
@@ -175,7 +175,6 @@ class CPythonSubversionWrapper(object):
         """ Updates the working copy. """
         
         try:
-            self._client.cleanup(self._repoWorkingCopyPath)
             self._client.update(self._repoWorkingCopyPath)
         except ClientError, error:
             raise SubversionError(error)
@@ -189,8 +188,6 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.resolved(self._repoWorkingCopyPath, recurse=True)
-            self._client.cleanup(self._repoWorkingCopyPath)
             self._client.checkin(self._repoWorkingCopyPath + path, "")
         except ClientError, error:
             raise SubversionError(error)
@@ -280,8 +277,7 @@ class CPythonSubversionWrapper(object):
         
         try:
             result = list()
-            self._client.update(self._repoWorkingCopyPath + path, depth=depth.files)
-            entries = self._client.list(self._repoWorkingCopyPath + path, recurse=False)[1:]
+            entries = self._client.list(self._repoPath + path, recurse=False)[1:]
             partToRemoveFromEntry = self._repoPath.replace(self._rootUrl, "")
             for entry in entries:
                 path = entry[0].repos_path.replace(partToRemoveFromEntry, "")
@@ -303,8 +299,7 @@ class CPythonSubversionWrapper(object):
             entry = self._cache[path]
         else:
             try:
-                self._client.update(self._repoWorkingCopyPath + path, depth=depth.empty)
-                entry = self._client.list(self._repoWorkingCopyPath + path, recurse=False)[0]
+                entry = self._client.list(self._repoPath + path, recurse=False)[0]
                 entry = entry[0]
             except ClientError, error:
                 raise SubversionError(error)
