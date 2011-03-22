@@ -74,13 +74,13 @@ class MetadataSubversionAdapterTestCase(unittest.TestCase):
         expectedResult = self._initValidRetrieveResult()
         
         connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None), \
-                                          "info": ({"lastChangedDate": "", "lastChangedAuthor": ""}, None)})
+                                          "info": ({"lastChangedDate": "", "lastChangedAuthor": "", "size": ""}, None)})
         defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
         self.assertEquals(defaultAdapter.retrieve(), expectedResult)
         self.assertEquals(defaultAdapter.retrieve(list()), dict())
         
         connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None), \
-                                          "info": ({"lastChangedDate": "", "lastChangedAuthor": ""}, None)})
+                                          "info": ({"lastChangedDate": "", "lastChangedAuthor": "", "size": ""}, None)})
         defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
         self.assertEquals(defaultAdapter.retrieve(["1"]), {"1": MetadataValue("value")})
 
