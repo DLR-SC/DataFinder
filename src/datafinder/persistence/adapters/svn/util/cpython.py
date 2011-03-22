@@ -82,6 +82,8 @@ class CPythonSubversionWrapper(object):
             self._repoWorkingCopyPath = workingCopyPath
             if not os.path.exists(self._repoWorkingCopyPath):
                 self._client.checkout(repoPath, self._repoWorkingCopyPath)
+            else:
+                self._client.update(self._repoWorkingCopyPath)
         except ClientError, error:
             raise PersistenceError(error)
         except TypeError, error:
