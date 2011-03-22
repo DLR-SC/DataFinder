@@ -43,9 +43,9 @@ Implements a SVN specific data adapter for CPython.
 import locale
 import os
 import pysvn
-from pysvn import depth
 import sys
-
+# pylint: disable=E1101
+# E1101: pylint could not resolve the depth attribute.
 from pysvn._pysvn_2_6 import ClientError
 
 from datafinder.persistence.error import PersistenceError
