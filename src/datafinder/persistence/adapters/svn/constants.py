@@ -44,17 +44,16 @@ __version__ = "$Revision-Id$"
 
 # Constants for connection pooling
 MAX_POOL_NUMBER = 10
-MAX_CONNECTION_NUMBER = 10 
+MAX_CONNECTION_NUMBER = 1 
 
 WIN32 = "win32"
 UTF8 = "UTF-8"
 LC_ALL = "LC_ALL"
 
-LINK_TARGET_PROPERTY = "svn:externals"
+LINK_TARGET_PROPERTY = "datafinder:____LINK____"
 
 DATAFINDER_JSON_PROPERTY = "datafinder:json"
 
 XPS_JSON_PROPERTY = "xps:json:de.dlr.xps.server.datafinder.model.as.XPSforCFDEntry"
-XPS_TITLE_PROPERTY = "xps:title"
 
 SVN_MIME_TYPE = "svn:mime-type"

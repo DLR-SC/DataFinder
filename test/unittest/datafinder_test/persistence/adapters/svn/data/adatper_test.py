@@ -45,7 +45,7 @@ import unittest
 
 from io import StringIO
 
-from datafinder.persistence.adapters.svn.data import adapter
+from datafinder.persistence.adapters.svn.data import adapter as svn_adapter
 from datafinder.persistence.adapters.svn.data.adapter import DataSubversionAdapter
 from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.error import PersistenceError
@@ -98,7 +98,7 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         
         self._osPathMock = SimpleMock()
         self._osModuleMock = _OsModuleMock(self._osPathMock)
-        adapter.os = self._osModuleMock
+        svn_adapter.os = self._osModuleMock
         self._openMock = _OpenMock()
         self._connectionMock = SimpleMock()
         self._defaultAdapter = DataSubversionAdapter("/path/identify", SimpleMock(self._connectionMock))

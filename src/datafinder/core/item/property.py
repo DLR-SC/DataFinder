@@ -154,7 +154,7 @@ class Property(object):
                         classObj = propertyDefinition.propertyType.cls
                         valueRepresentation = classObj.fromDict(valueRepresentation)
                     except AttributeError, error:
-                        raise PropertyError("Cannot create property. Reason: %s" % error)
+                        raise PropertyError(propertyDefinition.identifier, "Cannot create property. Reason: %s" % error)
                 propertyDefinition.validate(valueRepresentation)
                 if not foundValidRepresentation:
                     value = valueRepresentation

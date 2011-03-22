@@ -71,5 +71,6 @@ class Configuration(object):
         if not baseWorkingCopyPath is None:
             hash_ = hashlib.sha1(self.baseUrl).hexdigest()
             self.workingCopyPath = os.path.join(baseWorkingCopyPath, hash_, "working_copy")
+            self.workingCopyPath = self.workingCopyPath.replace("\\", "/")
         else:
             raise PersistenceError("Cannot determine temporary working copy directory.")

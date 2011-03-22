@@ -59,7 +59,7 @@ __version__ = "$Revision-Id$"
 
 _log = logging.getLogger()
 
- 
+
 class MetadataSubversionAdapter(NullMetadataStorer):
     """ Implements meta data storer interface for subversion. """
     
@@ -87,9 +87,10 @@ class MetadataSubversionAdapter(NullMetadataStorer):
             rawResult = dict()
             try:
                 persistenceJsonProperties = self._retrieveProperties(connection)
-                rawResult = json.loads(persistenceJsonProperties)
-            except SubversionError:
-                _log.debug("No subversion property is set!")
+                if not persistenceJsonProperties is None:
+                    rawResult = json.loads(persistenceJsonProperties)
+            except SubversionError, error:
+                raise PersistenceError(repr(error))
             mappedResult = self._mapRawResult(connection, rawResult)
             return self._filterResult(propertyIds, mappedResult)
         finally:
@@ -160,8 +161,9 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 persistenceProperties = properties
                 try:
                     persistenceJsonProperties = self._retrieveProperties(connection)
-                    oldPersistenceProperties = json.loads(persistenceJsonProperties)
-                    persistenceProperties.update(oldPersistenceProperties)
+                    if not persistenceJsonProperties is None:
+                        oldPersistenceProperties = json.loads(persistenceJsonProperties)
+                        persistenceProperties.update(oldPersistenceProperties)
                 except SubversionError:
                     _log.debug("No subversion property is set!")
                 jsonProperties = value_mapping.getPersistenceRepresentation(persistenceProperties)

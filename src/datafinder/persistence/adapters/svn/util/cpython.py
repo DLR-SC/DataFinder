@@ -75,15 +75,18 @@ class CPythonSubversionWrapper(object):
         self._client.callback_get_log_message = self._getLogMessage
         self._client.callback_ssl_server_trust_prompt = self._sslServerTrustPrompt
         self._repoPath = repoPath
-        self._rootUrl = self._client.root_url_from_path(self._repoPath)
-        self._cache = dict() # path: kind, size, has props, created rev, 
-        # last changed time, last author
+        self._rootUrl = None
+        # path: (kind, size, has props, created rev,
+        #     last changed time, last author)
+        self._cache = dict()
+        
+        # Create or update the working copy
         try: 
             self._repoWorkingCopyPath = workingCopyPath
-            if not os.path.exists(self._repoWorkingCopyPath):
-                self._client.checkout(repoPath, self._repoWorkingCopyPath)
-            else:
+            if os.path.exists(self._repoWorkingCopyPath):
                 self._client.update(self._repoWorkingCopyPath)
+            else:
+                self._client.checkout(repoPath, self._repoWorkingCopyPath)
         except ClientError, error:
             raise PersistenceError(error)
         except TypeError, error:
@@ -153,7 +156,7 @@ class CPythonSubversionWrapper(object):
         # E1101: pylint could not resolve the node_kind attribute. 
 
         return self._determineItemKind(path, pysvn.node_kind.dir)
-    
+
     def _determineItemKind(self, path, kind):
         """
         Determines the item type.
@@ -163,6 +166,8 @@ class CPythonSubversionWrapper(object):
         @param kind: Kind that should be determined. 
         """
         
+        if path == "/":
+            return pysvn.node_kind.dir
         if path in self._cache:
             entry = self._cache[path]
         else:
@@ -173,11 +178,11 @@ class CPythonSubversionWrapper(object):
                 raise SubversionError(error)
         return entry.kind == kind
     
-    def update(self):
+    def update(self, path):
         """ Updates the working copy. """
         
         try:
-            self._client.update(self._repoWorkingCopyPath)
+            self._client.update(self._repoWorkingCopyPath + path, depth=pysvn.depth.files)
         except ClientError, error:
             raise SubversionError(error)
         
@@ -190,6 +195,7 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
+            self._client.resolved(self._repoWorkingCopyPath + path, recurse=True)
             self._client.checkin(self._repoWorkingCopyPath + path, "")
         except ClientError, error:
             raise SubversionError(error)
@@ -234,7 +240,7 @@ class CPythonSubversionWrapper(object):
             self._client.copy(self._repoPath + path, self._repoPath + destinationPath)
         except ClientError, error:
             raise SubversionError(error)
-        
+
     def setProperty(self, path, key, value):
         """
         Sets the property of a file or directory.
@@ -253,31 +259,36 @@ class CPythonSubversionWrapper(object):
         except ClientError, error:
             raise SubversionError(error)
         
-    def getProperty(self, path, key):
+    def getProperty(self, path, name):
         """
         Gets the property of a file or directory.
         
         @param path: Path where the property should be retrieved.
         @type path: C{unicode}
-        @param key: Name of the property.
-        @type key: C{unicode}
+        @param name: Name of the property.
+        @type name: C{unicode}
         """  
         # pylint: disable=E1101
         # E1101: pylint could not resolve the Revision attribute.
         
+        result = None
+        fullWorkingPath = self._repoWorkingCopyPath + path
         try:
-            propertyValue = self._client.propget(key, self._repoPath + path, revision=pysvn.Revision(pysvn.opt_revision_kind.head), \
-                                                 peg_revision=pysvn.Revision(pysvn.opt_revision_kind.head))
-            return propertyValue[self._repoPath + path]
+            
+            propertyValue = self._client.propget(
+                name, fullWorkingPath, revision=pysvn.Revision(pysvn.opt_revision_kind.working))
+            if fullWorkingPath in propertyValue:
+                result = propertyValue[self._repoWorkingCopyPath + path]
         except ClientError, error:
             raise SubversionError(error)
-        except KeyError, error:
-            raise SubversionError(error)
+        else:
+            return result
     
     def getChildren(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         try:
+            self._rootUrl = self._client.root_url_from_path(self._repoPath)
             result = list()
             entries = self._client.list(self._repoPath + path, recurse=False)[1:]
             partToRemoveFromEntry = self._repoPath.replace(self._rootUrl, "")

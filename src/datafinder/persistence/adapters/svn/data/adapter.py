@@ -39,6 +39,8 @@
 Implements adapter for manipulating a SVN file system.
 """
 
+
+import logging
 import os
 
 from datafinder.persistence.error import PersistenceError
@@ -52,6 +54,7 @@ __version__ = "$Revision-Id$"
 
 
 _BLOCK_SIZE = 30000
+_log = logging.getLogger()
 
 
 class DataSubversionAdapter(NullDataStorer):
@@ -75,16 +78,12 @@ class DataSubversionAdapter(NullDataStorer):
     @property
     def linkTarget(self):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
-        
+
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.update()
-                linkTarget = connection.getProperty(self._persistenceId, constants.LINK_TARGET_PROPERTY)
-                if len(linkTarget) == 0:
-                    return None
-                else:
-                    return linkTarget
+                connection.update(util.determineParentPath(self._persistenceId))
+                return connection.getProperty(self._persistenceId, constants.LINK_TARGET_PROPERTY)
             except SubversionError:
                 return None
         finally:
@@ -93,12 +92,8 @@ class DataSubversionAdapter(NullDataStorer):
     @property
     def isLink(self):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
-        
-        linkTarget = self.linkTarget
-        if linkTarget is None:
-            return False
-        else:
-            return True
+
+        return not self.linkTarget is None
         
     @property
     def isLeaf(self):
@@ -136,13 +131,13 @@ class DataSubversionAdapter(NullDataStorer):
 
     def createLink(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
-
+        
         self.createResource()
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.update()
-                connection.setProperty(self._persistenceId, constants.LINK_TARGET_PROPERTY, connection.repoPath + destination.identifier)
+                connection.update(util.determineParentPath(self._persistenceId))
+                connection.setProperty(self._persistenceId, constants.LINK_TARGET_PROPERTY, destination.identifier)
                 connection.checkin(self._persistenceId)
             except SubversionError, error:
                 errorMessage = u"Cannot set property. Reason: '%s'" % error
@@ -217,7 +212,7 @@ class DataSubversionAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.update()
+                connection.update(self._persistenceId)
                 fd = open(connection.repoWorkingCopyPath + self._persistenceId, "wb")
                 try:
                     block = dataStream.read(_BLOCK_SIZE)
@@ -244,7 +239,7 @@ class DataSubversionAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.update()
+                connection.update(self._persistenceId)
                 return open(connection.repoWorkingCopyPath + self._persistenceId, "rb")
             except IOError, error:
                 errorMessage = os.strerror(error.errno)
@@ -259,10 +254,12 @@ class DataSubversionAdapter(NullDataStorer):
     def delete(self):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
+        parentPersistenceId = util.determineParentPath(self._persistenceId)
         connection = self._connectionPool.acquire()
         try:
             try:
                 connection.delete(self._persistenceId)
+                connection.update(parentPersistenceId)
             except SubversionError, error:
                 errorMessage = u"Unable to delete item '%s'. " % self.identifier \
                                + u"Reason: %s" % error
@@ -273,8 +270,19 @@ class DataSubversionAdapter(NullDataStorer):
     def move(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
-        self.copy(destination)
-        self.delete()
+        destinationPersistenceId = util.mapIdentifier(destination.identifier)
+        connection = self._connectionPool.acquire()
+        try:
+            try:
+                connection.copy(self._persistenceId, destinationPersistenceId)
+                connection.delete(self._persistenceId)
+                connection.update(destinationPersistenceId)
+            except SubversionError, error:
+                errorMessage = u"Unable to move item '%s' to '%s'. " % (self.identifier, destination.identifier) \
+                               + u"Reason: %s" % error
+                raise PersistenceError(errorMessage)
+        finally:
+            self._connectionPool.release(connection)
             
     def copy(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
@@ -284,6 +292,7 @@ class DataSubversionAdapter(NullDataStorer):
             try:
                 destinationPersistenceId = util.mapIdentifier(destination.identifier)
                 connection.copy(self._persistenceId, destinationPersistenceId)
+                connection.update(destinationPersistenceId)
             except SubversionError, error:
                 errorMessage = u"Unable to copy item '%s' to '%s'. " % (self.identifier, destination.identifier) \
                                + u"Reason: %s" % error
@@ -297,7 +306,7 @@ class DataSubversionAdapter(NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             try:
-                connection.update()
+                connection.update(util.determineParentPath(self._persistenceId))
                 return os.path.exists(connection.repoWorkingCopyPath + self._persistenceId)
             except SubversionError, error:
                 raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error)
