@@ -36,7 +36,8 @@
 
 
 """ 
-Implements a SVN specific data adapter for CPython.
+Implements utility functionality for accessing a Subversion repositories.
+This implementation works with CPython and is based on C[pysvn}.
 """
 
 
@@ -44,9 +45,10 @@ import locale
 import os
 import pysvn
 import sys
+import threading
+import time
 import urllib
-# pylint: disable=E1101
-# E1101: pylint could not resolve the depth attribute.
+
 from pysvn._pysvn_2_6 import ClientError
 
 from datafinder.persistence.error import PersistenceError
@@ -59,186 +61,136 @@ __version__ = "$Revision-Id$"
 
 class CPythonSubversionWrapper(object):
     """ 
-    Implements a SVN specific data adapter for CPython.
+    Implements CPython specific utility class for accessing SVN repositories.
     """
-    
-    def __init__(self, repoPath, workingCopyPath, username, password):
-        """
-        Constructor.
-        """
-  
-        self._initLocale()        
+
+    def __init__(self, repositoryUri, workingCopyPath, username, password):
+        """ Initializes the pysvn client for repository access and performs the initial
+        checkout if it does not already exist. """
+        
         self._username = username
         self._password = password
+        self._workingCopyPath = workingCopyPath
+        self._workingPathLength = len(workingCopyPath)
+        self._sharedState = None
+        
         self._client = pysvn.Client()
         self._loginTries = 0
         self._client.callback_get_login = self._getLogin
-        self._client.callback_get_log_message = self._getLogMessage
-        self._client.callback_ssl_server_trust_prompt = self._sslServerTrustPrompt
-        self._repoPath = repoPath
-        self._rootUrl = None
-        # path: (kind, size, has props, created rev,
-        #     last changed time, last author)
-        self._cache = dict()
-        self._logCache = dict()
-        # Create or update the working copy
-        try: 
-            self._repoWorkingCopyPath = workingCopyPath
-            if os.path.exists(self._repoWorkingCopyPath):
-                self._client.update(self._repoWorkingCopyPath)
-            else:
-                self._client.checkout(repoPath, self._repoWorkingCopyPath)
-        except ClientError, error:
-            raise PersistenceError(error)
-        except TypeError, error:
-            raise PersistenceError(error)
+        self._client.callback_get_log_message = lambda: (True, "")
+        self._client.callback_ssl_server_trust_prompt = \
+            lambda trustData: (True, trustData["failures"], True)
+        self._repositoryUri = repositoryUri
+        
+        self._initializeWorkingCopy()
         
     def _getLogin(self, _, __, ___):
-        """ Login callback function. """
+        """ Provides the login information for the pysvn
+        client. """
         
         if self._loginTries > 0:
             return (False, "", "", False)
         else:
             self._loginTries += 1
-            return True, self._username, self._password, False
-    
-    @staticmethod
-    def _getLogMessage():
-        """ Log message callback function. """
+            return (True, self._username, self._password, False)
         
-        return True, "datafinder"
-    
-    @staticmethod
-    def _sslServerTrustPrompt(trustData):
-        """ SSL trust prompt callback. """
+    def _initializeWorkingCopy(self):
+        """ Checks the working copy out if it does not exist. """
         
-        return True, trustData["failures"], True
-    
-    @staticmethod
-    def _initLocale():
-        """ Init the locale. """
-        
-        if sys.platform == constants.WIN32:
-            locale.setlocale(locale.LC_ALL, "")
-        else:
-            if constants.LC_ALL in os.environ:
-                try:
-                    locale.setlocale(locale.LC_ALL, os.environ[constants.LC_ALL])
-                    return
-                except locale.Error:
-                    # First try did not work, encoding must be set first then set locale.
-                    pass
-            languageCode, encoding = locale.getdefaultlocale()
-            if languageCode is None:
-                languageCode = "en_US"
-            # Set the encoding of the Python environment if no encoding is set.
-            if encoding is None:
-                encoding = constants.UTF8
-            if encoding.lower() == "utf":
-                encoding = constants.UTF8
-            try:
-                locale.setlocale(locale.LC_ALL, "%s.%s" % (languageCode, encoding))
-            except locale.Error:
-                try:
-                    locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
-                except locale.Error:
-                    locale.setlocale(locale.LC_ALL, "C")
-    
+        try: 
+            if not os.path.exists(self._workingCopyPath):
+                self._client.checkout(self._repositoryUri, self._workingCopyPath)
+        except ClientError, error:
+            raise PersistenceError(error)
+                
     def isLeaf(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}. """
+        """ Indicates whether the item is a file or not. """
         # pylint: disable=E1101
         # E1101: pylint could not resolve the node_kind attribute. 
 
         return self._determineItemKind(path, pysvn.node_kind.file)
     
     def isCollection(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}. """
+        """ Indicates whether the item is a directory or not. """
         # pylint: disable=E1101
         # E1101: pylint could not resolve the node_kind attribute. 
 
         return self._determineItemKind(path, pysvn.node_kind.dir)
 
     def _determineItemKind(self, path, kind):
-        """
-        Determines the item type.
+        """ Determines whether the item is of the given kind. """
+        # pylint: disable=E1101
+        # E1101: pylint could not resolve the node_kind attribute.
         
-        @param path: Path to determine.
-        @type path: C{unicode}
-        @param kind: Kind that should be determined. 
-        """
-        
-        if path == "/":
-            return pysvn.node_kind.dir
-        if path in self._cache:
-            entry = self._cache[path]
-        else:
-            try:
-                entry = self._client.list(self._repoPath + path, recurse=False)[0]
-                entry = entry[0]
-            except ClientError, error:
-                raise SubversionError(error)
+        entry = self._determineInfo(path)
         return entry.kind == kind
     
     def update(self, path):
-        """ Updates the working copy. """
-        
+        """ Updates the working copy. 
+        This method is sychronized among different connections.
+        The update call also restores accidently deleted files (mode: infinity).
+        """
+        # pylint: disable=E1101
+        # E1101: pylint could not resolve the depth attribute.
+            
+        self._sharedState.lock.acquire()
         try:
-            self._client.update(self._repoWorkingCopyPath + path, depth=pysvn.depth.files)
-        except ClientError, error:
-            raise SubversionError(error)
-        
+            try:
+                self._client.update(self._workingCopyPath + path, depth=pysvn.depth.infinity )
+            except ClientError, error:
+                raise SubversionError(error)
+        finally:
+            self._sharedState.lock.release()
+    
     def checkin(self, path):
-        """ 
-        Checkins to the repository.
-        
-        @param path: Path to checkin.
-        @type path: C{unicode} 
+        """ Commits changes of the item identified with C{path}. It also
+        ensures that existing conflicts are resolved.
         """
         
         try:
-            self._client.resolved(self._repoWorkingCopyPath + path, recurse=True)
-            self._client.checkin(self._repoWorkingCopyPath + path, "")
+            self._client.resolved(self._workingCopyPath + path, recurse=True)
+            self._client.checkin(self._workingCopyPath + path, "")
         except ClientError, error:
             raise SubversionError(error)
+        else:
+            self._sharedState.removeFromCache(path)
         
     def add(self, path):
-        """ 
-        Marks changes in the working copy for checking in. 
-        
-        @param path: Path to add.
-        @type path: C{unicode}
-        """
+        """ Adds a new file/directory to the working copy. """
         
         try:
-            self._client.add(self._repoWorkingCopyPath + path, recurse=True)
+            self._client.add(self._workingCopyPath + path, recurse=True)
         except ClientError, error:
             raise SubversionError(error)
         
     def delete(self, path):
-        """
-        Removes a file or directory from the working copy.
-        
-        @param path: Path to remove.
-        @type path: C{unicode}
+        """ Removes a file or directory from the repository. It works
+        directly on the server, i.e. no call to C{checkin} is required.
+        The cached information of the item all removed as well.
         """
         
         try:
-            self._client.remove(self._repoPath + path, force=True)
+            self._client.remove(self._getEncodedUri(path), force=True)
         except ClientError, error:
             raise SubversionError(error)
+        else:
+            self._sharedState.removeFromCache(path)
+        
+    def _getEncodedUri(self, path):
+        """ Helper method - First the path is encoded to UTF-8 and then
+        the special characters are quoted. It returns the 
+        full repository URI. It assumes that the repository URI is already in 
+        the correctly quoted and encoded format. """
+        
+        path = path.encode(constants.UTF8)
+        return self._repositoryUri + urllib.pathname2url(path)
         
     def copy(self, path, destinationPath):
-        """
-        Copies a file or directory within the working copy.
-        
-        @param path: Path to copy.
-        @type path: C{unicode}
-        @param destinationPath: Path to the destination.
-        @type destinationPath: C{unicode}
-        """
+        """ The copying process is directly performed on the SVN server. """
         
         try:
-            self._client.copy(self._repoPath + path, self._repoPath + destinationPath)
+            self._client.copy(self._getEncodedUri(path), 
+                              self._getEncodedUri(destinationPath))
         except ClientError, error:
             raise SubversionError(error)
 
@@ -246,8 +198,6 @@ class CPythonSubversionWrapper(object):
         """
         Sets the property of a file or directory.
         
-        @param path: Path where the property should be set.
-        @type path: C{unicode}
         @param key: Name of the property.
         @type key: C{unicode}
         @param value: Value of the property.
@@ -255,97 +205,216 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.propset(key, value, self._repoWorkingCopyPath + path)
+            self._client.propset(key, value, self._workingCopyPath + path)
             self.checkin(path)
         except ClientError, error:
             raise SubversionError(error)
         
     def getProperty(self, path, name):
         """
-        Gets the property of a file or directory.
+        Gets the property value of a file or directory.
         
-        @param path: Path where the property should be retrieved.
-        @type path: C{unicode}
         @param name: Name of the property.
         @type name: C{unicode}
+        
+        @rtype: C{unicode}
         """  
         # pylint: disable=E1101
         # E1101: pylint could not resolve the Revision attribute.
         
         result = None
-        fullWorkingPath = self._repoWorkingCopyPath + path
+        fullWorkingPath = (self._workingCopyPath + path).encode(constants.UTF8)
+
         try:
-            
-            propertyValue = self._client.propget(
+            propertyValues = self._client.propget(
                 name, fullWorkingPath, revision=pysvn.Revision(pysvn.opt_revision_kind.working))
-            if fullWorkingPath in propertyValue:
-                result = propertyValue[self._repoWorkingCopyPath + path]
+            if fullWorkingPath in propertyValues:
+                result = unicode(propertyValues[fullWorkingPath], constants.UTF8)
         except ClientError, error:
             raise SubversionError(error)
         else:
             return result
     
     def getChildren(self, path):
-        """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        """ Determines the direct children of the given directory. In prior an
+        update is performed. The retrieved information are cached. This method 
+        is synchronized among different connections. """
         
+        self._sharedState.lock.acquire()
         try:
-            self._rootUrl = self._client.root_url_from_path(self._repoPath)
-            result = list()
-            entries = self._client.list(self._repoPath + path, recurse=False)[1:]
-            partToRemoveFromEntry = self._repoPath.replace(self._rootUrl, "")
-            for entry in entries:
-                path = entry[0].repos_path.replace(partToRemoveFromEntry, "")
-                path2Url = urllib.pathname2url(path)
-                logMessages = self._client.log(self._repoPath + path2Url, revision_start=pysvn.Revision(pysvn.opt_revision_kind.number, 1),
-                                               revision_end=pysvn.Revision(pysvn.opt_revision_kind.head), limit=1)[0]
-                self._cache[path] = entry[0]
-                result.append(path) 
-            return result
-        except ClientError, error:
-            raise SubversionError(error)
+            try:
+                self.update(path)
+                children = list()
+                entries = self._client.list(self._workingCopyPath + path, recurse=False)
+                for entry in entries:
+                    entryPath = entry[0].path[self._workingPathLength:]
+                    self._sharedState.addToCache(entryPath, _Info(entry[0]))
+                    children.append(entryPath)
+                del children[0] # First item is always the path
+                return children
+            except ClientError, error:
+                raise SubversionError(error)
+        finally:
+            self._sharedState.lock.release()
         
     def info(self, path):
+        """ Returns a C{dict} holding the information about:
+        - "lastChangedDate", "size", "owner", "creationDate".
         """
-        Gets the information about a file or directory.
+        # pylint: disable=E1101
+        # E1101: pylint could not resolve the opt_revision_kind attribute.
         
-        @param path: Path to the file or directory information is needed.
-        @type path: C{unicode}
-        """
-        
-        if path in self._cache:
-            entry = self._cache[path]
-        else:
+        info = self._determineInfo(path)
+            
+        if info.logMessage is None: # determine creation date and owner
             try:
-                entry = self._client.list(self._repoPath + path, recurse=False)[0]
-                entry = entry[0]
+                info.logMessage = self._client.log(
+                    self._workingCopyPath + path, 
+                    revision_start=pysvn.Revision(pysvn.opt_revision_kind.number, 1),
+                    revision_end=pysvn.Revision(pysvn.opt_revision_kind.head), limit=1)[0]
             except ClientError, error:
                 raise SubversionError(error)
-        resultDict = dict()
-        resultDict["lastChangedAuthor"] = entry.last_author
-        resultDict["lastChangedDate"] = str(entry.time)
-        resultDict["size"] = str(entry.size)
-        if path in self._logCache:
-            logMessages = self._logCache[path]
-        else:
+        
+        result = dict()
+        result["lastChangedDate"] = str(info.lastChangedDate)
+        result["size"] = info.size
+        result["owner"] = info.owner
+        result["creationDate"] = str(info.creationTime)
+        return result
+
+    def _determineInfo(self, path):
+        """ Retrieves the entry information and puts it into the 
+        cache or uses the cached information. """
+        
+        entry = self._sharedState.getFromCache(path)
+        if entry is None:
             try:
-                path2Url = urllib.pathname2url(path)
-                logMessages = self._client.log(self._repoPath + path2Url, revision_start=pysvn.Revision(pysvn.opt_revision_kind.number, 1),
-                                               revision_end=pysvn.Revision(pysvn.opt_revision_kind.head), limit=1)[0]
-                self._logCache[path] = logMessages
+                entry = self._client.list(self._workingCopyPath + path, 
+                                          recurse=False)[0][0]
+                entry = _Info(entry)
+                self._sharedState.addToCache(path, entry)
+                return entry
             except ClientError, error:
                 raise SubversionError(error)
-        resultDict["owner"] = logMessages["author"]
-        resultDict["creationDate"] = str(logMessages["date"])
-        return resultDict
+        return entry
 
     @property
-    def repoWorkingCopyPath(self):
-        """ Returns the working copy path. """
-        
-        return self._repoWorkingCopyPath
+    def workingCopyPath(self):
+        return self._workingCopyPath
     
-    @property
-    def repoPath(self):
-        """ Returns the repo path. """
+
+class _Info(object):
+    """ Represents the information of a single item. """
+    
+    def __init__(self, entry, ):
+        """ Uses a C{PysvnList} and pysvn log message 
+        dictionaries as basis and provides a common interface. """
         
-        return self._repoPath
+        self.lastChangedDate = entry.time
+        self.size = entry.size
+        self.kind = entry.kind
+        self.logMessage = None
+        self._creationTimeStamp = time.time()
+        
+    @property
+    def creationTime(self):
+        if not self.logMessage is None :
+            return self.logMessage["date"]
+        
+    @property
+    def owner(self):
+        if not self.logMessage is None:
+            return self.logMessage["author"]
+        
+        
+class _SharedState(object):
+    """ Holds the synchronization information.
+    This includes a shared lock and a thread-safe
+    cache for sharing item information. Items are 
+    identified by the their path relative to the
+    repository working copy."""
+     
+    def __init__(self):
+        self._lock = threading.RLock()
+        self._cache = dict()
+        self.lock = threading.RLock()
+        
+    def addToCache(self, path, info):
+        self._lock.acquire()
+        try:
+            self._cache[path] = info
+        finally:
+            self._lock.release()
+    
+    def getFromCache(self, path):
+
+        self._lock.acquire()
+        try:
+            if path in self._cache:
+                return self._cache[path]
+        finally:
+            self._lock.release()
+            
+    def removeFromCache(self, path):
+        self._lock.acquire()
+        try:
+            if path in self._cache:
+                del self._cache[path]
+        finally:
+            self._lock.release()
+
+# Used to synchronize repository-specific connections
+# which are working on ONE working copy
+_repositoryUriSharedStateMap = dict()
+
+
+def createSubversionConnection(repositoryUri, workingCopyPath, username, password):
+    """ Factory method for safe creation of SVN connections.
+    
+    Adds specific shared shared state to synchronize work of different 
+    connection instances. 
+    
+    @note: It is expected that the calling client code ensures thread-safety. E.g.,
+    by using the default connection pool for connection creation.
+    """
+    
+    connection = CPythonSubversionWrapper(repositoryUri, workingCopyPath, username, password)
+    if repositoryUri in _repositoryUriSharedStateMap:
+        connection._sharedState = _repositoryUriSharedStateMap[repositoryUri]
+    else:
+        sharedState = _SharedState()
+        connection._sharedState = _SharedState()
+        _repositoryUriSharedStateMap[repositoryUri] = sharedState
+    return connection
+
+
+def _initializeLocale():
+    """ Initializes encoding information of C{locale} module. """
+    
+    if sys.platform == constants.WIN32:
+        locale.setlocale(locale.LC_ALL, "")
+    else:
+        if constants.LC_ALL in os.environ:
+            try:
+                locale.setlocale(locale.LC_ALL, os.environ[constants.LC_ALL])
+                return
+            except locale.Error:
+                # First try did not work, encoding must be set first then set locale.
+                pass
+        languageCode, encoding = locale.getdefaultlocale()
+        if languageCode is None:
+            languageCode = "en_US"
+        # Set the encoding of the Python environment if no encoding is set.
+        if encoding is None:
+            encoding = constants.UTF8
+        if encoding.lower() == "utf":
+            encoding = constants.UTF8
+        try:
+            locale.setlocale(locale.LC_ALL, "%s.%s" % (languageCode, encoding))
+        except locale.Error:
+            try:
+                locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+            except locale.Error:
+                locale.setlocale(locale.LC_ALL, "C")
+
+_initializeLocale() # Just once executed when the module is imported

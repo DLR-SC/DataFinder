@@ -51,6 +51,7 @@ from datafinder.core.item.leaf import ItemLeaf
 from datafinder.core.item.link import ItemLink
 from datafinder.core.item.privileges.privilege import ALL_PRIVILEGE, WRITE_PRIVILEGE
 from datafinder.core.item.visitor.base import ItemTreeWalkerBase, VisitSlot
+from datafinder.persistence.error import PersistenceError
 
 
 __version__ = "$Revision-Id:$" 
@@ -161,7 +162,11 @@ class ActionCheckVisitor(object):
         
         if item.isRoot:
             self._disable(self.capabilities.keys())
-            self.capabilities[self.CAPABILITY_ADD_CHILDREN] = item.fileStorer.canAddChildren
+            try:
+                self.capabilities[self.CAPABILITY_ADD_CHILDREN] = item.fileStorer.canAddChildren
+            except PersistenceError, error:
+                _logger.error(error)
+                self.capabilities[self.CAPABILITY_ADD_CHILDREN] = False
             self.capabilities[self.CAPABILITY_SEARCH] = self._hasSearchSupport
         else:
             self._checkDataState(item)

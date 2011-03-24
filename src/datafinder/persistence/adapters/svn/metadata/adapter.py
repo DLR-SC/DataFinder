@@ -46,9 +46,8 @@ import logging
 import mimetypes
 import os
 
-from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY, SVN_MIME_TYPE
+from datafinder.persistence.adapters.svn.constants import UTF8, XPS_JSON_PROPERTY, SVN_MIME_TYPE
 from datafinder.persistence.adapters.svn.error import SubversionError
-from datafinder.persistence.adapters.svn.util import util
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.metadata import constants, value_mapping
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
@@ -77,7 +76,6 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         
         NullMetadataStorer.__init__(self, identifier)
         self.__connectionPool = connectionPool
-        self.__persistenceId = util.mapIdentifier(identifier)
 
     def retrieve(self, propertyIds=None):
         """ @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}"""
@@ -99,13 +97,13 @@ class MetadataSubversionAdapter(NullMetadataStorer):
     def _retrieveProperties(self, connection):
         """ Retrieves all properties. """
 
-        return connection.getProperty(self.__persistenceId, XPS_JSON_PROPERTY)
+        return connection.getProperty(self.identifier, XPS_JSON_PROPERTY)
         
     def _mapRawResult(self, connection, rawResult):
         """ Maps the SVN specific result to interface format. """
         
         try:
-            infoDict = connection.info(self.__persistenceId)
+            infoDict = connection.info(self.identifier)
         except SubversionError, error:
             errorMessage = "Problem during meta data retrieval. " \
                            + "Reason: '%s'" % error 
@@ -116,7 +114,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
             raise PersistenceError(errorMessage)  
         mappedResult = dict()
         mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue(infoDict["creationDate"], \
-                                                                                        expectedType=datetime.datetime)
+                                                                                 expectedType=datetime.datetime)
         try:
             mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"], \
                                                                                         expectedType=datetime.datetime)
@@ -127,11 +125,11 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                            + "Reason: '%s'" % error 
             raise PersistenceError(errorMessage)
         try:
-            mimeType = connection.getProperty(self.__persistenceId, SVN_MIME_TYPE)
+            mimeType = connection.getProperty(self.identifier, SVN_MIME_TYPE)
             mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
         except SubversionError:
             _log.debug("No subversion property for mimetype is set! Trying to determine mimetype by persitenceId.")
-            mimeType = mimetypes.guess_type(self.__persistenceId, False)
+            mimeType = mimetypes.guess_type(self.identifier, False)
             if mimeType[0] is None:
                 mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue("")
             else:
@@ -168,7 +166,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 except SubversionError:
                     _log.debug("No subversion property is set!")
                 jsonProperties = value_mapping.getPersistenceRepresentation(persistenceProperties)
-                connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, jsonProperties)
+                connection.setProperty(self.identifier, XPS_JSON_PROPERTY, jsonProperties)
             except SubversionError, error:
                 errorMessage = "Cannot update properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
@@ -190,7 +188,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                     else:
                         persistenceProperties[propertyId] = u""
                 persistenceJsonProperties = json.dumps(persistenceProperties)
-                connection.setProperty(self.__persistenceId, XPS_JSON_PROPERTY, persistenceJsonProperties)
+                connection.setProperty(self.identifier, XPS_JSON_PROPERTY, persistenceJsonProperties)
             except SubversionError, error:
                 errorMessage = "Cannot delete properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
@@ -201,12 +199,3 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 raise PersistenceError(errorMessage)
         finally:
             self.__connectionPool.release(connection)
-    
-    def search(self, restrictions):
-        """ 
-        Unsupported delegating to default implementation.
-        @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}
-        """
-        
-        return NullMetadataStorer.search(self, restrictions)
-    

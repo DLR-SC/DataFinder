@@ -133,11 +133,11 @@ class JythonSubversionWrapper(object):
         except SVNException, error:
             raise SubversionError(error)
     
-    def update(self):
+    def update(self, path):
         """ Updates the working copy. """
         
         try:
-            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
+            self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile + path, SVNRevision.HEAD, True)
         except SVNException, error:
             raise SubversionError(error)
         
@@ -163,7 +163,8 @@ class JythonSubversionWrapper(object):
         """
         
         try:
-            self._svnWorkingCopyClient.doAdd(self._repoWorkingCopyFile, True, False, False, SVNDepth.INFINITY, False, False, False)
+            self._svnWorkingCopyClient.doAdd(
+                self._repoWorkingCopyFile, True, False, False, SVNDepth.INFINITY, False, False, False)
         except SVNException, error:
             raise SubversionError(error)
         
@@ -253,22 +254,18 @@ class JythonSubversionWrapper(object):
         """
         
         try:
-            resultDict = dict()
+            result = dict()
             self._svnUpdateClient.doUpdate(self._repoWorkingCopyFile, SVNRevision.HEAD, True)
-            resultDict["lastChangedAuthor"] = ""
-            resultDict["lastChangedDate"] = ""
-            return resultDict
+            result["lastChangedDate"] = ""
+            result["size"] = ""
+            result["owner"] = ""
+            result["creationDate"] = ""
+            return result
         except SVNException, error:
             raise SubversionError(error)
         
     @property
-    def repoWorkingCopyPath(self):
+    def workingCopyPath(self):
         """ Returns the working copy path. """
         
         return self._repoWorkingCopyPath
-    
-    @property
-    def repoPath(self):
-        """ Returns the repo path. """
-        
-        return self._repoPath

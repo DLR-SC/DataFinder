@@ -43,8 +43,8 @@ Implements mapping of logical identifiers to SVN-specific identifiers.
 import platform
 
 if platform.platform().lower().find("java") == -1:
-    from datafinder.persistence.adapters.svn.util.cpython import CPythonSubversionWrapper
-    SubversionWrapper = CPythonSubversionWrapper
+    from datafinder.persistence.adapters.svn.util.cpython import createSubversionConnection
+    SubversionWrapper = createSubversionConnection
 else:
     from datafinder.persistence.adapters.svn.util.jython import JythonSubversionWrapper
     SubversionWrapper = JythonSubversionWrapper
@@ -70,25 +70,6 @@ def createSubversionConnection(repoPath, workingCopyPath, username, password):
     """
     
     return SubversionWrapper(repoPath, workingCopyPath, username, password)
-
-
-def mapIdentifier(identifier):
-    """ 
-    Maps the logical identifier to the persistence representation.
-        
-    @param identifier: Path relative to the configured base URL.
-                       Base URL is implicitly represented by '/'.
-    @type identifier: C{unicode}
-        
-    @return: URL identifying the resource.
-    @rtype: C{unicode}
-    """
-        
-    if identifier.startswith("/"):
-        persistenceId = identifier
-    else:
-        persistenceId = "/" + identifier
-    return persistenceId
 
 
 def determineParentPath(path):

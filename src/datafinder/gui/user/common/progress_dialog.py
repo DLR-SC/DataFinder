@@ -116,7 +116,8 @@ class ProgressDialog(QtCore.QObject):
         self._timer.stop()
         if not self._worker.error is None:
             caption = "Error During Operation"
-            message = "The following error occurred while performing the user operation:\n" + self._worker.error.message
+            message = "The following error occurred while performing the user operation:\n%s" \
+                      % repr(self._worker.error)
             QtGui.QMessageBox.critical(self._progressDialog, caption, message)
 
         if not self._cb is None:

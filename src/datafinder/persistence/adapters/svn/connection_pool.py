@@ -61,7 +61,7 @@ class SubversionConnectionPool(ConnectionPool):
         """
         
         self._configuration = configuration
-        ConnectionPool.__init__(self, MAX_CONNECTION_NUMBER)
+        ConnectionPool.__init__(self, 20, None)
         
     def _createConnection(self):
         """ Overwrites template method for connection creation. """

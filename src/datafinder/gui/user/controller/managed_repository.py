@@ -241,17 +241,18 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
             else:
                 self._workerThread = util.startNewQtThread(self._doConnect, self._connectCallback, 
                                                            connectDialog.uri, connectDialog.username, connectDialog.password)
-                
+
     def _connectCallback(self):
         """ Callback for the thread establishing the repository connection. """
         
         repository = self._workerThread.result
-
         if not repository is None:
             self._model.load(repository)
             self._scriptController.loadSharedScripts(repository.configuration.scripts)
             self._controller.setConnectionState(True)
         else:
+            if not self._workerThread.error is None:
+                self._logger.error(self._workerThread.error)
             self._mainWindow.connectAction.setEnabled(True)
 
     def _doConnect(self, uri, username, password):

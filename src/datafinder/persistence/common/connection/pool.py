@@ -40,7 +40,8 @@ Implements the connection pool for WebDAV connections.
 """
 
 
-from threading import Condition
+import threading
+import time
 
 from datafinder.persistence.error import PersistenceError
 
@@ -57,14 +58,14 @@ class ConnectionPool(object):
         
         @param maxConnectionNumber: Maximum number of parallel connections. Default: 10.
         @type maxConnectionNumber: C{int}
-        @param timeout: Time out in seconds or C{None} specifying not time out (default).
+        @param timeout: Time out in seconds or C{None} specifying no time out (default).
         @type timeout: C{int}
         """
         
         self._maxConnectionNumber = maxConnectionNumber
         self._timeout = timeout
         self._connections = dict()
-        self._lock = Condition()
+        self._lock = threading.Condition()
         self.reload()
         
     def reload(self):
@@ -90,15 +91,18 @@ class ConnectionPool(object):
 
         self._lock.acquire()
         try:
-            connection = self._determineUnunsedConnection()
-            if connection is None:
-                if self._availableConnections < self._maxConnectionNumber:
-                    connection = self._createConnection()
-                else:
-                    self._lock.wait(self._timeout)
-                    connection = self._determineUnunsedConnection()
-                    if connection is None:
-                        raise PersistenceError("Time out occurred before a new connection was available.")
+            if self._availableConnections < self._maxConnectionNumber:
+                connection = self._createConnection()
+            else:
+                start = time.time()
+                while self._determineUnunsedConnection() is None:
+                    if not self._timeout is None:
+                        if time.time() - start > self._timeout:
+                            break
+                    self._lock.wait(1) # check at least every second
+                connection = self._determineUnunsedConnection()
+                if connection is None:
+                    raise PersistenceError("Time out occurred before a new connection was available.")
             self._connections[id(connection)] = connection, True
             return connection
         finally:

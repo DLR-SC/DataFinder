@@ -43,7 +43,9 @@ Defines SVN-specific connection parameters.
 import hashlib
 import os
 import tempfile
+import urllib
 
+from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.error import PersistenceError
 
 
@@ -61,7 +63,8 @@ class Configuration(object):
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """
         
-        self.baseUrl = baseConfiguration.baseUri
+        path = urllib.pathname2url(baseConfiguration.uriPath.encode(constants.UTF8))
+        self.baseUrl = baseConfiguration.uriScheme + "://" + baseConfiguration.uriNetloc + path 
         self.protocol = baseConfiguration.uriScheme
 
         self.username = baseConfiguration.username
