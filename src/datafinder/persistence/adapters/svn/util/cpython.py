@@ -46,7 +46,6 @@ import os
 import pysvn
 import sys
 import threading
-import time
 import urllib
 
 from pysvn._pysvn_2_6 import ClientError
@@ -227,7 +226,8 @@ class CPythonSubversionWrapper(object):
 
         try:
             propertyValues = self._client.propget(
-                name, fullWorkingPath, revision=pysvn.Revision(pysvn.opt_revision_kind.working))
+                name, fullWorkingPath, revision=pysvn.Revision(pysvn.opt_revision_kind.working),
+                depth=pysvn.depth.empty)
             if fullWorkingPath in propertyValues:
                 result = unicode(propertyValues[fullWorkingPath], constants.UTF8)
         except ClientError, error:
@@ -248,9 +248,15 @@ class CPythonSubversionWrapper(object):
                 entries = self._client.list(self._workingCopyPath + path, recurse=False)
                 for entry in entries:
                     entryPath = entry[0].path[self._workingPathLength:]
-                    self._sharedState.addToCache(entryPath, _Info(entry[0]))
+                    formerEntry = self._sharedState.getFromCache(path)
+                    if formerEntry is None:
+                        newEntry =  _Info(entry[0])
+                    else:
+                        newEntry = _Info(entry[0])
+                        newEntry.logMessage = formerEntry.logMessage # creation date and owner do not change
+                    self._sharedState.addToCache(entryPath, newEntry)
                     children.append(entryPath)
-                del children[0] # First item is always the path
+                del children[0] # First item is always the queried path
                 return children
             except ClientError, error:
                 raise SubversionError(error)
@@ -306,7 +312,7 @@ class CPythonSubversionWrapper(object):
 class _Info(object):
     """ Represents the information of a single item. """
     
-    def __init__(self, entry, ):
+    def __init__(self, entry):
         """ Uses a C{PysvnList} and pysvn log message 
         dictionaries as basis and provides a common interface. """
         
@@ -314,7 +320,6 @@ class _Info(object):
         self.size = entry.size
         self.kind = entry.kind
         self.logMessage = None
-        self._creationTimeStamp = time.time()
         
     @property
     def creationTime(self):

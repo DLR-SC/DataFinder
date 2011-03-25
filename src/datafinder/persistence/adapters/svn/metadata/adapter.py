@@ -46,7 +46,7 @@ import logging
 import mimetypes
 import os
 
-from datafinder.persistence.adapters.svn.constants import UTF8, XPS_JSON_PROPERTY, SVN_MIME_TYPE
+from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY, SVN_MIME_TYPE
 from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.metadata import constants, value_mapping
