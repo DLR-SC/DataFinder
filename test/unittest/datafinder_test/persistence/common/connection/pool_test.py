@@ -84,11 +84,14 @@ class ConnectionPoolTestCase(unittest.TestCase):
         
         def testFunction():
             try:
-                connection = self._connectionPool.acquire()
-                self._connectionPool.release(connection)
-                self._connectionPool.reload()
+                try:
+                    self._connectionPool.reload()
+                    connection = self._connectionPool.acquire()
+                finally:
+                    self._connectionPool.release(connection)
             except PersistenceError:
                 return False
+        
         threads = list()
         for _ in range(100):
             thread = threading.Thread(target=testFunction)
