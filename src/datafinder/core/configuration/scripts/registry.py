@@ -137,7 +137,8 @@ class ScriptRegistry(object):
                 self._preferences.addScriptUri(script.uri)
             try:
                 for script in script.scripts: 
-                    script.execute()
+                    if script.automatic:
+                        script.execute()
             except AttributeError: #It is a script and not a collection                 
                 if script.automatic:
                     script.execute()
