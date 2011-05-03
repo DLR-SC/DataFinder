@@ -79,6 +79,7 @@ class ActionCheckVisitor(object):
     @cvar CAPABILITY_RERTRIEVE: The associated data for the item can be retrieved.
     @cvar CAPABILITY_ARCHIVE: The given item can be archived.
     @cvar CAPABILITY_SEARCH: Searches can be performed using the given item.
+    @cvar CAPAPILITY_PRIVILEGES: The item can have added privileges
     @cvar CAPABILITY_RETRIEVE_PROPERTIES: Properties of the item can be retrieved.
     @cvar CAPABILITY_STORE_PROPERTIES: Properties of the given item can be written.
     """
@@ -92,9 +93,10 @@ class ActionCheckVisitor(object):
     CAPABILITY_RETRIEVE = "retrieveData"
     CAPABILITY_ARCHIVE = "archive"
     CAPABILITY_SEARCH = "search"
+    CAPABILITY_PRIVILEGES = "privilege"
     CAPABILITY_RETRIEVE_PROPERTIES = "retrieveProperties"
     CAPABILITY_STORE_PROPERTIES = "storeProperties"
-    
+
     
     def __init__(self, resolveLinks=False, hasCustomMetadataSupport=False, hasSearchSupport=False):
         """ Constructor. """
@@ -133,6 +135,7 @@ class ActionCheckVisitor(object):
             ActionCheckTreeWalker.CAPABILITY_RETRIEVE: True,
             ActionCheckTreeWalker.CAPABILITY_ARCHIVE: True,
             ActionCheckTreeWalker.CAPABILITY_SEARCH: self._hasSearchSupport,
+            ActionCheckTreeWalker.CAPABILITY_PRIVILEGES: False,
             ActionCheckTreeWalker.CAPABILITY_RETRIEVE_PROPERTIES: self._hasCustomMetadataSupport,
             ActionCheckTreeWalker.CAPABILITY_STORE_PROPERTIES: self._hasCustomMetadataSupport
         }
@@ -362,6 +365,18 @@ class ActionCheckVisitor(object):
         
         self.check(item)
         return self.capabilities[ActionCheckVisitor.CAPABILITY_SEARCH]
+    
+    def canPrivileges(self, item):
+        """
+        Convenience method to check whether an item can have rights added to it.
+        @note: The sanity checks are run again when this method is called.
+        
+        @param item: The item to be checked.
+        @type item: L{ItemBase<datafinder.core.item.base.ItemBase>}
+        """
+        
+        self.check(item)
+        return self.capabilities[ActionCheckVisitor.CAPABILITY_PRIVILEGES]
 
     def canRetrieveProperties(self, item):
         """

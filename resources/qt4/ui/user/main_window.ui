@@ -1282,18 +1282,27 @@
    </property>
   </action>
   <action name="privilegeAction">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>:/icons/icons/key24.png</normaloff>:/icons/icons/key24.png</iconset>
    </property>
    <property name="text">
-    <string>P&amp;revileges...</string>
+    <string>P&amp;rivileges...</string>
+   </property>
+   <property name="iconText">
+    <string>Privileges</string>
+   </property>
+   <property name="toolTip">
+    <string>Privileges</string>
    </property>
    <property name="statusTip">
-    <string>Open previlegedialog for the current selected file</string>
+    <string>Open privilege dialog for the current selected file</string>
    </property>
    <property name="visible">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </action>
   <action name="editPropertiesAction">

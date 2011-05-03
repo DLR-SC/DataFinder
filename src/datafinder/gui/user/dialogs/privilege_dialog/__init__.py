@@ -40,5 +40,6 @@
 Implements the privilege dialog.
 """
 
+from .main import PrivilegeDialog
 
 __version__ = "$Revision-Id:$" 

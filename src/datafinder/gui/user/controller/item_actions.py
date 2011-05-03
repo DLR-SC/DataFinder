@@ -53,6 +53,7 @@ from datafinder.gui.user.controller import constants as ac
 from datafinder.gui.user.dialogs.creation_wizard import CreationWizard
 from datafinder.gui.user.dialogs.properties_dialog import PropertiesDialog
 from datafinder.gui.user.dialogs.search_dialog import SearchDialog
+from datafinder.gui.user.dialogs.privilege_dialog import PrivilegeDialog
 from datafinder.gui.user.models import constants
 from datafinder.gui.user.models.properties import PropertiesModel
 
@@ -91,6 +92,7 @@ class ItemActionController(object):
         self._creationWizard = None
         self._progressDialog = None
         self._searchDialog = None
+        self._privilegeDialog = None
 
         self._itemActionChecker = _ItemActionChecker(self._sourceRepositoryModel,
                                                      self._targetRepositoryModel,
@@ -379,6 +381,12 @@ class ItemActionController(object):
         if self._searchDialog is None:
             self._searchDialog = SearchDialog(self._sourceRepositoryModel, self._mainWindow, self)
         self._searchDialog.show()
+    
+    def privilegeAction(self):
+        """Shows the privilege dialog. """
+        if self._privilegeDialog is None:
+            self._privilegeDialog = PrivilegeDialog(self._sourceRepositoryModel, self._mainWindow)
+        self._privilegeDialog.show()
 
     def commitArchive(self):
         """ Commits the selected archives. """
@@ -462,6 +470,9 @@ class ItemActionController(object):
         if not ac.SEARCH_ACTION in disableActions:
             menu.addAction(self._mainWindow.searchAction)
             menu.addSeparator()
+        if not ac.PRIVILEGE_ACTION in disableActions:
+            menu.addAction(self._mainWindow.privilegeAction)
+            menu.addSeparator()
         for action in self._mainWindow.editMenu.actions():
             if not unicode(action.objectName()) in disableActions:
                 menu.addAction(action)
@@ -501,7 +512,7 @@ class _ItemActionChecker(object):
                                                    ac.COMMIT_ARCHIVE_ACTION, ac.USE_SCRIPT_ACTION]
     _SINGLE_ITEM_ACTIONS = _MULTI_ITEM_ACTIONS + \
                            [ac.RENAME_ACTION, ac.COPY_PROPERTIES_ACTION, ac.EDIT_PROPERTIES_ACTION, ac.PRINT_ACTION, 
-                            ac.OPEN_ACTION]
+                            ac.OPEN_ACTION,  ac.PRIVILEGE_ACTION] 
     ALL_ITEM_ACTIONS = _SINGLE_ITEM_ACTIONS
 
     _ACTION_CHECK_MAP = {ac.CREATE_ARCHIVE_ACTION: lambda item: item.capabilities.canArchive,
@@ -512,6 +523,7 @@ class _ItemActionChecker(object):
                          ac.OPEN_ACTION: lambda item: not item.isLeaf or item.capabilities.canRetrieveData,
                          ac.PRINT_ACTION: lambda item: item.capabilities.canRetrieveData,
                          ac.SEARCH_ACTION: lambda item: item.capabilities.canSearch,
+                         ac.PRIVILEGE_ACTION: lambda item: item.capabilities.canPrivileges,
                          ac.RENAME_ACTION: lambda item: item.capabilities.canMove,
                          ac.COMMIT_ARCHIVE_ACTION: lambda item: item.state in [ITEM_STATE_ARCHIVED, ITEM_STATE_ARCHIVED_READONLY]} 
     
