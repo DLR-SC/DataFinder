@@ -68,6 +68,7 @@ _forcedIncludes = ["datafinder", "sgmllib", "htmlentitydefs",
 				   "datafinder.persistence.adapters.webdav_.factory", 
 				   "datafinder.persistence.adapters.tsm.factory",
                    "datafinder.persistence.adapters.archive.factory",
+                   "datafinder.persistence.adapters.svn.factory",
                    "datafinder.script_api.repository",
                    "datafinder.script_api.properties.property_support",
                    "datafinder.script_api.item.item_support"]
