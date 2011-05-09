@@ -157,13 +157,13 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         connection = self.__connectionPool.acquire()
         try:
             try:
-                persistenceProperties = properties
                 try:
+                    persistenceProperties = dict()
                     persistenceJsonProperties = self._retrieveProperties(connection)
                     if not persistenceJsonProperties is None:
-                        oldPersistenceProperties = json.loads(persistenceJsonProperties)
-                        persistenceProperties.update(oldPersistenceProperties)
-                except SubversionError:
+                        persistenceProperties = json.loads(persistenceJsonProperties)
+                    persistenceProperties.update(properties)
+                except SubversionError, error:
                     _log.debug("No subversion property is set!")
                 jsonProperties = value_mapping.getPersistenceRepresentation(persistenceProperties)
                 connection.setProperty(self.identifier, XPS_JSON_PROPERTY, jsonProperties)
