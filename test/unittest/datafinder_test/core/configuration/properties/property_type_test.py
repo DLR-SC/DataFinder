@@ -136,9 +136,12 @@ class ListPropertyTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates the test fixture. """
         
-        self._propertyType = property_type.ListType([property_type.StringType()])
+        allowedTypes = [property_type.StringType()]
+        self._propertyType = property_type.ListType(allowedTypes)
         self.assertEquals(len(self._propertyType.restrictions), 3)
         self.assertEquals(len(self._propertyType.restrictions[constants.ALLOWED_SUB_TYPES]), 1)
+        self.assertEquals(self._propertyType.restrictions["subTypes"], 
+                          [subType.name for subType in allowedTypes])
         
         self._propertyType = property_type.ListType()
         self.assertEquals(len(self._propertyType.restrictions), 3)
@@ -182,7 +185,7 @@ class AnyPropertyTestCase(unittest.TestCase):
         allowedTypes = [property_type.DatetimeType()]
         propType = property_type.AnyType(allowedTypes)
         self.assertEquals(propType.restrictions, 
-            {"subTypes": allowedTypes})
+                          {"subTypes": [subType.name for subType in allowedTypes]})
     
     def testValidate(self):
         """ Tests default data settings. """
@@ -247,12 +250,22 @@ class DomainObjectPropertyTestCase(unittest.TestCase):
         propertyType = property_type.DomainObjectType(name)
         self.assertEquals(propertyType.name, name)
         self.assertEquals(propertyType._cls, cls)
-
+        
+        # Initialization with full dotted name returns a class object
+        # with another name.
+        property_type.__import__ = lambda _, __, ___, ____: self.__module__
+        property_type.getattr = lambda _, __: self.__class__
+        self.assertEquals(property_type.DomainObjectType(name)._cls, 
+                          property_type.UnknownDomainObject)
+        property_type.__import__ = __import__
+        property_type.getattr = getattr
+        
         # Unknown domain objects      
         self.assertEquals(property_type.DomainObjectType("")._cls, 
                           property_type.UnknownDomainObject)
         self.assertEquals(property_type.DomainObjectType()._cls, 
                           property_type.UnknownDomainObject)
+        
         
     def testValidate(self):
         city = _City("New York")

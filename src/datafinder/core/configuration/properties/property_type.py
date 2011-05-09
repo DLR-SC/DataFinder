@@ -222,7 +222,7 @@ class ListType(BasePropertyType):
         subValidators = list()
         for subtype in self._allowedSubtypes:
             subValidators.append(subtype.validate)
-            self.restrictions[constants.ALLOWED_SUB_TYPES].append(subtype)
+            self.restrictions[constants.ALLOWED_SUB_TYPES].append(subtype.name)
         self._validate = type_validators.ListValidator(minimum, maximum, subValidators)
 
     def toPersistenceFormat(self, value):
@@ -293,7 +293,7 @@ class AnyType(BasePropertyType):
         subValidators = list()
         for subtype in self._allowedTypes:
             subValidators.append(subtype.validate)
-            self.restrictions[constants.ALLOWED_SUB_TYPES].append(subtype)
+            self.restrictions[constants.ALLOWED_SUB_TYPES].append(subtype.name)
         
         self.validate = base_validators.OrValidator(subValidators)
         
@@ -394,7 +394,10 @@ class DomainObjectType(BasePropertyType):
             moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
             cls = getattr(moduleInstance, className)
         except (ImportError, AttributeError, ValueError), error:
-            cls = self._handleImportError(str(error.args))
+            return self._handleImportError(str(error.args))
+        if cls.__name__ != className:
+            cls = self._handleImportError("Failed to import class '%s'! Got '%s' instead!" \
+                                          % (fullDottedClassName, cls.__name__))
         return cls
     
     def _handleImportError(self, reason):
