@@ -392,14 +392,21 @@ class DomainObjectType(BasePropertyType):
         className = fullDottedClassName[fullDottedClassName.rfind(".") + 1:]
         try:
             moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
-            return getattr(moduleInstance, className)
-        except (ImportError, AttributeError), error:
-            errorMessage = "Cannot import '%s'. Reason: '%s'" % (self.name, str(error.args))
-            _log.error(errorMessage)
-            self.name = "%s.%s" % (UnknownDomainObject.__module__, UnknownDomainObject.__name__)
-            return UnknownDomainObject
+            cls = getattr(moduleInstance, className)
+        except (ImportError, AttributeError, ValueError), error:
+            cls = self._handleImportError(str(error.args))
+        return cls
+    
+    def _handleImportError(self, reason):
+        """ Common procedure to handle failed domain object imports. """
+        
+        errorMessage = "Cannot import '%s'. Reason: '%s'" % (self.name, reason)
+        _log.error(errorMessage)
+        self.name = "%s.%s" % (UnknownDomainObject.__module__, UnknownDomainObject.__name__)
+        return UnknownDomainObject
 
     def _validate(self, value):
+
         """ Delegates the validation to the actual instance. """
 
         if self._cls != value.__class__:
