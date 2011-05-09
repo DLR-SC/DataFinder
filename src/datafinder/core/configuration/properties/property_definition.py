@@ -42,7 +42,6 @@ This module provides the definition of a property representations.
 
 from datafinder.core.configuration.gen.datamodel import property as property_
 from datafinder.core.configuration.properties import constants, property_type
-from datafinder.core.configuration.properties.validators import error
 from datafinder.core.error import ConfigurationError, PropertyError
 
 
@@ -96,11 +95,17 @@ class PropertyDefinition(object):
         self._identifier = identifier
         self.namespace = namespace
         self.category = category
-        self.displayName = displayName or identifier
+        self.displayName = displayName or identifier or ""
         self.description = description
         self._propertyType = propertyType
         self.defaultValue = None
-        self.notNull = False
+        
+    def _getNotNull(self):
+        return self._propertyType.notNull
+
+    def _setNotNull(self, value):
+        self._propertyType.notNull = value
+    notNull = property(_getNotNull, _setNotNull)
         
     @property
     def identifier(self):
@@ -114,12 +119,6 @@ class PropertyDefinition(object):
         
         return self._propertyType.name
     
-    @property
-    def propertyType(self):
-        """ Returns the type of the property. """
-        
-        return self._propertyType
-
     @property
     def restrictions(self):
         """ Returns the defined restrictions of the property. """
@@ -138,43 +137,74 @@ class PropertyDefinition(object):
         @type value: C{object}
         
         @raise PropertyError: Indicating that the value does not conform
-                              to the defined restrictions.
+            to the defined restrictions.
         """
         
-        if not value is None:
-            try:
-                self._propertyType.validator(value)
-            except error.ValidationError, error_:
-                raise PropertyError(self.identifier, error_.errorMessage)
-        else:
-            if self.notNull:
-                raise PropertyError(self.identifier, "Property value for %s must not be None." % self.displayName)
+        try:
+            self._propertyType.validate(value)
+        except ValueError, error:
+            raise PropertyError(self.identifier, repr(error.args))
             
+    def fromPersistenceFormat(self, persistedValue):
+        """ @see: <fromPersistenceFormat<datafinder.core.configuration.properties.
+        property_type.ListType.fromPersistenceFormat>}
+        
+        @raise PropertyError: Indicating that the value could not be restored or
+            does not conform to the defined restrictions.
+        """
+
+        try:        
+            value = self._propertyType.fromPersistenceFormat(persistedValue)
+        except ValueError, error:
+            raise PropertyError(self.identifier, repr(error.args))
+        else:
+            self.validate(value)
+            return value
+    
+    def toPersistenceFormat(self, value):
+        """ @see: <fromPersistenceFormat<datafinder.core.configuration.properties.
+        property_type.ListType.fromPersistenceFormat>} 
+        
+        @raise PropertyError: Indicating that the value could not be transformed
+            to the persistence format.
+        """
+        
+        try:
+            return self._propertyType.toPersistenceFormat(value)
+        except ValueError, error:
+            raise PropertyError(self.identifier, repr(error.args))
+    
     def __cmp__(self, other):
         """ Comparison of two instances. """
         
-        if self.identifier ==  other.identifier \
-           and self.namespace == other.namespace:
-            return 0
-        return 1
-        
+        try:
+            if self.identifier == other.identifier \
+               and self.namespace == other.namespace:
+                return 0
+            return 1
+        except AttributeError:
+            return 1
+
+    def __hash__(self):
+        return id(self.identifier) | id(self.namespace)
+           
     def __repr__(self):
         """ Returns a readable representation. """
         
         return self.displayName
 
     @staticmethod
-    def load(peristedPropertyDefinition):
-        """ Loads the property form persistence format. """
+    def load(persistedPropertyDefinition):
+        """ Loads the property definition form persistence format. """
         
-        propertyType = property_type.createPropertyType(peristedPropertyDefinition.valueType)
-        propertyDef = PropertyDefinition(peristedPropertyDefinition.name, propertyType=propertyType)
-        propertyDef.defaultValue = peristedPropertyDefinition.defaultValue
-        propertyDef.notNull = peristedPropertyDefinition.mandatory
+        propertyType = property_type.createPropertyType(persistedPropertyDefinition.valueType)
+        propertyDef = PropertyDefinition(persistedPropertyDefinition.name, propertyType=propertyType)
+        propertyDef.defaultValue = persistedPropertyDefinition.defaultValue
+        propertyDef.notNull = persistedPropertyDefinition.mandatory
         return propertyDef
     
     def toPersistenceRepresentation(self):
-        """ Returns a property in persistence format. """
+        """ Returns a property definition in persistence format. """
         
         return property_(self.identifier, self._propertyType.name, 
                          self.notNull, self.defaultValue)
@@ -189,7 +219,14 @@ class PropertyDefinitionFactory(object):
         """ 
         Constructor.
         
-        @param propertyIdValidator: Function taking the property  identifier as argument and checks whether it is valid.
+        @param propertyIdValidator: Function taking the property 
+        identifier as argument and checks whether it is valid.
+        Example:
+        >>> def isValid(theIdentfierString):
+        ...     position = None
+        ...     isValid = True
+        ...     return isValid, position
+        
         @type propertyIdValidator: Function object.
         """
         
@@ -208,8 +245,8 @@ class PropertyDefinitionFactory(object):
             isValid = self.propertyIdValidator(identifier)[0]
         return isValid
    
-    def createPropertyDefinition(self, identifier, category, propertyType=property_type.AnyType(), 
-                                 displayName=None, description=None, namespace=None):
+    def createPropertyDefinition(self, identifier, category=constants.USER_PROPERTY_CATEGORY, 
+        propertyType=property_type.AnyType(), displayName=None, description=None, namespace=None):
         """ 
         Returns a property definition. 
         

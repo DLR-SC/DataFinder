@@ -1,3 +1,6 @@
+# pylint: disable=W0212
+# W0212: It is fine to access protected members for test purposes.
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -43,10 +46,10 @@ Test module for the property type registry.
 import unittest
 
 from datafinder.core.configuration.properties import constants
-from datafinder.core.configuration.properties.property_definition import PropertyDefinition
+from datafinder.core.configuration.properties.property_definition import PropertyDefinition, PropertyDefinitionFactory
 from datafinder.core.configuration.properties.registry import PropertyDefinitionRegistry
 from datafinder.core.configuration.properties import property_type
-from datafinder_test.mocks import SimpleMock
+from datafinder.core.error import ConfigurationError
 
 
 __version__ = "$Revision-Id:$" 
@@ -58,56 +61,72 @@ class PropertyTypeRegistryTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates the required test environment. """
         
-        self.__propertyDef = PropertyDefinition("testID", constants.USER_PROPERTY_CATEGORY, property_type.StringType())
-        self.__registry = PropertyDefinitionRegistry(SimpleMock(), False)
-        self.__lenRegisteredProperties = len(self.__registry.registeredPropertyDefinitions)
+        self._propDef = PropertyDefinition(
+            "testID", constants.USER_PROPERTY_CATEGORY, property_type.StringType())
+        self._registry = PropertyDefinitionRegistry(PropertyDefinitionFactory(), True)
+        self._regPropsNumber = len(self._registry.registeredPropertyDefinitions)
     
     def tearDown(self):
         """ Cleans up test environment. """
         
-        self.__registry.unregister([self.__propertyDef])
+        self._registry.unregister([self._propDef])
     
     def testRemovingOfNonExistingPropertyType(self):
         """ Tests the removing of a non-existing property type definition. """
         
-        self.__registry.unregister([self.__propertyDef])
-        self.assertEquals(len(self.__registry.registeredPropertyDefinitions), self.__lenRegisteredProperties)
+        self._registry.unregister([self._propDef])
+        self.assertEquals(len(self._registry.registeredPropertyDefinitions), 
+            self._regPropsNumber)
         
     def testMuliplePropertyTypeAdding(self):
         """ Tests the multiple adding of the identical property type definition. """
         
-        self.__registry.register([self.__propertyDef, self.__propertyDef])
-        self.assertEquals(len(self.__registry.registeredPropertyDefinitions), self.__lenRegisteredProperties + 1)
+        self._registry.register([self._propDef, self._propDef])
+        self.assertEquals(
+            len(self._registry.registeredPropertyDefinitions), self._regPropsNumber + 1)
         
     def testRegisterPropertyType(self):
         """ Tests the registering of a property type. """
         
-        self.__registry.register([self.__propertyDef])
-        self.failIf((self.__propertyDef.namespace, self.__propertyDef.identifier) not in self.__registry.registeredPropertyDefinitions, 
-                    "The property was not registered.")
-        self.__registry.unregister([self.__propertyDef])
-        self.failIf((self.__propertyDef.namespace, self.__propertyDef.identifier) in self.__registry.registeredPropertyDefinitions, 
-                    "The property was not unregistered.")
+        self._registry.register([self._propDef])
+        self.failIf(
+            not self._registry.isPropertyDefinitionRegistered(self._propDef), 
+            "The property was not registered.")
+        
+        # Trying to register a system-specific properties again
+        systemPropDef = self._registry.systemPropertyDefinitions[0]
+        self.assertTrue(self._registry.existsSystemPropertyDefinition(systemPropDef.identifier))
+        self.assertRaises(ConfigurationError, self._registry.register, [systemPropDef])
+        
+        self._registry.clear()
+        self.assertEquals(len(self._registry.registeredPropertyDefinitions), 
+                          self._regPropsNumber)
+        self.assertEquals(len(self._registry.systemPropertyDefinitions), 
+                          self._regPropsNumber)
 
     def testUnregisterPropertyType(self):
         """ Tests the registering of a property type. """
         
-        self.__registry.unregister([self.__propertyDef])
-        self.failIf(self.__propertyDef.identifier in self.__registry.registeredPropertyDefinitions, "The property was not unregistered.")
+        self._registry.register([self._propDef])
+        self._registry.unregister([self._propDef])
+        self.failIf(
+            self._registry.isPropertyDefinitionRegistered(self._propDef), 
+            "The property was not registered.")
 
     def testPropertyTypeMappingUnmodifiable(self):
         """ Tests that property type mapping cannot be changed from outside. """
         
-        registeredProperties = self.__registry.registeredPropertyDefinitions
+        registeredProperties = self._registry.registeredPropertyDefinitions
         for propertyDef in registeredProperties:
-            if not propertyDef in self.__registry.registeredPropertyDefinitions:
+            if not propertyDef in self._registry.registeredPropertyDefinitions:
                 self.fail("Property definition not available.")
-        registeredProperties[self.__propertyDef.identifier] = self.__propertyDef
-        self.assertEquals(len(self.__registry.registeredPropertyDefinitions), self.__lenRegisteredProperties)
+        registeredProperties[self._propDef.identifier] = self._propDef
+        self.assertEquals(
+            len(self._registry.registeredPropertyDefinitions), self._regPropsNumber)
         
         equal = True
         for propertyDef in registeredProperties:
-            if not propertyDef in self.__registry.registeredPropertyDefinitions:
+            if not propertyDef in self._registry.registeredPropertyDefinitions:
                 equal = False
         if equal:
             self.fail("Property definition changed from outside.")
@@ -115,9 +134,60 @@ class PropertyTypeRegistryTestCase(unittest.TestCase):
     def testUpdateRegisteredPropertyType(self):
         """ Tests the update of a registered property type definition. """
         
-        self.__registry.register([self.__propertyDef])
-        self.__propertyDef.description = "New Description"
-        self.__registry.register([self.__propertyDef])
+        self._registry.register([self._propDef])
+        self._propDef.description = "New Description"
+        self._registry.register([self._propDef])
         
-        propertyDefRegistry = self.__registry.registeredPropertyDefinitions[(self.__propertyDef.namespace, self.__propertyDef.identifier)]
-        self.assertEquals(propertyDefRegistry.description, self.__propertyDef.description)
+        propertyDefRegistry = self._registry.registeredPropertyDefinitions\
+            [(self._propDef.namespace, self._propDef.identifier)]
+        self.assertEquals(propertyDefRegistry.description, self._propDef.description)
+
+    def testGetPropertyDefinition(self):
+        self._registry.register([self._propDef])
+        retrievedPropDef = self._registry.getPropertyDefinition(self._propDef.identifier)
+        self.assertEquals(retrievedPropDef, self._propDef)
+        self.assertNotEquals(id(retrievedPropDef), id(self._propDef))
+        
+        # Non-registered properties are created
+        newPropDef = self._registry.getPropertyDefinition("new")
+        self.assertTrue(not self._registry.isPropertyDefinitionRegistered(newPropDef)) # but not registered
+
+    def testDataFields(self):
+        """ Checks the different attributes data / fields. """
+        
+        self.assertEquals(self._registry.defaultArchivePropertyDefinitions,
+                          self._registry._defaultArchivePropertyDefinitions)
+        self.assertNotEquals(id(self._registry.defaultArchivePropertyDefinitions),
+                             id(self._registry._defaultArchivePropertyDefinitions))
+        
+        self.assertEquals(self._registry.defaultResourcePropertyDefinitions,
+                          self._registry._defaultResourcePropertyDefinitions)
+        self.assertNotEquals(id(self._registry.defaultResourcePropertyDefinitions),
+                             id(self._registry._defaultResourcePropertyDefinitions))
+        
+        self.assertEquals(self._registry.defaultCollectionPropertyDefinitions,
+                          self._registry._defaultCollectionPropertyDefinitions)
+        self.assertNotEquals(id(self._registry.defaultCollectionPropertyDefinitions),
+                             id(self._registry._defaultCollectionPropertyDefinitions))
+        
+        self.assertEquals(self._registry.registeredPropertyDefinitions,
+                          self._registry._registeredPropertyDefinitions)
+        self.assertNotEquals(id(self._registry.registeredPropertyDefinitions),
+                             id(self._registry._registeredPropertyDefinitions))
+        
+        self.assertEquals(self._registry.systemPropertyDefinitions,
+                          self._registry._systemPropertyDefinitions)
+        self.assertNotEquals(id(self._registry.systemPropertyDefinitions),
+                             id(self._registry._systemPropertyDefinitions))
+
+    def testPropertyNameValidationFunction(self):
+        """ Ensures that the extended check function works as expected. """
+        
+        # Check for non-existing ID
+        testFunction = self._registry.propertyNameValidationFunction
+        self.assertEquals(testFunction("unknownId"), True)
+        
+        # Check for existing ID
+        self._registry.register([self._propDef])
+        testFunction = self._registry.propertyNameValidationFunction
+        self.assertEquals(testFunction(self._propDef.identifier), False)

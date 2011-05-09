@@ -67,6 +67,7 @@ MAXIMUM_NUMBER_OF_DECIMAL_PLACES = u"maximumNumberOfDecimalPlaces"
 OPTIONS = u"options"
 OPTIONS_MANDATORY = u"optionsMandatory"
 PATTERN = u"pattern"
+ALLOWED_SUB_TYPES = "subTypes"
 
 # definition of property identifiers
 MODIFICATION_DATETIME_ID = u"____modificationdatetime____"

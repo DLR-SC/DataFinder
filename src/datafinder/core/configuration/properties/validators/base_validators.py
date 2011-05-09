@@ -40,10 +40,9 @@ This module defines a basic set of validation functions / classes for value veri
 """
 
 
+import decimal
 import re
-from decimal import Decimal
-
-from datafinder.core.configuration.properties.validators.error import ValidationError
+import sys
 
 
 __version__ = "$Revision-Id:$" 
@@ -57,8 +56,6 @@ class IsInRange(object):
     
     def __init__(self, minValue=None, maxValue=None):
         """ 
-        Constructor. 
-        
         @param minValue: The lower bound.
         @type minValue: C{object}
         @param maxValue: The upper bound.
@@ -77,9 +74,9 @@ class IsInRange(object):
         """
         
         if not self.minValue is None and value < self.minValue:
-            raise ValidationError("The provided value is < than the defined minimum.")
+            raise ValueError("The provided value is < than the defined minimum.")
         if not self.maxValue is None and value > self.maxValue:
-            raise ValidationError("The provided value is > then the defined maximum.")
+            raise ValueError("The provided value is > then the defined maximum.")
 
 
 class IsDecimalInRange(object):
@@ -89,12 +86,10 @@ class IsDecimalInRange(object):
     
     def __init__(self, minValue, maxValue):
         """ 
-        Constructor. 
-        
         @param minValue: The lower bound.
-        @type minValue: C{decimal.Decimal}
+        @type minValue: C{decimal.Decimal}, C{int}, C{long}, C{float}
         @param maxValue: The upper bound.
-        @type maxValue: C{decimal.Decimal}
+        @type maxValue: C{decimal.Decimal}, C{int}, C{long}, C{float}
         """
         
         self.minValue = minValue
@@ -107,13 +102,22 @@ class IsDecimalInRange(object):
         The value is converted to C{decimal.Decimal} before performing the range check.
         """
         
-        if isinstance(value, float):
-            value = Decimal(str(value))
-        self.__inRangeValidator.minValue = self.minValue
-        self.__inRangeValidator.maxValue = self.maxValue
-        self.__inRangeValidator(value)
+        self.__inRangeValidator.minValue = _toDecimal(self.minValue)
+        self.__inRangeValidator.maxValue = _toDecimal(self.maxValue)
+        self.__inRangeValidator(_toDecimal(value))
+
         
-        
+def _toDecimal(value):
+    """ Performs the conversion to C{decimal.Decimal}. """
+    
+    if not isinstance(value, decimal.Decimal):
+        try:
+            value = decimal.Decimal(str(value))
+        except decimal.InvalidOperation:
+            raise ValueError("The value '%s' is no valid numeric." % str(value))
+    return value
+
+
 class IsLengthInRange(object):
     """ 
     Checks whether the length of a given value is in a specific range. 
@@ -123,8 +127,6 @@ class IsLengthInRange(object):
     
     def __init__(self, minLength=None, maxLength=None):
         """ 
-        Constructor. 
-        
         @param minLength: The lower bound.
         @type minLength: C{int}
         @param maxLength: The upper bound.
@@ -156,8 +158,6 @@ class IsNumberOfDecimalPlacesInRange(object):
     
     def __init__(self, minNumberOfDecimalPlaces=None, maxNumberOfDecimalPlaces=None):
         """ 
-        Constructor. 
-        
         @param minNumberOfDecimalPlaces: The lower bound.
         @type minNumberOfDecimalPlaces: C{int}
         @param maxNumberOfDecimalPlaces: The upper bound.
@@ -176,13 +176,13 @@ class IsNumberOfDecimalPlacesInRange(object):
         @type value: L{Decimal<decimal.Decimal>}, C{float}, C{int}
         """
         
-        if not isinstance(value, Decimal):
-            value = Decimal(str(value))
+        value = _toDecimal(value)
+        
         # calculate specified number of decimal places
-        tupleRepr = value.as_tuple() # represents the numeric value as (sign, given digits, exponent)
-        if tupleRepr[2] >= 0: # positive or zero exponent indicates zero decimal places
+        tupleRepr = value.as_tuple() # represents as: (sign, given digits, exponent)
+        if tupleRepr[2] >= 0: # positive or zero exponent
             decimalPlaces = 0
-        else: # negative exponent indicates a numeric value with decimal places
+        else:
             absolutExponent = abs(tupleRepr[2])
             possibleNumberOfDecimalPlaces = len(tupleRepr[1])
             if possibleNumberOfDecimalPlaces > absolutExponent:
@@ -190,7 +190,7 @@ class IsNumberOfDecimalPlacesInRange(object):
             else:
                 decimalPlaces = possibleNumberOfDecimalPlaces
                 
-        # check the calculate number of specified decimal places
+        # check the calculated number of specified decimal places
         self.__inRangeValidator.minValue = self.minNumberOfDecimalPlaces
         self.__inRangeValidator.maxValue = self.maxNumberOfDecimalPlaces
         self.__inRangeValidator(decimalPlaces)
@@ -204,8 +204,6 @@ class AreOptionsMatched(object):
     
     def __init__(self, options, optionsMandatory=True):
         """
-        Constructor.
-        
         @param options: List of options that the checked value have to be taken from.
         @type options: C{list}
         """
@@ -223,20 +221,16 @@ class AreOptionsMatched(object):
         
         if self.optionsMandatory:
             if not value in self.options:
-                raise ValidationError("The item is not taken from the specified options.") 
+                raise ValueError("The item is not taken from the specified options.") 
 
 
 class AreTypesMatched(object):
     """
     Checks whether the value is from one of the allowed types.
-    
-    @note: The type checking is performed with the help of C{isinstance}.
     """
     
     def __init__(self, valueTypes, exactMatch=True):
         """
-        Constructor.
-        
         @param valueTypes: List of class object.
         @type valueTypes: C{list} of class objects.
         @param exactMatch: If C{True} type checking is performed by using C{type}
@@ -265,7 +259,7 @@ class AreTypesMatched(object):
                     representationTypeFound = True
                     break
         if not representationTypeFound:
-            raise ValidationError("The given value has not the required type.")
+            raise ValueError("The given value has not the required type. %s %s" % (repr(value), repr(self.valueTypes)))
 
 
 class IsPatternMatched(object):
@@ -275,8 +269,6 @@ class IsPatternMatched(object):
     
     def __init__(self, pattern):
         """
-        Constructor.
-        
         @param regularExpression: Convenient regular expression pattern.
         @type regularExpression: C{unicode}
         """
@@ -289,9 +281,9 @@ class IsPatternMatched(object):
         try:
             result = re.match(self.pattern, value)
         except (re.error, TypeError):
-            raise ValidationError("The pattern %s is not a valid regular expression." % self.pattern)
+            raise ValueError("The pattern %s is not a valid regular expression." % self.pattern)
         if result is None:
-            raise ValidationError("The given value does not match the defined pattern.")
+            raise ValueError("The given value does not match the defined pattern.")
 
 
 class IsEachValueUnique(object):
@@ -309,7 +301,7 @@ class IsEachValueUnique(object):
         
         tmpDict = dict.fromkeys(value) # Removes duplicated entries
         if len(tmpDict) != len(value):
-            raise ValidationError("The values in the given list are not unique.")
+            raise ValueError("The values in the given list are not unique.")
         
         
 class IsBinaryStringDecodable(object):
@@ -317,9 +309,11 @@ class IsBinaryStringDecodable(object):
     Checks whether the given string can be converted to unicode by 
     using the default encoding.
     """
+    
+    def __init__(self):
+        self._encoding = sys.getdefaultencoding() or "ascii"
         
-    @staticmethod
-    def __call__(value):
+    def __call__(self, value):
         """
         Checks whether the given string can be converted to unicode by 
         using the default encoding.
@@ -328,16 +322,17 @@ class IsBinaryStringDecodable(object):
         @type value: C{basestring}
         """
         
-        if isinstance(value, basestring):
-            if isinstance(value, str):
-                try:
-                    unicode(value)
-                except UnicodeEncodeError:
-                    errorMessage = "The given binary string cannot be converted to unicode using the default encoding." + \
-                                   "Please convert the string to unicode before."
-                    raise ValidationError(errorMessage)
+        if not isinstance(value, unicode):
+            try:
+                unicode(value, self._encoding)
+            except UnicodeError:
+                errorMessage = "The given binary string cannot be converted to unicode using the default encoding." + \
+                               "Please convert the string to unicode before."
+                raise ValueError(errorMessage)
+            except TypeError:
+                raise ValueError("The value '%s' is no binary string." %  str(value))
 
-            
+
 class ForEach(object):
     """
     This class performs a given check for each value in a sequence.
@@ -345,8 +340,6 @@ class ForEach(object):
     
     def __init__(self, validator):
         """
-        Constructor.
-        
         @param validator: A callable which takes a certain value as input.
                           Valid callables are defined in this module.
         @type: C{callable}
@@ -372,8 +365,6 @@ class OrValidator(object):
     
     def __init__(self, validators):
         """
-        Constructor.
-        
         @param validator: A list callable which takes a certain value as input.
                           Valid callables are defined in this module.
         @type: C{list} of C{callable}
@@ -388,17 +379,15 @@ class OrValidator(object):
         @param value: Any value.
         """
         
-        if value == 1:
-            pass
         for validator in self.validators:
             try:
                 validator(value)
                 allValidatorsFailed = False
                 break
-            except ValidationError:
+            except ValueError:
                 allValidatorsFailed = True
         if allValidatorsFailed:
-            raise ValidationError("Every defined validation rule failed for the given value.")
+            raise ValueError("Every defined validation rule failed for the given value.")
 
 
 class AndValidator(object):
@@ -408,8 +397,6 @@ class AndValidator(object):
     
     def __init__(self, validators):
         """
-        Constructor.
-        
         @param validator: A list of callables which takes a certain value as input.
                           Valid callables are defined in this module.
         @type: C{list} of C{callable}

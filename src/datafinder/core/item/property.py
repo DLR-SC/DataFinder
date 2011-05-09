@@ -40,7 +40,6 @@ Represents a property, i.e. property definition and value.
 """
 
 
-from datafinder.core.configuration.properties.property_type import ObjectType
 from datafinder.core.error import PropertyError
 
 
@@ -60,6 +59,8 @@ class Property(object):
         @type propertyDefinition: L{PropertyDefinition<datafinder.core.configuration.properties.property_definition.PropertyDefinition>}
         @param value: Value of the property.
         @type value: C{object}
+        
+        @raise PropertyError: Value does not fit.
         """
         
         self._propertyDefinition = propertyDefinition
@@ -84,36 +85,20 @@ class Property(object):
     def __getValue(self):
         """ Getter of the value attribute. """
         
-        if isinstance(self._value, type(dict())):
-            print self._propertyDefinition.propertyType.instance.fromDict(self._value)
-            print self._propertyDefinition.propertyType.instance.fromDict(self._value).__dict__
-            try:
-                return self._propertyDefinition.propertyType.instance.fromDict(self._value)
-            except AttributeError, error:
-                raise PropertyError("Cannot get value. Reason: %s" % error)
-        else:
-            return self._value
+        return self._value
         
     def __setValue(self, value):
         """ Setter of the value attribute. """        
 
         self.propertyDefinition.validate(value)
-        self._additionalValueRepresentations = list()
         self._value = value
     
     value = property(__getValue, __setValue)
 
-    def __getAdditionalValueRepresentations(self):
-        """ Returns the additional supported value representations. """
-        
-        return self._additionalValueRepresentations[:]
-
-    additionalValueRepresentations = property(__getAdditionalValueRepresentations)
-
     def __repr__(self):
         """ Returns the representation. """
         
-        return repr(self.propertyDefinition) + ": " + repr(self.value)
+        return str(self.propertyDefinition) + ": " + str(self.value)
     
     def __cmp__(self, other):
         """ Implements comparison of two instances. """
@@ -124,13 +109,10 @@ class Property(object):
             return 1
         
     def toPersistenceFormat(self):
-        value = self.value
-        if isinstance(self._propertyDefinition.propertyType, ObjectType):
-            try:
-                value = self.value.toDict()
-            except AttributeError, error:
-                raise PropertyError("Cannot convert to persistence format. Reason: %s" % error)
-        return self.identifier, value
+        """ @note: Raises a C{PropertyError} if the conversion fails. """
+        
+        preparedValue = self._propertyDefinition.toPersistenceFormat(self.value)
+        return {self.identifier: preparedValue}
         
     @staticmethod
     def create(propertyDefinition, persistedValue):
@@ -141,30 +123,19 @@ class Property(object):
         @type propertyDefinition: L{PropertyDefinition<datafinder.core.configuration.properties.property_definition.PropertyDefinition>}
         @param persistedValue: Value of the property in persistence format.
         @type persistedValue: L{MetadataValue<datafinder.persistence.metadata.value_mapping.MetadataValue>}
+        
+        @raise PropertyError: Value does not fit. 
         """
     
-        additionalValueRepresentations = list()
-        foundValidRepresentation = False
+        foundValue = False
         valueRepresentations = persistedValue.guessRepresentation()
         for valueRepresentation in valueRepresentations:
             try:
-                
-                if isinstance(valueRepresentation, dict): 
-                    try:
-                        classObj = propertyDefinition.propertyType.cls
-                        valueRepresentation = classObj.fromDict(valueRepresentation)
-                    except AttributeError, error:
-                        raise PropertyError(propertyDefinition.identifier, "Cannot create property. Reason: %s" % error)
-                propertyDefinition.validate(valueRepresentation)
-                if not foundValidRepresentation:
-                    value = valueRepresentation
-                    foundValidRepresentation = True
-                else:
-                    additionalValueRepresentations.append(valueRepresentation)
+                value = propertyDefinition.fromPersistenceFormat(valueRepresentation)
+                foundValue = True
+                break
             except PropertyError:
                 continue
-        if not foundValidRepresentation:
+        if not foundValue:
             value = propertyDefinition.defaultValue
-        result = Property(propertyDefinition, value)
-        result._additionalValueRepresentations = additionalValueRepresentations
-        return result
+        return Property(propertyDefinition, value)

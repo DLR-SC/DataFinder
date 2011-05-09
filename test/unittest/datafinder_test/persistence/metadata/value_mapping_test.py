@@ -110,10 +110,10 @@ class MetadataValueTestCase(unittest.TestCase):
         # Tests for a bool value.
         persistedValue = u"1"
         metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [True, decimal.Decimal("1"), datetime(1970, 1, 1, 1, 0, 1), u"1", 1])
+        self.assertEquals(metdataValue.guessRepresentation(), [True, decimal.Decimal("1"), datetime(1970, 1, 1, 1, 0, 1), 1,  u"1"])
         persistedValue = u"0"
         metdataValue = MetadataValue(persistedValue)
-        self.assertEquals(metdataValue.guessRepresentation(), [False, decimal.Decimal("0"), datetime(1970, 1, 1, 1, 0), u"0", 0])
+        self.assertEquals(metdataValue.guessRepresentation(), [False, decimal.Decimal("0"), datetime(1970, 1, 1, 1, 0), 0, u"0"])
       
       
     def testGetPersistenceRepresentation(self):

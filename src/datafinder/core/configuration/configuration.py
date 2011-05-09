@@ -155,9 +155,9 @@ class RepositoryConfiguration(object):
                     errorMessage = "The repository configuration '%s' does not exist." % self.repositoryConfigurationUri
                     raise ConfigurationError(errorMessage)
                 else:
+                    self._scriptHandler.load()
                     self._dataModelHandler.load()
                     self._dataStoreHandler.load()
-                    self._scriptHandler.load()
                     self._iconHandler.load()
         
     def store(self):

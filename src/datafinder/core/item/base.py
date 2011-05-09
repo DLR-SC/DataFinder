@@ -420,7 +420,7 @@ class ItemBase(object):
                             self.properties[property_.identifier] = Property(propDef, property_.value)
                         except PropertyError:
                             continue
-                    propertiesToStore[property_.identifier] = property_.value
+                    propertiesToStore.update(**property_.toPersistenceFormat())
         try:
             self.fileStorer.updateMetadata(propertiesToStore)
         except (AttributeError, PersistenceError), error:

@@ -42,11 +42,8 @@ Provides tests for the property representation.
 
 import unittest
 
-from datafinder.core.configuration.properties import property_type
-from datafinder.core.configuration.properties.property_definition import PropertyDefinition
 from datafinder.core.error import PropertyError
 from datafinder.core.item.property import Property
-from datafinder.script_api.properties.property_base_domain import PropertyBaseDomain
 from datafinder_test.mocks import SimpleMock
 
 
@@ -60,11 +57,13 @@ class _PropertyDefinitionMock(object):
     mock = None
     
     def validate(self, value):
-        """ Mocks the validate method. """
-        
         if not value == self.defaultValue:
             self.mock.validate(value)
     
+    def fromPersistenceFormat(self, _):
+        self = self # silent pylint
+        return True
+
 
 class PropertyTestCase(unittest.TestCase):
     """ Provides test cases for the Property representation. """
@@ -81,7 +80,6 @@ class PropertyTestCase(unittest.TestCase):
         self.assertEquals(self._property.value, None)
         self._property.value = "Test"
         self.assertEquals(self._property.value, "Test")
-        self.assertTrue(len(self._property.additionalValueRepresentations) == 0)
         
         self._propertyDefMock.error = PropertyError("", "")
         try:
@@ -95,83 +93,32 @@ class PropertyTestCase(unittest.TestCase):
         
         self._property = Property.create(self._propertyDefMock, SimpleMock([None]))
         self.assertEquals(self._property.value, None)
-        self.assertTrue(len(self._property.additionalValueRepresentations) == 0)
 
+        self._propertyDefMock.value = True
         self._property = Property.create(self._propertyDefMock, SimpleMock([True, 0, "0"]))
         self.assertEquals(self._property.value, True)
-        self.assertEquals(self._property.additionalValueRepresentations, [0, "0"])
 
-        self._propertyDefMock.error = PropertyError("", "")
-        propertyDefMock = _PropertyDefinitionMock()
-        propertyDefMock.mock = self._propertyDefMock
-        propertyDefMock.defaultValue = "Test"
-        self._property = Property.create(propertyDefMock, SimpleMock([True, 0, "0"]))
+        self._propertyDefMock.methodNameResultMap = \
+            {"fromPersistenceFormat":(None, PropertyError("", ""))}
+        self._propertyDefMock.defaultValue = "Test"
+        self._property = Property.create(self._propertyDefMock, SimpleMock([True, 0, "0"]))
         self.assertEquals(self._property.value, "Test")
-        self.assertEquals(self._property.additionalValueRepresentations, list())
         
-        propertyDef = PropertyDefinition("identifier", "category", property_type.ObjectType("datafinder_test.core.item.property_test.AuthorPropertyMock"))
-        propertyDef.defaultValue = "Test"
-        self._property = Property.create(propertyDef, SimpleMock([{"firstName": "Max", "lastName": "Muster", "email": "muster@gmail.com", \
-                                                                   "address": {"street": "Teststreet", "city": "New York"}}]))
-        self.assertEquals(self._property.value.firstName, "Max")
-        self.assertEquals(self._property.value.lastName, "Muster")
-        self.assertEquals(self._property.value.email, "muster@gmail.com")
-        self.assertEquals(self._property.value.address.street, "Teststreet")
-        self.assertEquals(self._property.value.address.city, "New York")
-        self.assertEquals(self._property.additionalValueRepresentations, list())
-        
-        propertyDef = PropertyDefinition("identifier", "category", property_type.ObjectType("datafinder_test.core.item.property_test.AddressPropertyMock"))
-        propertyDef.defaultValue = "Test"
-        self._property = Property.create(propertyDef, SimpleMock([{"street": "Teststreet", "city": "New York"}]))
-        self.assertEquals(self._property.value.street, "Teststreet")
-        self.assertEquals(self._property.value.city, "New York")
-        self.assertEquals(self._property.additionalValueRepresentations, list())
-    
     def testComparison(self):
         """ Tests the comparison of two instances. """
         
         self.assertEquals(self._property, self._property)
         self.assertEquals(self._property, Property(self._property.propertyDefinition, "value"))
         self.assertNotEquals(self._property, Property(SimpleMock(), "value"))
+        self.assertNotEquals(self._property, None)
         
     def testToPersistenceFormat(self):
-        """ Tests the creation of the persistence format. """
+        self.assertEquals(self._property.toPersistenceFormat(), 
+                          {self._property.identifier: None})
         
-        propertyDef = PropertyDefinition("identifier", "category", property_type.ObjectType("datafinder_test.core.item.property_test.AuthorPropertyMock"))
-        propertyDef.defaultValue = "Test"
-        self._property = Property.create(propertyDef, SimpleMock([{"firstName": "Max", "lastName": "Muster", "email": "muster@gmail.com", \
-                                                                   "address": {"street": "Teststreet", "city": "New York"}}]))
-        self.assertEquals(self._property.toPersistenceFormat(), ("identifier", {"firstName": "Max", "lastName": "Muster", "email": "muster@gmail.com", \
-                                                                   "address": {"street": "Teststreet", "city": "New York"}}))
-        
-        propertyDef = PropertyDefinition("identifier", "category", property_type.ObjectType("datafinder_test.core.item.property_test.AddressPropertyMock"))
-        propertyDef.defaultValue = "Test"
-        self._property = Property.create(propertyDef, SimpleMock([{"street": "Teststreet", "city": "New York"}]))
-        self.assertEquals(self._property.toPersistenceFormat(), ("identifier", {"street": "Teststreet", "city": "New York"}))
+        self._propertyDefMock.error = PropertyError("", "")
+        self.assertRaises(PropertyError, self._property.toPersistenceFormat)
 
-
-class AuthorPropertyMock(PropertyBaseDomain):
-    """ A simple property model class. """
-    
-    def __init__(self):
-        """
-        Constructor.
-        """
-        
-        self.firstName = ""
-        self.lastName = ""
-        self.email = ""
-        self.address = AddressPropertyMock()
-        
-        
-class AddressPropertyMock(PropertyBaseDomain):
-    """ A simple property model class. """
-    
-    def __init__(self):
-        """
-        Constructor.
-        """
-        
-        self.street = ""
-        self.city = ""
-    
+    def testRepresentation(self):
+        self.assertEquals(repr(self._property), 
+                          "%s: %s" % (repr(self._propertyDefMock), repr(None)))

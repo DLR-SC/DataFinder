@@ -76,8 +76,8 @@ class MetadataValue(object):
         self.__conversionFunctions.append(self._convertToDecimal)
         self.__conversionFunctions.append(self._convertToDatetime)
         self.__conversionFunctions.append(self._convertToList)
-        self.__conversionFunctions.append(self._convertToUnicode)
         self.__conversionFunctions.append(self._convertToDict)
+        self.__conversionFunctions.append(self._convertToUnicode)
         
     def __getPersistedValue(self):
         """ Simple getter. """

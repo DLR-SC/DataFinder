@@ -36,220 +36,433 @@
 
 
 """ 
-Implements different property types.
+Provides the supported property types. A property type allows 
+validation of property values against defined restrictions and
+performs transformation of values for the persistence layer.
 """
 
 
 from datetime import datetime
 from decimal import Decimal
+import logging
 
 from datafinder.core.configuration.properties import constants
+from datafinder.core.configuration.properties import domain
+from datafinder.core.configuration.properties.validators import base_validators
 from datafinder.core.configuration.properties.validators import type_validators
-from datafinder.core.configuration.properties.validators.error import ValidationError
 from datafinder.core.error import ConfigurationError
 
 
 __version__ = "$Revision-Id:$" 
 
 
-class StringType(object):
+_log = logging.getLogger()
+
+
+class BasePropertyType(object):
+    """ Base class for all property types. """
+    
+    name = ""
+    
+    def __init__(self, notNull):
+        """
+        @param notNull: Indicates if a values may be C{None} or not.
+        @type notNull: C{bool}
+        """
+        
+        self.restrictions = dict()
+        self.notNull = notNull
+
+    def validate(self, value):
+        """ Performs validation of the value against 
+        the defined restrictions. Calls C{_validate}
+        to perform concrete validation. 
+        
+        @raise ValueError: indicates validation errors.
+        """
+         
+        if not value is None:
+            self._validate(value)
+        else:
+            if self.notNull:
+                raise ValueError("Value must not be None.")
+        
+    def _validate(self, value):
+        """ Template method for concrete validation within
+        a sub class. """
+        
+        pass
+    
+    def fromPersistenceFormat(self, persistedValue):
+        """ Restores the value from the persistence layer format.
+         
+        @raise ValueError: Indicates problems during value transformation.
+        """
+        
+        self = self # silent pylint
+        return persistedValue
+    
+    def toPersistenceFormat(self, value):
+        """ Transforms the value to the persistence layer format. 
+        
+        @raise ValueError: Indicates problems during value transformation.
+        """
+        
+        self = self # silent pylint
+        return value
+
+
+class StringType(BasePropertyType):
     """ Represents string values. """
 
     name = constants.STRING_TYPE
 
-    def __init__(self, minimum=None, maximum=None, pattern=None, options=None, optionsMandatory=None):
+    def __init__(self, minimum=None, maximum=None, pattern=None, 
+                 options=None, optionsMandatory=None, notNull=False):
         """
-        Constructor.
-        
-        @param minimum: Minimum length of the string.
-        @type minimum: C{int}
-        @param maximum: Maximum length of the string.
-        @type maximum: C{int}
-        @param pattern: Regular expression pattern.
-        @type pattern: C{str}
-        @param options: List of options the value has to be taken from.
-        @type options: C{list} of C{unicode}
+        @see L{StringValidator.__init__<datafinder.core.configuration.
+            properties.validators.type_validators.StringValidator.__init__>}
+            for details on restriction parameters.
         """
         
-        self.restrictions = dict()
+        BasePropertyType.__init__(self, notNull)
         self.restrictions[constants.MINIMUM_LENGTH] = minimum
         self.restrictions[constants.MAXIMUM_LENGTH] = maximum
         self.restrictions[constants.PATTERN] = pattern
         self.restrictions[constants.OPTIONS] = options
         self.restrictions[constants.OPTIONS_MANDATORY] = optionsMandatory
-        self.validator = type_validators.StringValidator(minimum, maximum, pattern, options, optionsMandatory)
+        self._validate = type_validators.StringValidator(minimum, maximum, pattern, options, optionsMandatory)
 
 
-class BooleanType(object):
+class BooleanType(BasePropertyType):
     """ Represents a boolean values. """
 
     name = constants.BOOLEAN_TYPE
 
-    def __init__(self):
-        """
-        Constructor.
-        
-        @param minimum: Minimum value. 
-        @type minimum: C{decimal.Decimal}
-        @param maximum: Maximum value.
-        @type maximum: C{decimal.Decimal}
-        @param options: List of options the value has to be taken from.
-        @type options: C{list} of C{decimal.Decimal}
-        """
-        
-        self.restrictions = dict()
-        self.validator = type_validators.BooleanValidator()
+    def __init__(self, notNull=False):
+        BasePropertyType.__init__(self, notNull)
+        self._validate = type_validators.BooleanValidator()
 
 
-class NumberType(object):
+class NumberType(BasePropertyType):
     """ Represents numeric values. """
     
     name = constants.NUMBER_TYPE
 
     def __init__(self, minimum=None, maximum=None, minDecimalPlaces=None, 
-                 maxDecimalPlaces=None, options=None, optionsMandatory=None):
+                 maxDecimalPlaces=None, options=None, optionsMandatory=None,
+                 notNull=False):
         """
-        Constructor.
-        
-        @param minimum: Minimum value. 
-        @type minimum: C{decimal.Decimal}
-        @param maximum: Maximum value.
-        @type maximum: C{decimal.Decimal}
-        @param options: List of options the value has to be taken from.
-        @type options: C{list} of C{decimal.Decimal}
+        @see L{NumberType.__init__<datafinder.core.configuration.
+            properties.validators.type_validators.NumberType.__init__>}
+            for details on restriction parameters.
         """
         
-        self.restrictions = dict()
+        BasePropertyType.__init__(self, notNull)
         self.restrictions[constants.MINIMUM_VALUE] = minimum
         self.restrictions[constants.MAXIMUM_VALUE] = maximum
         self.restrictions[constants.MINIMUM_NUMBER_OF_DECIMAL_PLACES] = minDecimalPlaces
         self.restrictions[constants.MAXIMUM_NUMBER_OF_DECIMAL_PLACES] = maxDecimalPlaces
         self.restrictions[constants.OPTIONS] = options
         self.restrictions[constants.OPTIONS_MANDATORY] = optionsMandatory
-        self.validator = type_validators.NumberValidator(minimum, maximum, minDecimalPlaces, maxDecimalPlaces, options, optionsMandatory)
+        self._validate = type_validators.NumberValidator(minimum, maximum, minDecimalPlaces, 
+                                                         maxDecimalPlaces, options, optionsMandatory)
 
 
-class DatetimeType(object):
+class DatetimeType(BasePropertyType):
     """ Represents date and time values. """
     
     name = constants.DATETIME_TYPE
 
-    def __init__(self, minimum=None, maximum=None, options=None, optionsMandatory=None):
+    def __init__(self, minimum=None, maximum=None, options=None, 
+                 optionsMandatory=None, notNull=False):
         """
-        Constructor.
-        
-        @param minimum: Minimum length of the list.
-        @type minimum: C{int}
-        @param maximum: Maximum length of the list.
-        @type maximum: C{int}
-        @param options: List of options the value has to be taken from.
-        @type options: C{list} of C{datetime}
+        @see L{DatetimeType.__init__<datafinder.core.configuration.
+            properties.validators.type_validators.DatetimeType.__init__>}
+            for details on restriction parameters.
         """
         
-        self.restrictions = dict()
+        BasePropertyType.__init__(self, notNull)
         self.restrictions[constants.MINIMUM_VALUE] = minimum
         self.restrictions[constants.MAXIMUM_VALUE] = maximum
         self.restrictions[constants.OPTIONS] = options
         self.restrictions[constants.OPTIONS_MANDATORY] = optionsMandatory
-        self.validator = type_validators.DatetimeValidator(minimum, maximum, options, optionsMandatory)
+        self._validate = type_validators.DatetimeValidator(minimum, maximum, options, optionsMandatory)
 
 
-class ListType(object):
+class ListType(BasePropertyType):
     """ Represents list of primitive values. """
     
     name = constants.LIST_TYPE
 
-    def __init__(self, minimum=None, maximum=None):
+    def __init__(self, allowedSubtypes=None, minimum=None, 
+                 maximum=None, notNull=False):
         """
-        Constructor.
-        
-        @param minimum: Minimum length of the list.
-        @type minimum: C{int}
-        @param maximum: Maximum length of the list.
-        @type maximum: C{int}
-        @type allowed: Optional list of sub 
+        @see L{ListType.__init__<datafinder.core.configuration.
+            properties.validators.type_validators.ListType.__init__>}
+            for details on restriction parameters.
         """
         
-        self.restrictions = dict()
+        BasePropertyType.__init__(self, notNull)
+        
         self.restrictions[constants.MINIMUM_VALUE] = minimum
         self.restrictions[constants.MAXIMUM_VALUE] = maximum
-        self._allowedSubtypes = list()
-        self._allowedSubtypes.append(StringType())
-        self._allowedSubtypes.append(NumberType())
-        self._allowedSubtypes.append(BooleanType())
-        self._allowedSubtypes.append(DatetimeType())
+        self.restrictions[constants.ALLOWED_SUB_TYPES] = list()
+        
+        if allowedSubtypes is None:
+            self._allowedSubtypes = list()
+            self._allowedSubtypes.append(StringType())
+            self._allowedSubtypes.append(NumberType())
+            self._allowedSubtypes.append(BooleanType())
+            self._allowedSubtypes.append(DatetimeType())
+            self._allowedSubtypes.append(DomainObjectType())
+        else:
+            self._allowedSubtypes = allowedSubtypes
+        
         subValidators = list()
         for subtype in self._allowedSubtypes:
-            subValidators.append(subtype.validator)
-        self.validator = type_validators.ListValidator(minimum, maximum, subValidators)
+            subValidators.append(subtype.validate)
+            self.restrictions[constants.ALLOWED_SUB_TYPES].append(subtype)
+        self._validate = type_validators.ListValidator(minimum, maximum, subValidators)
 
+    def toPersistenceFormat(self, value):
+        """ Ensures that the transformation for every
+        list item is performed. """
+        
+        if not value is None:
+            result = list()
+            for item in value:
+                transformationSucceeded = False
+                for subType in self._allowedSubtypes:
+                    try:
+                        subType.validate(item)
+                        result.append(subType.toPersistenceFormat(item))
+                        transformationSucceeded = True
+                        break
+                    except ValueError:
+                        continue
+                if not transformationSucceeded:
+                    raise ValueError("Cannot transform value '%s' to persistence format."
+                                     % repr(item))
+            return result
+    
+    def fromPersistenceFormat(self, persistedValue):
+        """ Ensures that the transformation for every
+         list item is performed. """
+         
+        if not persistedValue is None:
+            result = list()
+            for item in persistedValue:
+                transformationSucceeded = False
+                for subType in self._allowedSubtypes:
+                    try:
+                        value = subType.fromPersistenceFormat(item)
+                        subType.validate(value)
+                        result.append(value)
+                        transformationSucceeded = True
+                        break
+                    except ValueError:
+                        continue
+                if not transformationSucceeded:
+                    raise ValueError("Cannot restore value '%s' from persistence format."
+                                     % repr(item))
+            return result
+        
 
-class AnyType(object):
+class AnyType(BasePropertyType):
     """ Represents an unspecific property type. """
     
     name = constants.ANY_TYPE
     
-    def __init__(self):
+    def __init__(self, allowedTypes=None, notNull=False):
         """ Constructor. """
         
-        self.restrictions = dict()
-        self.validator = type_validators.ArbitaryValidator()
+        BasePropertyType.__init__(self, notNull)
+        if allowedTypes is None:
+            self._allowedTypes = list()
+            self._allowedTypes.append(BooleanType())
+            self._allowedTypes.append(NumberType())
+            self._allowedTypes.append(DatetimeType())
+            self._allowedTypes.append(StringType())
+            self._allowedTypes.append(DomainObjectType())
+            self._allowedTypes.append(ListType())
+        else:
+            self._allowedTypes = allowedTypes
+        
+        self.restrictions[constants.ALLOWED_SUB_TYPES] = list()
+        subValidators = list()
+        for subtype in self._allowedTypes:
+            subValidators.append(subtype.validate)
+            self.restrictions[constants.ALLOWED_SUB_TYPES].append(subtype)
+        
+        self.validate = base_validators.OrValidator(subValidators)
+        
+    def toPersistenceFormat(self, value):
+        """ Ensures that the transformation for every
+        supported type is tried. """
+        
+        if not value is None:
+            result = None
+            transformationSucceeded = False
+            for subType in self._allowedTypes:
+                try:
+                    subType.validate(value)
+                    result = subType.toPersistenceFormat(value)
+                    transformationSucceeded = True
+                    break
+                except ValueError:
+                    continue
+            if not transformationSucceeded:
+                raise ValueError("Cannot transform value '%s' to persistence format."
+                                 % repr(value))
+            return result
+    
+    def fromPersistenceFormat(self, persistedValue):
+        """ Ensures that the transformation for every
+         supported type is tried. """
+         
+        if not persistedValue is None:
+            result = None
+            transformationSucceeded = False
+            for subType in self._allowedTypes:
+                try:
+                    value = subType.fromPersistenceFormat(persistedValue)
+                    subType.validate(value)
+                    result = value
+                    transformationSucceeded = True
+                    break
+                except ValueError:
+                    continue
+            if not transformationSucceeded:
+                raise ValueError("Cannot restore value '%s' from persistence format."
+                                 % repr(persistedValue))
+            return result
+        
+
+class UnknownDomainObject(domain.DomainObject):
+    """ Used to represent values of domain object types whose
+    class could not be loaded. """
+    
+    # Used to have a nice representation of the dictionary
+    representation = domain.DomainProperty(StringType())
+    
+    def __init__(self, theDict):
+        domain.DomainObject.__init__(self)
+        self.theDict = theDict # Used to allow access to the properties
+        self.representation = str(theDict)
         
         
-class ObjectType(object):
+class DomainObjectType(BasePropertyType):
     """ Represents a object values. """
 
     name = "" # Here you find the concrete class identifier after initialization
 
-    def __init__(self, fullDottedClassName):
+    def __init__(self, cls=None, notNull=False):
         """
         Constructor.
         
-        @param fullDottedClassName: Consists of package, module, and class name.
-        @type fullDottedClassName: C{unicode}
+        @param cls: Full dotted class name (consists of package, module, and class name)
+           or a class object.
+        @type cls: C{unicode} or class object
         """
         
-        self.name = fullDottedClassName        
-        self._fullDottedModuleName = fullDottedClassName[:fullDottedClassName.rfind(".")]
-        self._className = fullDottedClassName[fullDottedClassName.rfind(".") + 1:]
-        self._cls = self._importClass()
+        BasePropertyType.__init__(self, notNull)
         
+        if cls is None:
+            cls = UnknownDomainObject       
+      
+        if isinstance(cls, basestring):
+            self.name = cls   
+            self._cls = self._importClass(cls)
+        else:
+            self.name = "%s.%s" % (cls.__module__, cls.__name__) 
+            self._cls = cls
+    
     @property
-    def cls(self):
-        """ Returns the instance of an ObjectType model. """
+    def _isValid(self):
+        """ Indicates whether the domain class has been correctly loaded or not. """
         
-        return self._cls
+        return self._cls != UnknownDomainObject
+            
+    def _importClass(self, fullDottedClassName):
+        """ Tries to import the associated class and raises a configuration 
+        error if something goes wrong. """
         
-    @staticmethod
-    def validator(value):
+        fullDottedModuleName = fullDottedClassName[:fullDottedClassName.rfind(".")]
+        className = fullDottedClassName[fullDottedClassName.rfind(".") + 1:]
+        try:
+            moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
+            return getattr(moduleInstance, className)
+        except (ImportError, AttributeError), error:
+            errorMessage = "Cannot import '%s'. Reason: '%s'" % (self.name, str(error.args))
+            _log.error(errorMessage)
+            self.name = "%s.%s" % (UnknownDomainObject.__module__, UnknownDomainObject.__name__)
+            return UnknownDomainObject
+
+    def _validate(self, value):
         """ Delegates the validation to the actual instance. """
-        
+
+        if self._cls != value.__class__:
+            raise ValueError("The value '%s' has not the required type '%s'." \
+                             % (str(value), str(self._cls)))
         try:
             value.validate()
         except AttributeError, error:
-            raise ValidationError("Cannot validate property value. Reason %s" % error)
+            raise ValueError("Cannot validate property value. Reason '%s'" % str(error.args))
+        except ValueError, error:
+            raise ValueError("Invalid property value found: '%s'" % str(error.args))
         
-    def _importClass(self):
-        """
-        Tries to import the associated class and raises a configuration 
-        error if something goes wrong.
+    def toPersistenceFormat(self, value):
+        """ Transform the domain object into a dictionary. """
         
-        @raise ConfigurationError: 
-        """
-
-        try:
-            moduleInstance = __import__(self._fullDottedModuleName, globals(), dict(), [""])
-            return getattr(moduleInstance, self._className)
-        except (ImportError, AttributeError), error:
-            raise ConfigurationError("Cannot import '%s'. Reason: '%s'" % (self.name, repr(error)))
+        if not self._isValid:
+            raise ValueError("The domain class could not be found. Please " \
+                             + "correct the configuration.")
+        if not value is None:
+            if self._cls != value.__class__:
+                raise ValueError("The value '%s' has not the required type '%s'." \
+                                 % (str(value), str(self._cls)))
+            result = dict()
+            try:
+                for _, name, descriptor, subValue in value.walk():
+                    result[name] = descriptor.type.toPersistenceFormat(subValue)
+            except AttributeError:
+                raise ValueError("The value '%s' is no valid domain object." % str(value))
+            return result
+        
+    def fromPersistenceFormat(self, persistedValue):
+        """ Restores the domain object from the given dictionary. """
+        
+        if not persistedValue is None:
+            if not isinstance(persistedValue, dict):
+                raise ValueError("The persisted value '%s' is no dictionary." 
+                                 % str(persistedValue))
+            if not self._isValid:
+                return UnknownDomainObject(persistedValue)
+            try:
+                instance = self._cls()
+            except TypeError:
+                raise ValueError("Cannot create domain object '%s' using empty constructor."
+                    % self.name)
+            else:
+                for instance, name, descriptor, value in instance.walk():
+                    try:
+                        value = descriptor.type.fromPersistenceFormat(persistedValue[name])
+                    except KeyError:
+                        raise ValueError(
+                            "Persisted domain object '%s' does not fit defined domain class '%s'."
+                            % (self.name, str(persistedValue)))
+                    else:
+                        setattr(instance, name, value)
+            return instance
 
 
 _propertyNameClassMap = {StringType.name: StringType,
-                         BooleanType.name: BooleanType,
-                         NumberType.name: NumberType,
-                         DatetimeType.name: DatetimeType,
-                         ListType.name: ListType,
-                         AnyType.name: AnyType}
+    BooleanType.name: BooleanType,
+    NumberType.name: NumberType,
+    DatetimeType.name: DatetimeType,
+    ListType.name: ListType,
+    AnyType.name: AnyType}
 PROPERTY_TYPE_NAMES = _propertyNameClassMap.keys()[:]
 
 
@@ -272,36 +485,38 @@ def createPropertyType(propertyTypeName, restrictions=dict()):
         except TypeError:
             raise ConfigurationError("Restrictions for property type '%s' are invalid." % propertyTypeName)
     else:
-        return ObjectType(propertyTypeName)
+        return DomainObjectType(propertyTypeName)
 
 
-_typeConstantsPythonTypeMap = {constants.BOOLEAN_TYPE: bool,
-                               constants.DATETIME_TYPE: datetime,
-                               constants.LIST_TYPE: list,
-                               constants.NUMBER_TYPE: Decimal,
-                               constants.STRING_TYPE: unicode}
-_pythonTypeTypeConstantsMap = dict((value, key) for key, value in _typeConstantsPythonTypeMap.items())
+_typeConstantsPythonTypeMap = {constants.BOOLEAN_TYPE: [bool],
+    constants.DATETIME_TYPE: [datetime],
+    constants.LIST_TYPE: [list],
+    constants.NUMBER_TYPE: [int, float, Decimal],
+    constants.STRING_TYPE: [str, unicode]}
 
 
 def determinePropertyTypeConstant(value):
     """ 
-    Helper function to determine the property type constant of the given value. 
-    @see: L{constants<datafinder.core.configuration.properties.constants>} for property type constants.
+    Helper function to determine the property type constant of the given value.
+    If the no constant matches the full dotted class name is returned.
+    @see: L{constants<datafinder.core.configuration.properties.constants>} 
+    for property type constants.
     
     @param value: Python object.
     @type value: C{object}
     
     @return: Property type constant.
-    @rtype: C{unicode}
-    
-    @raise ValueError: Indicates non-matching value.
+    @rtype: C{string}    
     """
     
-    try:
-        displayPropertyTypeName = _pythonTypeTypeConstantsMap[type(value)]
-    except KeyError:
-        try:
-            displayPropertyTypeName = value.__class__.name
-        except AttributeError:
-            raise ValueError("Values of type '%s' are not supported." % type(value))
-    return displayPropertyTypeName
+    typeDisplayName = None
+    valueType = type(value)
+    for typeName, availableTypes in _typeConstantsPythonTypeMap.iteritems():
+        if valueType in availableTypes:
+            typeDisplayName = typeName
+            break
+    
+    if typeDisplayName is None:
+        typeDisplayName = \
+            "%s.%s" % (value.__class__.__module__, value.__class__.__name__)
+    return typeDisplayName

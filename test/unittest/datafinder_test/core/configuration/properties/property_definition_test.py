@@ -1,3 +1,6 @@
+# pylint: disable=W0212
+# W0212: For test reasons it is fine to access protected members.
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -40,10 +43,12 @@
 
 import unittest
 
-from datafinder.core.error import PropertyError
+from datafinder.core.error import PropertyError, ConfigurationError
 from datafinder.core.configuration.properties import constants
-from datafinder.core.configuration.properties.property_definition import PropertyDefinition
+from datafinder.core.configuration.properties import property_definition as prop_def
 from datafinder.core.configuration.properties import property_type
+
+from datafinder_test.mocks import SimpleMock
 
 
 __version__ = "$Revision-Id:$" 
@@ -55,7 +60,8 @@ class PropertyTypeTestCase(unittest.TestCase):
     def setUp(self):
         """ Initializes the property instance. """
     
-        self._propertyDef = PropertyDefinition("name", constants.USER_PROPERTY_CATEGORY, property_type.StringType())
+        self._propertyDef = prop_def.PropertyDefinition("name", constants.USER_PROPERTY_CATEGORY, 
+            property_type.StringType())
     
     def testSetNull(self):
         """ Tests the behavior when the the property must not be C{None}. """
@@ -96,7 +102,8 @@ class PropertyTypeTestCase(unittest.TestCase):
             self.assertTrue(key in self._propertyDef.restrictions)
             self.assertEquals(value, self._propertyDef.restrictions[key])
 
-        anotherPropDef = PropertyDefinition("identifier", "category", property_type.StringType(10, 100))
+        anotherPropDef = prop_def.PropertyDefinition("identifier", "category", 
+            property_type.StringType(10, 100))
         expectedRestrictions[constants.MINIMUM_LENGTH] = 10
         expectedRestrictions[constants.MAXIMUM_LENGTH] = 100
         for key, value in expectedRestrictions.iteritems():
@@ -108,11 +115,70 @@ class PropertyTypeTestCase(unittest.TestCase):
         
         self.assertEquals(self._propertyDef, self._propertyDef)
         
-        other = PropertyDefinition("identifier", constants.USER_PROPERTY_CATEGORY, property_type.NumberType())
+        other = prop_def.PropertyDefinition("identifier", constants.USER_PROPERTY_CATEGORY, 
+            property_type.NumberType())
         self.assertNotEquals(self._propertyDef, other)
+        self.assertNotEquals(hash(self._propertyDef), hash(other))
         
-        other = PropertyDefinition("name", constants.USER_PROPERTY_CATEGORY, property_type.NumberType())
+        other = prop_def.PropertyDefinition("name", constants.USER_PROPERTY_CATEGORY, 
+            property_type.NumberType())
         self.assertEquals(self._propertyDef, other)
-
+        self.assertEquals(hash(self._propertyDef), hash(other))
+        
         other.namespace = "anothernamespace"
         self.assertNotEquals(self._propertyDef, other)
+        self.assertNotEquals(hash(self._propertyDef), hash(other))
+        
+        self.assertNotEquals(self._propertyDef, None)
+        
+    def testFromPersistenceFormat(self):
+        """ Tests the success and error case. """
+        
+        self.assertEquals(self._propertyDef.fromPersistenceFormat("aString"), "aString")
+        
+        self._propertyDef._propertyType.fromPersistenceFormat = SimpleMock(error=ValueError)
+        self.assertRaises(PropertyError, self._propertyDef.fromPersistenceFormat, None)
+        
+    def testToPersistenceFormat(self):
+        """ Tests the success and error case. """
+        
+        self.assertEquals(self._propertyDef.toPersistenceFormat("aString"), "aString")
+        
+        self._propertyDef._propertyType.toPersistenceFormat = SimpleMock(error=ValueError)
+        self.assertRaises(PropertyError, self._propertyDef.toPersistenceFormat, None)
+
+    def testRepresentation(self):
+        self.assertEquals(repr(self._propertyDef), "name")
+        
+        self.assertEquals(repr(prop_def.PropertyDefinition(None)), "")
+        
+    def testPropertyDefintionPersistence(self):
+        """ Shows how the definition is persisted and restored. """
+        
+        persistedPropDef = self._propertyDef.toPersistenceRepresentation()
+        self.assertEquals(self._propertyDef, prop_def.PropertyDefinition.load(persistedPropDef))
+
+
+class PropertyDefinitionFactoryTestCase(unittest.TestCase):
+    """ Test cases for the property definition factory. """
+    
+    def setUp(self):
+        self._propertyDefFactory = prop_def.PropertyDefinitionFactory()
+        
+    def testIsValidPropertyIdentifier(self):
+        self.assertTrue(self._propertyDefFactory.isValidPropertyIdentifier("identifier"))
+        
+        self._propertyDefFactory.propertyIdValidator = SimpleMock((False, 2))
+        self.assertFalse(self._propertyDefFactory.isValidPropertyIdentifier("identifier"))
+
+    def testCreatePropertyDefinition(self):
+        propertyDef = self._propertyDefFactory.createPropertyDefinition("identifier")
+        self.assertTrue(isinstance(propertyDef, prop_def.PropertyDefinition))
+        
+        self._propertyDefFactory.propertyIdValidator = SimpleMock((False, 2))
+        self.assertRaises(ConfigurationError, self._propertyDefFactory.createPropertyDefinition, "identifier")
+        
+    def testCreatePropertyType(self):
+        self.assertTrue(not self._propertyDefFactory.createPropertyType("String") is None)
+        self.assertRaises(ConfigurationError, self._propertyDefFactory.createPropertyType, 
+                          "String", {"unknown": 2})

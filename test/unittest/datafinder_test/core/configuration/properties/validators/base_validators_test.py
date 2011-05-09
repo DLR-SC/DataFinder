@@ -33,6 +33,7 @@
 #THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
 #(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+from datafinder_test.mocks import SimpleMock
 
 
 """ 
@@ -40,6 +41,7 @@ Tests for the validators module.
 """
 
 
+import unicodedata
 import unittest
 from decimal import Decimal
         
@@ -92,20 +94,20 @@ class IsInRangeTestCase(unittest.TestCase):
         
         # lower and upper boundary
         inRangeValidator = validators.IsInRange(self.minValue, self.maxValue)
-        self.assertRaises(validators.ValidationError, inRangeValidator, self.maxValue + 1)
-        self.assertRaises(validators.ValidationError, inRangeValidator, self.minValue - 1)
-        self.assertRaises(validators.ValidationError, inRangeValidator, 30009)
-        self.assertRaises(validators.ValidationError, inRangeValidator, -110)
+        self.assertRaises(ValueError, inRangeValidator, self.maxValue + 1)
+        self.assertRaises(ValueError, inRangeValidator, self.minValue - 1)
+        self.assertRaises(ValueError, inRangeValidator, 30009)
+        self.assertRaises(ValueError, inRangeValidator, -110)
         
         # upper boundary
         inRangeValidator = validators.IsInRange(maxValue=self.maxValue)
-        self.assertRaises(validators.ValidationError, inRangeValidator, self.maxValue + 1)
-        self.assertRaises(validators.ValidationError, inRangeValidator, 30009)
+        self.assertRaises(ValueError, inRangeValidator, self.maxValue + 1)
+        self.assertRaises(ValueError, inRangeValidator, 30009)
         
         # lower boundary
         inRangeValidator = validators.IsInRange(minValue=self.minValue)
-        self.assertRaises(validators.ValidationError, inRangeValidator, self.minValue - 1)
-        self.assertRaises(validators.ValidationError, inRangeValidator, -110)        
+        self.assertRaises(ValueError, inRangeValidator, self.minValue - 1)
+        self.assertRaises(ValueError, inRangeValidator, -110)        
             
             
 class IsLengthInRangeTestCase(unittest.TestCase):
@@ -156,51 +158,49 @@ class IsLengthInRangeTestCase(unittest.TestCase):
         
         # lower and upper boundary
         lengthRangeValidator = validators.IsLengthInRange(self.minValue, self.maxValue)
-        self.assertRaises(validators.ValidationError, lengthRangeValidator, self.valueLessMinLength)
-        self.assertRaises(validators.ValidationError, lengthRangeValidator, self.valueMoreMaxLength)
+        self.assertRaises(ValueError, lengthRangeValidator, self.valueLessMinLength)
+        self.assertRaises(ValueError, lengthRangeValidator, self.valueMoreMaxLength)
         
         # upper boundary
         lengthRangeValidator = validators.IsLengthInRange(maxLength=self.maxValue)
-        self.assertRaises(validators.ValidationError, lengthRangeValidator, self.valueMoreMaxLength)
+        self.assertRaises(ValueError, lengthRangeValidator, self.valueMoreMaxLength)
         
         # lower boundary
         lengthRangeValidator = validators.IsLengthInRange(minLength=self.minValue)
-        self.assertRaises(validators.ValidationError, lengthRangeValidator, self.valueLessMinLength)
+        self.assertRaises(ValueError, lengthRangeValidator, self.valueLessMinLength)
 
 
 class IsNumberOfDecimalPlacesInRangeTestCase(unittest.TestCase):
-    """
-    Tests cases for the IsNumberOfDecimalPlacesInRange class.
-    """
         
     def setUp(self):
-        """ Defines the range for the number of decimal places. """
+        """ Setups the validator and defines some comparison values. """
         
-        self.minValue = 2
+        self.minValue = 0
         self.maxValue = 7
-        self.valueWithExactMinDecimalPlaces = Decimal("-1234.45")
+        self.valueWithExactMinDecimalPlaces = Decimal("-1234")
         self.valueWithExactMaxDecimalPlaces = Decimal("-1234.4556346")
-        self.valueInBoundries = Decimal("-1234.4548")
+        self.valueInBoundries = Decimal("-1.23e-04")
         self.valueLessMinDecimalPlaces = Decimal("-1234.4")
         self.valueMoreMaxDecimalPlaces = Decimal("-1234.44567890")
         
     def testValidValues(self):
-        """ Tests the behavior for decimal values with a number of decimal places in the defined range. """
-        
         # upper and lower boundary
-        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(self.minValue, self.maxValue)
+        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(
+            self.minValue, self.maxValue)
         decimalPlacesInRangeValidator(self.valueWithExactMinDecimalPlaces)
         decimalPlacesInRangeValidator(self.valueInBoundries)
         decimalPlacesInRangeValidator(self.valueWithExactMaxDecimalPlaces)
         
         # upper boundary
-        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(maxNumberOfDecimalPlaces=self.maxValue)
+        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(
+            maxNumberOfDecimalPlaces=self.maxValue)
         decimalPlacesInRangeValidator(self.valueWithExactMinDecimalPlaces)
         decimalPlacesInRangeValidator(self.valueInBoundries)
         decimalPlacesInRangeValidator(self.valueWithExactMaxDecimalPlaces)
         
         # lower boundary
-        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(minNumberOfDecimalPlaces=self.minValue)
+        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(
+            minNumberOfDecimalPlaces=self.minValue)
         decimalPlacesInRangeValidator(self.valueWithExactMinDecimalPlaces)
         decimalPlacesInRangeValidator(self.valueInBoundries)
         decimalPlacesInRangeValidator(self.valueWithExactMaxDecimalPlaces)
@@ -210,134 +210,184 @@ class IsNumberOfDecimalPlacesInRangeTestCase(unittest.TestCase):
         decimalPlacesInRangeValidator(self.valueWithExactMinDecimalPlaces)
         decimalPlacesInRangeValidator(self.valueInBoundries)
         decimalPlacesInRangeValidator(self.valueWithExactMaxDecimalPlaces)
-         
-    def testInvalidValues(self):
-        """ Tests the behavior for decimal values with a number of decimal places outside the defined range. """
         
+    def testInvalidValues(self):
         # lower and upper boundary
-        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(self.minValue, self.maxValue)
-        self.assertRaises(validators.ValidationError, decimalPlacesInRangeValidator, self.valueLessMinDecimalPlaces)
-        self.assertRaises(validators.ValidationError, decimalPlacesInRangeValidator, self.valueMoreMaxDecimalPlaces)
+        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(
+            self.minValue, self.maxValue)
+        self.assertRaises(ValueError, decimalPlacesInRangeValidator, self.valueMoreMaxDecimalPlaces)
         
         # upper boundary
-        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(maxNumberOfDecimalPlaces=self.maxValue)
-        self.assertRaises(validators.ValidationError, decimalPlacesInRangeValidator, self.valueMoreMaxDecimalPlaces)
-        
-        # lower boundary
-        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(minNumberOfDecimalPlaces=self.minValue)
-        self.assertRaises(validators.ValidationError, decimalPlacesInRangeValidator, self.valueLessMinDecimalPlaces)
+        decimalPlacesInRangeValidator = validators.IsNumberOfDecimalPlacesInRange(
+            maxNumberOfDecimalPlaces=self.maxValue)
+        self.assertRaises(ValueError, decimalPlacesInRangeValidator, self.valueMoreMaxDecimalPlaces)
 
 
-class AreOptionsMatchedTestCase(unittest.TestCase):
-    """ Defines some tests for the AreOptionsMatched class. """
+class IsDecimalInRangeTestCase(unittest.TestCase):
     
     def setUp(self):
-        """ Setups the instance of the class. """
+        self._validator = validators.IsDecimalInRange(2.0, 4)
         
+    def testValidValues(self):
+        self._validator(3)
+        self._validator(2)
+        self._validator(4)
+        
+        self._validator(3.2)
+        self._validator(Decimal(3))
+        
+    def testInvalidValues(self):
+        self.assertRaises(ValueError, self._validator, 1.2)
+        self.assertRaises(ValueError, self._validator, Decimal(0))
+        self.assertRaises(ValueError, self._validator, 5)
+        
+        # non-numerics
+        self.assertRaises(ValueError, self._validator, None)
+        self.assertRaises(ValueError, self._validator, "")
+        
+
+class AreOptionsMatchedTestCase(unittest.TestCase):
+    
+    def setUp(self):
         self.areOptionsMatchedValidator = validators.AreOptionsMatched(["hallo", True, 123])
         
     def testValidValues(self):
-        """ Tests different values that are conforming to the defined options. """
-        
         self.areOptionsMatchedValidator(True)
         self.areOptionsMatchedValidator(123)
         self.areOptionsMatchedValidator("hallo")
         
     def testInvalidValues(self):
-        """ Tests different values that are non-conforming to the defined options. """
-        
-        self.assertRaises(validators.ValidationError, self.areOptionsMatchedValidator, [True])
-        self.assertRaises(validators.ValidationError, self.areOptionsMatchedValidator, 1235)
-        self.assertRaises(validators.ValidationError, self.areOptionsMatchedValidator, None)
+        self.assertRaises(ValueError, self.areOptionsMatchedValidator, [True])
+        self.assertRaises(ValueError, self.areOptionsMatchedValidator, 1235)
+        self.assertRaises(ValueError, self.areOptionsMatchedValidator, None)
         
 
 class AreTypesMatchedTestCase(unittest.TestCase):
-    """ Defines some tests for the AreTypesMatched class. """
     
     def setUp(self):
-        """ Setups the instance of the class. """
+        self.exactValidator = validators.AreTypesMatched([unicode])
+        self.isinstanceValidator = validators.AreTypesMatched([basestring], 
+                                                              exactMatch=False)
         
-        self.areTypeMatchedValidator = validators.AreTypesMatched([unicode])
+    def testValues(self):
+        """ Shows valid and invalid values for exact / inexact type matching. """
         
-    def testValidValues(self):
-        """ Tests different values with suitable data type. """
-        
-        self.areTypeMatchedValidator(u"ahaha")
-        self.areTypeMatchedValidator(u"9980")
-        
-    def testInvalidValues(self):
-        """ Tests different values with unsuitable data type. """
-        
-        self.assertRaises(validators.ValidationError, self.areTypeMatchedValidator, [False])
-        self.assertRaises(validators.ValidationError, self.areTypeMatchedValidator, 1235)
-        self.assertRaises(validators.ValidationError, self.areTypeMatchedValidator, "halo")
+        self.exactValidator(u"ahaha")
+        self.exactValidator(u"9980")
+        self.assertRaises(ValueError, self.exactValidator, [False])
+        self.assertRaises(ValueError, self.exactValidator, 1235)
+        self.assertRaises(ValueError, self.exactValidator, "halo")
+
+        self.isinstanceValidator(u"ahaha")
+        self.isinstanceValidator("9980")
+        self.assertRaises(ValueError, self.isinstanceValidator, [False])
+        self.assertRaises(ValueError, self.isinstanceValidator, 1235)
 
 
 class IsPatternMatchedTestCase(unittest.TestCase):
-    """ Tests the class IsPatternMatched. """
     
     def setUp(self):
-        """ Setups the instance of the class. """
-        
         self.isPatternMatchedValidator = validators.IsPatternMatched("T..t")
         
     def testValidValues(self):
-        """ Test some strings the are conforming to the defined regular expression pattern. """
-
         self.isPatternMatchedValidator("Test")
         self.isPatternMatchedValidator("Taat")
         
     def testInvalidValues(self):
-        """ Test some strings the are not conforming to the defined regular expression pattern. """
-
-        self.assertRaises(validators.ValidationError, self.isPatternMatchedValidator, "Hallo")
-        self.assertRaises(validators.ValidationError, self.isPatternMatchedValidator, "est")
+        self.assertRaises(ValueError, self.isPatternMatchedValidator, "Hallo")
+        self.assertRaises(ValueError, self.isPatternMatchedValidator, "est")
         
     def testInvalidPattern(self):
-        """ Tests the behavior if an invalid regular expression pattern is used. """
-        
         self.isPatternMatchedValidator.pattern = "?**???"
-        self.assertRaises(validators.ValidationError, self.isPatternMatchedValidator, "Hallo")
+        self.assertRaises(ValueError, self.isPatternMatchedValidator, "Hallo")
         
         
 class IsEachValueUniqueTestCase(unittest.TestCase):
-    """ Test case for the validation function isEachValueUnique. """
 
     def setUp(self):
-        """ Test case setup. """
-        
         self.isEachValueUnique = validators.IsEachValueUnique()
         
     def testValidValues(self):
-        """ Test some sequences containing no duplicated values. """
-        
-        self.assertEquals(self.isEachValueUnique([1, 2, 3, 4, 5]), None)
-        self.assertEquals(self.isEachValueUnique(["a", "b", "c", "d"]), None)
+        self.isEachValueUnique([1, 2, 3, 4, 5])
+        self.isEachValueUnique(["a", "b", "c", "d"])
         
     def testInvalidValues(self):
-        """ Test some sequences containing duplicate values. """
-        
-        self.assertRaises(validators.ValidationError, self.isEachValueUnique, [1, 2, 3, 3, 5])
-        self.assertRaises(validators.ValidationError, self.isEachValueUnique, ["b", "b", "c", "d"])
+        self.assertRaises(ValueError, self.isEachValueUnique, [1, 2, 3, 3, 5])
+        self.assertRaises(ValueError, self.isEachValueUnique, ["b", "b", "c", "d"])
 
 
 class ForEachTestCase(unittest.TestCase):
-    """ Tests the class ForEach. """
     
     def setUp(self):
-        """ Instantiates the class under test. """
-        
         self.forEachValidator = validators.ForEach(validators.IsEachValueUnique())
         
     def testValidValues(self):
-        """ Tests some valid values given to ForEach and isEachValueUnique combination. """
-        
         self.forEachValidator(([1, 2, 3, 4], [1]))
         self.forEachValidator([[1, 2, 3, 4]])
         
     def testInvalidValues(self):
-        """ Tests some invalid values given to ForEach and isEachValueUnique combination. """
+        self.assertRaises(ValueError, self.forEachValidator, ([1, 3, 3, 4], [1]))
+        self.assertRaises(ValueError, self.forEachValidator, [[1, 2, 1, 4]])
+
+
+class IsBinaryStringDecodableTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        self.validator = validators.IsBinaryStringDecodable()
         
-        self.assertRaises(validators.ValidationError, self.forEachValidator, ([1, 3, 3, 4], [1]))
-        self.assertRaises(validators.ValidationError, self.forEachValidator, [[1, 2, 1, 4]])
+    def testValidValues(self):
+        self.validator("asdsd")
+        self.validator(u"asfdfer")
         
+    def testInvalidValues(self):
+        smallAe = unicodedata.lookup("LATIN SMALL LETTER A WITH DIAERESIS")
+        smallAe = smallAe.encode("utf-8") # Make it an UTF-8 encoded binary string
+        self.validator._encoding = "ascii" # Make default decoding with ASCII codec
+        self.assertRaises(ValueError, self.validator, smallAe)
+        
+        # Non-strings
+        self.assertRaises(ValueError, self.validator, None)
+        self.assertRaises(ValueError, self.validator, list())
+
+
+class OrTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        self.validator = validators.OrValidator(list())
+        
+    def testSuccessfullValidation(self):
+        successValidators = [SimpleMock(), SimpleMock()]
+        self.validator.validators = successValidators
+        self.validator("testValue")
+
+        validatorsWithOneError = [SimpleMock(error=ValueError), SimpleMock()]
+        self.validator.validators = validatorsWithOneError
+        self.validator("testValue")
+
+    def testValidationError(self):
+        validatorsWithError = [SimpleMock(error=ValueError), 
+                               SimpleMock(error=ValueError)]
+        self.validator.validators = validatorsWithError
+        self.assertRaises(ValueError, self.validator, "testValue")
+
+
+class AndTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        self.validator = validators.AndValidator(list())
+        
+    def testSuccessfullValidation(self):
+        successValidators = [SimpleMock(), SimpleMock()]
+        self.validator.validators = successValidators
+        self.validator("testValue")
+        
+    def testValidationError(self):
+        validatorWithOneError = [SimpleMock(error=ValueError), SimpleMock()]
+        self.validator.validators = validatorWithOneError
+        self.assertRaises(ValueError, self.validator, "testValue")
+
+        validatorWithError = [SimpleMock(error=ValueError), 
+                              SimpleMock(error=ValueError)]
+        self.validator.validators = validatorWithError
+        self.assertRaises(ValueError, self.validator, "testValue")
+    

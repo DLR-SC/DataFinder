@@ -44,7 +44,7 @@ import unittest
 from datetime import datetime
 from decimal import Decimal
 
-from datafinder.core.configuration.properties.validators import type_validators, error
+from datafinder.core.configuration.properties.validators import type_validators
 
 
 __version__ = "$Revision-Id:$" 
@@ -55,15 +55,18 @@ class StringValidatorTestCase(unittest.TestCase):
     
     def setUp(self):
         """ Creates the test environment. """
-        
-        self.__validator = type_validators.StringValidator()
+
+        pattern = "."        
+        options = [u"value", u"binaryString"]
+        self.__validator = type_validators.StringValidator(pattern=pattern, 
+                                                           options=options)
 
     def testValidate(self):
         """ Tests the validation method for the StringProperty. """
         
         self.__validator(u"value")
         self.__validator("binaryString")
-        self.assertRaises(error.ValidationError, self.__validator, 1234)
+        self.assertRaises(ValueError, self.__validator, 1234)
     
     
 class BooleanValidatorTestCase(unittest.TestCase):
@@ -79,27 +82,29 @@ class BooleanValidatorTestCase(unittest.TestCase):
         
         self.__validator(True)
         self.__validator(False)
-        self.assertRaises(error.ValidationError, self.__validator, "binaryString")
-        self.assertRaises(error.ValidationError, self.__validator, 1234)
+        self.assertRaises(ValueError, self.__validator, "binaryString")
+        self.assertRaises(ValueError, self.__validator, 1234)
         
         
-class DecimalValidatorTestCase(unittest.TestCase):
+class NumberValidatorTestCase(unittest.TestCase):
     """ Tests of the class DecimalProperty. """
     
     def setUp(self):
         """ Creates the test environment. """
         
-        self.__validator = type_validators.NumberValidator()
+        options = [Decimal("1234")]
+        self.__validator = type_validators.NumberValidator(options=options)
 
     def testValidate(self):
         """ Tests the validation method for the DecimalProperty. """
         
-        self.__validator(Decimal("1234"))
+        self.__validator(Decimal("1234.0"))
         self.__validator(Decimal(1234))
-        self.__validator(1234.897)
-        self.__validator(123)
-        self.assertRaises(error.ValidationError, self.__validator, "binaryString")
-        self.assertRaises(error.ValidationError, self.__validator, True)
+        self.__validator(1234)
+        self.assertRaises(ValueError, self.__validator, 1234.0)
+        self.assertRaises(ValueError, self.__validator, 123) # not an allowed option
+        self.assertRaises(ValueError, self.__validator, "binaryString")
+        self.assertRaises(ValueError, self.__validator, True)
         
         
 class DatetimeValidatorTestCase(unittest.TestCase):
@@ -108,14 +113,17 @@ class DatetimeValidatorTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates the test environment. """
         
-        self.__validator = type_validators.DatetimeValidator()
+        options = [datetime(2008, 10, 19), datetime(2008, 10, 20)]
+        self.__validator = type_validators.DatetimeValidator(options=options)
 
     def testValidate(self):
         """ Tests the validation method for the DatetimeProperty. """
         
         self.__validator(datetime(2008, 10, 19))
-        self.assertRaises(error.ValidationError, self.__validator, 1234)
-        self.assertRaises(error.ValidationError, self.__validator, "20.03.2009")
+        self.__validator(datetime(2008, 10, 20))
+        self.assertRaises(ValueError, self.__validator, datetime(2008, 10, 21))
+        self.assertRaises(ValueError, self.__validator, 1234)
+        self.assertRaises(ValueError, self.__validator, "20.03.2009")
         
         
 class ListValidatorTestCase(unittest.TestCase):
@@ -131,24 +139,5 @@ class ListValidatorTestCase(unittest.TestCase):
         
         self.__validator([])
         self.__validator([["peter", False], False, "hhh", 324234, 123.89, Decimal("12.4"), datetime(2008, 9, 9), u"ttz"])
-        self.assertRaises(error.ValidationError, self.__validator, "binaryString")
-        self.assertRaises(error.ValidationError, self.__validator, dict())
-
-
-class ArbitaryValidatorTestCase(unittest.TestCase):
-    """ Tests of the class ArbitaryValidatorTest. """
-    
-    def setUp(self):
-        """ Creates the test environment. """
-
-        self.__validator = type_validators.ArbitaryValidator()    
-       
-    def testValidate(self):
-        """ Tests the validation method for the ArbitaryProperty. """
-        
-        testValues = [False, "hhh", 324234, 123.89, Decimal("12.4"), 
-                      datetime(2008, 9, 9), u"ttz", [1, u"344", True]]
-        for testValue in testValues:
-            self.__validator(testValue)
-        self.assertRaises(error.ValidationError, self.__validator, dict())
-        self.assertRaises(error.ValidationError, self.__validator, [[123], 34])
+        self.assertRaises(ValueError, self.__validator, "binaryString")
+        self.assertRaises(ValueError, self.__validator, dict())

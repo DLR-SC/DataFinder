@@ -44,7 +44,7 @@ from threading import RLock
 from copy import copy
 import mimetypes
 
-from datafinder.core.configuration.properties import constants
+from datafinder.core.configuration.properties import constants as const
 from datafinder.core.configuration.properties.property_definition import PropertyDefinition
 from datafinder.core.configuration.properties import property_type
 from datafinder.core.error import ConfigurationError
@@ -54,153 +54,169 @@ __version__ = "$Revision-Id:$"
 
 
 class PropertyDefinitionRegistry(object):
-    """ Implements a registry for property types. """
+    """ Implements a registry for property definitions. """
 
     def __init__(self, propertyDefinitionFactory, isManagedRepository):
         """ 
-        Constructor. 
-        
-        @param propertyDefinitionFactory: Factory instance allowing creation of property definitions.
-        @type propertyDefinitionFactory: L{PropertyDefinitionFactory<datafinder.core.configuration.
-        properties.property_definition.PropertyDefinitionFactory>}
-        @param isManagedRepository: Flag indicating whether the system-specific properties
-                                    which are only required for managed repositories are also
-                                    loaded.
+        @param propertyDefinitionFactory: Factory instance allowing 
+            creation of property definitions.
+        @type propertyDefinitionFactory: L{PropertyDefinitionFactory
+            <datafinder.core.configuration.properties.property_definition.
+            PropertyDefinitionFactory>}
+        @param isManagedRepository: Flag indicating whether the system-specific 
+            properties which are only required for managed repositories are also
+            loaded.
         @type isManagedRepository: C{bool}
         """
 
-        self._systemProperties = list()
-        self._registeredProperties = dict()
+        self._systemPropertyDefinitions = list()
+        self._registeredPropertyDefinitions = dict()
         self._defaultCollectionPropertyDefinitions = list()
         self._defaultResourcePropertyDefinitions = list()
         self._defaultArchivePropertyDefinitions = list()
         self._lock = RLock()
         self._propertyDefinitionFactory = propertyDefinitionFactory
-
+        
         self._initUnmanagedSystemProperties()
         if isManagedRepository:
             self._initManagedSystemProperties()
-        self.register(self._systemProperties)
-
+        self.register(self._systemPropertyDefinitions)
+        
     def _initUnmanagedSystemProperties(self):
         """ Defines the common system-specific properties. """
         
         options = [mimeType for mimeType in mimetypes.types_map.values()]
         mimeTypeValidator = property_type.StringType(options=options)
-        mimeTypeProperty = PropertyDefinition(constants.MIME_TYPE_ID, 
-                                              constants.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                              mimeTypeValidator,
-                                              constants.MIME_TYPE_DISPLAYNAME,
-                                              constants.MIME_TYPE_DESCRIPTION)
-        self._systemProperties.append(mimeTypeProperty)
+        mimeTypeProperty = PropertyDefinition(
+            const.MIME_TYPE_ID, 
+            const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
+            mimeTypeValidator,
+            const.MIME_TYPE_DISPLAYNAME,
+            const.MIME_TYPE_DESCRIPTION)
+        self._systemPropertyDefinitions.append(mimeTypeProperty)
               
-        resourceCreationProperty = PropertyDefinition(constants.CREATION_DATETIME_ID,
-                                                      constants.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                      property_type.DatetimeType(),
-                                                      constants.CREATION_DATETIME_DISPLAYNAME,
-                                                      constants.CREATION_DATETIME_DESCRIPTION)
-        self._systemProperties.append(resourceCreationProperty)
+        resourceCreationProperty = PropertyDefinition(
+            const.CREATION_DATETIME_ID,
+            const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.DatetimeType(),
+            const.CREATION_DATETIME_DISPLAYNAME,
+            const.CREATION_DATETIME_DESCRIPTION)
+        self._systemPropertyDefinitions.append(resourceCreationProperty)
         
-        resourceModificationProperty = PropertyDefinition(constants.MODIFICATION_DATETIME_ID, 
-                                                          constants.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                          property_type.DatetimeType(),
-                                                          constants.MODIFICATION_DATETIME_DISPLAYNAME, 
-                                                          constants.MODIFICATION_DATETIME_DESCRIPTION)
-        self._systemProperties.append(resourceModificationProperty)
+        resourceModificationProperty = PropertyDefinition(
+            const.MODIFICATION_DATETIME_ID, 
+            const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.DatetimeType(),
+            const.MODIFICATION_DATETIME_DISPLAYNAME, 
+            const.MODIFICATION_DATETIME_DESCRIPTION)
+        self._systemPropertyDefinitions.append(resourceModificationProperty)
         
-        sizeProperty = PropertyDefinition(constants.SIZE_ID, 
-                                          constants.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                          property_type.NumberType(0, None),
-                                          constants.SIZE_DISPLAYNAME, 
-                                          constants.SIZE_DESCRIPTION)
-        self._systemProperties.append(sizeProperty)
+        sizeProperty = PropertyDefinition(
+            const.SIZE_ID, 
+            const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.NumberType(0, None),
+            const.SIZE_DISPLAYNAME, 
+            const.SIZE_DESCRIPTION)
+        self._systemPropertyDefinitions.append(sizeProperty)
         
-        ownerProperty = PropertyDefinition(constants.OWNER_ID, 
-                                           constants.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                           property_type.StringType(),
-                                           constants.OWNER_DISPLAYNAME,
-                                           constants.OWNER_DESCRIPTION)
-        self._systemProperties.append(ownerProperty)
+        ownerProperty = PropertyDefinition(
+            const.OWNER_ID, 
+            const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.StringType(),
+            const.OWNER_DISPLAYNAME,
+            const.OWNER_DESCRIPTION)
+        self._systemPropertyDefinitions.append(ownerProperty)
     
     def _initManagedSystemProperties(self):
         """ Defines the common system-specific properties. """
     
-        dataTypeProperty = PropertyDefinition(constants.DATATYPE_ID, 
-                                              constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                              property_type.StringType(),
-                                              constants.DATATYPE_DISPLAYNAME,
-                                              constants.DATATYPE_DESCRIPTION)
-        self._systemProperties.append(dataTypeProperty)
+        dataTypeProperty = PropertyDefinition(
+            const.DATATYPE_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.StringType(),
+            const.DATATYPE_DISPLAYNAME,
+            const.DATATYPE_DESCRIPTION)
+        self._systemPropertyDefinitions.append(dataTypeProperty)
     
-        datastoreProperty = PropertyDefinition(constants.DATASTORE_NAME_ID, 
-                                               constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                               property_type.StringType(),
-                                               constants.DATASTORE_DISPLAYNAME,
-                                               constants.DATASTORE_NAME_DESCRIPTION)
-        self._systemProperties.append(datastoreProperty)
+        datastoreProperty = PropertyDefinition(
+            const.DATASTORE_NAME_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.StringType(),
+            const.DATASTORE_DISPLAYNAME,
+            const.DATASTORE_NAME_DESCRIPTION)
+        self._systemPropertyDefinitions.append(datastoreProperty)
     
-        fileSizeProperty = PropertyDefinition(constants.CONTENT_SIZE_ID, 
-                                              constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                              property_type.NumberType(0, None),
-                                              constants.CONTENT_SIZE_DISPLAYNAME,
-                                              constants.CONTENT_SIZE_DESCRIPTION)
-        self._systemProperties.append(fileSizeProperty)
+        fileSizeProperty = PropertyDefinition(
+            const.CONTENT_SIZE_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.NumberType(0, None),
+            const.CONTENT_SIZE_DISPLAYNAME,
+            const.CONTENT_SIZE_DESCRIPTION)
+        self._systemPropertyDefinitions.append(fileSizeProperty)
         
-        fileCreationProperty = PropertyDefinition(constants.CONTENT_CREATION_DATETIME_PROPERTY_ID, 
-                                                  constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                  property_type.DatetimeType(),
-                                                  constants.CONTENT_CREATION_DISPLAYNAME,
-                                                  constants.CONTENT_CREATION_DATETIME_DESCRIPTION)
-        self._systemProperties.append(fileCreationProperty)
+        fileCreationProperty = PropertyDefinition(
+            const.CONTENT_CREATION_DATETIME_PROPERTY_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.DatetimeType(),
+            const.CONTENT_CREATION_DISPLAYNAME,
+            const.CONTENT_CREATION_DATETIME_DESCRIPTION)
+        self._systemPropertyDefinitions.append(fileCreationProperty)
         
-        fileModificationProperty = PropertyDefinition(constants.CONTENT_MODIFICATION_DATETIME_ID, 
-                                                      constants.MANAGED_SYSTEM_PROPERTY_CATEGORY, 
-                                                      property_type.DatetimeType(),
-                                                      constants.CONTENT_MODIFICATION_DATETIME_DISPLAYNAME,
-                                                      constants.CONTENT_MODIFICATION_DATETIME_DESCRIPTION)
-        self._systemProperties.append(fileModificationProperty)
+        fileModificationProperty = PropertyDefinition(
+            const.CONTENT_MODIFICATION_DATETIME_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY, 
+            property_type.DatetimeType(),
+            const.CONTENT_MODIFICATION_DATETIME_DISPLAYNAME,
+            const.CONTENT_MODIFICATION_DATETIME_DESCRIPTION)
+        self._systemPropertyDefinitions.append(fileModificationProperty)
         
-        archiveIdentifierProperty = PropertyDefinition(constants.CONTENT_IDENTIFIER_ID, 
-                                                       constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                       property_type.StringType(),
-                                                       constants.CONTENT_IDENTIFIER,
-                                                       constants.CONTENT_IDENTIFIER_DESCRIPTION)
-        self._systemProperties.append(archiveIdentifierProperty)
+        archiveIdentifierProperty = PropertyDefinition(
+            const.CONTENT_IDENTIFIER_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.StringType(),
+            const.CONTENT_IDENTIFIER,
+            const.CONTENT_IDENTIFIER_DESCRIPTION)
+        self._systemPropertyDefinitions.append(archiveIdentifierProperty)
         
-        archiveRetentionExceededProperty = PropertyDefinition(constants.ARCHIVE_RETENTION_EXCEEDED_DATETIME_ID, 
-                                                              constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                              property_type.DatetimeType(),
-                                                              constants.ARCHIVE_RETENTION_EXCEEDED_DISPLAYNAME,
-                                                              constants.ARCHIVE_RETENTION_EXCEEDED_DESCRIPTION)
-        self._systemProperties.append(archiveRetentionExceededProperty)
+        archiveRetentionExceededProperty = PropertyDefinition(
+            const.ARCHIVE_RETENTION_EXCEEDED_DATETIME_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.DatetimeType(),
+            const.ARCHIVE_RETENTION_EXCEEDED_DISPLAYNAME,
+            const.ARCHIVE_RETENTION_EXCEEDED_DESCRIPTION)
+        self._systemPropertyDefinitions.append(archiveRetentionExceededProperty)
         
-        archiveRootCollectionProperty = PropertyDefinition(constants.ARCHIVE_ROOT_COLLECTION_ID, 
-                                                           constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                           property_type.StringType(),
-                                                           constants.ARCHIVE_ROOT_COLLECTION_DISPLAYNAME,
-                                                           constants.ARCHIVE_ROOT_COLLECTION_DESCRIPTION)
-        self._systemProperties.append(archiveRootCollectionProperty)
+        archiveRootCollectionProperty = PropertyDefinition(
+            const.ARCHIVE_ROOT_COLLECTION_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.StringType(),
+            const.ARCHIVE_ROOT_COLLECTION_DISPLAYNAME,
+            const.ARCHIVE_ROOT_COLLECTION_DESCRIPTION)
+        self._systemPropertyDefinitions.append(archiveRootCollectionProperty)
         
-        archivePartIndexProperty = PropertyDefinition(constants.ARCHIVE_PART_INDEX_ID, 
-                                                      constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                      property_type.NumberType(0, None, 0, 0),
-                                                      constants.ARCHIVE_PART_INDEX_DISPLAYNAME,
-                                                      constants.ARCHIVE_PART_INDEX_DESCRIPTION)
-        self._systemProperties.append(archivePartIndexProperty)
+        archivePartIndexProperty = PropertyDefinition(
+            const.ARCHIVE_PART_INDEX_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.NumberType(0, None, 0, 0),
+            const.ARCHIVE_PART_INDEX_DISPLAYNAME,
+            const.ARCHIVE_PART_INDEX_DESCRIPTION)
+        self._systemPropertyDefinitions.append(archivePartIndexProperty)
         
-        archivePartCount = PropertyDefinition(constants.ARCHIVE_PART_COUNT_ID, 
-                                              constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                              property_type.NumberType(0, None, 0, 0),
-                                              constants.ARCHIVE_PART_COUNT_DISPLAYNAME,
-                                              constants.ARCHIVE_PART_COUNT_DESCRIPTION)
-        self._systemProperties.append(archivePartCount)
+        archivePartCount = PropertyDefinition(
+            const.ARCHIVE_PART_COUNT_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.NumberType(0, None, 0, 0),
+            const.ARCHIVE_PART_COUNT_DISPLAYNAME,
+            const.ARCHIVE_PART_COUNT_DESCRIPTION)
+        self._systemPropertyDefinitions.append(archivePartCount)
 
-        dataFormatProperty = PropertyDefinition(constants.DATA_FORMAT_ID, 
-                                                constants.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-                                                property_type.StringType(),
-                                                constants.DATA_FORMAT_DISPLAYNAME,
-                                                constants.DATA_FORMAT_DESCRIPTION)
-        self._systemProperties.append(dataFormatProperty)
+        dataFormatProperty = PropertyDefinition(
+            const.DATA_FORMAT_ID, 
+            const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
+            property_type.StringType(),
+            const.DATA_FORMAT_DISPLAYNAME,
+            const.DATA_FORMAT_DESCRIPTION)
+        self._systemPropertyDefinitions.append(dataFormatProperty)
         
         # init default property definitions
         self._defaultCollectionPropertyDefinitions.append(dataTypeProperty)
@@ -214,7 +230,8 @@ class PropertyDefinitionRegistry(object):
         
     def register(self, propertyDefinitions):
         """ 
-        Registers property definitions. A registered definition can be updated by simply registering again.
+        Registers property definitions. A registered definition can 
+        be updated by simply registering again.
         
         @param propertyDefinition: The property definitions to register.
         @type propertyDefinition: C{list} of L{PropertyDefinition}
@@ -222,22 +239,26 @@ class PropertyDefinitionRegistry(object):
         
         self._lock.acquire()
         try:
-            notRegisteredPropertyDefs = list()
-            for propertyDef in propertyDefinitions:
+            notRegPropDefs = list()
+            for propDef in propertyDefinitions:
                 try:
-                    registeredPropertyDef = self._registeredProperties[(propertyDef.namespace, propertyDef.identifier)]    
+                    regPropDef = self._registeredPropertyDefinitions[(propDef.namespace, 
+                        propDef.identifier)]    
                 except KeyError:
-                    self._registeredProperties[(propertyDef.namespace, propertyDef.identifier)] = propertyDef
+                    self._registeredPropertyDefinitions[(propDef.namespace, 
+                        propDef.identifier)] = propDef
                 else:
-                    if registeredPropertyDef.category == constants.MANAGED_SYSTEM_PROPERTY_CATEGORY \
-                       or registeredPropertyDef.category == constants.UNMANAGED_SYSTEM_PROPERTY_CATEGORY:
-                        notRegisteredPropertyDefs.append(propertyDef)
+                    if regPropDef.category == const.MANAGED_SYSTEM_PROPERTY_CATEGORY \
+                       or regPropDef.category == const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY:
+                        notRegPropDefs.append(propDef)
                     else:
-                        self._registeredProperties[(propertyDef.namespace, propertyDef.identifier)] = propertyDef
-            if len(notRegisteredPropertyDefs) > 0:
-                propertyNames = [propertyDef.identifier + " " for propertyDef in notRegisteredPropertyDefs]
-                errorMessage = "The following properties were not registered because system specific " \
-                               + "property definition already exist.\n '%s'" % propertyNames  
+                        self._registeredPropertyDefinitions[(propDef.namespace, 
+                            propDef.identifier)] = propDef
+            if len(notRegPropDefs) > 0:
+                propNames = [propDef.identifier + " " for propDef in notRegPropDefs]
+                errorMessage = "The following properties were not registered because " \
+                               + "system-specific property definitions already exist.\n '%s'" \
+                               % propNames  
                 raise ConfigurationError(errorMessage)
         finally:
             self._lock.release()
@@ -247,14 +268,15 @@ class PropertyDefinitionRegistry(object):
         Removes the given property type definitions from the registration.
         
         @param propertyDefinitions: The property definition to unregister.
-        @type propertyDefinitions: C{list} of L{PropertyDefinition}
+        @type propertyDefinitions: C{list} of C{PropertyDefinition}
         """
     
         self._lock.acquire()
         try:
-            for propertyDefinition in propertyDefinitions:
-                if (propertyDefinition.namespace, propertyDefinition.identifier) in self._registeredProperties:
-                    del self._registeredProperties[(propertyDefinition.namespace, propertyDefinition.identifier)]
+            for propDef in propertyDefinitions:
+                key = (propDef.namespace, propDef.identifier)
+                if key in self._registeredPropertyDefinitions:
+                    del self._registeredPropertyDefinitions[key]
         finally:
             self._lock.release()
     
@@ -263,13 +285,15 @@ class PropertyDefinitionRegistry(object):
         
         self._lock.acquire()
         try:
-            self._registeredProperties.clear()
+            self._registeredPropertyDefinitions.clear()
+            self.register(self._systemPropertyDefinitions)
         finally:
             self._lock.release()
     
     def existsSystemPropertyDefinition(self, identifier):
         """ 
-        Checks whether a system-specific property exists for the given property identifier.
+        Checks whether a system-specific property exists for the 
+        given property identifier.
         
         @param identifier: Identifier of the property definition.
         @type identifier: C{unicode}
@@ -280,7 +304,7 @@ class PropertyDefinitionRegistry(object):
     
         self._lock.acquire()
         try:
-            return (None, identifier) in self._registeredProperties
+            return (None, identifier) in self._registeredPropertyDefinitions
         finally:
             self._lock.release()
             
@@ -288,13 +312,15 @@ class PropertyDefinitionRegistry(object):
         """ 
         Checks whether the given property is already registered. 
         
-        @return: Flag indicating the existence of the property with the given identifier and name space.
+        @return: Flag indicating the existence of the property with 
+            the given identifier and name space.
         @rtype: C{bool}
         """
             
         self._lock.acquire()
         try:
-            if (propertyDefinition.namespace, propertyDefinition.identifier) in self._registeredProperties:
+            key = (propertyDefinition.namespace, propertyDefinition.identifier)
+            if key in self._registeredPropertyDefinitions:
                 return True
             return False
         finally:
@@ -306,24 +332,30 @@ class PropertyDefinitionRegistry(object):
         
         @param propertyIdentifier: Property identifier.
         @type propertyIdentifier: C{unicode}
-        @param namespace: Name space of the property, i.e. the data type name it is registered for.
+        @param namespace: Name space of the property, i.e. the data type name 
+            it is registered for.
         @type namespace: C{unicode}
         
         @return: Matching property definition.
         @rtype: L{PropertyDefinition}
+        
+        @raise ConfigurationError: Indicates problem on property definition creation.
         """
         
         self._lock.acquire()
         try:
-            registeredPropertyDefinition = None
-            if (namespace, propertyIdentifier) in self._registeredProperties:
-                registeredPropertyDefinition = copy(self._registeredProperties[(namespace, propertyIdentifier)])
-            if (None, propertyIdentifier) in self._registeredProperties:
-                registeredPropertyDefinition = copy(self._registeredProperties[(None, propertyIdentifier)])
-            if registeredPropertyDefinition is None:
-                registeredPropertyDefinition = self._propertyDefinitionFactory.createPropertyDefinition(propertyIdentifier, 
-                                                                                                        constants.USER_PROPERTY_CATEGORY)
-            return registeredPropertyDefinition
+            regPropDef = None
+            if (namespace, propertyIdentifier) in self._registeredPropertyDefinitions:
+                regPropDef = copy(
+                    self._registeredPropertyDefinitions[(namespace, propertyIdentifier)])
+            if (None, propertyIdentifier) in self._registeredPropertyDefinitions:
+                regPropDef = copy(
+                    self._registeredPropertyDefinitions[(None, propertyIdentifier)])
+            if regPropDef is None:
+                regPropDef = self._propertyDefinitionFactory.\
+                    createPropertyDefinition(propertyIdentifier, 
+                                             const.USER_PROPERTY_CATEGORY)
+            return regPropDef
         finally:
             self._lock.release()
 
@@ -350,13 +382,14 @@ class PropertyDefinitionRegistry(object):
         """
         Returns a mapping of property identifiers to existing property type definitions.
         
-        @return: Mapping of property definition identifiers (namespace, property id) to property type definitions.
+        @return: Mapping of property definition identifiers (namespace, property id) 
+            to property type definitions.
         @rtype: C{dict}; keys: C{unicode}, C{unicode}; values: C{PropertyDefinition}
         """
         
         self._lock.acquire()
         try:
-            return copy(self._registeredProperties)
+            return copy(self._registeredPropertyDefinitions)
         finally:
             self._lock.release()
     
@@ -365,24 +398,26 @@ class PropertyDefinitionRegistry(object):
         """
         Returns a list of system-specific property type definitions.
         
-        @return: Mapping of property definition identifiers (namespace, property id) to property type definitions.
+        @return: Mapping of property definition identifiers 
+            (namespace, property id) to property type definitions.
         @rtype: C{list} of C{PropertyDefinition}
         """
         
         self._lock.acquire()
         try:
-            result = list()
-            for propertyDefinition in self._registeredProperties.values():
-                if propertyDefinition.category == constants.UNMANAGED_SYSTEM_PROPERTY_CATEGORY \
-                   or propertyDefinition.category == constants.MANAGED_SYSTEM_PROPERTY_CATEGORY:
-                    result.append(propertyDefinition)
-            return result
+            return self._systemPropertyDefinitions[:]
         finally:
             self._lock.release()
 
     @property
     def propertyNameValidationFunction(self):
-        """ Getter for the property identifier validation function. """
+        """ Getter for the property identifier validation function. 
+        In addition to the pure name validation the function rejects IDs
+        which have been already registered.
+        
+        The returned function expects a string as input and returns a boolean 
+        value.
+        """
         
         def wrapperFunction(inputString):
             return self._propertyDefinitionFactory.isValidPropertyIdentifier(inputString) \
