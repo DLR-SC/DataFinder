@@ -126,7 +126,7 @@ function-rgx=_{0,2}[a-z][a-zA-Z0-9]*_{0,1}$
 method-rgx=((_{0,2}[a-z][a-zA-Z0-9]*$)|(__[a-z0-9]*__))
 
 # Regular expression which should only match correct instance attribute names
-attr-rgx=_{0,2}[a-z][a-zA-Z0-9]*$
+attr-rgx=_{0,2}[a-z][a-zA-Z0-9]*_{0,2}$
 
 # Regular expression which should only match correct argument names
 argument-rgx=[a-z][a-zA-Z0-9]*_{0,1}$|_*
