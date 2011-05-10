@@ -40,26 +40,8 @@ Contains wrapper class around the property representation used in the core packa
 """
  
 
-from datafinder.core.configuration.properties.validators import base_validators
-from datafinder.script_api.properties import constants
-
-
 __version__ = "$Revision-Id:$" 
 
-
-# definition of supported restriction parameters
-_restrictionParameterValidatorMapping = {constants.MINIMUM_VALUE: (base_validators.IsInRange, "minValue"),
-                                         constants.MAXIMUM_VALUE: (base_validators.IsInRange, "maxValue"),
-                                         constants.MINIMUM_LENGTH: (base_validators.IsLengthInRange, "minLength"),
-                                         constants.MAXIMUM_LENGTH: (base_validators.IsLengthInRange, "maxLength"),
-                                         constants.MINIMUM_NUMBER_OF_DECIMAL_PLACES: (base_validators.IsNumberOfDecimalPlacesInRange, 
-                                                                                      "minNumberOfDecimalPlaces"),
-                                         constants.MAXIMUM_NUMBER_OF_DECIMAL_PLACES: (base_validators.IsNumberOfDecimalPlacesInRange, 
-                                                                                      "maxNumberOfDecimalPlaces"),
-                                         constants.OPTIONS: (base_validators.AreOptionsMatched, "options"),
-                                         constants.OPTIONS_MANDATORY: (base_validators.AreOptionsMatched, "optionsMandatory"),
-                                         constants.PATTERN: (base_validators.IsPatternMatched, "pattern")}
- 
 
 class PropertyDescription(object):
     """ 
@@ -74,10 +56,8 @@ class PropertyDescription(object):
                     System specific: property can NOT be deleted from resource, values are read-only
                     Data model specific: property can NOT be deleted from resource, values changeable
                     User specific: property can be deleted from resource, values changeable
-    @type category: C{unicode}, possible values are: 
-                    L{systemPropertyCategory<systemPropertyCategory>},
-                    L{datamodelPropertyCategory<systemPropertyCategory>}, 
-                    L{userPropertyCategory<systemPropertyCategory>}
+    @type category: C{unicode}, for possible values see: 
+                    L{constants<datafinder.script_api.properties.constants>}
     @ivar displayName: A readable name that can be presented in a user interface.
     @type displayName: C{unicode}
     @ivar description: Describes the purpose of the property.
@@ -86,8 +66,6 @@ class PropertyDescription(object):
     @type notNull: C{bool}
     @ivar defaultValue: A default value for the property that is used for creation of the property on a resource.
     @type defaultValue: The type of the default value depends on the property definition.
-    @ivar representationTypes: Read-only property restricting the type of the property values.
-    @type representationTypes: C{list} of class objects
     @ivar restrictions: This parameter holds the defined property restrictions that are
                         represented by  parameters. The returned mapping can contain the following keys:
                         minimumValue: Defining the lower boundary of a value range.
@@ -96,10 +74,15 @@ class PropertyDescription(object):
                         maximumLength: Defining the upper boundary of a length range.
                         minimumNumberOfDecimalPlaces: Defining the minimum number of decimal places.
                         maximumNumberOfDecimalPlaces: Defining the maximum number of decimal places. 
-                        options: A list of options the value can be chosen from.
                         pattern: Regular expression pattern that restricts a string value.
-                        The possible restrictions depend on the supported representation types.
+                        options: A list of options the value can be chosen from.
+                        optionsMandatory: Boolean indicating whether the value MUST be from the list of options.
+                        subTypes: List of strings identifying supported types.
+                        The possible restrictions depend on the type.
     @type restrictions: C{dict}
+    @ivar namespace: Name space in which the property is valid, e.g. used to distinguish
+                     different C{name} properties of different data types.
+    @type namespace: C{unicode}
     """
     
     
@@ -201,7 +184,7 @@ class PropertyDescription(object):
     
     restrictions = property(__getRestrictions)
 
-    def __str__(self):
+    def __repr__(self):
         """ Returns a readable representation. """
         
         return self.identifier + " Type: " + self.type \

@@ -36,8 +36,14 @@
 
 
 """
-This package provides property operations.
+This package provides access to property operations.
 """
 
 
 __version__ = "$Revision-Id:$" 
+
+
+# Enable support for domain properties
+from datafinder.core.configuration.properties.domain import DomainObject, DomainProperty
+from datafinder.core.configuration.properties.property_type import \
+    BooleanType, DatetimeType, ListType, NumberType, StringType, DomainObjectType

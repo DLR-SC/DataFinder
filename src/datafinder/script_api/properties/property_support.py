@@ -36,18 +36,16 @@
 
 
 """ 
-This module contains the script API functionalities for property data access.
-@note: System specific properties are set via dedicated methods, e.g. during file import. 
-       The support package is developed for the user who should not directly set system properties.
+This module contains the script API functionalities for property access.
+@note: System-specific properties are set via dedicated methods, e.g. during file import. 
+The support package is developed for the user who should not directly set system properties.
 """
 
 
 from datafinder.core.configuration.properties import constants
-from datafinder.core.configuration.properties.property_definition import PropertyDefinitionFactory
-from datafinder.core.configuration.properties.registry import PropertyDefinitionRegistry
-from datafinder.core.error import PropertyError, ItemError
+from datafinder.core.error import PropertyError, ItemError, ConfigurationError
 from datafinder.core.repository_manager import repositoryManagerInstance
-from datafinder.script_api.error import PropertiesSupportError, ItemSupportError
+from datafinder.script_api.error import PropertySupportError, ItemSupportError
 from datafinder.script_api.properties.property_description import PropertyDescription
 
 
@@ -61,19 +59,30 @@ def validate(properties):
     @param properties: Mapping of property identifiers to values.
     @type properties: C{dict}
         
-    @raise PropertiesSupportError: Raised when a value does not conform to 
-                                 the defined property restrictions. 
+    @raise PropertySupportError: Raised when a value does not conform to 
+        the defined property restrictions. 
     """
     
-    propertyRegistry = PropertyDefinitionRegistry(PropertyDefinitionFactory(), repositoryManagerInstance.workingRepository)
+    registry = _getPropertyDefinitionRegistry()
     
     for propertyIdentifier, value in properties.iteritems():
-        propertyDefinition = propertyRegistry.getPropertyDefinition(propertyIdentifier)
+        propertyDefinition = registry.getPropertyDefinition(propertyIdentifier)
         try:
             propertyDefinition.validate(value)
         except PropertyError:
-            raise PropertiesSupportError("Value for property '%s' is not valid." % 
-                                         propertyDefinition.displayName)
+            raise PropertySupportError(
+                "Value '%s' for property '%s' is not valid." \
+                % (str(value), propertyDefinition.displayName))
+
+
+def _getPropertyDefinitionRegistry():
+    return repositoryManagerInstance.workingRepository.\
+        configuration.propertyDefinitionRegistry
+
+
+def _getPropertyDefinitionFactory():
+    return repositoryManagerInstance.workingRepository.\
+        configuration.propertyDefinitionFactory
 
 
 def propertyDescription(propertyIdentifier):
@@ -85,14 +94,13 @@ def propertyDescription(propertyIdentifier):
         
     @return: property description instance.
     @rtype: L{PropertyDescription<datafinder.script_api.configuration.properties.
-                property_description.PropertyDescription>}
+        property_description.PropertyDescription>}
     """
     
-    propertyRegistry = PropertyDefinitionRegistry(PropertyDefinitionFactory(), repositoryManagerInstance.workingRepository)    
-     
-    propertyDefinition = propertyRegistry.getPropertyDefinition(propertyIdentifier)
-    propertyDescription_ = PropertyDescription(propertyDefinition)
-    return propertyDescription_
+    registry = _getPropertyDefinitionRegistry() 
+    propDef = registry.getPropertyDefinition(propertyIdentifier)
+    propDesc = PropertyDescription(propDef)
+    return propDesc
 
 
 def availableProperties():
@@ -104,12 +112,11 @@ def availableProperties():
     @rtype: C{dict} of L{PropertyDescription<PropertyDescription>}
     """
         
-    propertyRegistry = PropertyDefinitionRegistry(PropertyDefinitionFactory(), 
-                                                  repositoryManagerInstance.workingRepository.configuration.isManagedRepository)    
-    registeredPropertyDefinitions = propertyRegistry.registeredPropertyDefinitions
+    registry = _getPropertyDefinitionRegistry()
+    regPropDef = registry.registeredPropertyDefinitions
     propertyDescriptions = dict()
-    for propertyIdentifier, propertyDefinition in registeredPropertyDefinitions.iteritems():
-        propertyDescriptions[propertyIdentifier[1]] = PropertyDescription(propertyDefinition)
+    for propId, propDef in regPropDef.iteritems():
+        propertyDescriptions[propId[1]] = PropertyDescription(propDef)
     return propertyDescriptions
 
 
@@ -123,13 +130,13 @@ def retrieveProperties(path):
     @return properties: Mapping of property identifiers to values.
     @rtype properties: C{dict} of C{unicode}, C{object}
         
-    @raise ItemSupportError: Raised when problems during the property retrieval occurs.
+    @raise ItemSupportError: Raised when problems during the property retrieval occur.
     """
     
     try:    
         item = repositoryManagerInstance.workingRepository.getItem(path)
     except ItemError:
-        raise ItemSupportError("Item cannot be found.")
+        raise ItemSupportError("Item '%s' cannot be found." % path)
     else:
         properties = item.properties
         result = dict()
@@ -148,8 +155,8 @@ def storeProperties(path, properties):
     @type properties: C{dict} of C{unicode}, C{object}
         
     @raise ItemSupportError: Raised when values do not conform to the specified restrictions,
-                             values of system specific properties are tried to change or
-                             other difficulties occur during property storage. 
+        values of system specific properties are tried to change or
+        other difficulties occur during property storage. 
     """
     
     cwr = repositoryManagerInstance.workingRepository
@@ -159,22 +166,23 @@ def storeProperties(path, properties):
         raise ItemSupportError("Item cannot be found.")
     else:
         mappedProperties = list()
-        for propertyIdentifier, value in properties.iteritems():
+        for propId, value in properties.iteritems():
             try:
-                if propertyIdentifier in item.properties:
-                    property_ = cwr.createPropertyFromDefinition(item.properties[propertyIdentifier].propertyDefinition, value)
+                if propId in item.properties:
+                    prop = item.properties[propId]
+                    prop.value = value
                 else:
-                    property_ = cwr.createProperty(propertyIdentifier, value)
-                if not property_.propertyDefinition.category == constants.MANAGED_SYSTEM_PROPERTY_CATEGORY:
-                    mappedProperties.append(property_)
+                    prop = cwr.createProperty(propId, value)
+                if not prop.propertyDefinition.category == constants.MANAGED_SYSTEM_PROPERTY_CATEGORY:
+                    mappedProperties.append(prop)
             except PropertyError, error:
                 errorMessage = u"The property '%s' is an invalid value assigned." % error.propertyIdentifier \
-                               + "The validation failed for the following reason:\n '%s'." % error.message
+                               + "The validation failed for the following reason:\n '%s'." % str(error.args)
                 raise ItemSupportError(errorMessage)
         try:
             item.updateProperties(mappedProperties)
         except ItemError, error:
-            raise ItemSupportError("Cannot update properties.\nReason: '%s'" % error.message)
+            raise ItemSupportError("Cannot update properties.\nReason: '%s'" % str(error.args))
 
 
 def deleteProperties(path, propertyIdentifiers):
@@ -187,8 +195,7 @@ def deleteProperties(path, propertyIdentifiers):
     @type propertyIdentifiers: C{list} of C{unicode}
     
     @raise ItemSupportError: Raised when system specific or data model specific properties
-                             should be removed or other difficulties during the deletion
-                             process occur.
+        should be removed or other difficulties during the deletion process occur.
     """
     
     cwr = repositoryManagerInstance.workingRepository
@@ -197,17 +204,44 @@ def deleteProperties(path, propertyIdentifiers):
     except ItemError:
         raise ItemSupportError("Problem during retrieval of the item.")
     else:
-        propertyRegistry = PropertyDefinitionRegistry(PropertyDefinitionFactory(), cwr)    
+        registry = _getPropertyDefinitionRegistry()
         propertiesForDeletion = list()
-        for propertyIdentifier in propertyIdentifiers:
-            propertyDefinition = propertyRegistry.getPropertyDefinition(propertyIdentifier)
-            if propertyDefinition.category == constants.USER_PROPERTY_CATEGORY:
-                propertiesForDeletion.append(propertyIdentifier)
+        for propId in propertyIdentifiers:
+            propDef = registry.getPropertyDefinition(propId)
+            if propDef.category == constants.USER_PROPERTY_CATEGORY:
+                propertiesForDeletion.append(propId)
             else:
                 raise ItemSupportError("Unable to delete property '%s' because it is not user-defined. " \
-                                       % propertyDefinition.displayName + \
+                                       % propDef.displayName + \
                                        "Only user-defined properties can be deleted." )
         try:
             item.deleteProperties(propertiesForDeletion)
         except ItemError, error:
-            raise ItemSupportError("Cannot delete item properties.\nReason: '%s'" % error.message)
+            raise ItemSupportError("Cannot delete item properties.\nReason: '%s'" % str(error.args))
+
+
+def registerPropertyDefinition(identifier, type_, displayName=None, description=None):
+    """
+    Creates a user-specific property and registers it.
+    
+    @param identifier: Unique name.
+    @type identifier: C{unicode}
+    @param type_: Type of the property.
+    @type type_: C{BasePropertyType} @see {properties<datafinder.script_api.properties.__init__>}
+    @param displayName: A user-readable name.
+    @type displayName: C{unicode}
+    @param description: A short help test.
+    @type description: C{unicode}
+    
+    @raises PropertySupportError: Invalid identifier 
+        / Overwrites read-only property
+    """
+    
+    registry = _getPropertyDefinitionRegistry()
+    factory = _getPropertyDefinitionFactory()
+    try:
+        propDef = factory.createPropertyDefinition(
+            identifier, constants.USER_PROPERTY_CATEGORY, type_, displayName, description) 
+        registry.register([propDef])
+    except ConfigurationError, error:
+        raise PropertySupportError(str(error.args))

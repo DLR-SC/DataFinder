@@ -40,39 +40,69 @@ Demonstrates the property access.
 """
 
 
-import sys
 import datetime
+import logging
+import sys
 
 from datafinder.script_api.repository import connectRepository
-from datafinder.script_api.properties.property_support import retrieveProperties, storeProperties, deleteProperties, \
-                                                              validate, availableProperties, propertyDescription
+from datafinder.script_api.properties import property_support as prop_supp
+from datafinder.script_api.properties import \
+    DomainObject, DomainObjectType, DomainProperty, StringType
 
 
 __version__ = "$Revision-Id:$" 
+
+
+_logger = logging.getLogger()
+_logger.addHandler(logging.StreamHandler(sys.stdout))
+
+
+class _Author(DomainObject):
+    firstName = DomainProperty(StringType(2), None, "First Name", "This is the first name.")
+    lastName = DomainProperty(StringType(2), None, "Last Name", "This is the last name.")
+
+    def __init__(self, firstName="", lastName=""):
+        DomainObject.__init__(self)
+        self.firstName = firstName
+        self.lastName = lastName
+    
+    @firstName.setValidate
+    def _validateFirstName(self):
+        self._validateName(self.firstName)
+    
+    @lastName.setValidate
+    def _validateLastName(self):
+        self._validateName(self.lastName)
+    
+    @staticmethod
+    def _validateName(name):
+        if name is None:
+            raise ValueError("Name should not be empty.")
 
 
 def propertyAccess(baseUrl, username=None, password=None):
     """ Demonstrates the access to properties. """
     
     connectRepository(baseUrl, username=username, password=password)
-    for propertyDescription_ in availableProperties().values():
-        print propertyDescription_
-    print propertyDescription("anotherProperty")
+    prop_supp.registerPropertyDefinition("author", DomainObjectType(_Author))
+    for propertyDescription_ in prop_supp.availableProperties().values():
+        _logger.info(propertyDescription_)
+    _logger.info(prop_supp.propertyDescription("anotherProperty"))
     
-    print retrieveProperties("/")
-    properties = {"anotherProperty": datetime.datetime.now()}
-    validate(properties)
-    storeProperties("/", properties)
-    print retrieveProperties("/")
-    deleteProperties("/", ["anotherProperty"])
-    print retrieveProperties("/")
+    _logger.info(prop_supp.retrieveProperties("/"))
+    properties = {"anotherProperty": datetime.datetime.now(),
+                  "author": _Author("Me", "You")}
+    prop_supp.validate(properties)
+    prop_supp.storeProperties("/", properties)
+    _logger.info(prop_supp.retrieveProperties("/"))
+    prop_supp.deleteProperties("/", ["anotherProperty", "author"])
+    _logger.info(prop_supp.retrieveProperties("/"))
     
 
 if __name__ == "__main__":
-
     if len(sys.argv) == 2:
         propertyAccess(unicode(sys.argv[1]))
     elif len(sys.argv) == 4:
         propertyAccess(unicode(sys.argv[1]), unicode(sys.argv[2]), unicode(sys.argv[3]))
     else:
-        print "Call: properties.py URL [username] [password]"
+        _logger.info("Call: properties.py URL [username] [password]")

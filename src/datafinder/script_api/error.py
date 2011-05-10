@@ -59,7 +59,7 @@ class ConfigurationSupportError(ScriptApiError):
     pass
 
         
-class PropertiesSupportError(ScriptApiError):
+class PropertySupportError(ScriptApiError):
     """
     Indicates errors of the properties support package.
     """
