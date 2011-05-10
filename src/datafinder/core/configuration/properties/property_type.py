@@ -42,6 +42,7 @@ performs transformation of values for the persistence layer.
 """
 
 
+from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
 import logging
@@ -205,8 +206,8 @@ class ListType(BasePropertyType):
         
         BasePropertyType.__init__(self, notNull)
         
-        self.restrictions[constants.MINIMUM_VALUE] = minimum
-        self.restrictions[constants.MAXIMUM_VALUE] = maximum
+        self.restrictions[constants.MINIMUM_LENGTH] = minimum
+        self.restrictions[constants.MAXIMUM_LENGTH] = maximum
         self.restrictions[constants.ALLOWED_SUB_TYPES] = list()
         
         if allowedSubtypes is None:
@@ -268,6 +269,12 @@ class ListType(BasePropertyType):
                                      % repr(item))
             return result
         
+    def __deepcopy__(self, _):
+        return ListType(deepcopy(self._allowedSubtypes), 
+                        self.restrictions[constants.MINIMUM_LENGTH],
+                        self.restrictions[constants.MAXIMUM_LENGTH], 
+                        self.notNull)
+
 
 class AnyType(BasePropertyType):
     """ Represents an unspecific property type. """
@@ -337,6 +344,9 @@ class AnyType(BasePropertyType):
                 raise ValueError("Cannot restore value '%s' from persistence format."
                                  % repr(persistedValue))
             return result
+        
+    def __deepcopy__(self, _):
+        return AnyType(deepcopy(self._allowedTypes), self.notNull)
         
 
 class UnknownDomainObject(domain.DomainObject):

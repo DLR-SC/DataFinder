@@ -43,6 +43,7 @@ Provides tests for the different property types.
 """
 
 
+from copy import deepcopy
 import datetime
 import decimal
 import unittest
@@ -136,16 +137,23 @@ class ListPropertyTestCase(unittest.TestCase):
     def setUp(self):
         """ Creates the test fixture. """
         
-        allowedTypes = [property_type.StringType()]
-        self._propertyType = property_type.ListType(allowedTypes)
-        self.assertEquals(len(self._propertyType.restrictions), 3)
-        self.assertEquals(len(self._propertyType.restrictions[constants.ALLOWED_SUB_TYPES]), 1)
-        self.assertEquals(self._propertyType.restrictions["subTypes"], 
-                          [subType.name for subType in allowedTypes])
-        
         self._propertyType = property_type.ListType()
         self.assertEquals(len(self._propertyType.restrictions), 3)
         self.assertEquals(len(self._propertyType.restrictions[constants.ALLOWED_SUB_TYPES]), 5)
+
+    def testDeepCopy(self):
+        allowedTypes = [property_type.StringType()]
+        aPropType = property_type.ListType(allowedTypes, 1, 2, True)
+        aPropTypeCopy = deepcopy(aPropType)
+        
+        for propType in [aPropType, aPropTypeCopy]:
+            self.assertEquals(len(propType.restrictions), 3)
+            self.assertEquals(len(propType.restrictions[constants.ALLOWED_SUB_TYPES]), 1)
+            self.assertEquals(propType.restrictions["subTypes"], 
+                              [subType.name for subType in allowedTypes])
+            self.assertEquals(propType.restrictions[constants.MINIMUM_LENGTH], 1)
+            self.assertEquals(propType.restrictions[constants.MAXIMUM_LENGTH], 2)
+            self.assertTrue(propType.notNull)
 
     def testFromPersistenceFormat(self):
         self._propertyType.fromPersistenceFormat(["", True])
@@ -182,10 +190,15 @@ class AnyPropertyTestCase(unittest.TestCase):
             False, "hhh", u"hhh", 324234, 32.4234, decimal.Decimal(32),
             datetime.datetime(2008, 9, 9), [1, u"344", True]]
 
+    def testDeepCopy(self):
         allowedTypes = [property_type.DatetimeType()]
-        propType = property_type.AnyType(allowedTypes)
-        self.assertEquals(propType.restrictions, 
-                          {"subTypes": [subType.name for subType in allowedTypes]})
+        anotherPropType = property_type.AnyType(allowedTypes, True)
+        propTypeCopy = deepcopy(anotherPropType)
+        for propType in [anotherPropType, propTypeCopy]:
+            self.assertEquals(propType.restrictions, 
+                              {"subTypes": [subType.name for subType in allowedTypes]})
+            self.assertEquals(propType.name, "Any")
+            self.assertTrue(propType.notNull)
     
     def testValidate(self):
         """ Tests default data settings. """
