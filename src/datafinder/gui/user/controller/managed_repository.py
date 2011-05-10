@@ -249,6 +249,10 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
         if not repository is None:
             self._model.load(repository)
             self._scriptController.loadSharedScripts(repository.configuration.scripts)
+            try:
+                repository.configuration.scriptHandler.executeStartupScripts()
+            except ConfigurationError, error:
+                self._logger.error(str(error.args))
             self._controller.setConnectionState(True)
         else:
             if not self._workerThread.error is None:
@@ -269,8 +273,8 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
                 repositoryConfiguration.release()
         else:
             try:
-                repository = self._repositoryManager.connectRepository(repositoryConfiguration.defaultDataUris[0], repositoryConfiguration, 
-                                                                       username, password)
+                repository = self._repositoryManager.connectRepository(repositoryConfiguration.defaultDataUris[0], 
+                                                                       repositoryConfiguration, username, password)
             except ConfigurationError, error:
                 self._logger.error("Cannot connect repository.\nReason: '%s'" % error.message)
             else:

@@ -352,8 +352,7 @@ class Application(QtGui.QApplication):
                                                    self.__mainWindow)
         self.__unmanagedRepositoryController.load(self.__managedRepositoryController, self.__scriptController)
         self.__managedRepositoryController.load(self.__unmanagedRepositoryController, self.__scriptController)
-        self.__scriptController.load()
-
+        
         self.__outputView = OutputFacadeController(self.__mainWindow, 
                                                    SearchFilter(self.__managedRepositoryController.model),
                                                    self.__managedRepositoryController.itemActionController)
@@ -362,11 +361,11 @@ class Application(QtGui.QApplication):
         self.__outputView.myScriptLogView.model = LoggingSortFilterModel(scriptLoggingModel)
         
         
-        #Display the GUI
+        # Display the GUI
         self.__mainWindow.show()
         splash.finish(self.__mainWindow)
 
-        # initialize script API
+        # initialize script API and scripts
         scriptApiContext = _ScriptApiContext()
         scriptApiContext.mainWidget = self.__mainWindow
         scriptApiContext.repositoryManager = repositoryManager
@@ -374,7 +373,8 @@ class Application(QtGui.QApplication):
         scriptApiContext.unmanagedRepositoryController = self.__unmanagedRepositoryController
         scriptApiContext.scriptController = self.__scriptController
         script_api._context = scriptApiContext
-
+        self.__scriptController.load()
+        
         # Register clean up stuff
         atexit.register(repositoryManager.savePreferences)
 

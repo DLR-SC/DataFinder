@@ -42,8 +42,9 @@ Implements tests for the script registry.
 
 import unittest
 
-from datafinder.core.configuration.scripts import registry
 from datafinder.core.error import ConfigurationError
+from datafinder.core.configuration.scripts.constants import LOCAL_SCRIPT_LOCATION
+from datafinder.core.configuration.scripts import registry
 from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock
 
@@ -115,12 +116,35 @@ class ScriptRegistryTestCase(unittest.TestCase):
         self.assertEquals(len(self._registry.getScripts("anotherTest")), 0)
         self.assertEquals(len(self._registry.getScripts("test")), 0)
         self.assertEquals(len(self._registry.scripts), 0)
-
-
+        
+        # Register on local disk
+        self._registry.register(LOCAL_SCRIPT_LOCATION, [firstScript])
+        self._registry.unregister(LOCAL_SCRIPT_LOCATION, firstScript)
+        
+        
+    def testExecuteStartupScripts(self):
+        # Success
+        self._registry.register("location", [_ScriptMock("test"), _ScriptCollectionMock("testCollection")])
+        self._registry.executeStartupScripts("location")
+        
+        # Error during execution
+        self._registry.register("location", [_ScriptMock("error", True)])
+        self.assertRaises(ConfigurationError, self._registry.executeStartupScripts, "location")
+        
+        
 class _ScriptMock(object):
-    def __init__(self, uri):
+    def __init__(self, uri, error=False):
         self.uri = uri
+        self.name = uri
         self.automatic = True
+        self.error = error
         
     def execute(self):
-        pass
+        if self.error:
+            raise ConfigurationError("")
+
+class _ScriptCollectionMock(object):
+    def __init__(self, uri):
+        self.uri = uri
+        self.name = uri
+        self.scripts = [_ScriptMock("")]

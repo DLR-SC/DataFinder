@@ -113,7 +113,11 @@ class ScriptController(object):
                      key=operator.attrgetter("title"))
         for script in scripts:
             self._addScript(script)
-
+        try:
+            self._scriptRegistry.executeStartupScripts(LOCAL_SCRIPT_LOCATION)
+        except ConfigurationError, error:
+            self._logger.error(str(error.args))    
+        
     def _addScript(self, script, isLocal=True):
         """ Adds the corresponding actions for the given script. """
          

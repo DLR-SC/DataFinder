@@ -241,3 +241,11 @@ class ScriptHandler(object):
         
         targetStorer = self._targetFileStorer.getChild(localScriptPathName)
         return self._scriptRegistry.hasScript(self._location, targetStorer.uri)
+
+    def executeStartupScripts(self):
+        """ Executes all scripts which are indicated the @automatic tag.
+        
+        @raise ConfigurationError: Signals all failed scripts.
+        """
+        
+        return self._scriptRegistry.executeStartupScripts(self._location)

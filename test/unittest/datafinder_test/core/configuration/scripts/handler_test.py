@@ -69,6 +69,7 @@ class ScripthandlerTestCase(unittest.TestCase):
     def testLoad(self):
         """ Tests the initialization of the script handler. """
         
+        # Success
         self._createScriptMock.value = SimpleMock(uri="uri")
         self._sourceFileStorerMock.methodNameResultMap = {"getChildren": ([SimpleMock(SimpleMock())], None)}
         self._targetFileStorerMock.methodNameResultMap = {"getChild": (SimpleMock(SimpleMock()), None),
@@ -76,9 +77,15 @@ class ScripthandlerTestCase(unittest.TestCase):
         self._handler._isUpdateRequired = SimpleMock(True)
         self._handler.load()
 
+        # Cannot copy a certain script
+        self._handler._copy = SimpleMock(error=PersistenceError(""))
+        self._handler.load()
+        
+        # Cannot create target collection
         self._targetFileStorerMock.error = PersistenceError("")
         self.assertRaises(ConfigurationError, self._handler.load)
 
+        # Cannot access scripts
         self._targetFileStorerMock.error = None
         self._sourceFileStorerMock.methodNameResultMap = None
         self._sourceFileStorerMock.error = PersistenceError("")
@@ -143,3 +150,11 @@ class ScripthandlerTestCase(unittest.TestCase):
         self._sourceFileStorerMock.error = SimpleMock(True)
         self._targetFileStorerMock.error = PersistenceError("")
         self.assertRaises(ConfigurationError, self._handler.removeScript, SimpleMock(name="scriptBaseFileName"))
+        
+    def testExecuteStartupScripts(self):
+        # Success
+        self._handler.executeStartupScripts()
+        
+        # Error
+        self._registryMock.error = ConfigurationError("")
+        self.assertRaises(ConfigurationError, self._handler.executeStartupScripts)
