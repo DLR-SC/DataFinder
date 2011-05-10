@@ -48,7 +48,8 @@ import unittest
 from datafinder.core.configuration.properties.registry import PropertyDefinitionRegistry
 from datafinder.core.configuration.properties.property_definition import PropertyDefinitionFactory
 from datafinder.core.error import ItemError, PropertyError
-from datafinder.script_api.error import ItemSupportError, PropertySupportError
+from datafinder.script_api import error
+from datafinder.script_api.properties import constants as const
 from datafinder.script_api.properties import property_support as prop_supp
 from datafinder.script_api.properties import StringType
 from datafinder_test.mocks import SimpleMock
@@ -94,7 +95,10 @@ class _RepositoryMock(object):
     def createProperty(self, propId, value):
         if self.propError:
             raise PropertyError(propId, "")
-        return _PropertyMock(propId, value)
+        propDef = self.propRegistry.getPropertyDefinition(propId)
+        prop = _PropertyMock(propId, value)
+        prop.propertyDefinition = propDef
+        return prop
     
     def getItem(self, _):
         if self.error:
@@ -126,7 +130,7 @@ class PropertySupportTestCase(unittest.TestCase):
         
         # Problems during retrieval
         self._repositoryMock.error = True
-        self.assertRaises(ItemSupportError, prop_supp.retrieveProperties, "/item")
+        self.assertRaises(error.ItemSupportError, prop_supp.retrieveProperties, "/item")
 
     def testStoreProperties(self):
         # Success
@@ -135,18 +139,24 @@ class PropertySupportTestCase(unittest.TestCase):
         prop_supp.storeProperties("/item", properties)
         self.assertEquals(prop_supp.retrieveProperties("/item"), properties)
         
-        # Cannot set specific property
+        # System-specific properties cannot be changed
+        self.assertRaises(
+            error.PropertySupportError, prop_supp.storeProperties, "/item", {const.SIZE_ID: 10})
+        self.assertRaises(
+            error.PropertySupportError, prop_supp.storeProperties, "/item", {const.DATATYPE_ID: "Name"})
+        
+        # Invalid property value
         self._repositoryMock.propError = True
         self.assertRaises(
-            ItemSupportError, prop_supp.storeProperties, "/item", {"n2": None})
+            error.PropertySupportError, prop_supp.storeProperties, "/item", {"n2": None})
         
         # Cannot store them
         self._itemMock.error = True
-        self.assertRaises(ItemSupportError, prop_supp.storeProperties, "/item", dict())
+        self.assertRaises(error.ItemSupportError, prop_supp.storeProperties, "/item", dict())
         
         # Cannot find item
         self._repositoryMock.error = True
-        self.assertRaises(ItemSupportError, prop_supp.storeProperties, "/item", dict())
+        self.assertRaises(error.ItemSupportError, prop_supp.storeProperties, "/item", dict())
 
     def testDeleteProperties(self):
         # Success
@@ -154,22 +164,22 @@ class PropertySupportTestCase(unittest.TestCase):
         
         # Cannot delete system-specific properties
         self.assertRaises(
-            ItemSupportError, prop_supp.deleteProperties, "/item", ["____size____"])
+            error.PropertySupportError, prop_supp.deleteProperties, "/item", [const.SIZE_ID])
         
         # Cannot delete them
         self._itemMock.error = True
-        self.assertRaises(ItemSupportError, prop_supp.deleteProperties, "/Item", list())
+        self.assertRaises(error.ItemSupportError, prop_supp.deleteProperties, "/Item", list())
 
         # Cannot find item
         self._repositoryMock.error = True
-        self.assertRaises(ItemSupportError, prop_supp.deleteProperties, "/Item", list())
+        self.assertRaises(error.ItemSupportError, prop_supp.deleteProperties, "/Item", list())
 
     def testValidate(self):
         # Success
         prop_supp.validate({"name": "name", "price": 123})
         
         # Values does not fit
-        self.assertRaises(PropertySupportError, prop_supp.validate, {"____size____": "name"})
+        self.assertRaises(error.PropertySupportError, prop_supp.validate, {const.SIZE_ID: "name"})
         
     def testPropertyDescription(self):
         propDesc = prop_supp.propertyDescription("id")
@@ -182,7 +192,8 @@ class PropertySupportTestCase(unittest.TestCase):
         self.assertEquals(propDesc.notNull, False)
         self.assertEquals(propDesc.namespace, None)
         self.assertEquals(len(propDesc.restrictions), 1)
-        self.assertEquals(repr(propDesc), "id Type: Any Category: ____user____")
+        self.assertEquals(repr(propDesc), 
+                          "id Type: Any Category: %s" % const.USER_PROPERTY_CATEGORY)
 
     def testAvailableProperties(self):
         self.assertEquals(len(prop_supp.availableProperties()), 
@@ -195,20 +206,20 @@ class PropertySupportTestCase(unittest.TestCase):
         self.assertEquals(propDesc.identifier, "name")
         self.assertEquals(propDesc.type, "String")
         self.assertEquals(propDesc.displayName, "displayName")
-        self.assertEquals(propDesc.category, "____user____")
+        self.assertEquals(propDesc.category, const.USER_PROPERTY_CATEGORY)
         self.assertEquals(propDesc.description, "helpText")
         self.assertEquals(propDesc.defaultValue, None)
         self.assertEquals(propDesc.notNull, False)
         self.assertEquals(propDesc.namespace, None)
         self.assertEquals(propDesc.restrictions, dict())
-        self.assertEquals(repr(propDesc), "name Type: String Category: ____user____")
+        self.assertEquals(repr(propDesc), 
+                          "name Type: String Category: %s" % const.USER_PROPERTY_CATEGORY)
         
         # System-specific property exists
-        self.assertRaises(PropertySupportError, prop_supp.registerPropertyDefinition, 
-                          "____size____", StringType())
+        self.assertRaises(error.PropertySupportError, prop_supp.registerPropertyDefinition, 
+                          const.SIZE_ID, StringType())
         
         # Property identifier does not match
         self._propRegistry._propertyDefinitionFactory.propertyIdValidator = lambda _: (False, 0)
-        self.assertRaises(PropertySupportError, prop_supp.registerPropertyDefinition, 
+        self.assertRaises(error.PropertySupportError, prop_supp.registerPropertyDefinition, 
                           "id", StringType())
-        

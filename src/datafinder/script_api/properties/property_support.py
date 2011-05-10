@@ -42,7 +42,7 @@ The support package is developed for the user who should not directly set system
 """
 
 
-from datafinder.core.configuration.properties import constants
+from datafinder.core.configuration.properties import constants as const
 from datafinder.core.error import PropertyError, ItemError, ConfigurationError
 from datafinder.core.repository_manager import repositoryManagerInstance
 from datafinder.script_api.error import PropertySupportError, ItemSupportError
@@ -154,16 +154,16 @@ def storeProperties(path, properties):
     @param properties: Mapping of property identifiers to values.
     @type properties: C{dict} of C{unicode}, C{object}
         
-    @raise ItemSupportError: Raised when values do not conform to the specified restrictions,
-        values of system specific properties are tried to change or
-        other difficulties occur during property storage. 
+    @raise ItemSupportError: Raised when difficulties with the item access occur.
+    @raise PropertySupportError: Raised when values do not conform to the specified restrictions,
+        values of system-specific properties are changed.
     """
     
     cwr = repositoryManagerInstance.workingRepository
     try:
         item = cwr.getItem(path)
     except ItemError:
-        raise ItemSupportError("Item cannot be found.")
+        raise ItemSupportError("Cannot find item '%s'." % path)
     else:
         mappedProperties = list()
         for propId, value in properties.iteritems():
@@ -173,12 +173,16 @@ def storeProperties(path, properties):
                     prop.value = value
                 else:
                     prop = cwr.createProperty(propId, value)
-                if not prop.propertyDefinition.category == constants.MANAGED_SYSTEM_PROPERTY_CATEGORY:
+                if (prop.propertyDefinition.category != const.MANAGED_SYSTEM_PROPERTY_CATEGORY
+                   and prop.propertyDefinition.category != const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY):
                     mappedProperties.append(prop)
+                else:
+                    errorMessage = "You cannot change system-specific property values."
+                    raise PropertySupportError(errorMessage)
             except PropertyError, error:
                 errorMessage = u"The property '%s' is an invalid value assigned." % error.propertyIdentifier \
-                               + "The validation failed for the following reason:\n '%s'." % str(error.args)
-                raise ItemSupportError(errorMessage)
+                               + " The validation failed for the following reason:\n '%s'." % str(error.args)
+                raise PropertySupportError(errorMessage)
         try:
             item.updateProperties(mappedProperties)
         except ItemError, error:
@@ -194,26 +198,27 @@ def deleteProperties(path, propertyIdentifiers):
     @param propertyIdentifiers: List of property identifiers.
     @type propertyIdentifiers: C{list} of C{unicode}
     
-    @raise ItemSupportError: Raised when system specific or data model specific properties
-        should be removed or other difficulties during the deletion process occur.
+    @raise ItemSupportError: Raised when difficulties with the item access occur.
+    @raise PropertySupportError: Raised when system specific or data model specific properties
+        should be removed.
     """
     
     cwr = repositoryManagerInstance.workingRepository
     try:
         item = cwr.getItem(path)
     except ItemError:
-        raise ItemSupportError("Problem during retrieval of the item.")
+        raise ItemSupportError("Cannot find item '%s'." % path)
     else:
         registry = _getPropertyDefinitionRegistry()
         propertiesForDeletion = list()
         for propId in propertyIdentifiers:
             propDef = registry.getPropertyDefinition(propId)
-            if propDef.category == constants.USER_PROPERTY_CATEGORY:
+            if propDef.category == const.USER_PROPERTY_CATEGORY:
                 propertiesForDeletion.append(propId)
             else:
-                raise ItemSupportError("Unable to delete property '%s' because it is not user-defined. " \
-                                       % propDef.displayName + \
-                                       "Only user-defined properties can be deleted." )
+                raise PropertySupportError("Unable to delete property '%s' because it is not user-defined. " \
+                                           % propDef.displayName + \
+                                           "Only user-defined properties can be deleted." )
         try:
             item.deleteProperties(propertiesForDeletion)
         except ItemError, error:
@@ -234,14 +239,14 @@ def registerPropertyDefinition(identifier, type_, displayName=None, description=
     @type description: C{unicode}
     
     @raises PropertySupportError: Invalid identifier 
-        / Overwrites read-only property
+        / Overwrites read-only property.
     """
     
     registry = _getPropertyDefinitionRegistry()
     factory = _getPropertyDefinitionFactory()
     try:
         propDef = factory.createPropertyDefinition(
-            identifier, constants.USER_PROPERTY_CATEGORY, type_, displayName, description) 
+            identifier, const.USER_PROPERTY_CATEGORY, type_, displayName, description) 
         registry.register([propDef])
     except ConfigurationError, error:
         raise PropertySupportError(str(error.args))
