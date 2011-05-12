@@ -183,10 +183,8 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 persistenceJsonProperties = self._retrieveProperties(connection)
                 persistenceProperties = json.loads(persistenceJsonProperties)
                 for propertyId in propertyIds:
-                    if isinstance(persistenceProperties[propertyId], type(list())):
-                        persistenceProperties[propertyId] = []
-                    else:
-                        persistenceProperties[propertyId] = u""
+                    if propertyId in persistenceProperties:
+                        del persistenceProperties[propertyId]
                 persistenceJsonProperties = json.dumps(persistenceProperties)
                 connection.setProperty(self.identifier, XPS_JSON_PROPERTY, persistenceJsonProperties)
             except SubversionError, error:
