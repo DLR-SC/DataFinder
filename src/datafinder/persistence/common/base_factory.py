@@ -40,6 +40,7 @@ Base class for the adaptor specific file system factory implementations.
 """
 
 
+from datafinder.persistence.common import character_constants as char_const
 from datafinder.persistence.data.datastorer import NullDataStorer
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
 from datafinder.persistence.principal_search.principalsearcher import NullPrincipalSearcher
@@ -137,17 +138,35 @@ class BaseFileSystem(object):
         @note: This implementation always returns C{True}, C{None}.
         """
         
-        self, name = self, name # silent pylint
-        return True, None
+        return self._validateIdentifier(name, 
+                                        char_const.IDENTIFIER_INVALID_CHARACTER_RE, 
+                                        char_const.IDENTIFIER_VALID_STARTCHARACTER_RE)
 
+    @staticmethod
+    def _validateIdentifier(name, invalidCharRe, validStartCharRe):
+        """ Helper used for identifier validation. """
+        
+        isValidIdentifer = False, None
+        if not name is None and len(name.strip()) > 0:
+            result = invalidCharRe.search(name)
+            if not result is None:
+                isValidIdentifer = False, result.start()
+            else:
+                if validStartCharRe.match(name):
+                    isValidIdentifer = True, None
+                else:
+                    isValidIdentifer = False, 0
+        return isValidIdentifer
+    
     def isValidMetadataIdentifier(self, name): # W0613
         """ 
         @see: L{FileSystem.metadataIdentifier<datafinder.persistence.factory.FileSystem.metadataIdentifierPattern>}
         @note: This implementation always returns C{True}, C{None}.
         """
         
-        self, name = self, name # silent pylint
-        return True, None
+        return self._validateIdentifier(name, 
+                                        char_const.PROPERTYNAME_INVALID_CHARACTER_RE, 
+                                        char_const.PROPERTYNAME_VALID_STARTCHARACTER_RE)
     
     @property
     def hasCustomMetadataSupport(self):

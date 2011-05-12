@@ -40,6 +40,7 @@ Definition commonly used character constants mainly used building regular expres
 """
 
 
+import re
 import unicodedata
 
 
@@ -65,11 +66,23 @@ DOLLAR  = "\$"
 PLUS = "+"
 EQUAL = "="
 SHARP = "#"
-GERMAN_UMLAUTS = u"".join(_unicodeUmlaut)
+GERMAN_UMLAUTE = u"".join(_unicodeUmlaut)
 ALPHABET = "A-Za-z"
 NUMBER = "0-9"
-ALPHABET_WITH_NUMBER = ALPHABET + NUMBER
 
 # Define character groups
-LETTERS_WITH_NUMBER = ALPHABET_WITH_NUMBER + GERMAN_UMLAUTS
-LETTERS = ALPHABET + GERMAN_UMLAUTS
+LETTERS = ALPHABET + GERMAN_UMLAUTE
+
+# Define character sets for names
+_firstPropertyChar = LETTERS + UNDERSCORE
+_propertyChar = _firstPropertyChar + NUMBER + DASH + DOT
+_firstResourceChar = _firstPropertyChar + NUMBER + TILDE + EXCLAM + \
+                     DOLLAR + DOT + DASH + PLUS + EQUAL + SHARP
+_resourceChar = _firstResourceChar + SPACE
+
+
+# Defines regular expressions for name validations
+PROPERTYNAME_VALID_STARTCHARACTER_RE = re.compile(u"^["+ _firstPropertyChar +"]")
+PROPERTYNAME_INVALID_CHARACTER_RE = re.compile(u"[^"+ _propertyChar +"]")
+IDENTIFIER_VALID_STARTCHARACTER_RE = re.compile(u"^["+ _firstResourceChar +"]")
+IDENTIFIER_INVALID_CHARACTER_RE = re.compile(u"[^"+ _resourceChar +"]")

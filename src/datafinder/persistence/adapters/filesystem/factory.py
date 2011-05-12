@@ -41,7 +41,6 @@ Factory implementation for the standard file system implementation.
 """
 
 
-from datafinder.persistence.adapters.filesystem.constants import IDENTIFIER_INVALID_CHARACTER_RE, IDENTIFIER_VALID_FIRSTCHARACTER_RE
 from datafinder.persistence.adapters.filesystem.configuration import Configuration
 from datafinder.persistence.adapters.filesystem.data.adapter import DataFileSystemAdapter
 from datafinder.persistence.adapters.filesystem.metadata.adapter import MetadataFileSystemAdapter
@@ -95,21 +94,3 @@ class FileSystem(BaseFileSystem):
         
         if self._configuration.connectBaseDirectory:
             connectWindowsShare(self._configuration.basePath, self._configuration.username, self._configuration.password)
-
-    def isValidIdentifier(self, name):
-        """ 
-        This is the WebDAV-specific implementation.
-        @see: L{FileSystem.identifierPattern<datafinder.persistence.factory.FileSystem.identifierPattern>}
-        """
-        
-        isValidIdentifer = False, None
-        if len(name.strip()) > 0:
-            result = IDENTIFIER_INVALID_CHARACTER_RE.search(name)
-            if not result is None:
-                isValidIdentifer = False, result.start()
-            else:
-                if IDENTIFIER_VALID_FIRSTCHARACTER_RE.match(name):
-                    isValidIdentifer = True, None
-                else:
-                    isValidIdentifer = False, 0
-        return isValidIdentifer

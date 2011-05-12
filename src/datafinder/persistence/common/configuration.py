@@ -90,10 +90,7 @@ class BaseConfiguration(object):
             self.uriScheme = parsedUri.scheme
             self.uriNetloc = parsedUri.netloc
             self.uriHostname = parsedUri.hostname
-            try:
-                self.uriPort = parsedUri.port
-            except ValueError:
-                self.uriPort = None
+            self.uriPort = parsedUri.port
             self.uriPath = parsedUri.path
         
     baseUri = property(__getBaseUri, __setBaseUri)

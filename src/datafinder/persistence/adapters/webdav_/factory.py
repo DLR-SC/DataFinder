@@ -49,10 +49,6 @@ from webdav.Connection import WebdavError
 from datafinder.persistence.adapters.webdav_.configuration import Configuration
 from datafinder.persistence.adapters.webdav_.connection_pool import WebdavConnectionPool
 from datafinder.persistence.adapters.webdav_ import constants
-from datafinder.persistence.adapters.webdav_.constants import IDENTIFIER_VALID_STARTCHARACTER_RE, \
-                                                              IDENTIFIER_INVALID_CHARACTER_RE, \
-                                                              PROPERTYNAME_VALID_STARTCHARACTER_RE, \
-                                                              PROPERTYNAME_INVALID_CHARACTER_RE
 from datafinder.persistence.adapters.webdav_.util import ItemIdentifierMapper, createCollectionStorer
 from datafinder.persistence.adapters.webdav_.data.adapter import DataWebdavAdapter
 from datafinder.persistence.adapters.webdav_.metadata.adapter import MetadataWebdavAdapter
@@ -163,38 +159,6 @@ class FileSystem(BaseFileSystem):    """
         
         self._connectionManager.remove(self._configuration.baseUrl)
 
-    def isValidIdentifier(self, name):
-        """ 
-        This is the WebDAV-specific implementation.
-        @see: L{FileSystem.identifierPattern<datafinder.persistence.factory.FileSystem.identifierPattern>}
-        """
-        
-        return self._isValidIdentifierHelper(name, IDENTIFIER_INVALID_CHARACTER_RE, IDENTIFIER_VALID_STARTCHARACTER_RE)
-    
-    @staticmethod
-    def _isValidIdentifierHelper(name, invalidCharRe, validStartCharRe):
-        """ Helper used for identifier validation. """
-        
-        isValidIdentifer = False, None
-        if len(name.strip()) > 0:
-            result = invalidCharRe.search(name)
-            if not result is None:
-                isValidIdentifer = False, result.start()
-            else:
-                if validStartCharRe.match(name):
-                    isValidIdentifer = True, None
-                else:
-                    isValidIdentifer = False, 0
-        return isValidIdentifer
-    
-    def isValidMetadataIdentifier(self, name):
-        """ 
-        This is the WebDAV-specific implementation.
-        @see: L{FileSystem.metadataIdentifierPattern<datafinder.persistence.factory.FileSystem.metadataIdentifierPattern>}
-        """
-        
-        return self._isValidIdentifierHelper(name, PROPERTYNAME_INVALID_CHARACTER_RE, PROPERTYNAME_VALID_STARTCHARACTER_RE)
-    
     @property #R0201
     def hasCustomMetadataSupport(self):
         """ 

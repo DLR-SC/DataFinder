@@ -40,30 +40,11 @@ Constant definitions for connection handling.
 """
 
 
-import re
-
 from webdav.Constants import NS_DAV, PROP_RESOURCE_TYPE
-
-from datafinder.persistence.common import character_constants
 
 
 __version__ = "$Revision-Id:$" 
 
-
-# Define character sets for names
-_firstPropertyChar = character_constants.LETTERS + character_constants.UNDERSCORE
-_propertyChar = _firstPropertyChar + character_constants.NUMBER + character_constants.DASH + character_constants.DOT
-_firstResourceChar = _firstPropertyChar + character_constants.NUMBER + character_constants.TILDE + character_constants.EXCLAM + \
-                     character_constants.DOLLAR + character_constants.DOT + character_constants.DASH + character_constants.PLUS + \
-                     character_constants.EQUAL + character_constants.SHARP
-_resourceChar = _firstResourceChar + character_constants.SPACE
-
-
-# Defines regular expressions for name validations
-PROPERTYNAME_VALID_STARTCHARACTER_RE = re.compile(u"^["+ _firstPropertyChar +"]")
-PROPERTYNAME_INVALID_CHARACTER_RE = re.compile(u"[^"+ _propertyChar +"]")
-IDENTIFIER_VALID_STARTCHARACTER_RE = re.compile(u"^["+ _firstResourceChar +"]")
-IDENTIFIER_INVALID_CHARACTER_RE = re.compile(u"[^"+ _resourceChar +"]")
 
 # Constants for connection pooling
 MAX_POOL_NUMBER = 10
