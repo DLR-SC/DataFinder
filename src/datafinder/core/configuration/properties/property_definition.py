@@ -170,6 +170,7 @@ class PropertyDefinition(object):
         """
         
         try:
+            self.validate(value)
             return self._propertyType.toPersistenceFormat(value)
         except ValueError, error:
             raise PropertyError(self.identifier, repr(error.args))

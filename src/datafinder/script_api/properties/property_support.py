@@ -52,27 +52,41 @@ from datafinder.script_api.properties.property_description import PropertyDescri
 __version__ = "$Revision-Id:$" 
 
 
-def validate(properties):
+def validate(properties, path=None):
     """ 
     Validates the given properties.
         
     @param properties: Mapping of property identifiers to values.
     @type properties: C{dict}
+    @param path: Optional item path which ensures that the validation is performed 
+        in the correct context.
+    @type path: C{unicode}
         
     @raise PropertySupportError: Raised when a value does not conform to 
         the defined property restrictions. 
     """
-    
+
+    reqPropDefs = dict()
+    if not path is None:
+        try:    
+            item = repositoryManagerInstance.workingRepository.getItem(path)
+        except ItemError:
+            raise ItemSupportError("Item '%s' cannot be found." % path)
+        else:
+            reqPropDefs = item.requiredPropertyDefinitions 
+
     registry = _getPropertyDefinitionRegistry()
-    
-    for propertyIdentifier, value in properties.iteritems():
-        propertyDefinition = registry.getPropertyDefinition(propertyIdentifier)
+    for propId, value in properties.iteritems():
+        if propId in reqPropDefs:
+            propDef = reqPropDefs[propId]
+        else:
+            propDef = registry.getPropertyDefinition(propId)
         try:
-            propertyDefinition.validate(value)
+            propDef.validate(value)
         except PropertyError:
             raise PropertySupportError(
                 "Value '%s' for property '%s' is not valid." \
-                % (str(value), propertyDefinition.displayName))
+                % (str(value), propDef.displayName))
 
 
 def _getPropertyDefinitionRegistry():
@@ -167,21 +181,16 @@ def storeProperties(path, properties):
     else:
         mappedProperties = list()
         for propId, value in properties.iteritems():
-            try:
-                if propId in item.properties:
-                    prop = item.properties[propId]
-                    prop.value = value
-                else:
-                    prop = cwr.createProperty(propId, value)
-                if (prop.propertyDefinition.category != const.MANAGED_SYSTEM_PROPERTY_CATEGORY
-                   and prop.propertyDefinition.category != const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY):
-                    mappedProperties.append(prop)
-                else:
-                    errorMessage = "You cannot change system-specific property values."
-                    raise PropertySupportError(errorMessage)
-            except PropertyError, error:
-                errorMessage = u"The property '%s' is an invalid value assigned." % error.propertyIdentifier \
-                               + " The validation failed for the following reason:\n '%s'." % str(error.args)
+            if propId in item.properties:
+                prop = item.properties[propId]
+                prop.value = value
+            else:
+                prop = cwr.createProperty(propId, value)
+            if (prop.propertyDefinition.category != const.MANAGED_SYSTEM_PROPERTY_CATEGORY
+               and prop.propertyDefinition.category != const.UNMANAGED_SYSTEM_PROPERTY_CATEGORY):
+                mappedProperties.append(prop)
+            else:
+                errorMessage = "You cannot change system-specific property values."
                 raise PropertySupportError(errorMessage)
         try:
             item.updateProperties(mappedProperties)
@@ -212,7 +221,10 @@ def deleteProperties(path, propertyIdentifiers):
         registry = _getPropertyDefinitionRegistry()
         propertiesForDeletion = list()
         for propId in propertyIdentifiers:
-            propDef = registry.getPropertyDefinition(propId)
+            if propId in item.requiredPropertyDefinitions:
+                propDef = item.requiredPropertyDefinitions[propId]
+            else:
+                propDef = registry.getPropertyDefinition(propId)
             if propDef.category == const.USER_PROPERTY_CATEGORY:
                 propertiesForDeletion.append(propId)
             else:

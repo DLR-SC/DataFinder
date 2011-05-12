@@ -65,7 +65,6 @@ class Property(object):
         
         self._propertyDefinition = propertyDefinition
         self._additionalValueRepresentations = list()
-        self._value = None
         self.value = value
         
     def __getPropertyIdentifier(self):
@@ -82,19 +81,6 @@ class Property(object):
     
     propertyDefinition = property(__getPropertyDefinition)
         
-    def __getValue(self):
-        """ Getter of the value attribute. """
-        
-        return self._value
-        
-    def __setValue(self, value):
-        """ Setter of the value attribute. """        
-
-        self.propertyDefinition.validate(value)
-        self._value = value
-    
-    value = property(__getValue, __setValue)
-
     def __repr__(self):
         """ Returns the representation. """
         
@@ -123,8 +109,6 @@ class Property(object):
         @type propertyDefinition: L{PropertyDefinition<datafinder.core.configuration.properties.property_definition.PropertyDefinition>}
         @param persistedValue: Value of the property in persistence format.
         @type persistedValue: L{MetadataValue<datafinder.persistence.metadata.value_mapping.MetadataValue>}
-        
-        @raise PropertyError: Value does not fit. 
         """
     
         foundValue = False

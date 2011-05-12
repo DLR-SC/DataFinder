@@ -47,7 +47,7 @@ import unittest
 
 from datafinder.core.configuration.properties.registry import PropertyDefinitionRegistry
 from datafinder.core.configuration.properties.property_definition import PropertyDefinitionFactory
-from datafinder.core.error import ItemError, PropertyError
+from datafinder.core.error import ItemError
 from datafinder.script_api import error
 from datafinder.script_api.properties import constants as const
 from datafinder.script_api.properties import property_support as prop_supp
@@ -70,6 +70,7 @@ class _ItemMock(object):
     def __init__(self, path="", properties=dict()):
         self.path = path    
         self.properties = properties
+        self.requiredPropertyDefinitions = dict()
         
     def updateProperties(self, properties):
         self._raiseError()
@@ -87,14 +88,14 @@ class _ItemMock(object):
     
 class _RepositoryMock(object):
     error = False
-    propError = False
     def __init__(self, itemMock, propRegistry):
         self.itemMock = itemMock 
         self.propRegistry = propRegistry
+        
+        for propDef in propRegistry.registeredPropertyDefinitions.values():
+            self.itemMock.requiredPropertyDefinitions[propDef.identifier] = propDef
     
     def createProperty(self, propId, value):
-        if self.propError:
-            raise PropertyError(propId, "")
         propDef = self.propRegistry.getPropertyDefinition(propId)
         prop = _PropertyMock(propId, value)
         prop.propertyDefinition = propDef
@@ -145,12 +146,7 @@ class PropertySupportTestCase(unittest.TestCase):
         self.assertRaises(
             error.PropertySupportError, prop_supp.storeProperties, "/item", {const.DATATYPE_ID: "Name"})
         
-        # Invalid property value
-        self._repositoryMock.propError = True
-        self.assertRaises(
-            error.PropertySupportError, prop_supp.storeProperties, "/item", {"n2": None})
-        
-        # Cannot store them
+        # Cannot store them or properties are invalid
         self._itemMock.error = True
         self.assertRaises(error.ItemSupportError, prop_supp.storeProperties, "/item", dict())
         
@@ -177,10 +173,15 @@ class PropertySupportTestCase(unittest.TestCase):
     def testValidate(self):
         # Success
         prop_supp.validate({"name": "name", "price": 123})
+        prop_supp.validate({"name": "name", const.SIZE_ID: 12}, "/path")
         
         # Values does not fit
         self.assertRaises(error.PropertySupportError, prop_supp.validate, {const.SIZE_ID: "name"})
         
+        # Item not found
+        self._repositoryMock.error = True
+        self.assertRaises(error.ItemSupportError, prop_supp.validate, {const.SIZE_ID: "name"}, "")
+
     def testPropertyDescription(self):
         propDesc = prop_supp.propertyDescription("id")
         self.assertEquals(propDesc.identifier, "id")

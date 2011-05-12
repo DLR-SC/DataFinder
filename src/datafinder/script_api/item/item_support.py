@@ -40,8 +40,7 @@ Module that supports simple item operations.
 """
 
 
-from datafinder.core.configuration.properties.constants import DATATYPE_ID
-from datafinder.core.error import CoreError, PropertyError, ItemError
+from datafinder.core.error import CoreError, ItemError
 from datafinder.core.repository_manager import repositoryManagerInstance
 from datafinder.script_api.error import ItemSupportError
 from datafinder.script_api.item.item_description import ItemDescription
@@ -90,7 +89,7 @@ def createCollection(path, properties=None):
     except ItemError, error:
         raise ItemSupportError("Collection cannot be created.\nReason: '%s'" % error.message)
     else:
-        _createItem(item, properties)
+        _createItem(cwr, item, properties)
 
     
 def createLeaf(path, properties=None):
@@ -113,7 +112,7 @@ def createLeaf(path, properties=None):
     except ItemError, error:
         raise ItemSupportError("Leaf cannot be created.\nReason: '%s'" % error.message)
     else:
-        _createItem(item, properties)
+        _createItem(cwr, item, properties)
 
 
 def createLink(path, linkTargetPath):
@@ -137,32 +136,24 @@ def createLink(path, linkTargetPath):
     except ItemError, error:
         raise ItemSupportError("Link cannot be created.\nReason: '%s'" % error.message)
     else:
-        _createItem(item)
+        _createItem(cwr, item)
     
 
-def _createItem(item, properties=None):
+def _createItem(cwr, item, properties=None):
     """
     Creates the given item object.
 
     @raise ItemSupportError: Raised when an error occurred.
     """
     
+    mappedProperties = list()
+    if not properties is None:
+        mappedProperties = _mapProperties(dict(), properties, cwr)
     try:
-        mappedProperties = list()
-        if not properties is None:
-            namespace = None
-            if DATATYPE_ID in properties:
-                namespace = properties[DATATYPE_ID]
-            for propertyIdentifier, value in properties.iteritems():
-                mappedProperties.append(repositoryManagerInstance.workingRepository.createProperty(propertyIdentifier, value, namespace))
-    except PropertyError, error:
-        raise ItemSupportError("Invalid properties found.\nReason: %s" % error.message)
-    else:
-        try:
-            item.create(mappedProperties)
-        except ItemError, error:
-            item.invalidate()
-            raise ItemSupportError("Item cannot be created.\nReason: %s" % error.message)
+        item.create(mappedProperties)
+    except ItemError, error:
+        item.invalidate()
+        raise ItemSupportError("Item cannot be created.\nReason: %s" % error.message)
     
 
 def getChildParentPath(path):
@@ -368,10 +359,10 @@ def createArchive(path, targetPath, defaultProperties=None):
         raise ItemSupportError("One of the items has not been found.")
     else:
         try:
-            mappedProperties = _mapProperties(defaultProperties, cwr)
+            mappedProperties = _mapProperties(item.requiredPropertyDefinitions, defaultProperties, cwr)
             cwr.createArchive(item, targetItem, mappedProperties)
         except ItemError, error:
-            errorMessage = "cannot archive item.\nReason:'%s'" % error.message
+            errorMessage = "Cannot archive item.\nReason:'%s'" % error.message
             raise ItemSupportError(errorMessage)
 
 
@@ -410,7 +401,7 @@ def performImport(sourcePath, targetParentPath, targetRepository,
     except ItemError:
         raise ItemSupportError("One of the items cannot be found.")
     else:
-        mappedProperties = _mapProperties(defaultProperties, cwr)
+        mappedProperties = _mapProperties(dict(), defaultProperties, cwr)
         if not determinePropertiesCallback is None:
             determinePropertiesCallback = _createDeterminePropertiesCallback(determinePropertiesCallback, cwr)
         try:
@@ -428,20 +419,21 @@ def _createDeterminePropertiesCallback(baseFunction, cwr):
     
     def callback(item):
         properties = baseFunction(ItemDescription(item))
-        return _mapProperties(properties, cwr)
+        return _mapProperties(item.requiredPropertyDefinitions, properties, cwr)
     return callback
 
 
-def _mapProperties(properties, cwr):
+def _mapProperties(reqPropDefs, properties, cwr):
     """ Converts the given properties. """
     
     mappedProperties = list()
-    if not properties is None:
-        for propertyIdentifier, value in properties.iteritems():
-            try:
-                mappedProperties.append(cwr.createProperty(propertyIdentifier, value))
-            except PropertyError:
-                continue
+    for propId, value in properties.iteritems():
+        if propId in reqPropDefs:
+            propDef = reqPropDefs[propId]
+            prop = cwr.createPropertyFromDefinition(propDef, value)
+        else:
+            prop = cwr.createProperty(propId, value)
+        mappedProperties.append(prop)
     return mappedProperties
 
 

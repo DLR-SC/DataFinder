@@ -251,32 +251,39 @@ class DataTypeView(AddEditDataTypeDialog):
         self.propertyTable.setItem(numberOfRows, 3, QCheckTableItem(self.propertyTable, ""))
         return self.propertyTable.numRows()
 
-    def _addAttribute(self, attribute, rowIndex):
+    def _addAttribute(self, propDef, rowIndex):
         """
         Adds a predefined attribute.
 
-        @param attribute: Attribute of this data type.
-        @type attribute: L{PropertyDefinition<datafinder.application.PropertyDefinition.PropertyDefinition>}
+        @param propDef: Property definition.
+        @type propDef: L{PropertyDefinition<datafinder.application.PropertyDefinition.PropertyDefinition>}
         @param rowIndex: Row index.
         @type rowIndex: C{int}
         """
 
-        textTableItem = ValidatedTableItem(self.propertyTable, rowIndex, 0, attribute.identifier, self._propertyIdValidationFunction)
+        textTableItem = ValidatedTableItem(self.propertyTable, rowIndex, 0, 
+                                           propDef.identifier, self._propertyIdValidationFunction)
         self.propertyTable.setItem(rowIndex, 0, textTableItem)
-        typeComboBox = self._getTypeCombobox()
-        typeComboBox.setCurrentItem(attribute.type or "Any")
+        typeComboBox = self._getTypeCombobox([propDef.type])
+        typeComboBox.setCurrentItem(propDef.type or "Any")
         self.propertyTable.setItem(rowIndex, 1, typeComboBox)
-        self.propertyTable.setText(rowIndex, 2, attribute.defaultValue or "")
+        self.propertyTable.setText(rowIndex, 2, propDef.defaultValue or "")
         self.propertyTable.setItem(rowIndex, 3, QCheckTableItem(self.propertyTable, ""))
-        self.propertyTable.item(rowIndex, 3).setChecked(attribute.notNull)
+        self.propertyTable.item(rowIndex, 3).setChecked(propDef.notNull)
 
-    def _getTypeCombobox(self):
-        """ Initailizes and returns a combination box displaying available property types. """
+    def _getTypeCombobox(self, additionalTypes=None):
+        """ Initializes and returns a combination box displaying available property types. """
         
         stringList = QStringList()
+        if not additionalTypes is None:
+            for typeName in additionalTypes:
+                if not typeName in self._propertyTypeNames:
+                    stringList.append(typeName)
         for typeName in self._propertyTypeNames:
             stringList.append(typeName)
+        
         typeComboBox = QComboTableItem(self.propertyTable, stringList)
+        typeComboBox.setEditable(True)
         return typeComboBox
         
     def _getEditedTitle(self):

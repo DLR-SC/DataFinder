@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>339</height>
+    <width>542</width>
+    <height>347</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,7 +20,7 @@
    <string>Properties</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../user.qrc">
+   <iconset>
     <normaloff>:/icons/icons/properties_24.png</normaloff>:/icons/icons/properties_24.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
@@ -28,7 +28,7 @@
     <widget class="PropertyWidget" name="propertyWidget" native="true">
      <property name="minimumSize">
       <size>
-       <width>445</width>
+       <width>520</width>
        <height>158</height>
       </size>
      </property>

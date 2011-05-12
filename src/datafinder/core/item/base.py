@@ -97,6 +97,7 @@ class ItemBase(object):
         self._privileges = None
         self._properties = None
         self._ignoreChecks = False
+        self._requiredPropertyDefinitions = None
         
     def refresh(self, itemStateOnly=False):
         """ 
@@ -115,6 +116,7 @@ class ItemBase(object):
         self._acl = None
         self._properties = None
         self._privileges = None
+        self._requiredPropertyDefinitions = None
             
     def create(self, properties):
         """ 
@@ -124,37 +126,41 @@ class ItemBase(object):
         @type properties: C{list} of L{Property<datafinder.core.item.properties.Property>}
         """
         
-        self._checkCreationProperties(properties)
+        self._properties = dict()
+        if self.itemFactory.hasCustomMetadataSupport:
+            for prop in properties:
+                if (self.isManaged 
+                    or prop.propertyDefinition.category != MANAGED_SYSTEM_PROPERTY_CATEGORY):
+                    self._properties[prop.identifier] = prop
         
+        missingProperties = self._completeProperties()
+        if len(missingProperties) > 0:
+            self._properties = None
+            errorMessage = "The following required properties are missing.\n" \
+                           "%s" % "\n".join(missingProperties)
+            raise ItemError(errorMessage)
+    
         if not self.parent.capabilities.canAddChildren:
             raise ItemError("No child item can be created below parent item '%s'" % self.parent.path)
         
-    def _checkCreationProperties(self, properties):
+    def _completeProperties(self):
         """ Checking whether the given properties are sufficient for item creation. """
         
-        self._properties = dict()
-        if self.itemFactory.hasCustomMetadataSupport:
-            for property_ in properties:
-                if self.isManaged or property_.propertyDefinition.category != MANAGED_SYSTEM_PROPERTY_CATEGORY:
-                    self._properties[property_.identifier] = property_
-        
         missingProperties = list()
-        requiredPropertyDefinitions = self.requiredPropertyDefinitions
-        availablePropertyDefinitions = [property_.propertyDefinition for property_ in properties]
+        reqPropDefs = self.requiredPropertyDefinitions.values()
+        for reqPropDef in reqPropDefs:
+            isAvailable = reqPropDef.identifier in self._properties
+            if not isAvailable:
+                prop = Property(reqPropDef, reqPropDef.defaultValue)
+                self._properties[reqPropDef.identifier] = prop
+            else:
+                value = self._properties[reqPropDef.identifier].value
+                prop = Property(reqPropDef, value)
+                self._properties[reqPropDef.identifier] = prop
+            if not isAvailable and reqPropDef.notNull:
+                missingProperties.append(reqPropDef.displayName)
+        return missingProperties
         
-        for requiredPropertyDefinition in requiredPropertyDefinitions:
-            isAvailable = requiredPropertyDefinition in availablePropertyDefinitions
-            if not isAvailable and requiredPropertyDefinition.notNull:
-                missingProperties.append(requiredPropertyDefinition.displayName)
-            elif not isAvailable:
-                property_ = Property(requiredPropertyDefinition, requiredPropertyDefinition.defaultValue)
-                properties.append(property_)
-                
-        if len(missingProperties) > 0:
-            self._properties = None
-            errorMessage = "The following required properties are missing.\n%s" % "\n".join(missingProperties)
-            raise ItemError(errorMessage)
-    
     def delete(self, ignoreStorageLocation=False):
         """ Deletes the item. """
 
@@ -365,31 +371,21 @@ class ItemBase(object):
     def _refreshProperties(self):
         """ Updates the item properties with current information of the persistence backend. """
         
-        self._properties = dict()
         try:
-            metadata = self.fileStorer.retrieveMetadata()
+            persistedProps = self.fileStorer.retrieveMetadata()
         except PersistenceError, error:
-            _logger.error(error.message)
+            self._properties = dict()
+            _logger.error(error.args)
         except AttributeError:
             self._properties = dict()
         else:
-            propertyNamespace = self._determinePropertyNamespace(metadata)
-            for metadataId, persistedValue in metadata.iteritems():
-                propertyDefinition = self.itemFactory.getPropertyDefinition(metadataId, propertyNamespace)
-                try:
-                    property_ = Property.create(propertyDefinition, persistedValue)
-                except PropertyError, error:
-                    message = "Invalid value for property '%s' of item '%s' " % (propertyDefinition.identifier, self.path)\
-                              + "has been found."
-                    _logger.warning(message)
-                else:
-                    self._properties[propertyDefinition.identifier] = property_
-
-    def _determinePropertyNamespace(self, metadata):
-        """ Allows determination of the name space used identify property definitions. """
-
-        pass
-    
+            self._properties = dict()
+            for propId, value in persistedProps.iteritems():
+                propDef = self.itemFactory.getPropertyDefinition(propId)
+                prop = Property.create(propDef, value)
+                self._properties[propId] = prop
+            self._completeProperties()
+                    
     def updateProperties(self, properties):
         """ 
         Adds/Updates the given properties to the item.
@@ -399,32 +395,26 @@ class ItemBase(object):
         """
         
         propertiesToStore = dict()
-        if self._properties is not None:
-            currentProperties = self._properties.copy()
-        else:
-            currentProperties = list()
-        for property_ in properties:
-            if property_.propertyDefinition.category != UNMANAGED_SYSTEM_PROPERTY_CATEGORY:
-                if self.isManaged or property_.propertyDefinition.category != MANAGED_SYSTEM_PROPERTY_CATEGORY:
-                    if property_.identifier in self.properties:
-                        try:
-                            self.properties[property_.identifier].value = property_.value
-                        except PropertyError:
-                            continue
+        currentProperties = None 
+        if not self.properties is None:
+            currentProperties = self.properties.copy()
+        
+        for prop in properties:
+            if prop.propertyDefinition.category != UNMANAGED_SYSTEM_PROPERTY_CATEGORY:
+                if self.isManaged or prop.propertyDefinition.category != MANAGED_SYSTEM_PROPERTY_CATEGORY:
+                    if prop.identifier in self.properties:
+                        self.properties[prop.identifier].value = prop.value
                     else:
-                        propertyNamespace = None
-                        if not self.dataType is None:
-                            propertyNamespace = self.dataType.name
-                        propDef = self.itemFactory.getPropertyDefinition(property_.identifier, propertyNamespace)
-                        try:
-                            self.properties[property_.identifier] = Property(propDef, property_.value)
-                        except PropertyError:
-                            continue
-                    propertiesToStore.update(**property_.toPersistenceFormat())
+                        propDef = self.itemFactory.getPropertyDefinition(prop.identifier)
+                        self.properties[prop.identifier] = Property(propDef, prop.value)
+                    try:
+                        propertiesToStore.update(**prop.toPersistenceFormat())
+                    except PropertyError, error:
+                        _logger.error(error.args)
         try:
             self.fileStorer.updateMetadata(propertiesToStore)
         except (AttributeError, PersistenceError), error:
-            _logger.error(error.message)
+            _logger.error(error.args)
             self._properties = currentProperties
             
     def deleteProperties(self, propertyIdentifiers):
@@ -438,7 +428,7 @@ class ItemBase(object):
         try:
             self.fileStorer.deleteMetadata(propertyIdentifiers)
         except (AttributeError, PersistenceError), error:
-            _logger.error(error.message)
+            _logger.error(error.args)
         else:     
             for propertyIdentifier in propertyIdentifiers:
                 if propertyIdentifier in self.properties:
@@ -452,13 +442,13 @@ class ItemBase(object):
             try:
                 persistedAcl = self.fileStorer.retrieveAcl()
             except (AttributeError, PersistenceError), error:
-                _logger.error(error.message)
+                _logger.error(error.args)
                 self._acl = AccessControlList()
             else:
                 try:
                     self._acl = AccessControlList.create(persistedAcl)
                 except PrivilegeError, error:
-                    _logger.error(error.message)
+                    _logger.error(error.args)
                     self._acl = AccessControlList()
 
     def updateAcl(self, acl):
@@ -467,7 +457,7 @@ class ItemBase(object):
         try:
             self.fileStorer.updateAcl(self._acl.toPersistenceFormat())
         except (AttributeError, PersistenceError), error:
-            _logger.error(error.message)
+            _logger.error(error.args)
         else:
             self._acl = acl
     
@@ -635,12 +625,17 @@ class ItemBase(object):
     def requiredPropertyDefinitions(self):
         """ Determines the required property definitions. """
         
-        requiredPropertyDefinitions = self.itemFactory.getDefaultPropertyDefinitions(self)
-        if not self.dataType is None:
-            requiredPropertyDefinitions += self.dataType.propertyDefinitions
-        if not self.dataFormat is None:
-            requiredPropertyDefinitions += self.dataFormat.propertyDefinitions
-        return requiredPropertyDefinitions
+        if self._requiredPropertyDefinitions is None:
+            reqPropDefs = self.itemFactory.getDefaultPropertyDefinitions(self)
+            if not self.dataType is None:
+                reqPropDefs += self.dataType.propertyDefinitions
+            if not self.dataFormat is None:
+                reqPropDefs += self.dataFormat.propertyDefinitions
+                
+            self._requiredPropertyDefinitions = dict()
+            for propDef in reqPropDefs:
+                self._requiredPropertyDefinitions[propDef.identifier] = propDef
+        return self._requiredPropertyDefinitions
 
     @property
     def ignoreChecks(self):

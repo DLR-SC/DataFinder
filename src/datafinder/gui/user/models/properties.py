@@ -42,18 +42,20 @@ This module contains the properties model.
 
 from PyQt4 import QtCore, QtGui
 
-from datafinder.gui.user.common.util import extractPyObject, determineDisplayRepresentation, determinePropertyDefinitionToolTip
+from datafinder.gui.user.common.util import \
+    extractPyObject, determineDisplayRepresentation, determinePropertyDefinitionToolTip
 from datafinder.core.configuration.properties import constants
-from datafinder.core.configuration.properties.property_type import determinePropertyTypeConstant
+from datafinder.core.configuration.properties.domain import DomainObject
+from datafinder.core.configuration.properties.property_type import \
+    determinePropertyTypeConstant, PROPERTY_TYPE_NAMES
 from datafinder.core.error import PropertyError
+
 
 __version__ = "$Revision-Id:$" 
 
 
 class PropertiesModel(QtCore.QAbstractTableModel):
-    """
-    This model represents a set of properties.
-    """
+    """ This model represents a set of properties. """
 
     PROPERTY_STATE_CHANGED_SIGNAL = "propertyStateChanged"
     IS_CONSISTENT_SIGNAL = "isConsistentSignal"
@@ -62,15 +64,13 @@ class PropertiesModel(QtCore.QAbstractTableModel):
     _DATA = 2
     _PROP = 4
     _NEW = 8
-
     _DELETED = 16
     _EDITED = 32
     _REQUIRED_NOT_SET = 64
+    _DOMAIN_PROPERTY = 128 # Used until there is a complete editor
     
     def __init__(self, repositoryModel, trackRepositoryUpdates=True):
         """
-        Constructor.
-
         @param repositoryModel: The parent model which handles access to item of the data repository.
         @type repositoryModel: L{RepositoryModel<datafinder.gui.user.models.repository.RepositoryModel>}
         @param trackRepositoryUpdates: Optional flag determining whether the property model
@@ -95,13 +95,16 @@ class PropertiesModel(QtCore.QAbstractTableModel):
             self.connect(self._repositoryModel, QtCore.SIGNAL("modelReset()"), self.clear)
     
     def _handleUpdateSlot(self, index):
-        """ Handles update. """
+        """ Updates properties if the displayed item changed . """
         
-        if index.row() == self._itemIndex.row():
-            self.itemIndex = index
-            self.reset()
-            self._emitPropertyDataChanged()
-    
+        try:
+            if index.row() == self._itemIndex.row():
+                self.itemIndex = index
+                self.reset()
+                self._emitPropertyDataChanged()
+        except AttributeError:
+            pass # Nothing to do, index has already been handled.
+            
     def _emitPropertyDataChanged(self):
         """ Emits the signal C{self.PROPERTY_STATE_CHANGED_SIGNAL}. """
         
@@ -118,17 +121,15 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         self._properties = list(list())
         propertyIds = list()
         for prop in properties:
-            try:
-                propDef = prop.propertyDefinition
-            except AttributeError:
-                propDef = prop
+            propDef = prop.propertyDefinition
             state = self._determinePropertyState(propDef.category)
             if not propDef.identifier in propertyIds and not state is None:
                 propertyIds.append(propDef.identifier)
-                try:
-                    value = prop.value
-                except AttributeError:
-                    value = propDef.defaultValue
+                value = prop.value
+                    
+                if (not propDef.type in PROPERTY_TYPE_NAMES
+                    or isinstance(value, DomainObject)):
+                    state |= self._DOMAIN_PROPERTY
                 displayPropertyTypeName = self._determinePropertyTypeName(propDef.type, value)
                 self._properties.append([propDef.displayName, displayPropertyTypeName, value,
                                          propDef, propDef.restrictions, propDef.type, value, state])
@@ -140,16 +141,11 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         self._isConsistent = True
         for prop in self._properties:
             try:
-                if prop[-1] & self._NEW:
-                    self._repositoryModel.repository.createProperty(prop[0], prop[2])
-                else:
-                    try:
-                        namespace = prop[3].namespace
-                    except AttributeError:
-                        namespace = prop[3].propertyDefinition.namespace
-                    self._repositoryModel.repository.createProperty(prop[3].identifier, prop[2], namespace)
+                propDef = prop[3]
+                if not propDef is None:
+                    prop[3].validate(prop[2])
                 if prop[-1] & self._REQUIRED_NOT_SET:
-                    prop[-1] ^= self._REQUIRED_NOT_SET
+                    prop[-1] ^= self._REQUIRED_NOT_SET # Remove the "Not Set" flag
             except PropertyError:
                 prop[-1] |= self._REQUIRED_NOT_SET
                 self._isConsistent = False
@@ -171,35 +167,35 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         return state
         
     @staticmethod
-    def _determinePropertyTypeName(propertyType, propertyValue):
+    def _determinePropertyTypeName(propertyType, value):
         """ Determines the display name of the property type. """
         
         displayPropertyTypeName = propertyType
-        if displayPropertyTypeName == constants.ANY_TYPE:
-            try:
-                displayPropertyTypeName = determinePropertyTypeConstant(propertyValue)
-            except ValueError:
-                displayPropertyTypeName = constants.STRING_TYPE    
+        if propertyType == constants.ANY_TYPE:
+            if value is None:
+                displayPropertyTypeName = constants.STRING_TYPE
+            else:
+                displayPropertyTypeName = determinePropertyTypeConstant(value)
+                
+        dotIndex = displayPropertyTypeName.rfind(".")
+        if dotIndex > 0:
+            startIndex = dotIndex + 1
+            if not startIndex >= len(displayPropertyTypeName):
+                displayPropertyTypeName = displayPropertyTypeName[startIndex:]
         return displayPropertyTypeName    
         
     def rowCount(self, _=QtCore.QModelIndex()):
-        """
-        @see: L{rowCount<PyQt4.QtCore.QAbstractTableModel.rowCount>}
-        """
+        """ @see: L{rowCount<PyQt4.QtCore.QAbstractTableModel.rowCount>} """
         
         return len(self._properties)
 
     def columnCount(self, _):
-        """
-        @see: L{columnCount<PyQt4.QtCore.QAbstractTableModel.columnCount>}
-        """
+        """ @see: L{columnCount<PyQt4.QtCore.QAbstractTableModel.columnCount>} """
 
         return len(self._headers)
 
     def headerData(self, section, orientation, role = QtCore.Qt.DisplayRole):
-        """
-        @see: L{headerData<PyQt4.QtCore.QAbstractTableModel.headerData>}
-        """
+        """ @see: L{headerData<PyQt4.QtCore.QAbstractTableModel.headerData>} """
 
         if orientation == QtCore.Qt.Horizontal:
             if role == QtCore.Qt.DisplayRole:
@@ -212,17 +208,10 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         """ @see: L{data<PyQt4.QtCore.QAbstractTableModel.data>} """
 
         row = index.row()
+        column = index.column()
         variant = QtCore.QVariant()
         if role == QtCore.Qt.DisplayRole:
-            value = self._properties[row][index.column()]
-            if index.column() == 2:
-                propDef = self._properties[row][3]
-                propId = None
-                if not propDef is None:
-                    propId = propDef.identifier
-                variant = QtCore.QVariant(determineDisplayRepresentation(value, propId))
-            else:
-                variant = QtCore.QVariant(value)
+            variant = self._getValueDisplayRepresentation(row, index)
         elif role == QtCore.Qt.BackgroundColorRole:
             state = self._properties[row][-1]
             attribute = QtGui.QColor(QtCore.Qt.white)
@@ -235,16 +224,29 @@ class PropertiesModel(QtCore.QAbstractTableModel):
             elif state & self._EDITED:
                 attribute = QtGui.QColor(240, 240, 240)
             variant = QtCore.QVariant(attribute)
-        elif role == QtCore.Qt.ToolTipRole and index.column() == 0:
+        elif role == QtCore.Qt.ToolTipRole:
             propertyEntry = self._properties[index.row()]
-            if not propertyEntry[3] is None:
-                variant = determinePropertyDefinitionToolTip(propertyEntry[3])
+            if column == 0:
+                if not propertyEntry[3] is None:
+                    variant = determinePropertyDefinitionToolTip(propertyEntry[3])
+            elif column == 2:
+                variant = self._getValueDisplayRepresentation(row, index)
         return variant
 
+    def _getValueDisplayRepresentation(self, row, index):
+        value = self._properties[row][index.column()]
+        if index.column() == 2:
+            propDef = self._properties[row][3]
+            propId = None
+            if not propDef is None:
+                propId = propDef.identifier
+            variant = QtCore.QVariant(determineDisplayRepresentation(value, propId))
+        else:
+            variant = QtCore.QVariant(value)
+        return variant
+    
     def setData(self, index, value, _=None):
-        """
-        @see: L{setData<PyQt4.QtCore.QAbstractTableModel.setData>}
-        """
+        """ @see: L{setData<PyQt4.QtCore.QAbstractTableModel.setData>} """
 
         row = index.row()
         column = index.column()
@@ -276,9 +278,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         return True
 
     def flags(self, index):
-        """
-        @see: L{flags<PyQt4.QtCore.QAbstractTableModel.flags>}
-        """
+        """ @see: L{flags<PyQt4.QtCore.QAbstractTableModel.flags>} """
 
         state = self._properties[index.row()][-1]
         flags = QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
@@ -287,14 +287,13 @@ class PropertiesModel(QtCore.QAbstractTableModel):
                or (state & (self._DATA|self._PROP) and index.column() == 2) \
                or (self._properties[index.row()][5] == constants.ANY_TYPE and state & (self._DATA|self._PROP) and index.column() == 1):
                 flags |= QtCore.Qt.ItemIsEnabled
-                if not state & self._DELETED:
+                if (not state & self._DELETED
+                    and not state & self._DOMAIN_PROPERTY):
                     flags |= QtCore.Qt.ItemIsEditable
         return flags
 
     def sort(self, column, order=QtCore.Qt.AscendingOrder):
-        """
-        @see: L{sort<PyQt4.QtCore.QAbstractTableModel.sort>}
-        """
+        """ @see: L{sort<PyQt4.QtCore.QAbstractTableModel.sort>} """
 
         self._sortedColumn = column
         self._sortedOrder = order
@@ -305,9 +304,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         self.emit(QtCore.SIGNAL("layoutChanged()"))
 
     def save(self):
-        """
-        Save all modified attributes of the given item.
-        """
+        """ Saves property modifications of the given item. """
 
         dirty = False
         for row in self._properties:
@@ -318,10 +315,8 @@ class PropertiesModel(QtCore.QAbstractTableModel):
             self._updateProperties(self._properties)
         
     def _updateProperties(self, properties):
-        """
-        Converts the data saved in the model back to its internally used 
-        representation and stores it.
-        """
+        """ Converts the data saved in the model back to its internally used 
+        representation and stores it. """
         
         addedEditedProperties = list()
         deletableProperties = list()
@@ -340,9 +335,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
                 self._repositoryModel.updateProperties(self._itemIndex, addedEditedProperties, deletableProperties)
                     
     def clear(self):
-        """
-        Clears the model internal data and resets the model.
-        """
+        """ Clears the model internal data and resets the model. """
 
         self._itemIndex = None
         self._properties = list()
@@ -360,7 +353,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
 
     def add(self):
         """
-        Appends a new property to the end of the existing properties.
+        Appends a "blank" property to the existing properties.
 
         @return: The index the new property.
         @rtype: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
@@ -394,9 +387,8 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         
     def remove(self, index):
         """
-        Removes the property by the given index.
-        When the item was a new item the item will delete instantly otherwise the property
-        will first deleted after a save operation.
+        iF the item is new it will be deleted instantly. Otherwise the property
+        will be deleted after a save operation.
 
         @param index: The index that has to be removed.
         @type index: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
@@ -433,12 +425,8 @@ class PropertiesModel(QtCore.QAbstractTableModel):
             if self._properties[row][-1] & self._DELETED:
                 self._properties[row][-1] ^= self._DELETED
             elif self._properties[row][-1] & self._EDITED:
-                originalType = constants.STRING_TYPE
-                originalValue = None
-                if not self._properties[row][6] is None:
-                    originalValue = self._properties[row][6]
-                    originalType = self._determinePropertyTypeName(self._properties[row][5], originalValue)
-                        
+                originalValue = self._properties[row][6]
+                originalType = self._determinePropertyTypeName(self._properties[row][5], originalValue)
                 self._properties[row][1] = originalType
                 self._properties[row][2] = originalValue
                 self._properties[row][-1] ^= self._EDITED
@@ -448,8 +436,6 @@ class PropertiesModel(QtCore.QAbstractTableModel):
             self._emitPropertyDataChanged()
             
     def _isPropertyNameUnique(self, propertyName):
-        """ Checks whether the given property name is a unique identifier. """
-        
         for item in self._properties:
             existingIdentifer = item[0]
             if not item[3] is None:
@@ -460,8 +446,6 @@ class PropertiesModel(QtCore.QAbstractTableModel):
     
     def isDeleteable(self, index):
         """
-        Return whether the given index can be deleted or not.
-
         @param index: Index that has to be checked.
         @type index: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
 
@@ -469,28 +453,25 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         @rtype: C{bool}
         """
 
-        flags = self._properties[index.row()][-1]
-        return bool(flags & (self._NEW | self._PROP)) and not bool(flags & self._DELETED)
+        state = self._properties[index.row()][-1]
+        return (bool(state & (self._NEW | self._PROP)) 
+                and not bool(state & self._DELETED))
 
     def isRevertable(self, index):
         """
-        Return whether the given index can be reverted or not.
-
         @param index: Index that has to be checked.
         @type index: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
 
-        @return: C{True} if the index can be reverted else False.
+        @return: C{True} if the index can be reverted else c{False}.
         @rtype: C{bool}
         """
 
-        flags = self._properties[index.row()][-1]
-        return bool(flags & (self._DELETED | self._EDITED)) \
-               and not bool(flags & self._NEW)
+        state = self._properties[index.row()][-1]
+        return (bool(state & (self._DELETED | self._EDITED)) 
+                and not bool(state & self._NEW))
 
     def canBeCleared(self, index):
         """
-        Checks whether the given index can be cleared or not.
-
         @param index: Index that has to be checked.
         @type index: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
 
@@ -498,26 +479,22 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         @rtype: C{bool}
         """
 
-        return not self._properties[index.row()][-1] & self._SYSTEM \
-               and not self._properties[index.row()][2] is None
+        state = self._properties[index.row()][-1]
+        return (not bool(state & self._SYSTEM)
+                and not bool(state & self._DOMAIN_PROPERTY)
+                and not self._properties[index.row()][2] is None)
 
     def getModelData(self, row, column):
-        """
-        This function allows direct access the model data structure.
-        """
+        """ This function allows direct access the model data structure. """
         
         return self._properties[row][column]
     
     @property
     def hasCustomMetadataSupport(self):
-        """ Getter for the has custom meta data flag. """
-        
         return self._repositoryModel.hasCustomMetadataSupport
 
     @property
     def propertyNameValidationFunction(self):
-        """ Getter for the property identifier validation function. """
-        
         def wrapper(inputString):
             return self._repositoryModel.repository.configuration.propertyNameValidationFunction(inputString) \
                    and self._isPropertyNameUnique(inputString)
@@ -526,8 +503,6 @@ class PropertiesModel(QtCore.QAbstractTableModel):
     @property
     def dirty(self):
         """
-        Returns whether the data has changed.
-
         @return: C{True} if the data has changed else C{False}.
         @rtype: C{bool}
         """
@@ -540,8 +515,6 @@ class PropertiesModel(QtCore.QAbstractTableModel):
     @property
     def sortProperties(self):
         """
-        Returns how the model is sorted.
-
         @return: The properties for the sorting, i.e. sorted column number and sort order.
         @rtype: C{tuple}
         """
@@ -551,8 +524,6 @@ class PropertiesModel(QtCore.QAbstractTableModel):
     @property
     def properties(self):
         """
-        Returns the properties represented by this model.
-        
         @return: List of property instances contained in this model.
         @rtype: C{list} of L{Property<datafinder.core.item.property.Property>}
         """
@@ -592,7 +563,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
                     self._itemIndex = self._repositoryModel.indexFromPath(item.path)
                     self.itemName = item.name
                     self.isReadOnly = not item.capabilities.canStoreProperties
-                    properties = item.properties.values() + item.requiredPropertyDefinitions
+                    properties = item.properties.values()
                     self.load(properties)
                     self.sort(self._sortedColumn, self._sortedOrder)
     itemIndex = property(fset=_setItemIndex)

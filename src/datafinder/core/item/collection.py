@@ -118,7 +118,7 @@ class ItemCollection(ItemBase):
                 for fileStorer in fileStorers:
                     result.append(self.itemFactory.create(None, fileStorer=fileStorer))
             except PersistenceError, error:
-                self._logger.error(error.message)
+                self._logger.error(error.args)
                 raise CoreError(str(error))
             return result
     
@@ -132,7 +132,7 @@ class ItemCollection(ItemBase):
                     children = self.fileStorer.getChildren()
                 except PersistenceError, error:
                     self._childrenPopulated = True
-                    raise ItemError(error.message)
+                    raise ItemError(error.args)
                 else:
                     for fileStorer in children:
                         try:
@@ -191,14 +191,6 @@ class ItemCollection(ItemBase):
         
         return self.itemFactory.create(None, self, fileStorer)
         
-    def _determinePropertyNamespace(self, metadata): # R0201
-        """ Determines the property name space. """
-        
-        propertyNamespace = None
-        if DATATYPE_ID in metadata:
-            propertyNamespace = metadata[DATATYPE_ID].value
-        return propertyNamespace
-    
     @property
     def dataType(self):
         """ @see: L{dataType<datafinder.core.item.base.ItemBase.dataType>} """

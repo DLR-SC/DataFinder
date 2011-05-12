@@ -539,6 +539,7 @@ def determineDisplayRepresentation(value, propertyIdentifier=None):
     @rtype: C{unicode}
     """
 
+    displayRepresentation = repr(value)
     if isinstance(value, bool):
         displayRepresentation = "False"
         if value:
@@ -563,7 +564,7 @@ def determineDisplayRepresentation(value, propertyIdentifier=None):
             displayRepresentation = displayRepresentation + "]"
     elif value is None:
         displayRepresentation = u""
-    else:
+    elif isinstance(value, basestring):
         displayRepresentation = unicode(value)
     return displayRepresentation
 

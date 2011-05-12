@@ -413,9 +413,8 @@ class DomainObjectType(BasePropertyType):
     def _handleImportError(self, reason):
         """ Common procedure to handle failed domain object imports. """
         
-        errorMessage = "Cannot import '%s'. Reason: '%s'" % (self.name, reason)
-        _log.error(errorMessage)
-        self.name = "%s.%s" % (UnknownDomainObject.__module__, UnknownDomainObject.__name__)
+        message = "Cannot import '%s'. Reason: '%s'" % (self.name, reason)
+        _log.warning(message)
         return UnknownDomainObject
 
     def _validate(self, value):

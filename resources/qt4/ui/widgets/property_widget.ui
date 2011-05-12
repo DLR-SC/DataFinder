@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>361</width>
-    <height>259</height>
+    <height>251</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,6 +37,9 @@
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectItems</enum>
         </property>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>125</number>
+        </attribute>
        </widget>
       </item>
       <item row="0" column="1">

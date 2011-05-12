@@ -122,8 +122,9 @@ class PropertyWizardPage(BaseWizardPage):
         dataTypeProperty = self.baseRepositoryModel.repository.createProperty(DATATYPE_ID,
                                                                               unicode(self.dataTypeComboBox.currentText()))
         properties = [dataTypeProperty]
-        for propertyDefinition in dataType.propertyDefinitions:
-            properties.append(propertyDefinition)
+        for propDef in dataType.propertyDefinitions:
+            prop = self.baseRepositoryModel.repository.createPropertyFromDefinition(propDef, propDef.defaultValue)
+            properties.append(prop)
         self._loadProperties(properties)
             
     def _loadProperties(self, properties):

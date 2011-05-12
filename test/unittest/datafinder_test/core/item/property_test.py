@@ -77,16 +77,16 @@ class PropertyTestCase(unittest.TestCase):
     def testNotPersistedValue(self):
         """ Shows the behavior with a value which is not in persistence format. """
         
-        self.assertEquals(self._property.value, None)
+        # Setting a valid value
+        self._propertyDefMock.value = "Test"
         self._property.value = "Test"
-        self.assertEquals(self._property.value, "Test")
+        self.assertEquals(self._property.toPersistenceFormat(), 
+                          {self._property.identifier: self._property.value})
         
+        # Setting an invalid value
         self._propertyDefMock.error = PropertyError("", "")
-        try:
-            self._property.value = 56
-            self.fail("MetadataError was not raised.")
-        except PropertyError:
-            self.assertEquals(self._property.value, "Test")
+        self._property.value = 56
+        self.assertRaises(PropertyError, self._property.toPersistenceFormat)
         
     def testCreate(self):
         """ Shows creation of a property from persistence format. """
@@ -99,7 +99,7 @@ class PropertyTestCase(unittest.TestCase):
         self.assertEquals(self._property.value, True)
 
         self._propertyDefMock.methodNameResultMap = \
-            {"fromPersistenceFormat":(None, PropertyError("", ""))}
+            {"fromPersistenceFormat": (None, PropertyError("", ""))}
         self._propertyDefMock.defaultValue = "Test"
         self._property = Property.create(self._propertyDefMock, SimpleMock([True, 0, "0"]))
         self.assertEquals(self._property.value, "Test")
