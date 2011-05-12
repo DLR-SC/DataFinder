@@ -82,7 +82,7 @@ class DataSubversionAdapter(NullDataStorer):
         try:
             try:
                 connection.update(util.determineParentPath(self.identifier))
-                result = connection.getProperty(self.identifier, constants.LINK_TARGET_PROPERTY)
+                result = connection.getProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME)
                 return result
             except SubversionError:
                 return None
@@ -137,7 +137,8 @@ class DataSubversionAdapter(NullDataStorer):
         try:
             try:
                 connection.update(util.determineParentPath(self.identifier))
-                connection.setProperty(self.identifier, constants.LINK_TARGET_PROPERTY, destination.identifier)
+                connection.setProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME, 
+                                       destination.identifier)
                 connection.checkin(self.identifier)
             except SubversionError, error:
                 errorMessage = u"Cannot set property. Reason: '%s'" % error

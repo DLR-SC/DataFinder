@@ -50,10 +50,6 @@ WIN32 = "win32"
 UTF8 = "UTF-8"
 LC_ALL = "LC_ALL"
 
-LINK_TARGET_PROPERTY = "datafinder:____LINK____"
-
-DATAFINDER_JSON_PROPERTY = "datafinder:json"
-
-XPS_JSON_PROPERTY = "xps:json:de.dlr.xps.server.datafinder.model.as.XPSforCFDEntry"
-
-SVN_MIME_TYPE = "svn:mime-type"
+LINK_TARGET_PROPERTY_NAME = "datafinder:____LINK____"
+JSON_PROPERTY_NAME = "datafinder:json"
+MIME_TYPE_PROPERTY_NAME = "svn:mime-type"

@@ -46,7 +46,7 @@ import logging
 import mimetypes
 import os
 
-from datafinder.persistence.adapters.svn.constants import XPS_JSON_PROPERTY, SVN_MIME_TYPE
+from datafinder.persistence.adapters.svn.constants import JSON_PROPERTY_NAME, MIME_TYPE_PROPERTY_NAME
 from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.metadata import constants, value_mapping
@@ -97,7 +97,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
     def _retrieveProperties(self, connection):
         """ Retrieves all properties. """
 
-        return connection.getProperty(self.identifier, XPS_JSON_PROPERTY)
+        return connection.getProperty(self.identifier, JSON_PROPERTY_NAME)
         
     def _mapRawResult(self, connection, rawResult):
         """ Maps the SVN specific result to interface format. """
@@ -125,18 +125,25 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                            + "Reason: '%s'" % error 
             raise PersistenceError(errorMessage)
         try:
-            mimeType = connection.getProperty(self.identifier, SVN_MIME_TYPE)
-            mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
-        except SubversionError:
-            _log.debug("No subversion property for mimetype is set! Trying to determine mimetype by persitenceId.")
-            mimeType = mimetypes.guess_type(self.identifier, False)
-            if mimeType[0] is None:
-                mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue("")
-            else:
-                mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType[0])
+            mimeType = connection.getProperty(self.identifier, MIME_TYPE_PROPERTY_NAME)
+            if mimeType is None:
+                mimeType = self._guessMimeType()
+        except SubversionError, error:
+            _log.debug(error)
+            mimeType = self._guessMimeType()
+        mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
+        
         for key, value in rawResult.iteritems():
             mappedResult[key] = value_mapping.MetadataValue(value)
         return mappedResult
+
+    def _guessMimeType(self):
+        mimeType = mimetypes.guess_type(self.identifier, False)
+        if mimeType[0] is None:
+            mimeType = ""
+        else:
+            mimeType = mimeType[0]
+        return mimeType
     
     @staticmethod
     def _filterResult(selectedPropertyIds, mappedResult):
@@ -166,7 +173,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                 except SubversionError, error:
                     _log.debug("No subversion property is set!")
                 jsonProperties = value_mapping.getPersistenceRepresentation(persistenceProperties)
-                connection.setProperty(self.identifier, XPS_JSON_PROPERTY, jsonProperties)
+                connection.setProperty(self.identifier, JSON_PROPERTY_NAME, jsonProperties)
             except SubversionError, error:
                 errorMessage = "Cannot update properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
@@ -186,7 +193,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                     if propertyId in persistenceProperties:
                         del persistenceProperties[propertyId]
                 persistenceJsonProperties = json.dumps(persistenceProperties)
-                connection.setProperty(self.identifier, XPS_JSON_PROPERTY, persistenceJsonProperties)
+                connection.setProperty(self.identifier, JSON_PROPERTY_NAME, persistenceJsonProperties)
             except SubversionError, error:
                 errorMessage = "Cannot delete properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
