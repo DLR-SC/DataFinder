@@ -163,6 +163,9 @@ class DataTsmAdapterTestCase(unittest.TestCase):
         self._channelMock.stderr = "Error Code... ANS1092W kkk"
         self.assertFalse(self._dataAdapter.exists())
         
+        self._channelMock.stderr = "ANS1083E No files have..."
+        self.assertFalse(self._dataAdapter.exists())
+        
         self._channelMock.stderr = ""
         self._channelMock.stdout = "Error Code... ANS1217E kkk"
         self.assertRaises(PersistenceError, self._dataAdapter.exists)

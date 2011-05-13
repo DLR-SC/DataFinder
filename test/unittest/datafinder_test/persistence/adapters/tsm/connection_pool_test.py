@@ -70,6 +70,9 @@ class _TransportMock(object):
         self.password = password
         if not self.error is None:
             raise self.error
+        
+    def close(self):
+        pass
 
 
 class TsmConnectionTestCase(unittest.TestCase):
@@ -82,10 +85,14 @@ class TsmConnectionTestCase(unittest.TestCase):
         connection_pool.Transport = _TransportMock
         self._connectionPool = connection_pool.TsmConnectionPool(SimpleMock())
         
+    def tearDown(self):
+        self._connectionPool.reload()
+    
     def testAquireSuccess(self):
         """ Tests the successful acquire of a TSM connection. """
         
-        self.assertNotEquals(self._connectionPool.acquire(), None)
+        connection = self._connectionPool.acquire()
+        self.assertNotEquals(connection, None)
         
     def testAcquireError(self):
         """ Tests error handling when acquiring a TSM connection. """

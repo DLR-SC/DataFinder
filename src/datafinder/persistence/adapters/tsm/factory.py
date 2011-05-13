@@ -96,10 +96,7 @@ class FileSystem(BaseFileSystem):
         Transforms the logical identifier to the persistence identifier.
         """
         
-        if identifier.startswith("/"):
-            persistenceId = self._configuration.basePath + identifier
-        else:
-            persistenceId = self._configuration.basePath + "/" + identifier
+        persistenceId = self._configuration.basePath + identifier
         return persistenceId
 
     def release(self):

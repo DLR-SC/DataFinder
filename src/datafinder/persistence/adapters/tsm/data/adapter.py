@@ -70,6 +70,7 @@ _DELETE_ARCHIVE_COMMAND = _ARCHIVE_COMMANDLINE_TOOL + " delete archive %s -nopro
 _UNKNOWN_TSM_NODE_ERROR_CODE = "ANS1217E"
 _INVALID_OPTION_ERROR_CODE = "ANS1107E"
 _NON_MATCHING_FILESEARCH_ERROR_CODE = "ANS1092W"
+_NO_FILES_PREVIOUSLY_ARCHIVED = "ANS1083E"
 
 
 _log = logging.getLogger()
@@ -133,6 +134,8 @@ class DataTsmAdapter(NullDataStorer):
                 if _NON_MATCHING_FILESEARCH_ERROR_CODE in error.message:
                     if self.identifier != "/":
                         exists = False
+                elif _NO_FILES_PREVIOUSLY_ARCHIVED in error.message:
+                    exists = False
                 else:
                     raise error
             return exists

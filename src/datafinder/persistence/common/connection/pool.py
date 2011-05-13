@@ -69,7 +69,8 @@ class ConnectionPool(object):
         self.reload()
         
     def reload(self):
-        """ Reloads the connection pool. """
+        """ Empties the connection pool and calls the specific 
+        releasing behavior of every connection. """
         
         self._lock.acquire()
         try:

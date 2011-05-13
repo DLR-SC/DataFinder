@@ -1,3 +1,6 @@
+# pylint: disable=W0212
+# It is fine to access protected members for test purposes.
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -53,11 +56,12 @@ __version__ = "$Revision-Id:$"
 class FileSystemTestCase(unittest.TestCase):
     """ Tests cases of the TSM factory. """
     
-    def testCreateDataStorer(self):
-        """ Tests the creation of the TSM specific data adaptor. """
-        
+    def testBasicProcedures(self):
         tsmFileSystem = factory.FileSystem(BaseConfiguration("tsm://host.de/basePath"))
         self.assertTrue(isinstance(tsmFileSystem.createDataStorer("/logical/Identifier"), DataTsmAdapter))
+        tsmFileSystem.release()
         
-        tsmFileSystem = factory.FileSystem(BaseConfiguration("tsm://host.de/basePath"))
-        self.assertTrue(isinstance(tsmFileSystem.createDataStorer("/logical/Identifier"), DataTsmAdapter))
+        credentials = {"username": "me", "password": "secret"}
+        tsmFileSystem.updateCredentials(credentials)
+        self.assertEquals(tsmFileSystem._configuration.username, "me")
+        self.assertEquals(tsmFileSystem._configuration.password, "secret")
