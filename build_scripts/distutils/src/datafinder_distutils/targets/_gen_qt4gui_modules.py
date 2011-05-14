@@ -90,12 +90,14 @@ class _gen_qt4gui_modules(Command):
         self.uiTargetDirectory = self.__buildConfiguration.generatedGuiModuleDirectory
         self.basedirectory = None
         self.verbose = None
+        self.defaultResourceFilePath = None
         Command.__init__(self, distribution)
 
     def initialize_options(self):
         """ Definition of command options. """
 
         self.pyuiccommand = "pyuic4"
+        self.pyrcccommand = "pyrcc4"
         self.uidirectory = "resources/qt4/ui"
         self.ignoreuifilenames = ""
         self.basedirectory = "resources/qt4"
@@ -154,31 +156,21 @@ class _gen_qt4gui_modules(Command):
                 if os.path.isfile(itemName) and itemBaseName.endswith(".qrc"):
                     pythonDirectoryBaseName = itemBaseName[:-4]
                     pythonFileBaseName = pythonDirectoryBaseName + "_rc.py"
-    
-                    destinationPythonDirectoryName = os.path.join(self.uiTargetDirectory,
-                                                                  pythonDirectoryBaseName)
-                    if os.path.exists(destinationPythonDirectoryName):
-                        destinationPythonFileName = os.path.join(destinationPythonDirectoryName,
-                                                                 pythonFileBaseName)
-                        command = self.PYRCC_COMMAND_TEMPLATE % (self.pyrcccommand,
-                                                                 destinationPythonFileName,
-                                                                 itemName)
-    
-                        msg = self.MESSAGE_FAILED_TEMPLATE
-                        if os.system(command) == 0:
-                            msg = self.MESSAGE_SUCCESS_TEMPLATE
-                        if self.verbose:
-                            print(msg % (itemBaseName, destinationPythonFileName))
-                    else:
-                        if self.verbose:
-                            print("Unable to convert '%s'. Target '%s' doesn't exist." % (itemBaseName,
-                                                                                          destinationPythonDirectoryName))
-        else:
-            targetDirectoryPath = os.path.join(self.uiTargetDirectory, "user")
-            targetResourceFilePath = os.path.join(targetDirectoryPath, os.path.basename(self.defaultResourceFilePath))
-            if regenerateFile(self.defaultResourceFilePath, targetResourceFilePath):
-                print("Copying default resource file instead of generating it.")
-                shutil.copy(self.defaultResourceFilePath, targetDirectoryPath)
+                    destinationPythonFileName = os.path.join(self.basedirectory,
+                                                             pythonFileBaseName)
+                    command = self.PYRCC_COMMAND_TEMPLATE % (self.pyrcccommand,
+                                                             destinationPythonFileName,
+                                                             itemName)
+                    msg = self.MESSAGE_FAILED_TEMPLATE
+                    if os.system(command) == 0:
+                        msg = self.MESSAGE_SUCCESS_TEMPLATE
+                    if self.verbose:
+                        print(msg % (itemBaseName, destinationPythonFileName))
+        targetDirectoryPath = os.path.join(self.uiTargetDirectory, "user")
+        targetResourceFilePath = os.path.join(targetDirectoryPath, os.path.basename(self.defaultResourceFilePath))
+        if regenerateFile(self.defaultResourceFilePath, targetResourceFilePath):
+            print("Copying default resource file.")
+            shutil.copy(self.defaultResourceFilePath, targetDirectoryPath)
 
     def run(self):
         """ Perform command actions. """

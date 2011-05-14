@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/icons" >
+  	<file>../icons/users24.png</file>
+  	<file>../icons/user24.png</file>
   	<file>../icons/audio_format16.png</file>
   	<file>../icons/bin_format16.png</file>
   	<file>../icons/doc_format16.png</file>

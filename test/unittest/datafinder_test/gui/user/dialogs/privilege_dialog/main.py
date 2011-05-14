@@ -53,6 +53,9 @@ from datafinder.core.item.privileges.principal import SPECIAL_PRINCIPALS
 from datafinder.gui.user.dialogs.privilege_dialog.main import PrivilegeDialog
 from datafinder_test.gui.user.mocks import BaseRepositoryMock, BaseItemMock
 
+from datafinder.gui.gen.user import user_rc
+user_rc = user_rc # silent pylint
+
 
 __version__ = "$Revision-Id$" 
 

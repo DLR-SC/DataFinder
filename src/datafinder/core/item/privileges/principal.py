@@ -69,10 +69,21 @@ class _PrincipalType(object):
         self.identifier = identifier
         self.displayName = displayName
         self.description = description
+        
+    def __cmp__(self, other):
+        try:
+            return cmp(self.identifier, other.identifier)
+        except AttributeError:
+            return 1
+        
+    def __hash__(self):
+        return hash(self.identifier)
 
 
-USER_PRINCIPAL_TYPE = _PrincipalType(constants.USER_PRINCIPAL_TYPE, "User Type", "Represents a user.")
-GROUP_PRINCIPAL_TYPE = _PrincipalType(constants.GROUP_PRINCIPAL_TYPE, "Group Type", "Represents a group.")
+USER_PRINCIPAL_TYPE = _PrincipalType(constants.USER_PRINCIPAL_TYPE, 
+                                     "User Type", "Represents a user.")
+GROUP_PRINCIPAL_TYPE = _PrincipalType(constants.GROUP_PRINCIPAL_TYPE, 
+                                      "Group Type", "Represents a group.")
 
 PRINCIPAL_TYPES = [USER_PRINCIPAL_TYPE, GROUP_PRINCIPAL_TYPE]
 

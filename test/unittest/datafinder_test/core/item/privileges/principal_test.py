@@ -60,6 +60,10 @@ class PrincipalTestCase(unittest.TestCase):
         self._principal = principal.Principal("principal")
         groupPrincipal = principal.Principal("group")
         groupPrincipal.type = principal.GROUP_PRINCIPAL_TYPE
+        self.assertNotEquals(principal.GROUP_PRINCIPAL_TYPE, None)
+        self.assertEquals(groupPrincipal.type, principal.GROUP_PRINCIPAL_TYPE)
+        self.assertEquals(hash(groupPrincipal.type), 
+                          hash(principal.GROUP_PRINCIPAL_TYPE))
         self._principal.memberof.add(groupPrincipal)
     
     def testToPersistenceFormat(self):

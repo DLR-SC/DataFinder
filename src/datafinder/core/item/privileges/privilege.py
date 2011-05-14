@@ -79,13 +79,11 @@ class _Privilege(object):
             for privilege in aggregatedPrivileges:
                 self.aggregatedPrivileges.extend(privilege.aggregatedPrivileges)
 
-    def __str__(self):
+    def __repr__(self):
         """ Determines the string representation. """
         
         return self.displayName
 
-    __repr__ = __str__
-    
     def __cmp__(self, other):
         """ Compares two instances. """
         

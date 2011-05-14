@@ -73,6 +73,7 @@ class PrincipalItem(QStandardItem):
         else:
             self.setIcon(self._groupIcon)
         self.setEditable(False)
+        self.setToolTip(self.principal.type.displayName)
         
     def _initIcons(self):
         """ Initializes the icons. """
@@ -84,24 +85,25 @@ class PrincipalItem(QStandardItem):
 
 
 class AccessLevelItem(QStandardItem):
-    """ Access level specific item. """
+    """ Access level item. """
 
-    #@param accessLevels: Access levels that can be represented.
-    #@type accessLevels: C{list} of C{unicode}
-    accessLevelNames = [accessLevel.displayName for accessLevel in ACCESS_LEVELS]
-    
-    def __init__(self, levelName, isReadOnly=False):
+    accessLevels = [accessLevel for accessLevel in ACCESS_LEVELS]
+
+    def __init__(self, level, isReadOnly=False):
         """ Constructor.
         
         @param level: The associated access level constant.
-        @type level: C{unicode}
-        @param isReadOnly: Falg indicating whether the value should be changeable.
+        @type level: L{_AccessLevel<datafinder.core.item.
+            privileges.privilege._AccessLevel>}
+        @param isReadOnly: Flag indicating whether the value 
+            should be changeable.
         @type isReadOnly: C{bool}
         """
         
-        QStandardItem.__init__(self, levelName)
-        
+        QStandardItem.__init__(self, "")
+        self._level = None
         self.setEditable(not isReadOnly)
+        self.level = level
 
     def createEditor(self, parent):
         """ Returns the correctly initialized editor for the item value. 
@@ -114,8 +116,22 @@ class AccessLevelItem(QStandardItem):
         """
         
         editor = QComboBox(parent)
-        for accessLevelName in self.accessLevelNames:
-            editor.addItem(accessLevelName)
-        editor.setCurrentIndex(self.accessLevelNames.index(unicode(self.text())))
+        currentName = unicode(self.text())
+        index = 0
+        for number, level in enumerate(self.accessLevels):
+            editor.addItem(level.displayName)
+            if level.displayName == currentName:
+                index = number
+        editor.setCurrentIndex(index)
         editor.setEditable(False)
         return editor
+
+    def _getLevel(self):
+        return self._level
+
+    def _setLevel(self, newLevel):
+        if self._level != newLevel:
+            self._level = newLevel
+            self.setText(newLevel.displayName)
+            self.setToolTip(newLevel.description)
+    level = property(_getLevel, _setLevel)

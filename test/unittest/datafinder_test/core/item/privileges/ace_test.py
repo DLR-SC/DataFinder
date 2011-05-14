@@ -67,6 +67,7 @@ class AccessControlListEntryTestCase(unittest.TestCase):
         """ Tests the privilege granting. """
         
         self._ace.grantPrivilege(privilege.READ_PRIVILEGE)
+        self.assertEquals(str(privilege.READ_PRIVILEGE), "Read")
         self.assertEquals(self._ace.grantedPrivileges, set([privilege.READ_PRIVILEGE]))
         
         self.assertRaises(PrivilegeError, self._ace.grantPrivilege, self._UNSUPPORTED_PRIVILEGE)

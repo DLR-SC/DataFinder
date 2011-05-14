@@ -260,7 +260,7 @@
          </property>
          <widget class="QGroupBox" name="groupBox_3">
           <property name="title">
-           <string>Upper Collections</string>
+           <string>Path</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="0" column="0">
@@ -369,15 +369,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>DefaultTableView</class>
+   <extends>QTableView</extends>
+   <header>datafinder.gui.user.common.widget</header>
+  </customwidget>
+  <customwidget>
    <class>SelectItemWidget</class>
    <extends>QWidget</extends>
    <header>datafinder.gui.user.common.widget</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>DefaultTableView</class>
-   <extends>QTableView</extends>
-   <header>datafinder.gui.user.common.widget</header>
   </customwidget>
  </customwidgets>
  <resources/>

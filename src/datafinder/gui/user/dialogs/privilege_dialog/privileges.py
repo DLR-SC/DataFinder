@@ -281,9 +281,9 @@ class PrivilegeModel(QStandardItemModel):
         """ Adds the principal and its access levels to the table view. """
        
         row = [PrincipalItem(principal)]
-        row.append(AccessLevelItem(self._acl.contentAccessLevel(principal).displayName))
-        row.append(AccessLevelItem(self._acl.propertiesAccessLevel(principal).displayName))
-        row.append(AccessLevelItem(self._acl.administrationAccessLevel(principal).displayName)) 
+        row.append(AccessLevelItem(self._acl.contentAccessLevel(principal)))
+        row.append(AccessLevelItem(self._acl.propertiesAccessLevel(principal)))
+        row.append(AccessLevelItem(self._acl.administrationAccessLevel(principal))) 
         self.appendRow(row)
         
     def removePrincipals(self, principalItems):
@@ -322,26 +322,26 @@ class PrivilegeModel(QStandardItemModel):
         self._item.updateAcl(self._acl)
         self._acl = deepcopy(self._acl)
         
-    def changeAccessLevel(self, levelItem, levelName):
+    def changeAccessLevel(self, levelItem, newLevelName):
         """ Changes the associated access level. Also the data model 
         is adapted in accordance.
 
         @param principalItem: Principal to move.
         @type principalItem: L{AccessLevelItem<datafinder.gui.user.
         dialogs.privilege_dialog.items.AccessLevelItem>}
-        @param levelName: The new access level display name.
-        @type levelName: C{unicode}
+        @param newLevelName: The new access level display name.
+        @type newLevelName: C{unicode}
         """
         
         principal = self.item(levelItem.row()).principal
         if principal in self._acl.principals:
             level = None
             for accessLevel in ACCESS_LEVELS:
-                if levelName == accessLevel.displayName:
+                if newLevelName == accessLevel.displayName:
                     level = accessLevel
                     break
             if not level is None:
-                levelItem.setText(levelName)
+                levelItem.level = level
                 if levelItem.column() == 1:
                     self._acl.setContentAccessLevel(principal, level)
                 elif levelItem.column() == 2:

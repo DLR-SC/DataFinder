@@ -137,12 +137,11 @@ class _gen_qt3gui_modules(Command):
                 for imageName in os.listdir(imageDirectory):
                     if imageName.endswith(".png"):
                         imageFilePaths += os.path.join(imageDirectory, imageName) + " "
-            command = self.pyuiccommand + " -embed DataFinder %s > %s" % (imageFilePaths, targetDirectoryPath)
+            command = self.pyuiccommand + " -embed DataFinder %s > %s" % (imageFilePaths, _DEFAULT_STATIC_IMAGES_FILE_PATH)
             if self.verbose:
                 print(command)
             os.system(command)
-        else:
-            targetResourceFilePath = os.path.join(targetDirectoryPath, os.path.basename(_DEFAULT_STATIC_IMAGES_FILE_PATH))
-            if regenerateFile(_DEFAULT_STATIC_IMAGES_FILE_PATH, targetResourceFilePath):
-                print("Copying default static image file instead of generating it.")
-                shutil.copy(_DEFAULT_STATIC_IMAGES_FILE_PATH, targetDirectoryPath)
+        targetResourceFilePath = os.path.join(targetDirectoryPath, os.path.basename(_DEFAULT_STATIC_IMAGES_FILE_PATH))
+        if regenerateFile(_DEFAULT_STATIC_IMAGES_FILE_PATH, targetResourceFilePath):
+            print("Copying default static image file.")
+            shutil.copy(_DEFAULT_STATIC_IMAGES_FILE_PATH, targetDirectoryPath)

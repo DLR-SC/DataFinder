@@ -161,9 +161,9 @@ class InheritedPrivilegeModel(QStandardItemModel):
                 self._itemRowMap[item.path].append(currentRow)
                 row = [PrincipalItem(principal)]
                 row[0].item = item
-                row.append(AccessLevelItem(item.acl.contentAccessLevel(principal).displayName, True))
-                row.append(AccessLevelItem(item.acl.propertiesAccessLevel(principal).displayName, True))
-                row.append(AccessLevelItem(item.acl.administrationAccessLevel(principal).displayName, True)) 
+                row.append(AccessLevelItem(item.acl.contentAccessLevel(principal), True))
+                row.append(AccessLevelItem(item.acl.propertiesAccessLevel(principal), True))
+                row.append(AccessLevelItem(item.acl.administrationAccessLevel(principal), True)) 
                 self.appendRow(row)
     item_ = property(None, _setItem) # item already exists as method
 
