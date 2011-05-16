@@ -100,7 +100,7 @@ class FileSystem(object):
     
     _uriSchemeAdapterMap = {"http": ["svn", "webdav_"],
                             "https": ["svn", "webdav_"],
-                            "file": ["filesystem"],
+                            "file": ["svn", "filesystem"],
                             "ldap": ["ldap_"],
                             "tsm": ["tsm"],
                             "arch": ["archive"],
