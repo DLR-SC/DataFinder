@@ -71,11 +71,9 @@ class DataS3Adapter(NullDataStorer):
         self._connectionPool = connectionPool
         
         self._bucketname = bucketname
-        self._bucket = None
+        self._bucket = self._getBucket()
         
-        #setting a different keyname
-        # keyname --> Path of the item within the file system.
-        self._keyname =  identifier # the implmentation does not work with certain special characters (e.g: ae, oe,ue)
+        self._keyname =  identifier.encode("UTF-8") 
         self._key = None
         import locale
         locale.setlocale(locale.LC_TIME, "C")
@@ -83,22 +81,16 @@ class DataS3Adapter(NullDataStorer):
     @property
     def isLeaf(self):
         """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        if self._keyname == "":
+        if self._keyname == "/":
             return False
         else: 
-            if self._bucketname == "":
-                return False
-            else:
-                return True
+            return True
         
     @property
     def isCollection(self):
         """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorenr.NullDataStorer>} """
-        if self._keyname == "":
-            if self._bucketname == "":
-                return False
-            else:
-                return True
+        if self._keyname == "/":
+            return True
         else:
             return False
         
@@ -113,13 +105,10 @@ class DataS3Adapter(NullDataStorer):
     def createResource(self):
         """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        if self._bucketname == "":
-            raise PersistenceError("Cannot create item with empty bucket name.")
-        elif self._keyname == "":
+        if self._keyname == "":
             raise PersistenceError("Cannot create item with empty key name.")
         else:
             try:
-                self.createCollection()
                 if not self._keyname ==  "/":
                     try:
                         self._key = self._bucket.get_key(self._keyname)
@@ -132,55 +121,44 @@ class DataS3Adapter(NullDataStorer):
                 raise PersistenceError(errorMessage)
         return self._key 
     
-    def createCollection(self, _=False):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        
+    def _getBucket(self):
+        "gets the python object representation of the specified bucket"
+        bucket = None
         connection = self._connectionPool.acquire()
         try:
-            if self._bucketname == '':
-                raise PersistenceError("Cannot create item with empty location name. Contact your Admin to configure the store")
-            else:
+            bucket = connection.lookup(self._bucketname)
+        except S3ResponseError, error:
+            raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
+        else:
+            if bucket is None: 
                 try:
-                    self._bucket = connection.lookup(self._bucketname)   # does not find this anymore
-                except S3ResponseError, error:
-                    raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
-                else:
-                    if self._bucket is None: 
-                        try:
-                            self._bucket = connection.create_bucket(self._bucketname)
-                        except (S3ResponseError, S3CreateError), error:
-                            errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error.error_message)
-                            raise PersistenceError(errorMessage)
-                    
-                    return self._bucket 
+                    bucket = connection.create_bucket(self._bucketname)
+                except (S3ResponseError, S3CreateError), error:
+                    errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error.error_message)
+                    raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
-            
+            return bucket
+                
     def getChildren(self):
         """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-        if self.isLeaf:
-            result = list()
-            return result  
-                
-        elif self.isCollection:
-            
+               
+        if self.isCollection:    
             connection = self._connectionPool.acquire()
             result = list()
             try:
-                if not self._bucket:
-                    self.createCollection()
                 result = self._bucket.get_all_keys()
             except S3ResponseError, error: 
                 errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" % (self.identifier, error.reason)
                 raise PersistenceError(errorMessage)
             else:
-                return result # Mapping to correct return type not done yet 
+                return result 
                 
             finally: 
                 self._connectionPool.release(connection)
         else:
-            raise PersistenceError('Cannot retrieve children of unkown source')
+            return list()
 
 
     def writeData(self, data):
@@ -218,7 +196,7 @@ class DataS3Adapter(NullDataStorer):
         if self.isLeaf and not self._keyname.endswith("/"):
             try:
                 self.createResource()
-                self._key.delete() #resultset has no keyset
+                self._key.delete()
             except (PersistenceError, S3ResponseError), error:  
                 errorMessage = "Unable to delete item '%s'. " % self.identifier \
                                    + "Reason: %s" % error.reason
@@ -249,26 +227,19 @@ class DataS3Adapter(NullDataStorer):
         """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         exists = True
-        collection = self.isCollection
-        if (self.identifier == "/" or collection == True):
-            connection = self._connectionPool.acquire()
-            try:
-                bucket = connection.lookup(self._bucketname) 
-                if bucket is None: 
-                    exists = False 
-            except S3ResponseError, error:
-                raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
-            finally: 
-                self._connectionPool.release(connection)
+        if self.isCollection:
+            if not self._bucket: 
+                exists = False       
         elif self.isLeaf:
-            key = None
+            connection = self._connectionPool.acquire()
             try: 
-                self.createCollection()
                 key = self._bucket.get_key(self._keyname)
                 if key is None:
                     exists = False
             except S3ResponseError, error:
                 raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
+            finally: 
+                self._connectionPool.release(connection)
         else:
             exists = False
         return exists 

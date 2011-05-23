@@ -46,6 +46,7 @@ import unittest
 from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
 from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock 
+from boto.exception import S3ResponseError
 
 
 _PROPERTY_NOT_FOUND_MESSAGE = "Property is missing:"
@@ -67,14 +68,14 @@ class DataS3AdapterTestCase(unittest.TestCase):
         adapter = DataS3Adapter("identifier", SimpleMock(), SimpleMock() )
         self.assertTrue(adapter.isLeaf)
         adapter = DataS3Adapter("", SimpleMock(), SimpleMock())
-        self.assertFalse(adapter.isLeaf)
-        adapter = DataS3Adapter("identifier", SimpleMock(), '')
+        self.assertTrue(adapter.isLeaf)
+        adapter = DataS3Adapter("/", SimpleMock(), '')
         self.assertFalse(adapter.isLeaf)
         
     def testisCollection(self):
         """ Tests the normal behavior of the isResource method. """
         
-        adapter = DataS3Adapter("", SimpleMock(), SimpleMock())
+        adapter = DataS3Adapter("/", SimpleMock(), SimpleMock())
         self.assertTrue(adapter.isCollection)
         adapter = DataS3Adapter("identifier", SimpleMock(), '')
         self.assertFalse(adapter.isCollection)
@@ -89,14 +90,15 @@ class DataS3AdapterTestCase(unittest.TestCase):
     def testcreateCollection(self):
         """ Tests the normal behavior of the createCollection method. """
         
-        self._defaultAdapter.createCollection()
-        adapter = DataS3Adapter("", SimpleMock(SimpleMock()), '')
-        self.assertRaises(PersistenceError, adapter.createCollection)
+        adapter = DataS3Adapter("/identifier", SimpleMock(SimpleMock(SimpleMock(error=PersistenceError("")))) ,SimpleMock())
+        self.assertRaises(PersistenceError, adapter._getBucket())
         
     def testgetChildren(self):
         """ Tests the normal behavior of the getChildren method. """
     
         adapter = DataS3Adapter("/identifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock(keyset = 1)))), SimpleMock())
+        self.assertEquals(adapter.getChildren(), list())
+        adapter = DataS3Adapter("/", SimpleMock(SimpleMock(SimpleMock(returnValue = []))), SimpleMock())
         self.assertEquals(adapter.getChildren(), list())
     
     def testwriteData(self):
@@ -119,7 +121,6 @@ class DataS3AdapterTestCase(unittest.TestCase):
         """ Tests the normal behavior of the move method. """
                 
         destinationBucket = SimpleMock(SimpleMock(SimpleMock()))
-        #source = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock(), SimpleMock())
         self._defaultAdapter.move(destinationBucket)
         
     def testcopy(self):
@@ -132,7 +133,7 @@ class DataS3AdapterTestCase(unittest.TestCase):
         
         adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock(SimpleMock(SimpleMock()))), SimpleMock())
         self.assertTrue(adapter.exists())
-        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock()), "" )
+        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock(SimpleMock())), "" )
         self.assertFalse(adapter.exists())
-        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(error=PersistenceError("")), SimpleMock())
+        adapter = DataS3Adapter("/anotherIdentifier", SimpleMock(SimpleMock(SimpleMock(error=PersistenceError("")))), SimpleMock())
         self.assertRaises(PersistenceError, adapter.exists)
