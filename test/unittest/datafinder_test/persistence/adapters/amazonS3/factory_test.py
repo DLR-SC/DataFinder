@@ -60,7 +60,7 @@ class FileSystemTestCase(unittest.TestCase):
         """ Mocks an utility functionality. """
         
         factory.FileSystem._getConnection = SimpleMock(SimpleMock())
-        factory.FileSystem._getConnectionPool = SimpleMock(SimpleMock())
+        factory.FileSystem._getConnectionPool = SimpleMock(SimpleMock(SimpleMock()))
         self._factory = factory.FileSystem(BaseConfiguration("http://s3.amazonaws.de/bucketname/keyname"))
        
     def testCreateDataStorer(self):

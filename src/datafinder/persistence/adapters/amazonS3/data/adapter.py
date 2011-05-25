@@ -37,10 +37,18 @@
 
 """ 
 Implements adapter for manipulating a AmazonS3 file system.
+
+It needs a bucketname from an Amazon S3 bucket. In the bucket the data 
+items are stored. A bucket is used similar to a directory. Only that 
+collections cannot be created within.
+
+The keys with the identifier of the item are stored in the bucket. 
 """
 
-import atexit
-import os
+
+from atexit import register
+from os import remove
+from locale import resetlocale, setlocale, LC_TIME, Error
 from tempfile import NamedTemporaryFile
 
 from boto.exception import S3ResponseError, S3CreateError, BotoClientError, S3DataError
@@ -51,7 +59,8 @@ from datafinder.persistence.data.datastorer import NullDataStorer
 __version__ = "$Revision-Id$" 
 
 
-_PROPERTY_NOT_FOUND_MESSAGE = "Property is missing"
+UTF_ENCODING = "UTF-8"
+LOCALE_TIME = "C"
 
 
 class DataS3Adapter(NullDataStorer):
@@ -65,6 +74,8 @@ class DataS3Adapter(NullDataStorer):
         @type identifier: C{unicode}
         @param connectionPool: Connection pool - connection to S3
         @type connectionPool: L{Connection<datafinder.persistence.amazonS3.connection_pool.S3ConnectionPool>}
+        @param bucketname: Name of the bucket in Amazon S3, specified in the data location of the configuration.
+        @type bucketname: C{unicode}
         """ 
         
         NullDataStorer.__init__(self, identifier)
@@ -73,60 +84,19 @@ class DataS3Adapter(NullDataStorer):
         self._bucketname = bucketname
         self._bucket = self._getBucket()
         
-        self._keyname =  identifier.encode("UTF-8") 
+        self._keyname =  identifier.encode(UTF_ENCODING)
         self._key = None
-        import locale
-        locale.setlocale(locale.LC_TIME, "C")
 
-    @property
-    def isLeaf(self):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        if self._keyname == "/":
-            return False
-        else: 
-            return True
-        
-    @property
-    def isCollection(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorenr.NullDataStorer>} """
-        if self._keyname == "/":
-            return True
-        else:
-            return False
-        
-    @property
-    def canAddChildren(self):
-        """
-        @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
-        """
-        
-        return self.isCollection
-
-    def createResource(self):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-        
-        if self._keyname == "":
-            raise PersistenceError("Cannot create item with empty key name.")
-        else:
-            try:
-                if not self._keyname ==  "/":
-                    try:
-                        self._key = self._bucket.get_key(self._keyname)
-                        if not self._key:
-                            self._key = self._bucket.new_key(self._keyname) 
-                    except S3ResponseError, error:
-                        raise PersistenceError("Cannot create resource. Reason: '%s'" % error.error_message)                                       
-            except PersistenceError, error:
-                errorMessage = "Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error) 
-                raise PersistenceError(errorMessage)
-        return self._key 
-    
     def _getBucket(self):
-        "gets the python object representation of the specified bucket"
+        """ Gets a s3 bucket, to access and store data items on the service """ 
+        
         bucket = None
+        setlocale(LC_TIME, LOCALE_TIME)
         connection = self._connectionPool.acquire()
         try:
+            
             bucket = connection.lookup(self._bucketname)
+            
         except S3ResponseError, error:
             raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
         else:
@@ -138,130 +108,188 @@ class DataS3Adapter(NullDataStorer):
                     raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
-            return bucket
+            self._resetLocale()
+        return bucket
+    
+    @property
+    def isLeaf(self):
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        if self._isRoot(self._keyname):
+            return False
+        else: 
+            return True
+     
+    def _isRoot(self, key):  
+        """ Determines if the root is accessed. """
+        
+        return key == "/"
+    
+    @property
+    def isCollection(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.metadata.metadatastorenr.NullDataStorer>} """
+        
+        if self._keyname == "/":
+            return True
+        else:
+            return False
+        
+    @property
+    def canAddChildren(self):
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        return self.isCollection
+
+    def createResource(self):
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        setlocale(LC_TIME, LOCALE_TIME)
+        connection = self._connectionPool.acquire()
+        try:
+            if not self._keyname ==  "/":
+                self._key = self._bucket.get_key(self._keyname)
+                if not self._key:
+                    self._key = self._bucket.new_key(self._keyname)                                    
+        except (S3ResponseError, PersistenceError), error:
+            errorMessage = "Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error) 
+            raise PersistenceError(errorMessage)
+        finally:
+            self._connectionPool.release(connection)
+            self._resetLocale()
+        return self._key 
                 
     def getChildren(self):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
-               
+        result = list()      
         if self.isCollection:    
+            setlocale(LC_TIME, LOCALE_TIME)
             connection = self._connectionPool.acquire()
-            result = list()
             try:
                 result = self._bucket.get_all_keys()
             except S3ResponseError, error: 
                 errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" % (self.identifier, error.reason)
                 raise PersistenceError(errorMessage)
-            else:
-                return result 
-                
             finally: 
                 self._connectionPool.release(connection)
-        else:
-            return list()
-
+                self._resetLocale()
+        return result
 
     def writeData(self, data):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-    
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        setlocale(LC_TIME, LOCALE_TIME)
+        connection = self._connectionPool.acquire()
         try:
             self._key = self.createResource()
             self._key.set_contents_from_file(data)
         except (S3ResponseError, S3DataError), error:
-            errorMessage = "Unable to write data to '%s'. " % self.identifier + \
-                               "Reason: %s" % error.error_message
+            errorMessage = "Unable to write data to '%s'. " % self.identifier \
+                           + "Reason: %s" % error.error_message
             raise PersistenceError(errorMessage)
-          
-
-    def readData(self):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        finally:
+            self._connectionPool.release(connection) 
+            self._resetLocale() 
         
+    def readData(self):
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        setlocale(LC_TIME, LOCALE_TIME)
+        connection = self._connectionPool.acquire()
         try:
-            fileObject = NamedTemporaryFile(delete = False)
+            fileObject = NamedTemporaryFile(delete=False)
             self.createResource()
             self._key.get_contents_to_filename(fileObject.name)
             _temporaryFiles.append(fileObject)
             return fileObject
         except (PersistenceError, S3ResponseError, BotoClientError), error:
-            errorMessage = "Unable to read data from '%s'. " % self.identifier + \
-                               "Reason: %s" % error.reason
+            errorMessage = "Unable to read data from '%s'. " % self.identifier \
+                           + "Reason: %s" % error.reason
             raise PersistenceError(errorMessage)
+        finally:
+            self._connectionPool.release(connection) 
+            self._resetLocale() 
     
-
-        
-           
     def delete(self):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
-
-        if self.isLeaf and not self._keyname.endswith("/"):
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        if self.isLeaf:
+            setlocale(LC_TIME, LOCALE_TIME)
+            connection = self._connectionPool.acquire()
             try:
                 self.createResource()
                 self._key.delete()
             except (PersistenceError, S3ResponseError), error:  
                 errorMessage = "Unable to delete item '%s'. " % self.identifier \
-                                   + "Reason: %s" % error.reason
-                raise PersistenceError(errorMessage)        
-
+                               + "Reason: %s" % error.reason
+                raise PersistenceError(errorMessage)     
+            finally:
+                self._connectionPool.release(connection) 
+                self._resetLocale()   
         else:
-            raise PersistenceError("Specified identifier is not available and cannot be deleted")
+            raise PersistenceError("Unable to delete item '%s'. " % self.identifier)
        
     def move(self, destination):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         self.copy(destination)
         self.delete()
         
     def copy(self, destination):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
+        setlocale(LC_TIME, LOCALE_TIME)
         connection = self._connectionPool.acquire()
         try:
             destination.writeData(self.readData())       
         except (S3ResponseError, S3CreateError, PersistenceError), error:
-            errorMessage = "Unable to move item '%s' to '%s'. " % (self.identifier, self._bucket.identifier) \
-                               + "Reason: %s" % error.reason
+            errorMessage = "Unable to move item '%s' to '%s'." %(self.identifier, self._bucket.identifier)\
+                           + "Reason: %s" % error.reason
             raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection) 
+            self._resetLocale()
 
     def exists(self):
-        """@see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        """ @see:L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         exists = True
-        if self.isCollection:
-            if not self._bucket: 
-                exists = False       
-        elif self.isLeaf:
+        if self.isLeaf:
+            setlocale(LC_TIME, LOCALE_TIME)
             connection = self._connectionPool.acquire()
             try: 
                 key = self._bucket.get_key(self._keyname)
                 if key is None:
                     exists = False
             except S3ResponseError, error:
-                raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
+                raise PersistenceError("Cannot determine item existence. " \
+                                       + "Reason: '%s'" % error.error_message)
             finally: 
                 self._connectionPool.release(connection)
-        else:
-            exists = False
+                self._resetLocale()
         return exists 
 
+    def _resetLocale(self):
+        """Reseting the process time settings"""
+        
+        try:
+            resetlocale(LC_TIME)
+        except Error:
+            setlocale(LC_TIME, "C")
+
+        
 _temporaryFiles = list()
-@atexit.register
+
+        
+@register
 def _cleanupTemporaryFile():
-    """Cleaning up TemporaryFiles for a """
+    """Cleaning up TemporaryFiles, Problems are sent to the debug logger""" #neu
+    
     for tempFile in _temporaryFiles:
         try:
             tempFile.close()
-            os.remove(tempFile.name)
+            remove(tempFile.name)
         except (OSError, PersistenceError):
+            # sent problem to logger
             raise PersistenceError("Cannot clean up temporary file '%s'" % tempFile.name)
-
-@atexit.register    
-def _resetLocale():
-    """Reseting the process wide settings"""
-    import locale
-    try:
-        locale.resetlocale(locale.LC_ALL)
-    except:
-        locale.setlocale(locale.LC_ALL, "C") # -> safe value
-
         
