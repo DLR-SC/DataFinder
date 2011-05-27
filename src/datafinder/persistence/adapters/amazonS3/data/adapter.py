@@ -63,6 +63,9 @@ UTF_ENCODING = "UTF-8"
 LOCALE_TIME = "C"
 
 
+_temporaryFiles = list()
+
+
 class DataS3Adapter(NullDataStorer):
     """ An adapter instance represents an item within the Amazon S3 file system. """
 
@@ -94,18 +97,15 @@ class DataS3Adapter(NullDataStorer):
         setlocale(LC_TIME, LOCALE_TIME)
         connection = self._connectionPool.acquire()
         try:
-            
             bucket = connection.lookup(self._bucketname)
-            
-        except S3ResponseError, error:
-            raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
-        else:
-            if bucket is None: 
-                try:
-                    bucket = connection.create_bucket(self._bucketname)
-                except (S3ResponseError, S3CreateError), error:
-                    errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error.error_message)
-                    raise PersistenceError(errorMessage)
+            if bucket is None:
+                bucket = connection.create_bucket(self._bucketname)
+        except (S3ResponseError, S3CreateError), error:
+            if bucket is None:
+                raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error.error_message)
+            else:
+                errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error.error_message)
+                raise PersistenceError(errorMessage)                    
         finally:
             self._connectionPool.release(connection)
             self._resetLocale()
@@ -168,7 +168,7 @@ class DataS3Adapter(NullDataStorer):
             try:
                 result = self._bucket.get_all_keys()
             except S3ResponseError, error: 
-                errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" % (self.identifier, error.reason)
+                errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" % (self.identifier, error)
                 raise PersistenceError(errorMessage)
             finally: 
                 self._connectionPool.release(connection)
@@ -183,9 +183,9 @@ class DataS3Adapter(NullDataStorer):
         try:
             self._key = self.createResource()
             self._key.set_contents_from_file(data)
-        except (S3ResponseError, S3DataError), error:
+        except (PersistenceError, S3ResponseError, S3DataError), error:
             errorMessage = "Unable to write data to '%s'. " % self.identifier \
-                           + "Reason: %s" % error.error_message
+                           + "Reason: %s" % error
             raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection) 
@@ -204,7 +204,7 @@ class DataS3Adapter(NullDataStorer):
             return fileObject
         except (PersistenceError, S3ResponseError, BotoClientError), error:
             errorMessage = "Unable to read data from '%s'. " % self.identifier \
-                           + "Reason: %s" % error.reason
+                           + "Reason: %s" % error
             raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection) 
@@ -221,7 +221,7 @@ class DataS3Adapter(NullDataStorer):
                 self._key.delete()
             except (PersistenceError, S3ResponseError), error:  
                 errorMessage = "Unable to delete item '%s'. " % self.identifier \
-                               + "Reason: %s" % error.reason
+                               + "Reason: %s" % error
                 raise PersistenceError(errorMessage)     
             finally:
                 self._connectionPool.release(connection) 
@@ -243,8 +243,8 @@ class DataS3Adapter(NullDataStorer):
         try:
             destination.writeData(self.readData())       
         except (S3ResponseError, S3CreateError, PersistenceError), error:
-            errorMessage = "Unable to move item '%s' to '%s'." %(self.identifier, self._bucket.identifier)\
-                           + "Reason: %s" % error.reason
+            errorMessage = "Unable to move item '%s' to '%s'." % (self.identifier, self._bucket.identifier)\
+                           + "Reason: %s" % error
             raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection) 
@@ -277,19 +277,20 @@ class DataS3Adapter(NullDataStorer):
         except Error:
             setlocale(LC_TIME, "C")
 
-        
-_temporaryFiles = list()
-
-        
+     
 @register
-def _cleanupTemporaryFile():
+def _cleanupTemporaryFile(fileList = None):
     """Cleaning up TemporaryFiles, Problems are sent to the debug logger""" #neu
-    
-    for tempFile in _temporaryFiles:
+    if fileList:
+        tempFiles = fileList
+    else:
+        tempFiles = _temporaryFiles     
+    for tempFile in tempFiles:
         try:
             tempFile.close()
             remove(tempFile.name)
         except (OSError, PersistenceError):
-            # sent problem to logger
-            raise PersistenceError("Cannot clean up temporary file '%s'" % tempFile.name)
+            import logging
+            _log = logging.getLogger("")
+            _log.debug("Cannot clean up temporary file '%s'" % tempFile.name)
         

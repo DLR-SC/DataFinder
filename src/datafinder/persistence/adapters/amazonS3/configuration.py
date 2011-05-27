@@ -40,7 +40,8 @@ Defines S3-specific connection parameters.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
+
 
 class Configuration(object):
     """ Defines a set of configuration parameters of the s3 protocol. """
@@ -58,17 +59,6 @@ class Configuration(object):
 
         self.username = baseConfiguration.username
         self.password = baseConfiguration.password
-        
-        self.awsAccessKey = baseConfiguration.awsAccessKey
-        self.awsSecretAccessKey = baseConfiguration.awsSecretAccessKey      
-        #edit the uri path in user... needing some kind of keyname within the user
-        #bucketName, keyName = self._determineBucketAndKey(baseConfiguration.uriPath or "")
-        
+          
         self.bucketName = baseConfiguration.uriPath
-        #self.keyName = keyName
-        
-    @staticmethod   
-    def _determineBucketAndKey(bucketAndKey):   
-        
-        splitUrl = bucketAndKey.split("/")
-        return splitUrl[1], splitUrl[2]
+   

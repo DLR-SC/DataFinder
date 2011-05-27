@@ -41,12 +41,11 @@ Implements Amazon S3-specific connection pool.
 
 
 from boto.s3.connection import S3Connection
-
 from datafinder.persistence.common.connection.pool import ConnectionPool
 from datafinder.persistence.adapters.amazons3.constants import MAX_CONNECTION_NUMBER
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 class S3ConnectionPool(ConnectionPool):
@@ -56,8 +55,8 @@ class S3ConnectionPool(ConnectionPool):
         """ 
         Constructor. 
         
-        @param configurationContext: S3 connection parameters.
-        @type configurationContext: L{Configuration<datafinder.persistence.
+        @param configuration: S3 connection parameters.
+        @type configuration: L{Configuration<datafinder.persistence.
         amazonS3.configuration.Configuration>}
         """
         
@@ -65,12 +64,9 @@ class S3ConnectionPool(ConnectionPool):
         ConnectionPool.__init__(self, MAX_CONNECTION_NUMBER)
         
     def _createConnection(self):
-        """ Overwrites template method for connection creation. """
+        """ Creates a s3 connection. """
         
         secretAccessKey = self._configuration.password
-         
         accessKey = self._configuration.username
-        
         connection = S3Connection(accessKey, secretAccessKey) 
-         
         return connection

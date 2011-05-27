@@ -41,29 +41,52 @@ Implements test cases for the AmazonS3-specific file system factory.
 """
 
 
-import unittest
-
+from unittest import TestCase
+from boto.s3.connection import S3Connection
 
 from datafinder.persistence.common.configuration import BaseConfiguration
 from datafinder.persistence.adapters.amazons3 import factory
 from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
+from datafinder.persistence.adapters.amazons3.connection_pool import S3ConnectionPool
 from datafinder_test.mocks import SimpleMock
 
 
 __version__ = "$Revision-Id$" 
 
 
-class FileSystemTestCase(unittest.TestCase):
+class FileSystemTestCase(TestCase):
     """ Test cases for Amazon S3 file system factory."""
     
     def setUp(self):
         """ Mocks an utility functionality. """
         
-        factory.FileSystem._getConnection = SimpleMock(SimpleMock())
         factory.FileSystem._getConnectionPool = SimpleMock(SimpleMock(SimpleMock()))
         self._factory = factory.FileSystem(BaseConfiguration("http://s3.amazonaws.de/bucketname/keyname"))
-       
+      
     def testCreateDataStorer(self):
         """ Tests the creation of a AmazonS3 specific data storer. """
         
         self.assertTrue(isinstance(self._factory.createDataStorer("identifier"), DataS3Adapter))
+  
+    def testUpdateCredentials(self):
+        """ Tests to update the credentials """
+        
+        credentials = dict()
+        credentials["username"] = ""
+        credentials["password"] = ""
+        self._factory.updateCredentials(credentials)
+        
+
+class ConnectionPool(TestCase):
+    """Test case for the connection Pool"""
+    
+    def setUp(self):
+        """ Mocks an utility functionality. """
+    
+    def testGetConnectionPool(self):
+        """getting a connection"""
+        
+        self._factory = factory.FileSystem(BaseConfiguration("http://s3.amazonaws.de/bucketname/keyname"))
+        connectionPool = self._factory._getConnectionPool()
+        self.assertTrue(isinstance(connectionPool, S3ConnectionPool))
+        

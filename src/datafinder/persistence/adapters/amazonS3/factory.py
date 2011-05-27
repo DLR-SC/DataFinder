@@ -36,30 +36,27 @@
 
 
 """ 
-Implements factory methods for objects that can be used to
-access a Amazon s3 file system.
-
-to be implemented - erstellt einen Datastore des Typs S3
+Implements factory methods for objects that are used to
+access an Amazon s3 file system.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
 
 
 from datafinder.persistence.adapters.amazons3.configuration import Configuration
 from datafinder.persistence.adapters.amazons3.connection_pool import S3ConnectionPool
 from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
 from datafinder.persistence.adapters.amazons3 import constants
-
 from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.common.connection.manager import ConnectionPoolManager
 from datafinder.persistence.error import PersistenceError
 
-class FileSystem(BaseFileSystem):    """ 
-    Implements factory methods of the different aspects of file system items. 
-    Moreover, information of specific feature are available.
-    """
-    _connectionManager = ConnectionPoolManager(constants.MAX_POOL_NUMBER) 
+
+class FileSystem(BaseFileSystem):    """ Implements factory methods of the different aspects of file system items. """
+    
+    _connectionManager = ConnectionPoolManager(constants.MAX_POOL_NUMBER)
+     
     def __init__(self, baseConfiguration):
         """ 
         Constructor. 
@@ -71,7 +68,6 @@ class FileSystem(BaseFileSystem):    """
         BaseFileSystem.__init__(self)
         self._configuration = Configuration(baseConfiguration)
         self._connectionPool = self._getConnectionPool()
-    
 
     def _getConnectionPool(self):
         
@@ -81,11 +77,9 @@ class FileSystem(BaseFileSystem):    """
             self._connectionManager.add(self._configuration.baseUrl, connectionPool)
         return connectionPool
     
-        
     def updateCredentials(self, credentials):
         """ @see: L{updateCredentials<datafinder.persistence.factory.FileSystem.updateCredentials>} """
         
-        #CorrectCredential implementation
         try:
             self._configuration.username = credentials["username"]
             self._configuration.password = credentials["password"]
@@ -102,13 +96,10 @@ class FileSystem(BaseFileSystem):    """
         @rtype: ... # missing return type
         """
         
-        return DataS3Adapter(identifier, self._connectionPool, self._configuration.bucketName)#, self._configuration.keyName)
-    
+        return DataS3Adapter(identifier, self._connectionPool, self._configuration.bucketName)
   
     def getConfiguration(self):
-        """
-        Getter for the Configuration 
-        """
+        """ Getter for the Configuration """
         
         return self._configuration
     

@@ -44,4 +44,4 @@ adapter - Adapts the general data-related interface to the S3 library.
 """
 
 
-__version__ = "$Revision-Id:$" 
+__version__ = "$Revision-Id$" 
