@@ -47,6 +47,7 @@ import unittest
 
 
 from datafinder.persistence.common.configuration import BaseConfiguration
+from datafinder.persistence.common.connection.manager import ConnectionPoolManager
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.adapters.svn import connection_pool
 from datafinder.persistence.adapters.svn import factory
@@ -63,9 +64,10 @@ class FileSystemTestCase(unittest.TestCase):
     def setUp(self):
         self._createSvnConnectionMock = SimpleMock(SimpleMock())
         connection_pool.util.createSubversionConnection = self._createSvnConnectionMock
+        factory.FileSystem._connectionManager = ConnectionPoolManager(10) # Ensure it is empty
         self._factory = factory.FileSystem(BaseConfiguration("http://svn.test.de/svn"))
         self.assertTrue(self._factory.hasCustomMetadataSupport)
-       
+
     def testCreateDataStorer(self):
         self.assertTrue(isinstance(self._factory.createDataStorer("identifier"), 
                                    DataSubversionAdapter))
