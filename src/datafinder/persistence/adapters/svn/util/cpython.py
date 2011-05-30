@@ -373,7 +373,7 @@ class _SharedState(object):
 _repositoryUriSharedStateMap = dict()
 
 
-def createSubversionConnection(repositoryUri, workingCopyPath, username, password):
+def createCPythonWrapper(repositoryUri, workingCopyPath, username, password):
     """ Factory method for safe creation of SVN connections.
     
     Adds specific shared shared state to synchronize work of different 

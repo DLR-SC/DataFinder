@@ -72,7 +72,6 @@ class DatetimeUtilTestCase(unittest.TestCase):
 
         # Error
         self.assertRaises(ValueError, dt_util.convertFromTimeStamp, None)
-        self.assertRaises(ValueError, dt_util.convertFromTimeStamp, -10.0)
 
     def testConvertFromRfc822(self):
         # Success
