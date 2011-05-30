@@ -61,4 +61,3 @@ class Configuration(object):
         self.password = baseConfiguration.password
           
         self.bucketName = baseConfiguration.uriPath
-   

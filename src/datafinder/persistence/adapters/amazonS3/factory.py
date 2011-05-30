@@ -59,8 +59,6 @@ class FileSystem(BaseFileSystem):    """ Implements factory methods of the diff
      
     def __init__(self, baseConfiguration):
         """ 
-        Constructor. 
-        
         @param baseConfiguration: Object specifying configuration parameters.
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """
@@ -89,20 +87,10 @@ class FileSystem(BaseFileSystem):    """ Implements factory methods of the diff
             self._connectionPool.reload()
     
     def createDataStorer(self, identifier):
-        """ 
-        Factory Method providing a Amazon S3-specific data storer. 
-        
-        @return: Amazon S3-specific implementation of the data interface.
-        @rtype: ... # missing return type
-        """
+        """ Factory Method providing a Amazon S3-specific data storer. """
         
         return DataS3Adapter(identifier, self._connectionPool, self._configuration.bucketName)
   
-    def getConfiguration(self):
-        """ Getter for the Configuration """
-        
-        return self._configuration
-    
     def release(self):
         """ Releases the acquired connection pool. """
         

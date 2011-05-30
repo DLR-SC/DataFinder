@@ -49,9 +49,11 @@ The keys with the identifier of the item are stored in the bucket.
 from atexit import register
 from os import remove
 from locale import resetlocale, setlocale, LC_TIME, Error
+import logging
 from tempfile import NamedTemporaryFile
 
 from boto.exception import S3ResponseError, S3CreateError, BotoClientError, S3DataError
+
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.data.datastorer import NullDataStorer
 
@@ -71,8 +73,6 @@ class DataS3Adapter(NullDataStorer):
 
     def __init__(self, identifier, connectionPool, bucketname):
         """
-        Constructor.
-        
         @param identifier: Logical identifier of the resource.
         @type identifier: C{unicode}
         @param connectionPool: Connection pool - connection to S3
@@ -120,7 +120,8 @@ class DataS3Adapter(NullDataStorer):
         else: 
             return True
      
-    def _isRoot(self, key):  
+    @staticmethod
+    def _isRoot(key):  
         """ Determines if the root is accessed. """
         
         return key == "/"
@@ -269,7 +270,8 @@ class DataS3Adapter(NullDataStorer):
                 self._resetLocale()
         return exists 
 
-    def _resetLocale(self):
+    @staticmethod
+    def _resetLocale():
         """Reseting the process time settings"""
         
         try:
@@ -279,8 +281,9 @@ class DataS3Adapter(NullDataStorer):
 
      
 @register
-def _cleanupTemporaryFile(fileList = None):
-    """Cleaning up TemporaryFiles, Problems are sent to the debug logger""" #neu
+def _cleanupTemporaryFile(fileList=None):
+    """ Cleaning up temporary files. Problems are sent to the debug logger""" 
+    
     if fileList:
         tempFiles = fileList
     else:
@@ -290,7 +293,6 @@ def _cleanupTemporaryFile(fileList = None):
             tempFile.close()
             remove(tempFile.name)
         except (OSError, PersistenceError):
-            import logging
             _log = logging.getLogger("")
             _log.debug("Cannot clean up temporary file '%s'" % tempFile.name)
         
