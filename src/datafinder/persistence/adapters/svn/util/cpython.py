@@ -283,7 +283,7 @@ class CPythonSubversionWrapper(object):
         
         result = dict()
         result["lastChangedDate"] = str(info.lastChangedDate)
-        result["size"] = info.size
+        result["size"] = str(info.size)
         result["owner"] = info.owner
         result["creationDate"] = str(info.creationTime)
         return result

@@ -56,8 +56,6 @@ class Configuration(object):
     
     def __init__(self, baseConfiguration):
         """ 
-        Constructor.
-        
         @param baseConfiguration: General basic configuration.
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """

@@ -3,11 +3,11 @@
 # Last Changed: $Date$ $Committer$ $Revision-Id$
 #
 # Copyright (c) 2003-2011, German Aerospace Center (DLR)
+#
 # All rights reserved.
-#
-#
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are
+#
 #met:
 #
 # * Redistributions of source code must retain the above copyright 
@@ -36,7 +36,5 @@
 
 
 """ 
-Tests of the Subversion adapter.
+Provides test cases for the property encoding/decoding.
 """
-
-__version__ = "$Revision-Id$" 

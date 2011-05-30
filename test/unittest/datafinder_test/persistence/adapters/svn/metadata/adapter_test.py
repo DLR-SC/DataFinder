@@ -1,4 +1,3 @@
-# pylint: disable=R0201
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -46,7 +45,7 @@ import unittest
 from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.adapters.svn.metadata import adapter
 from datafinder.persistence.error import PersistenceError
-from datafinder.persistence.metadata import constants
+from datafinder.persistence.metadata import constants as const
 from datafinder.persistence.metadata.value_mapping import MetadataValue
 from datafinder_test.mocks import SimpleMock
 
@@ -55,35 +54,38 @@ __version__ = "$Revision-Id$"
 
 
 class MetadataSubversionAdapterTestCase(unittest.TestCase):
-    """ Tests the meta data adapter implementation. """
         
-    def _initValidRetrieveResult(self):
-        """ Creates the expected result. """
-        
-        mappedResult = dict()
-        mappedResult[constants.MODIFICATION_DATETIME] = MetadataValue("")
-        mappedResult[constants.CREATION_DATETIME] = MetadataValue("")
-        mappedResult[constants.SIZE] = MetadataValue("")
-        mappedResult[constants.OWNER] = MetadataValue("")
-        mappedResult[constants.MIME_TYPE] = MetadataValue("{}")
-        return mappedResult
-
-    def testRetrieveSuccess(self):
-        """ Tests successful meta data retrieval. """
-        
+    def testRetrieve(self):
+        # Success
         expectedResult = self._initValidRetrieveResult()
-        
-        connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{}", None), \
-                                          "info": ({"lastChangedDate": "", "owner": "", "size": "", "creationDate": ""}, None)})
+        connectionMock = SimpleMock(methodNameResultMap=\
+            {"getProperty": ('{"name": "me"}', None),
+            "info": ({"lastChangedDate": "", "owner": "", "size": "10", "creationDate": ""}, None)})
         defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
-        self.assertEquals(defaultAdapter.retrieve(), expectedResult)
-        self.assertEquals(defaultAdapter.retrieve(list()), dict())
-        
-        connectionMock = SimpleMock(methodNameResultMap={"getProperty": ("{\"1\": \"value\"}", None), \
-                                          "info": ({"lastChangedDate": "", "owner": "", "size": "", "creationDate": ""}, None)})
-        defaultAdapter = adapter.MetadataSubversionAdapter("identifier", SimpleMock(connectionMock))
-        self.assertEquals(defaultAdapter.retrieve(["1"]), {"1": MetadataValue("value")})
+        self.assertEquals(defaultAdapter.retrieve(), expectedResult) # Filter nothing
+        self.assertEquals(defaultAdapter.retrieve(list()), expectedResult) # Filter nothing
+        self.assertEquals(defaultAdapter.retrieve([const.SIZE]), 
+                          {const.SIZE: MetadataValue("10")}) # Filter size
 
+        # Error access system properties
+        connectionMock.methodNameResultMap = {"info": (None, SubversionError(""))}
+        self.assertRaises(PersistenceError, defaultAdapter.retrieve)
+
+        # Error accessing custom properties
+        connectionMock.methodNameResultMap = {"getProperty": (None, SubversionError(""))}
+        self.assertRaises(PersistenceError, defaultAdapter.retrieve)
+
+    @staticmethod
+    def _initValidRetrieveResult():
+        mappedResult = dict()
+        mappedResult[const.MODIFICATION_DATETIME] = MetadataValue("")
+        mappedResult[const.CREATION_DATETIME] = MetadataValue("")
+        mappedResult[const.SIZE] = MetadataValue("10")
+        mappedResult[const.OWNER] = MetadataValue("")
+        mappedResult[const.MIME_TYPE] = MetadataValue("")
+        mappedResult["name"] = MetadataValue("me")
+        return mappedResult
+    
     def testUpdateSuccess(self):
         """ Tests successful update of meta data. """
         

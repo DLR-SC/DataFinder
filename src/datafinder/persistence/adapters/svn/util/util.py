@@ -67,6 +67,8 @@ def createSubversionConnection(repoPath, workingCopyPath, username, password):
     @type password: C{unicode}
     
     @return: SVN connection.
+    
+    @raise PersistenceError: Initialization failed. 
     """
     
     return SubversionWrapper(repoPath, workingCopyPath, username, password)

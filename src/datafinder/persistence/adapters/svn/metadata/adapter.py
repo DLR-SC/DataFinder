@@ -41,15 +41,15 @@ This module implements how the meta data is persisted on the SVN server.
 
 
 import datetime
-import json
 import logging
 import mimetypes
-import os
 
-from datafinder.persistence.adapters.svn.constants import JSON_PROPERTY_NAME, MIME_TYPE_PROPERTY_NAME
+from datafinder.persistence.adapters.svn.constants import JSON_PROPERTY_NAME
 from datafinder.persistence.adapters.svn.error import SubversionError
 from datafinder.persistence.error import PersistenceError
-from datafinder.persistence.metadata import constants, value_mapping
+from datafinder.persistence.metadata import constants as const
+from datafinder.persistence.metadata.value_mapping import custom_format
+from datafinder.persistence.metadata.value_mapping import json_format
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
 
 
@@ -70,8 +70,6 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         @type identifier: C{unicode}
         @param connectionPool: Connection pool.
         @type connectionPool: L{Connection<datafinder.persistence.svn.connection_pool.SVNConnectionPool>}
-        @param modelIdentifier: Logical identifier of the model.
-        @type modelIdentifier: C{unicode}
         """
         
         NullMetadataStorer.__init__(self, identifier)
@@ -82,98 +80,67 @@ class MetadataSubversionAdapter(NullMetadataStorer):
 
         connection = self.__connectionPool.acquire()
         try:
-            rawResult = dict()
-            try:
-                persistenceJsonProperties = self._retrieveProperties(connection)
-                if not persistenceJsonProperties is None:
-                    rawResult = json.loads(persistenceJsonProperties)
-            except SubversionError, error:
-                raise PersistenceError(repr(error))
-            mappedResult = self._mapRawResult(connection, rawResult)
-            return self._filterResult(propertyIds, mappedResult)
+            properties = self._retrieveCustomProperties(connection)
+            for key, value in properties.iteritems():
+                properties[key] = json_format.MetadataValue(value)
+            systemProperties = self._retrieveSystemProperties(connection)
+            properties.update(systemProperties)
+            return self._filterResult(propertyIds, properties)
         finally:
             self.__connectionPool.release(connection)
 
-    def _retrieveProperties(self, connection):
-        """ Retrieves all properties. """
+    @staticmethod
+    def _filterResult(propertyIds, properties):
+        if not propertyIds is None and len(propertyIds) > 0:
+            filteredProps = dict()
+            for propertyId in propertyIds:
+                if propertyId in properties:
+                    filteredProps[propertyId] = properties[propertyId]
+        else:
+            filteredProps = properties
+        return filteredProps
 
-        return connection.getProperty(self.identifier, JSON_PROPERTY_NAME)
-        
-    def _mapRawResult(self, connection, rawResult):
-        """ Maps the SVN specific result to interface format. """
-        
+    def _retrieveCustomProperties(self, connection):
+        customProperties = dict()
         try:
-            infoDict = connection.info(self.identifier)
+            jsonString = connection.getProperty(self.identifier, JSON_PROPERTY_NAME)
+            if not jsonString is None:
+                customProperties = json_format.convertFromPersistenceFormat(jsonString)
+        except SubversionError, error:
+            raise PersistenceError(str(error))
+        return customProperties
+        
+    def _retrieveSystemProperties(self, connection):
+        try:
+            rawSystemProps = connection.info(self.identifier)
         except SubversionError, error:
             errorMessage = "Problem during meta data retrieval. " \
-                           + "Reason: '%s'" % error 
+                           + "Reason: '%s'" % str(error) 
             raise PersistenceError(errorMessage)
-        except OSError, error:
-            reason = os.strerror(error.errno)
-            errorMessage = "Cannot retrieve properties of collection '%s'. Reason: '%s'" % (self.identifier, reason)
-            raise PersistenceError(errorMessage)  
-        mappedResult = dict()
-        mappedResult[constants.CREATION_DATETIME] = value_mapping.MetadataValue(infoDict["creationDate"], \
-                                                                                 expectedType=datetime.datetime)
-        try:
-            mappedResult[constants.MODIFICATION_DATETIME] = value_mapping.MetadataValue(infoDict["lastChangedDate"], \
-                                                                                        expectedType=datetime.datetime)
-            mappedResult[constants.SIZE] = value_mapping.MetadataValue(infoDict["size"])
-            mappedResult[constants.OWNER] = value_mapping.MetadataValue(infoDict["owner"])
-        except KeyError, error:
-            errorMessage = "Cannot get properties of item '%s'. " % self.identifier \
-                           + "Reason: '%s'" % error 
-            raise PersistenceError(errorMessage)
-        try:
-            mimeType = connection.getProperty(self.identifier, MIME_TYPE_PROPERTY_NAME)
-            if mimeType is None:
-                mimeType = self._guessMimeType()
-        except SubversionError, error:
-            _log.debug(error)
-            mimeType = self._guessMimeType()
-        mappedResult[constants.MIME_TYPE] = value_mapping.MetadataValue(mimeType)
-        
-        for key, value in rawResult.iteritems():
-            mappedResult[key] = value_mapping.MetadataValue(value)
-        return mappedResult
+        else:
+            systemProps = dict()
+            systemProps[const.CREATION_DATETIME] = \
+                custom_format.MetadataValue(rawSystemProps["creationDate"] or "", datetime.datetime)
+            systemProps[const.MODIFICATION_DATETIME] = \
+                custom_format.MetadataValue(rawSystemProps["lastChangedDate"] or "", datetime.datetime)
+            systemProps[const.SIZE] = custom_format.MetadataValue(rawSystemProps["size"] or "")
+            systemProps[const.OWNER] = custom_format.MetadataValue(rawSystemProps["owner"] or "")
+            systemProps[const.MIME_TYPE] = custom_format.MetadataValue(self._guessMimeType() or "")
+            return systemProps
 
     def _guessMimeType(self):
-        mimeType = mimetypes.guess_type(self.identifier, False)
-        if mimeType[0] is None:
-            mimeType = ""
-        else:
-            mimeType = mimeType[0]
-        return mimeType
+        return mimetypes.guess_type(self.identifier, False)[0]
     
-    @staticmethod
-    def _filterResult(selectedPropertyIds, mappedResult):
-        """ Filters the result so it contains only the specified properties. """
-        
-        if not selectedPropertyIds is None and len(selectedPropertyIds) >= 0:
-            result = dict()
-            for propertyId in selectedPropertyIds:
-                if propertyId in mappedResult:
-                    result[propertyId] = mappedResult[propertyId]
-            return result
-        else:
-            return mappedResult
-
     def update(self, properties):
         """ @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}"""
 
         connection = self.__connectionPool.acquire()
         try:
+            customProperties = self._retrieveCustomProperties(connection)
+            customProperties.update(properties)
+            newJsonString = json_format.convertToPersistenceFormat(customProperties)
             try:
-                try:
-                    persistenceProperties = dict()
-                    persistenceJsonProperties = self._retrieveProperties(connection)
-                    if not persistenceJsonProperties is None:
-                        persistenceProperties = json.loads(persistenceJsonProperties)
-                    persistenceProperties.update(properties)
-                except SubversionError, error:
-                    _log.debug("No subversion property is set!")
-                jsonProperties = value_mapping.getPersistenceRepresentation(persistenceProperties)
-                connection.setProperty(self.identifier, JSON_PROPERTY_NAME, jsonProperties)
+                connection.setProperty(self.identifier, JSON_PROPERTY_NAME, newJsonString)
             except SubversionError, error:
                 errorMessage = "Cannot update properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
@@ -186,19 +153,14 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         
         connection = self.__connectionPool.acquire()
         try:
+            customProperties = self._retrieveCustomProperties(connection)
+            for propertyId in propertyIds:
+                if propertyId in customProperties:
+                    del customProperties[propertyId]
+            newJsonString = json_format.convertToPersistenceFormat(customProperties)
             try:
-                persistenceJsonProperties = self._retrieveProperties(connection)
-                persistenceProperties = json.loads(persistenceJsonProperties)
-                for propertyId in propertyIds:
-                    if propertyId in persistenceProperties:
-                        del persistenceProperties[propertyId]
-                persistenceJsonProperties = json.dumps(persistenceProperties)
-                connection.setProperty(self.identifier, JSON_PROPERTY_NAME, persistenceJsonProperties)
+                connection.setProperty(self.identifier, JSON_PROPERTY_NAME, newJsonString)
             except SubversionError, error:
-                errorMessage = "Cannot delete properties of item '%s'. " % self.identifier \
-                               + "Reason: '%s'" % error 
-                raise PersistenceError(errorMessage)
-            except KeyError, error:
                 errorMessage = "Cannot delete properties of item '%s'. " % self.identifier \
                                + "Reason: '%s'" % error 
                 raise PersistenceError(errorMessage)

@@ -1,4 +1,6 @@
-# pylint: disable=W0511, W0201
+# pylint: disable=W0212
+# W0212: For test purposes it is fine to access protected members.
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -45,6 +47,8 @@ import unittest
 
 
 from datafinder.persistence.common.configuration import BaseConfiguration
+from datafinder.persistence.error import PersistenceError
+from datafinder.persistence.adapters.svn import connection_pool
 from datafinder.persistence.adapters.svn import factory
 from datafinder.persistence.adapters.svn.data.adapter import DataSubversionAdapter
 from datafinder.persistence.adapters.svn.metadata.adapter import MetadataSubversionAdapter
@@ -55,22 +59,45 @@ __version__ = "$Revision-Id$"
 
 
 class FileSystemTestCase(unittest.TestCase):
-    """ Test cases for SVN file system factory."""
-    
+
     def setUp(self):
-        """ Mocks an utility functionality. """
-        
-        factory.FileSystem._getConnection = SimpleMock(SimpleMock())
-        factory.FileSystem._getConnectionPool = SimpleMock(SimpleMock())
+        self._createSvnConnectionMock = SimpleMock(SimpleMock())
+        connection_pool.util.createSubversionConnection = self._createSvnConnectionMock
         self._factory = factory.FileSystem(BaseConfiguration("http://svn.test.de/svn"))
+        self.assertTrue(self._factory.hasCustomMetadataSupport)
        
     def testCreateDataStorer(self):
-        """ Tests the creation of a SVN specific data storer. """
-        
-        self.assertTrue(isinstance(self._factory.createDataStorer("identifier"), DataSubversionAdapter))
+        self.assertTrue(isinstance(self._factory.createDataStorer("identifier"), 
+                                   DataSubversionAdapter))
 
     def testCreateMetadataStorer(self):
-        """ Tests the creation of a SVN specific meta data storer. """
-        
-        self.assertTrue(isinstance(self._factory.createMetadataStorer("identifier"), MetadataSubversionAdapter))
+        self.assertTrue(isinstance(self._factory.createMetadataStorer("identifier"), 
+                                   MetadataSubversionAdapter))
     
+    def testUpdateCredentials(self):
+        # Success
+        self._factory.updateCredentials({"username": "me", "password": "secret"})
+        self.assertEquals(self._factory._configuration.username, "me")
+        self.assertEquals(self._factory._configuration.password, "secret")
+        
+        # Error
+        self.assertRaises(PersistenceError, self._factory.updateCredentials, dict())
+        
+    def testRelease(self):
+        # Success
+        self.assertEquals(len(factory.FileSystem._connectionManager), 1)
+        self._factory.release()
+        self.assertEquals(len(factory.FileSystem._connectionManager), 0)
+        
+        # Trying to release it again
+        self._factory.release()
+        self.assertEquals(len(factory.FileSystem._connectionManager), 0)
+        
+    def testCanHandleLocation(self):
+        # can handle it
+        self.assertTrue(self._factory.canHandleLocation)
+        
+        # Cannot handle
+        self._factory.release()
+        self._createSvnConnectionMock.error = PersistenceError("")
+        self.assertFalse(self._factory.canHandleLocation)

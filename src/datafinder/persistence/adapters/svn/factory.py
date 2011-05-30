@@ -56,18 +56,11 @@ __version__ = "$Revision-Id$"
 
 
 class FileSystem(BaseFileSystem):
-    """ 
-    Implements factory methods of the different aspects of file system items. 
-    Moreover, information of specific feature are available.
-    """
-    
     _connectionManager = ConnectionPoolManager(constants.MAX_POOL_NUMBER)
     _logger = logging.getLogger()
         
     def __init__(self, baseConfiguration):
-        """ 
-        Constructor. 
-        
+        """
         @param baseConfiguration: Object specifying configuration parameters.
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """
@@ -98,7 +91,7 @@ class FileSystem(BaseFileSystem):
     
     def createDataStorer(self, identifier):
         """ 
-        Factory Method providing a SVN-specific data storer. 
+        Factory method providing a SVN-specific data storer. 
         
         @return: SVN-specific implementation of the data interface.
         @rtype: L{DataSubversionAdapter<datafinder.persistence.adapters.svn.
@@ -109,7 +102,7 @@ class FileSystem(BaseFileSystem):
     
     def createMetadataStorer(self, identifier):
         """ 
-        Factory Method providing a SVN-specific meta data storer. 
+        Factory method providing a SVN-specific meta data storer. 
         
         @return: SVN-specific implementation of the meta data interface.
         @rtype: L{MetadataSubversionAdapter<datafinder.persistence.adapters.svn.

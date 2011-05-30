@@ -53,25 +53,20 @@ class SubversionConnectionPool(ConnectionPool):
     
     def __init__(self, configuration):
         """ 
-        Constructor. 
-        
         @param configurationContext: SVN connection parameters.
         @type configurationContext: L{Configuration<datafinder.persistence.
         svn.configuration.Configuration>}
         """
         
         self._configuration = configuration
-        ConnectionPool.__init__(self, 20, None)
+        ConnectionPool.__init__(self, MAX_CONNECTION_NUMBER, None)
         
     def _createConnection(self):
-        """ Overwrites template method for connection creation. """
+        """ Creates a Subversion connection. """
         
         repoPath = self._configuration.baseUrl
         workingCopyPath = self._configuration.workingCopyPath
         username = self._configuration.username
         password = self._configuration.password
-        
-        connection = util.createSubversionConnection(repoPath, workingCopyPath, username, password)
-        
-        return connection
+        return util.createSubversionConnection(repoPath, workingCopyPath, username, password)
     

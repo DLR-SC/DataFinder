@@ -42,8 +42,8 @@ modules:
 configuration - Defines configuration data strcture.
 connection_pool - Defines connection pooling for SVN connections.
 constants - Connection specific definitions.
-factory - Implements supported generic factory methods SVN-specific.
-util - Provides some helper functionality.
+factory - Implements supported generic factory methods.
+util - Provides some helper functionality (Cpython and Jython support).
 """
 
 __version__ = "$Revision-Id$" 
