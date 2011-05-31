@@ -143,7 +143,7 @@ class ItemBase(object):
         if not self.parent.capabilities.canAddChildren:
             raise ItemError("No child item can be created below parent item '%s'" % self.parent.path)
         
-    def _completeProperties(self):
+    def _completeProperties(self, persistedProps=None):
         """ Checking whether the given properties are sufficient for item creation. """
         
         missingProperties = list()
@@ -154,9 +154,14 @@ class ItemBase(object):
                 prop = Property(reqPropDef, reqPropDef.defaultValue)
                 self._properties[reqPropDef.identifier] = prop
             else:
-                value = self._properties[reqPropDef.identifier].value
-                prop = Property(reqPropDef, value)
-                self._properties[reqPropDef.identifier] = prop
+                if not persistedProps is None:
+                    prop = Property.create(
+                        reqPropDef, persistedProps[reqPropDef.identifier])
+                    self._properties[reqPropDef.identifier] = prop
+                else:
+                    value = self._properties[reqPropDef.identifier].value
+                    prop = Property(reqPropDef, value)
+                    self._properties[reqPropDef.identifier] = prop
             if not isAvailable and reqPropDef.notNull:
                 missingProperties.append(reqPropDef.displayName)
         return missingProperties
@@ -384,7 +389,7 @@ class ItemBase(object):
                 propDef = self.itemFactory.getPropertyDefinition(propId)
                 prop = Property.create(propDef, value)
                 self._properties[propId] = prop
-            self._completeProperties()
+            self._completeProperties(persistedProps)
                     
     def updateProperties(self, properties):
         """ 
