@@ -3,6 +3,18 @@
 		<name>User</name>
 		<iconName>Mitarbeiter</iconName>
 		<properties>
+			<name>Name</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Firstname</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
 			<name>E-Mail</name>
 			<valueType>String</valueType>
 			<mandatory>false</mandatory>
@@ -31,6 +43,12 @@
 		<name>Run</name>
 		<iconName>export</iconName>
 		<properties>
+			<name>Description</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
 			<name>ID</name>
 			<valueType>String</valueType>
 			<mandatory>false</mandatory>
@@ -55,6 +73,18 @@
 		<name>TRACE</name>
 		<iconName>FlowSolution</iconName>
 		<properties>
+			<name>Version</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>CPUs</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
 			<name>Blocks</name>
 			<valueType>String</valueType>
 			<mandatory>false</mandatory>
@@ -64,6 +94,36 @@
 	<datatypes>
 		<name>Project</name>
 		<iconName>Planner</iconName>
+		<properties>
+			<name>Name</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Description</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Start</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>End</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Responsible</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
 		<properties>
 			<name>Editor</name>
 			<valueType>String</valueType>
@@ -110,6 +170,66 @@
 	<datatypes>
 		<name>Monitoring</name>
 		<iconName>monitor_</iconName>
+		<properties>
+			<name>PID</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Status</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Start</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>End</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Queue</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Workdir</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>ID</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>BackendType</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>BackendName</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
+		<properties>
+			<name>Memory</name>
+			<valueType>String</valueType>
+			<mandatory>false</mandatory>
+			<defaultValue></defaultValue>
+		</properties>
 		<properties>
 			<name>CPUs</name>
 			<valueType>String</valueType>

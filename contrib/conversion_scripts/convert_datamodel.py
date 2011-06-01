@@ -39,6 +39,7 @@
 Script to convert data models of datafinder 1.x to 2.x
 """
 
+
 from gnosis.xml import objectify
 
 
@@ -46,8 +47,6 @@ __version__ = "$Revision-Id:$"
 
 
 class DataModelConverter(object):
-    """ Module to convert the datamodel"""
-   
     def __init__(self, oldFilePath, newFilePath):
         self._newXmlFile = open(newFilePath, "w")
               
@@ -55,17 +54,20 @@ class DataModelConverter(object):
         self._mapToNew()
         self._newXmlFile.close()
         
-    def _importOld(self, oldFilePath):
+    @staticmethod
+    def _importOld(oldFilePath):
         """ Imports the old XML data model file """
+        
         xml_obj = objectify.XML_Objectify(oldFilePath)
         return xml_obj.make_instance() 
     
     def _mapToNew(self):
         """ 
-        maps the objects from the old 
+        Maps the objects from the old 
         file to the new model and writes them 
-        to the new file
+        to the new file.
         """
+        
         self._newXmlFile.write("<datamodel>\n")
         for attributes in self._oldModel.attr:
             if attributes.name == "dataTypes":
@@ -76,10 +78,10 @@ class DataModelConverter(object):
         
     def _mapDataTypes(self, dataTypes):
         """ 
-        maps the datatype - objects from the old 
+        Maps the data type - objects from the old 
         file to the new model and writes them 
-        to the new file 
-        """
+        to the new file. """
+        
         for item in dataTypes.item:
             for attribute in item.attr:
                 # Determine relevant properties
@@ -89,6 +91,7 @@ class DataModelConverter(object):
                     iconName = attribute.value
                 elif attribute.name == "properties":
                     try:
+                        properties = list()
                         for item in attribute.item:
                             for attribute in item.attr:
                                 if attribute.name == "name":
@@ -99,23 +102,23 @@ class DataModelConverter(object):
                                     mandatory = attribute.type.lower()
                                 elif attribute.name == "defaultValue":
                                     defaultValue = attribute.value
-                                properties = True
-                            
+                            properties.append((propertyName, valueType, mandatory, defaultValue))
                     except AttributeError:
                         print ("DataType: " + name + " has no properties defined" )
-                        properties = False
+                        properties = list()
                 
             # Write a relation to the file
             self._newXmlFile.write("\t<datatypes>\n")
             self._newXmlFile.write("\t\t<name>" + name + "</name>\n")
             self._newXmlFile.write("\t\t<iconName>" + iconName + "</iconName>\n")
-            if(properties):
-                self._newXmlFile.write("\t\t<properties>\n")
-                self._newXmlFile.write("\t\t\t<name>" + propertyName + "</name>\n")
-                self._newXmlFile.write("\t\t\t<valueType>" + valueType + "</valueType>\n")
-                self._newXmlFile.write("\t\t\t<mandatory>" + mandatory + "</mandatory>\n")
-                self._newXmlFile.write("\t\t\t<defaultValue>" + defaultValue + "</defaultValue>\n")
-                self._newXmlFile.write("\t\t</properties>\n")
+            if len(properties) > 0:
+                for propertyName, valueType, mandatory, defaultValue in properties:
+                    self._newXmlFile.write("\t\t<properties>\n")
+                    self._newXmlFile.write("\t\t\t<name>" + propertyName + "</name>\n")
+                    self._newXmlFile.write("\t\t\t<valueType>" + valueType + "</valueType>\n")
+                    self._newXmlFile.write("\t\t\t<mandatory>" + mandatory + "</mandatory>\n")
+                    self._newXmlFile.write("\t\t\t<defaultValue>" + defaultValue + "</defaultValue>\n")
+                    self._newXmlFile.write("\t\t</properties>\n")
             self._newXmlFile.write("\t</datatypes>\n")                  
     
     def _mapRelationTypes(self, relationTypes):
@@ -160,7 +163,7 @@ if __name__ == "__main__":
     import sys
               
     if len(sys.argv) != 3:
-        print("Usage: oldFilePath <string>, newFilePath  <string> ") # TODO: complete it
+        print("Usage: oldFilePath <string>, newFilePath  <string> ")
     else:
         DataModelConverter(sys.argv[1], sys.argv[2])
         print("Successfully mapped")
