@@ -40,6 +40,8 @@ Implements WebDAV-specific connection pool.
 """
 
 
+import re
+                    
 from webdav.Connection import AuthorizationError, Connection, WebdavError
 from webdav.WebdavClient import CollectionStorer, parseDigestAuthInfo
 
@@ -81,14 +83,17 @@ class WebdavConnectionPool(ConnectionPool):
                 username = self._configuration.username or ""
                 password = self._configuration.password or ""
                 if error.authType == "Basic":
-                    connection.addBasicAuthorization(username, password)
+                    realm = re.search('realm="([^"]+)"', error.authInfo)
+                    if not realm is None:
+                        realm = realm.group(1)
+                    connection.addBasicAuthorization(username, password, realm)
                 elif error.authType == "Digest":
                     authInfo = parseDigestAuthInfo(error.authInfo)
                     connection.addDigestAuthorization(username, password, 
                                                       realm=authInfo["realm"], qop=authInfo["qop"], nonce=authInfo["nonce"])
                 else:
                     raise PersistenceError("Cannot create connection. Authentication type '%s' is not supported.")
-        except WebdavError, error:
+        except (AttributeError, WebdavError), error:
             errorMessage = "Cannot create connection.\nReason:'%s'" % error.reason
             raise PersistenceError(errorMessage)
         return connection
