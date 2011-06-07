@@ -80,12 +80,11 @@ class DataSubversionAdapter(NullDataStorer):
 
         connection = self._connectionPool.acquire()
         try:
-            try:
-                connection.update(util.determineParentPath(self.identifier))
-                result = connection.getProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME)
-                return result
-            except SubversionError:
-                return None
+            connection.update(util.determineParentPath(self.identifier))
+            result = connection.getProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME)
+            return result
+        except SubversionError:
+            return None
         finally:
             self._connectionPool.release(connection)
         
@@ -101,12 +100,11 @@ class DataSubversionAdapter(NullDataStorer):
         
         connection = self._connectionPool.acquire()
         try:
-            try:
-                return connection.isLeaf(self.identifier)
-            except SubversionError, error:
-                errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" \
-                             % (self.identifier, error)
-                raise PersistenceError(errorMessage)
+            return connection.isLeaf(self.identifier)
+        except SubversionError, error:
+            errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" \
+                         % (self.identifier, error)
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
         
@@ -122,12 +120,11 @@ class DataSubversionAdapter(NullDataStorer):
         
         connection = self._connectionPool.acquire()
         try:
-            try:
-                return connection.isCollection(self.identifier)
-            except SubversionError, error:
-                errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" \
-                               % (self.identifier, error)
-                raise PersistenceError(errorMessage)
+            return connection.isCollection(self.identifier)
+        except SubversionError, error:
+            errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" \
+                           % (self.identifier, error)
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
 
@@ -137,13 +134,12 @@ class DataSubversionAdapter(NullDataStorer):
         self.createResource()
         connection = self._connectionPool.acquire()
         try:
-            try:
-                connection.setProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME, 
-                                       destination.identifier)
-                connection.checkin(self.identifier)
-            except SubversionError, error:
-                errorMessage = u"Cannot set property. Reason: '%s'" % error
-                raise PersistenceError(errorMessage)
+            connection.setProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME, 
+                                   destination.identifier)
+            connection.checkin(self.identifier)
+        except SubversionError, error:
+            errorMessage = u"Cannot set property. Reason: '%s'" % error
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
             
@@ -152,44 +148,43 @@ class DataSubversionAdapter(NullDataStorer):
 
         connection = self._connectionPool.acquire()
         try:
-            try:
-                fd = open(connection.workingCopyPath + self.identifier, "wb")
-                fd.close()
-                connection.add(self.identifier)
-                connection.checkin(self.identifier)
-            except IOError, error:
-                errorMessage = os.strerror(error.errno)
-                raise PersistenceError(errorMessage)
-            except SubversionError, error:
-                os.remove(connection.workingCopyPath + self.identifier)
-                errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error)
-                raise PersistenceError(errorMessage)
+            fd = open(connection.workingCopyPath + self.identifier, "wb")
+            fd.close()
+            connection.add(self.identifier)
+            connection.checkin(self.identifier)
+        except IOError, error:
+            errorMessage = os.strerror(error.errno)
+            raise PersistenceError(errorMessage)
+        except SubversionError, error:
+            os.remove(connection.workingCopyPath + self.identifier)
+            errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error)
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
             
     def createCollection(self, recursively=False):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
+        if recursively:
+            parent = self._getParent()
+            if not parent.exists() and parent.identifier != "/":
+                parent.createCollection(True)
+        
         connection = self._connectionPool.acquire()
         try:
-            try:
-                if recursively:
-                    parent = self._getParent()
-                    if not parent.exists():
-                        parent.createCollection(True)
-                os.mkdir(connection.workingCopyPath + self.identifier)
-                connection.add(self.identifier)
-                connection.checkin(self.identifier)
-            except OSError, error:
-                errorMessage = os.strerror(error.errno)
-                raise PersistenceError(errorMessage)
-            except SubversionError, error:
-                errorMessage = u"Cannot create collection '%s'. Reason: '%s'" \
-                               % (self.identifier, error)
-                raise PersistenceError(errorMessage)
+            os.mkdir(connection.workingCopyPath + self.identifier)
+            connection.add(self.identifier)
+            connection.checkin(self.identifier)
+        except OSError, error:
+            errorMessage = os.strerror(error.errno)
+            raise PersistenceError(errorMessage)
+        except SubversionError, error:
+            errorMessage = u"Cannot create collection '%s'. Reason: '%s'" \
+                           % (self.identifier, error)
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
-                
+                    
     def _getParent(self):
         """ Helper which create the parent data storer. """
   
@@ -201,12 +196,11 @@ class DataSubversionAdapter(NullDataStorer):
         
         connection = self._connectionPool.acquire()
         try:
-            try:
-                return connection.getChildren(self.identifier)
-            except SubversionError, error:
-                errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" \
-                               % (self.identifier, error)
-                raise PersistenceError(errorMessage)
+            return connection.getChildren(self.identifier)
+        except SubversionError, error:
+            errorMessage = u"Cannot retrieve children of item '%s'. Reason: '%s'" \
+                           % (self.identifier, error)
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
             
@@ -215,25 +209,24 @@ class DataSubversionAdapter(NullDataStorer):
         
         connection = self._connectionPool.acquire()
         try:
+            connection.update(self.identifier)
+            fd = open(connection.workingCopyPath + self.identifier, "wb")
             try:
-                connection.update(self.identifier)
-                fd = open(connection.workingCopyPath + self.identifier, "wb")
-                try:
+                block = dataStream.read(_BLOCK_SIZE)
+                while len(block) > 0:
+                    fd.write(block)
                     block = dataStream.read(_BLOCK_SIZE)
-                    while len(block) > 0:
-                        fd.write(block)
-                        block = dataStream.read(_BLOCK_SIZE)
-                finally:
-                    fd.close()
-                    dataStream.close()
-                connection.checkin(self.identifier)
-            except SubversionError, error:
-                errorMessage = u"Unable to write data to '%s'. " % self.identifier + \
-                               u"Reason: %s" % error
-                raise PersistenceError(errorMessage)
-            except IOError, error:
-                errorMessage = os.strerror(error.errno)
-                raise PersistenceError(errorMessage)
+            finally:
+                fd.close()
+                dataStream.close()
+            connection.checkin(self.identifier)
+        except SubversionError, error:
+            errorMessage = u"Unable to write data to '%s'. " % self.identifier + \
+                           u"Reason: %s" % error
+            raise PersistenceError(errorMessage)
+        except IOError, error:
+            errorMessage = os.strerror(error.errno)
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
 
@@ -242,16 +235,15 @@ class DataSubversionAdapter(NullDataStorer):
         
         connection = self._connectionPool.acquire()
         try:
-            try:
-                connection.update(self.identifier)
-                return open(connection.workingCopyPath + self.identifier, "rb")
-            except IOError, error:
-                errorMessage = os.strerror(error.errno)
-                raise PersistenceError(errorMessage)
-            except SubversionError, error:
-                errorMessage = u"Unable to read data from '%s'. " % self.identifier + \
-                               u"Reason: %s" % error
-                raise PersistenceError(errorMessage)
+            connection.update(self.identifier)
+            return open(connection.workingCopyPath + self.identifier, "rb")
+        except IOError, error:
+            errorMessage = os.strerror(error.errno)
+            raise PersistenceError(errorMessage)
+        except SubversionError, error:
+            errorMessage = u"Unable to read data from '%s'. " % self.identifier + \
+                           u"Reason: %s" % error
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
  
@@ -261,13 +253,12 @@ class DataSubversionAdapter(NullDataStorer):
         parentId = util.determineParentPath(self.identifier)
         connection = self._connectionPool.acquire()
         try:
-            try:
-                connection.delete(self.identifier)
-                connection.update(parentId)
-            except SubversionError, error:
-                errorMessage = u"Unable to delete item '%s'. " % self.identifier \
-                               + u"Reason: %s" % error
-                raise PersistenceError(errorMessage)
+            connection.delete(self.identifier)
+            connection.update(parentId)
+        except SubversionError, error:
+            errorMessage = u"Unable to delete item '%s'. " % self.identifier \
+                           + u"Reason: %s" % error
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
 
@@ -283,14 +274,13 @@ class DataSubversionAdapter(NullDataStorer):
         destinationParentId = util.determineParentPath(destination.identifier)
         connection = self._connectionPool.acquire()
         try:
-            try:
-                connection.copy(self.identifier, destination.identifier)
-                connection.update(destinationParentId)
-            except SubversionError, error:
-                errorMessage = u"Unable to copy item '%s' to '%s'. " \
-                               % (self.identifier, destination.identifier) \
-                               + u"Reason: %s" % error
-                raise PersistenceError(errorMessage)
+            connection.copy(self.identifier, destination.identifier)
+            connection.update(destinationParentId)
+        except SubversionError, error:
+            errorMessage = u"Unable to copy item '%s' to '%s'. " \
+                           % (self.identifier, destination.identifier) \
+                           + u"Reason: %s" % error
+            raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
         
@@ -299,10 +289,9 @@ class DataSubversionAdapter(NullDataStorer):
 
         connection = self._connectionPool.acquire()
         try:
-            try:
-                connection.update(util.determineParentPath(self.identifier))
-                return os.path.exists(connection.workingCopyPath + self.identifier)
-            except SubversionError, error:
-                raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error)
+            connection.update(util.determineParentPath(self.identifier))
+            return os.path.exists(connection.workingCopyPath + self.identifier)
+        except SubversionError, error:
+            raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error)
         finally:
             self._connectionPool.release(connection)
