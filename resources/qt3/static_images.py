@@ -107,6 +107,7 @@
 #      resources/icons\refresh24.png
 #      resources/icons\register_db24.png
 #      resources/icons\Relation24.png
+#      resources/icons\relationType16.png
 #      resources/icons\relationType24.png
 #      resources/icons\remove24.png
 #      resources/icons\rename24.png
@@ -131,7 +132,7 @@
 #      resources/icons\xml_format16.png
 #      resources/icons\zip_format16.png
 #
-# Created: Fr 13. Mai 16:25:34 2011
+# Created: Mi 8. Jun 17:24:46 2011
 #      by: The PyQt User Interface Compiler (pyuic) 3.18.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -30032,8 +30033,22 @@ image_103_ctable = [
     0xffd81c01
 ]
 
-# resources/icons\relationType24.png
+# resources/icons\relationType16.png
 image_104_data = \
+    "\x00\x00\x04\x00\x78\x9c\xfb\xff\x1f\x13\x30\x9b\xfe\xc6" \
+    "\x22\x8a\x1b\x30\x30\x30\xc0\x31\xb3\xc1\x23\x0c\xf9\xb3" \
+    "\x73\xda\xc0\xf8\xd9\xb9\x43\x38\xf5\x83\xec\x04\x61\x10" \
+    "\x1b\x1d\x6c\x4d\xd0\xfb\x7f\x20\x43\xe3\xff\xb9\xb9\x6d" \
+    "\x38\xf5\xc3\xdc\x8d\x4d\x3f\x08\xdc\xec\x75\xf8\xff\x6c" \
+    "\x73\xc3\xff\x2d\x58\xcc\x42\x76\x3f\x2e\xfd\x20\xbd\x20" \
+    "\x00\xd2\x07\xc2\xb8\xfc\x02\x73\x07\xb9\xf6\x63\x0b\x3f" \
+    "\x42\xf6\x13\x0a\x3f\xb8\xfd\x5b\x70\xdb\x0f\x73\x37\x2e" \
+    "\xfd\x9f\x6e\x1e\xc0\x6b\x3f\xa1\xf0\x23\x05\x50\x3b\xfd" \
+    "\x11\xa3\x9f\x50\xf8\x11\xd2\x0f\x02\x94\xe8\xa7\x66\xf8" \
+    "\x91\x02\x00\xb7\x29\x59\x28"
+
+# resources/icons\relationType24.png
+image_105_data = \
     "\x00\x00\x09\x00\x78\x9c\xfb\xff\x7f\x78\x02\x66\xd3\xdf" \
     "\x60\x8c\x0d\x3c\x3b\x7b\xe8\xff\x99\x39\x2d\x70\x4c\x08" \
     "\x30\x30\x30\xa0\x60\x66\x83\x27\x38\xcd\x06\x01\x90\x99" \
@@ -30055,7 +30070,7 @@ image_104_data = \
     "\x00\x12\x1d\x04\x22"
 
 # resources/icons\remove24.png
-image_105_data = \
+image_106_data = \
     "\x00\x00\x02\x40\x78\x9c\x6d\xd1\x6d\x0f\x82\x20\x14\x86" \
     "\xe1\x43\x52\xa6\x21\x99\xe2\x72\x8d\xb4\x72\xbd\xfc\xff" \
     "\x5f\x18\xe7\xf0\x12\x90\xf7\x27\xbd\xd8\xdc\x33\x64\x22" \
@@ -30070,14 +30085,14 @@ image_105_data = \
     "\x12\x7f\x5f\x4e\xd7\x7b\xce\xcc\x7f\x3f\xe3\x70\xbc\xce" \
     "\xb4\x7f\xd5\xa3\xe7\x2f\x7a\x4e\x11\xee"
 
-image_105_ctable = [
+image_106_ctable = [
     0xff0a7105,0xff00ff,0xffff9933,0xffcf8935,0xfffcf0e4,0xff78d74d,0xfffec45f,0xff1ba30e,0xff96591c,0xffffdba8,0xfffeb34e,0xff46bb2b,0xffd5781c,0xffffab46,
     0xfffeb954,0xff2bac19,0xffcc9966,0xff60ca3d,0xffffe3b0,0xfffeb550,0xfffebe59,0xff39b422,0xff82dd55,0xff5ac638,0xffffe6ba,0xfffec25d,0xff6fd248,0xffffcc66,
     0xffffdfad,0xff4fc032,0xffcf8d39,0xff20a511,0xffffaf4a,0xff3fb727,0xff69cf43,0xff85df57,0xfffff7e6,0xff49bd2e,0xff2ead1a,0xff7cd950,0xff52c234
 ]
 
 # resources/icons\rename24.png
-image_106_data = \
+image_107_data = \
     "\x00\x00\x09\x00\x78\x9c\xbd\xd5\xc9\x52\x53\x51\x10\x06" \
     "\xe0\xbc\x09\x8f\xc0\xc2\x07\xc8\x9a\x95\x3b\xdd\x3a\xae" \
     "\x7c\x0b\x1f\x04\xcb\x9d\x55\x2a\x83\xca\x0c\x09\x20\x22" \
@@ -30138,7 +30153,7 @@ image_106_data = \
     "\x0f\xdd\x85"
 
 # resources/icons\reset24.png
-image_107_data = \
+image_108_data = \
     "\x00\x00\x02\x40\x78\x9c\x9d\x90\xe9\x0e\x82\x30\x10\x84" \
     "\x97\x78\x6b\xbd\xb5\xde\x72\x29\x56\x10\xa9\x95\x14\x15" \
     "\x7d\xff\xd7\x12\x48\x23\x47\xaa\x21\xce\xaf\xed\x37\xd9" \
@@ -30153,7 +30168,7 @@ image_107_data = \
     "\x71\x8f\x3a\x32\x8e\x0c\xc7\x97\xf1\x86\xea\x33\x19\xff" \
     "\x92\x5b\xbe\xf9\x6f\xbd\x01\x39\x67\x11\xb2"
 
-image_107_ctable = [
+image_108_ctable = [
     0xff0a7105,0xff00ff,0xffff3300,0xff1aa10d,0xfffff0ec,0xff990000,0xfffd8c6f,0xff6cd145,0xfffc5d36,0xff47b12d,0xfffecabd,0xff16960b,0xff7ddb52,0xff32b21d,
     0xfffda994,0xff5cb73b,0xfffb4011,0xff28841f,0xfffc7350,0xff35a720,0xff78cd4f,0xffffffff,0xff88e059,0xff5bca3a,0xff44b52a,0xfffb4c20,0xff76d04e,0xff428832,
     0xff42af29,0xff4ec330,0xff2aad18,0xff5bc73a,0xff219613,0xfffb3807,0xff6dd346,0xff87e058,0xff48bd2d,0xff2fb01b,0xff8ce45b,0xff61be3f,0xff41bc28,0xff81d954,
@@ -30162,7 +30177,7 @@ image_107_ctable = [
 ]
 
 # resources/icons\save24.png
-image_108_data = \
+image_109_data = \
     "\x00\x00\x02\x40\x78\x9c\xb5\xd2\x6d\x17\x81\x30\x14\xc0" \
     "\x71\xd6\x52\xcb\x43\x76\x93\xb2\x22\x3a\x34\x31\x84\xef" \
     "\xff\xdd\xac\x32\x59\x47\xe7\xf0\xc2\xff\xdd\x7e\x67\xe7" \
@@ -30177,7 +30192,7 @@ image_108_data = \
     "\xa3\x48\xba\x95\xd7\x0b\x96\x6d\x9a\xca\x67\xe7\x8d\x20" \
     "\xf4\x00\xd9\xa2\x29\xb0"
 
-image_108_ctable = [
+image_109_ctable = [
     0xff22228d,0xffc0c2dd,0xff00ff,0xff6769be,0xfff7fafe,0xff5b5bc4,0xff9a9ba3,0xff5353b8,0xffdcdede,0xff3f4397,0xff7e7fc2,0xffa4a6d7,0xffcccccc,0xffe6e6eb,
     0xffb3b4c1,0xff8282d1,0xff5454bb,0xff7273ce,0xff6666cc,0xff333399,0xff7474a2,0xff8e8dd8,0xff5757bd,0xff6363c4,0xfff6f8f3,0xff5756a2,0xffffffff,0xffe6e7e3,
     0xffc6c7e5,0xffb2b4cf,0xffccccd5,0xff3e3ea3,0xffedeff0,0xff9b9ab5,0xff2a2992,0xff9494d6,0xffd8dae9,0xff5c5bb0,0xff6a6cc4,0xff5e5fc6,0xffeaedf2,0xff605fbf,
@@ -30185,7 +30200,7 @@ image_108_ctable = [
 ]
 
 # resources/icons\save_all24.png
-image_109_data = \
+image_110_data = \
     "\x00\x00\x09\x00\x78\x9c\xad\x93\xff\x4f\x12\x71\x1c\xc6" \
     "\xff\x12\x7f\xc0\xf9\x47\xf8\x3f\xd4\x9c\x40\x3a\xca\x19" \
     "\x09\x13\xdb\xc4\x03\xa9\x41\xe8\xcf\xad\xad\xd5\xfc\xd2" \
@@ -30234,7 +30249,7 @@ image_109_data = \
     "\x1b\xd6\x9e\x9e\xc6\xfb\xbf\x00\x5f\x75\x82\xce"
 
 # resources/icons\save_as24.png
-image_110_data = \
+image_111_data = \
     "\x00\x00\x02\x40\x78\x9c\x65\xd0\xef\x37\xc2\x50\x18\xc0" \
     "\x71\x57\x91\x94\x08\xe9\x77\x1d\x09\x15\x57\x2b\xa9\x45" \
     "\x66\x42\x98\x12\x29\x72\x12\x6b\x4a\xa1\xad\x91\x94\x88" \
@@ -30261,7 +30276,7 @@ image_110_data = \
     "\xc6\x31\xb6\xf0\x24\x75\x60\x91\x6b\xcf\x3c\x1e\xcf\x9e" \
     "\x76\x4d\x2e\xe6\x6f\xf8\x24\x66\x31"
 
-image_110_ctable = [
+image_111_ctable = [
     0xff006600,0xff00ff,0xff5f5eca,0xffe3e4e1,0xff4c4ba7,0xff4baa2f,0xff9ad4f5,0xff21218f,0xff70b2e8,0xff7b7bb8,0xff69ce44,0xff128409,0xff869bcf,0xff525298,
     0xffd6d6d9,0xffbec0d8,0xff858eba,0xff6c6ba4,0xfff6f8f0,0xff2ba919,0xff4aa5ec,0xffd7d8e9,0xffa9bcc6,0xffbcdff6,0xff20aa11,0xff6c6cc3,0xff7171d0,0xff8c8dce,
     0xff5858ae,0xffe4effa,0xff92bded,0xff91e85e,0xffd9effc,0xff6668bc,0xff18970c,0xfff4fcff,0xff5abe3a,0xff6887c5,0xff5b5bb4,0xffa5a6bb,0xffb7daf0,0xff656cb8,
@@ -30275,7 +30290,7 @@ image_110_ctable = [
 ]
 
 # resources/icons\search24.png
-image_111_data = \
+image_112_data = \
     "\x00\x00\x02\x40\x78\x9c\x85\x90\xeb\x52\xc2\x30\x10\x85" \
     "\x57\xb0\x15\x1b\xb6\x5b\xa3\x62\xa9\x25\x88\x17\xbc\xa0" \
     "\x56\x11\x2f\xa8\x14\xa1\xe8\x58\xaf\x23\xef\xff\x30\x6e" \
@@ -30298,7 +30313,7 @@ image_111_data = \
     "\xe6\x49\x70\xb6\x20\xa3\xb3\x86\x9a\xcc\x90\xe9\xdf\xe7" \
     "\x1b\x93\x9b\x68\x23"
 
-image_111_ctable = [
+image_112_ctable = [
     0xff000000,0xff689ac3,0xff186697,0xff434242,0xffd9e9de,0xff00661c,0xff7cae8a,0xffb1b0d7,0xff666699,0xff1a1a1a,0xff3a8951,0xffacacac,0xff4185b1,0xff0e0d0d,
     0xff9999cc,0xffffffff,0xffb6c8dc,0xff575756,0xff0d7329,0xff6996bd,0xff87a7ca,0xffa4c5ae,0xffc5c3ea,0xff2f73a1,0xff333333,0xffa4a3ce,0xff9a98c1,0xff5b8eb6,
     0xff4a975f,0xff666666,0xfff2f2f2,0xffb1d2bb,0xff86c097,0xffbfd0dd,0xffbfd6e4,0xffbfbde4,0xff1e70a0,0xff9ebadc,0xff8f90bd,0xff7e7eaa,0xff282928,0xff76a3ca,
@@ -30308,7 +30323,7 @@ image_111_ctable = [
 ]
 
 # resources/icons\sql_execute24.png
-image_112_data = \
+image_113_data = \
     "\x00\x00\x02\x40\x78\x9c\x75\xd0\xeb\x57\xc1\x70\x18\xc0" \
     "\xf1\x89\x75\x55\x2a\xd2\x6d\xa3\x74\xb3\xa2\x55\x2a\x15" \
     "\x8b\x86\x84\xec\xfc\x5a\x46\xa8\x5c\x5b\x85\xca\x65\x44" \
@@ -30334,7 +30349,7 @@ image_112_data = \
     "\xdf\xda\x4c\xa6\x52\xa1\x40\xbf\x93\xff\x6a\xf3\x2f\x7c" \
     "\x69\x74\xbb"
 
-image_112_ctable = [
+image_113_ctable = [
     0xff0347ae,0xffe9c754,0xff39a0ef,0xffd8ad2e,0xff8dc4ef,0xff00ff,0xff787da8,0xffeef2f8,0xff89a0ce,0xfff1e1b3,0xff3f75b6,0xffabcff1,0xff445f7d,0xffd5c797,
     0xff8392be,0xffdab034,0xfffff3b9,0xff5d769f,0xff998c52,0xfff4d96c,0xff16509e,0xff6699cc,0xff9fc3e9,0xfffae695,0xffcae3f7,0xff81b5e7,0xffc0bc8c,0xff257fd5,
     0xff7681b3,0xff3d62af,0xff0066cc,0xff6181c0,0xff82a4da,0xff97b5de,0xffe9cb76,0xfff8e09a,0xff767fab,0xff6aade5,0xff478fd9,0xff1c77d1,0xfffff4d7,0xfff7e385,
@@ -30348,7 +30363,7 @@ image_112_ctable = [
 ]
 
 # resources/icons\sql_scriptopen24.png
-image_113_data = \
+image_114_data = \
     "\x00\x00\x02\x40\x78\x9c\x6d\xd1\xfb\x37\xc2\x60\x18\xc0" \
     "\x71\x26\x5b\x9b\xcd\xa5\x86\x58\x85\x44\x45\x7b\x11\xde" \
     "\x9a\xdb\x99\x54\x2e\xad\x90\xdb\x4e\xe6\xee\xa0\x0b\x6d" \
@@ -30377,7 +30392,7 @@ image_113_data = \
     "\x5a\xf3\xb7\x5b\x5e\x56\x4e\x97\xd1\x06\x4e\xa7\x93\xfc" \
     "\x93\xde\xbe\x7f\x4b\xfe\x97\xcf\xe4\x2f\xc4\x14\x65\xce"
 
-image_113_ctable = [
+image_114_ctable = [
     0xff006600,0xff4aa5ec,0xffecce59,0xff70b2e8,0xffd3a112,0xff62bf3f,0xff00ff,0xfffef8cf,0xffedd89f,0xff35ae21,0xff7a85b8,0xffddb640,0xfff8efcc,0xfffce983,
     0xffc9cfe3,0xffeddaa4,0xff16830c,0xffe5c549,0xfff8e282,0xffd9ad30,0xffffffff,0xfffff6a9,0xffe8cf8a,0xff4baa2f,0xfff3f5f9,0xff858eba,0xff83de55,0xfffff78c,
     0xff869bcf,0xfffff69d,0xfff1df6b,0xff199d0c,0xfffef9c3,0xffd1e6f8,0xff0e7d08,0xffd7ab25,0xffe0bd55,0xffa9bcc6,0xffeacf64,0xfff3e6bc,0xff92bded,0xfffff9b7,
@@ -30391,7 +30406,7 @@ image_113_ctable = [
 ]
 
 # resources/icons\txt_format16.png
-image_114_data = \
+image_115_data = \
     "\x00\x00\x01\x00\x78\x9c\x3d\xcb\xe5\x16\x82\x40\x10\x86" \
     "\x61\xec\x8e\x15\x5b\xec\xa6\x1b\xb1\x15\x15\x44\xb8\xff" \
     "\xdb\x71\x16\xf6\xf0\xfe\x7b\xe6\x3b\x43\x51\xd4\x6e\x35" \
@@ -30406,7 +30421,7 @@ image_114_data = \
     "\x76\x9f\x02\xb7\x9a\xcd\x7a\xad\x52\x2a\xe4\x32\xe9\x30" \
     "\xfc\x03\x29\x9f\x20\xa6"
 
-image_114_ctable = [
+image_115_ctable = [
     0x8f000,0xff5981c6,0xff5882c5,0xff5d84c4,0xff5e84c4,0xff6188c3,0xff6289c3,0xff658ac2,0xff678bc1,0xff698cc1,0xff6c8ec0,0xff6e8ebf,0xff7290bf,0xff7291bf,
     0xff7693bd,0xff7a95bb,0xff7b95bc,0xff7e97ba,0xff829abc,0xff859dbe,0xff88a0c0,0xff8ba2c2,0xff8ca2c2,0xff8fa5c4,0xff91a7c6,0xff92a8c6,0xff95abc8,0xff97acc9,
     0xff90aed6,0xff9aaecb,0xff9db0cd,0xff9db1cd,0xffa1b4ce,0xffa3b6d1,0xffa4b6d1,0xffa7b9d3,0xffa9bbd4,0xffaabcd5,0xffaebed7,0xffafc0d8,0xffb3c3da,0xffd2e2fa,
@@ -30416,7 +30431,7 @@ image_114_ctable = [
 ]
 
 # resources/icons\user24.png
-image_115_data = \
+image_116_data = \
     "\x00\x00\x02\x40\x78\x9c\x63\x64\x24\x17\xa8\xfa\xb9\x9a" \
     "\x63\x8a\x9a\x73\xaa\x26\xe4\x44\x38\x18\xa2\x09\x4b\x68" \
     "\x70\x8a\x46\x0b\xe8\xb3\xdb\xbb\xa1\x89\x67\x1b\x96\x16" \
@@ -30437,7 +30452,7 @@ image_115_data = \
     "\x8b\x8b\x55\x75\x75\x5c\x71\x71\xb1\xb8\xb8\x95\x1d\x42" \
     "\x9c\x05\x19\x20\xac\x25\x05\x00\x00\x2d\x59\x3b\xbc"
 
-image_115_ctable = [
+image_116_ctable = [
     0xff000000,0xff00ff,0xffb2440c,0xff2d59dc,0xff104aae,0xff851d00,0xff9aabfb,0xffb47124,0xff4a2d11,0xff737372,0xffcccccc,0xffff3300,0xff2a50b8,0xff290901,
     0xff494179,0xff6282fd,0xff7d4814,0xffe9ece9,0xffcf651f,0xffe19132,0xff7386d8,0xff413e3d,0xff764849,0xff5165fc,0xff333333,0xffbc3b06,0xff3c4d99,0xff9c2500,
     0xffbc571b,0xffcbd3fd,0xff150400,0xffe77122,0xff676ea3,0xff741a12,0xffac4212,0xff214fb4,0xff4764ed,0xff858686,0xffffab39,0xff6b88fc,0xff666666,0xff3c65d2,
@@ -30460,7 +30475,7 @@ image_115_ctable = [
 ]
 
 # resources/icons\users24.png
-image_116_data = \
+image_117_data = \
     "\x00\x00\x02\x40\x78\x9c\xb5\x91\x7b\x37\x02\x41\x18\x87" \
     "\xc7\xa5\xdb\x2a\x23\x12\x65\x89\xdc\x23\x6a\xcb\xb5\x84" \
     "\x51\xd4\x66\xd9\x0a\xd5\xe6\x96\x4b\xc8\x65\x4b\x49\x2a" \
@@ -30486,7 +30501,7 @@ image_116_data = \
     "\x05\x5a\x46\x35\x51\xca\xb3\x6c\x22\xc1\xb2\xae\xc9\x56" \
     "\x7c\xf4\x0f\x1e\xb4\x5d\xaa"
 
-image_116_ctable = [
+image_117_ctable = [
     0xff000000,0xff2a56d4,0xffc65d1d,0xff8d290c,0xff3159db,0xff0549b0,0xff008e00,0xffa8b5fd,0xff007300,0xff827f89,0xffd8a347,0xff4e1909,0xff4cbd26,0xffb59441,
     0xff66cc66,0xff00ff,0xffc4953d,0xff666666,0xff222222,0xff6884fa,0xfff7f9ff,0xff975a12,0xff2db316,0xff8de08d,0xff384e9a,0xffeaedfe,0xfff79c39,0xff4c4e4f,
     0xff4f65f6,0xfffca33c,0xff4e924c,0xffc87a27,0xff844a19,0xff333333,0xffb7691d,0xff0e0e0e,0xff1d52c7,0xff385ad1,0xffacb3cc,0xff334f0e,0xff1c880e,0xff8dad8b,
@@ -30500,7 +30515,7 @@ image_116_ctable = [
 ]
 
 # resources/icons\user_add24.png
-image_117_data = \
+image_118_data = \
     "\x00\x00\x02\x40\x78\x9c\x63\x64\x24\x07\xa4\x5a\x71\x19" \
     "\xc3\xd8\xac\xac\xac\x50\x96\x71\x69\x2a\x5f\x46\xb0\x8d" \
     "\x2a\x54\xdc\x03\x2a\x2e\xaf\x50\xca\x1e\x2e\x6a\xc0\xe1" \
@@ -30524,7 +30539,7 @@ image_117_data = \
     "\xcc\x0e\x21\xce\x82\x0c\x10\xd6\x92\x0a\x00\x73\x07\x3e" \
     "\xaf"
 
-image_117_ctable = [
+image_118_ctable = [
     0xff000000,0xff00ff,0xffa83907,0xff405ee7,0xff104aae,0xff197b30,0xff9aabfb,0xff413e3d,0xffb47124,0xff7f1d00,0xff7a7b7d,0xffcccccc,0xff3055c0,0xff4a2d11,
     0xff696e73,0xffe9ece9,0xff278c2d,0xff6282fd,0xffbc571b,0xffe19132,0xff321707,0xff7d4814,0xff3f5cdb,0xff214fb4,0xff676ea3,0xffcbd3fd,0xff494179,0xffd56a21,
     0xff752e15,0xffe77122,0xff4e76e7,0xff333333,0xff666666,0xffac4d19,0xff875a4c,0xff3ea628,0xff3366cc,0xff0f1212,0xff932900,0xffffab39,0xff1851c8,0xff6b88fc,
@@ -30538,7 +30553,7 @@ image_117_ctable = [
 ]
 
 # resources/icons\verify_document_24.png
-image_118_data = \
+image_119_data = \
     "\x00\x00\x09\x00\x78\x9c\xbd\x94\xc9\x4f\x93\x51\x14\x47" \
     "\xf9\xc3\x8c\x89\x2b\x17\xae\xdc\xb9\x72\xe1\xc6\xa5\x31" \
     "\x71\xa1\x22\x65\xa8\x18\x06\x21\x46\xa3\x91\x84\x05\x89" \
@@ -30603,7 +30618,7 @@ image_118_data = \
     "\x29\xf3\x0f\x67\xcd\x50\x3d"
 
 # resources/icons\video_format16.png
-image_119_data = \
+image_120_data = \
     "\x00\x00\x01\x00\x78\x9c\x63\x60\x60\x08\x31\xcc\x6e\x36" \
     "\xb2\x71\xe6\x67\x64\x64\x00\x83\xac\x06\x4d\x5f\x37\x95" \
     "\xf0\x1e\x46\x3e\xb0\x40\x61\xa2\x82\x85\x5f\xa8\x57\xbc" \
@@ -30623,7 +30638,7 @@ image_119_data = \
     "\xa4\x98\xaa\x52\x6f\x67\x4b\x5d\x85\xb0\x30\x00\xa2\x31" \
     "\x29\xf0"
 
-image_119_ctable = [
+image_120_ctable = [
     0x600,0xff7e97ba,0xffe1ecfc,0xffe2edfc,0xffdeeafb,0xffdfebfc,0xffe0ebfc,0xffdce8fb,0xffe4edfc,0xffe5eefc,0xffe6effc,0xffe7f0fd,0xffe8f0fd,0xffd8e6fb,
     0xffffffff,0xff859dbe,0xffd9e6fb,0xffdae7fa,0xffdae7fb,0xff5580c8,0xffdee9fb,0xffdeeafc,0xff7693bd,0xffe2ecfc,0xffe3edfc,0xff7b95bc,0xffe5eefd,0xff91a471,
     0xffe6effd,0xffe9f1fd,0xffe4eefc,0xff808b99,0xff72918a,0xff6c8ec0,0xff6e8ebf,0xff7290bf,0xff84908f,0xff7291bf,0xff404f3e,0xff494e4d,0xff8e9298,0xff6da16a,
@@ -30638,35 +30653,6 @@ image_119_ctable = [
 ]
 
 # resources/icons\views.png
-image_120_data = \
-    "\x00\x00\x06\xd4\x78\x9c\xbd\xd5\x3f\x4a\x03\x51\x10\xc7" \
-    "\x71\x5e\x2d\x78\x02\x8f\xe1\x11\x2c\xbd\x87\x8d\x76\x62" \
-    "\xa1\x85\x95\xe0\x15\xde\x09\x34\x68\xa2\xb2\x0a\x36\x0a" \
-    "\x82\x20\xb2\x6b\x11\x50\x03\x51\x88\xf9\xa3\x48\x8c\x68" \
-    "\x40\x45\x11\xf6\xe7\x4c\xd6\x37\x79\x93\x2c\x46\x96\xd5" \
-    "\x85\x4f\xb3\xc5\x97\xc9\xec\x40\x4e\x0f\x8a\x88\xe6\x27" \
-    "\x10\xcd\x98\xfc\xcc\x8d\x23\x2c\xac\x20\x5c\x9d\xca\xb7" \
-    "\xeb\xf5\xcb\xb3\x06\xd5\x05\x83\xda\x52\xbe\xb8\xcf\xed" \
-    "\xcc\xcf\xe7\x3b\xf0\xf1\x02\xbc\x3d\x02\xaf\x6d\xa0\xdb" \
-    "\x14\xff\xdd\x8e\xac\x15\xfe\xd3\x58\x1e\x13\x40\x9c\xa0" \
-    "\xae\xb1\x46\xe4\xd2\xe6\x79\x19\xcd\xab\xda\x4f\x37\x22" \
-    "\x73\x9b\xf7\xc0\x68\x0f\xaa\xdd\xa9\x8a\x4c\xfb\xe6\xdd" \
-    "\x3a\xbc\x63\xa7\x7d\xae\xa4\xb5\x83\x20\x10\xea\xfd\xce" \
-    "\x36\xd9\xea\x91\x5e\xb7\x85\xa0\x54\x40\x50\x5c\x27\x6b" \
-    "\xc0\x7d\x59\xfc\x7a\xee\xa1\x7b\x68\x25\x3a\x57\xc0\x43" \
-    "\x25\xe9\xdd\x9d\x01\xb7\xa1\x48\x6b\x4f\x2f\xf6\x25\x4f" \
-    "\xdc\x6b\xdb\x49\x23\xf0\x5c\x4f\x50\xd7\xd8\x48\xa0\x79" \
-    "\x22\x46\xb7\x63\x99\x59\xb5\x79\x5e\x46\xf3\xaa\x76\xfd" \
-    "\x48\x8c\x6c\x7b\xbb\x50\x6d\xde\x03\xa3\x3d\xa8\x76\xed" \
-    "\x50\xfc\xb8\x6f\x77\x67\x83\xf7\xe0\x7d\x2f\x7f\x07\xb8" \
-    "\xde\x57\xd2\xda\x96\xee\xda\xf1\xef\x41\xbd\xe7\xef\xc6" \
-    "\xa8\xa9\xde\x57\x77\xc5\x70\x3b\xee\xcf\xea\x6e\x81\x7d" \
-    "\xff\x7e\xd7\x13\x8d\x63\xea\xec\x01\x15\xba\xcb\xcb\x92" \
-    "\xa2\xdb\x71\xfa\xad\xf1\x3d\x0c\xde\x9a\xeb\xf2\xef\x77" \
-    "\xed\x8b\x4d\xb2\x21\x5c\xfb\x4f\xfe\x1b\xc8\x17\x11\x45" \
-    "\x6c\x96"
-
-# resources/icons\viewsmenu.png
 image_121_data = \
     "\x00\x00\x06\xd4\x78\x9c\xbd\xd5\x3f\x4a\x03\x51\x10\xc7" \
     "\x71\x5e\x2d\x78\x02\x8f\xe1\x11\x2c\xbd\x87\x8d\x76\x62" \
@@ -30695,8 +30681,37 @@ image_121_data = \
     "\xed\x8b\x4d\xb2\x21\x5c\xfb\x4f\xfe\x1b\xc8\x17\x11\x45" \
     "\x6c\x96"
 
-# resources/icons\vsd_format16.png
+# resources/icons\viewsmenu.png
 image_122_data = \
+    "\x00\x00\x06\xd4\x78\x9c\xbd\xd5\x3f\x4a\x03\x51\x10\xc7" \
+    "\x71\x5e\x2d\x78\x02\x8f\xe1\x11\x2c\xbd\x87\x8d\x76\x62" \
+    "\xa1\x85\x95\xe0\x15\xde\x09\x34\x68\xa2\xb2\x0a\x36\x0a" \
+    "\x82\x20\xb2\x6b\x11\x50\x03\x51\x88\xf9\xa3\x48\x8c\x68" \
+    "\x40\x45\x11\xf6\xe7\x4c\xd6\x37\x79\x93\x2c\x46\x96\xd5" \
+    "\x85\x4f\xb3\xc5\x97\xc9\xec\x40\x4e\x0f\x8a\x88\xe6\x27" \
+    "\x10\xcd\x98\xfc\xcc\x8d\x23\x2c\xac\x20\x5c\x9d\xca\xb7" \
+    "\xeb\xf5\xcb\xb3\x06\xd5\x05\x83\xda\x52\xbe\xb8\xcf\xed" \
+    "\xcc\xcf\xe7\x3b\xf0\xf1\x02\xbc\x3d\x02\xaf\x6d\xa0\xdb" \
+    "\x14\xff\xdd\x8e\xac\x15\xfe\xd3\x58\x1e\x13\x40\x9c\xa0" \
+    "\xae\xb1\x46\xe4\xd2\xe6\x79\x19\xcd\xab\xda\x4f\x37\x22" \
+    "\x73\x9b\xf7\xc0\x68\x0f\xaa\xdd\xa9\x8a\x4c\xfb\xe6\xdd" \
+    "\x3a\xbc\x63\xa7\x7d\xae\xa4\xb5\x83\x20\x10\xea\xfd\xce" \
+    "\x36\xd9\xea\x91\x5e\xb7\x85\xa0\x54\x40\x50\x5c\x27\x6b" \
+    "\xc0\x7d\x59\xfc\x7a\xee\xa1\x7b\x68\x25\x3a\x57\xc0\x43" \
+    "\x25\xe9\xdd\x9d\x01\xb7\xa1\x48\x6b\x4f\x2f\xf6\x25\x4f" \
+    "\xdc\x6b\xdb\x49\x23\xf0\x5c\x4f\x50\xd7\xd8\x48\xa0\x79" \
+    "\x22\x46\xb7\x63\x99\x59\xb5\x79\x5e\x46\xf3\xaa\x76\xfd" \
+    "\x48\x8c\x6c\x7b\xbb\x50\x6d\xde\x03\xa3\x3d\xa8\x76\xed" \
+    "\x50\xfc\xb8\x6f\x77\x67\x83\xf7\xe0\x7d\x2f\x7f\x07\xb8" \
+    "\xde\x57\xd2\xda\x96\xee\xda\xf1\xef\x41\xbd\xe7\xef\xc6" \
+    "\xa8\xa9\xde\x57\x77\xc5\x70\x3b\xee\xcf\xea\x6e\x81\x7d" \
+    "\xff\x7e\xd7\x13\x8d\x63\xea\xec\x01\x15\xba\xcb\xcb\x92" \
+    "\xa2\xdb\x71\xfa\xad\xf1\x3d\x0c\xde\x9a\xeb\xf2\xef\x77" \
+    "\xed\x8b\x4d\xb2\x21\x5c\xfb\x4f\xfe\x1b\xc8\x17\x11\x45" \
+    "\x6c\x96"
+
+# resources/icons\vsd_format16.png
+image_123_data = \
     "\x00\x00\x01\x00\x78\x9c\x63\x60\x60\x88\x89\x08\x09\xf2" \
     "\xf3\x76\x73\xb4\xb1\x61\x60\x60\xf0\x74\xb1\x35\x54\x51" \
     "\x92\x92\x10\x13\xee\xb5\xe9\x03\x0a\xf8\xf4\x81\x80\x6b" \
@@ -30715,7 +30730,7 @@ image_122_data = \
     "\x13\x13\x54\x81\x7c\x7b\x6b\x6b\x0b\x53\x63\x03\x3d\x1d" \
     "\x4d\x35\x65\x65\x00\xdf\x10\x4b\x6a"
 
-image_122_ctable = [
+image_123_ctable = [
     0x92a8c6,0xff0b2085,0xff0b208c,0xff0c2395,0xff0c2398,0xff0c269c,0xff0d26a2,0xff0d27a8,0xff0e2aae,0xff0e2db4,0xff0e2ebb,0xff0f2ebf,0xff1333c2,0xff1533c4,
     0xff2037a3,0xff1938c8,0xff1939c8,0xff1c3bcb,0xff1d3ccc,0xff2442d0,0xff2543d2,0xff2645c6,0xff2e4bd8,0xff324fd9,0xff3a56de,0xff425de4,0xff4661e5,0xff5364ac,
     0xff4564db,0xff4767e6,0xff4a67e5,0xff526bcc,0xff526ced,0xff586fc6,0xff526ded,0xff5580c8,0xff6179f3,0xff5981c6,0xff5882c5,0xff647ce2,0xff657cf3,0xff5d84c4,
@@ -30730,7 +30745,7 @@ image_122_ctable = [
 ]
 
 # resources/icons\window_options24.png
-image_123_data = \
+image_124_data = \
     "\x00\x00\x02\x40\x78\x9c\xad\xd1\x61\x4f\x83\x30\x10\x06" \
     "\xe0\x31\xdb\x43\x18\xb6\xea\x9c\xb8\x4d\x01\xad\x4e\x4d" \
     "\xab\x52\xe4\x44\x87\xfb\xff\x7f\xcb\x1e\x0c\x86\x09\x5f" \
@@ -30749,7 +30764,7 @@ image_123_data = \
     "\x8a\xf9\x39\xf2\xc3\xd1\xd6\xb5\x8a\x63\xc4\xb2\xaf\x4e" \
     "\xec\x8d\x7f\x8b\x1e\xf6\x4f\xf9\x01\x16\x23\x39\xc9"
 
-image_123_ctable = [
+image_124_ctable = [
     0xff006600,0xffadd8ff,0xffd46e4e,0xff3e83d2,0xffffcc00,0xffd4eaff,0xff2852a3,0xffe0e0db,0xff939979,0xff4d6982,0xff00ff,0xff186eca,0xff305a7c,0xff78c0ea,
     0xff244f75,0xffe9f5ff,0xffc3cfdb,0xff1686e5,0xffe9eef2,0xff657f95,0xffc3e2ff,0xff3877c6,0xffffeeaa,0xffb7dcf4,0xff69849c,0xfff8fcff,0xffa6a7a7,0xff4091e2,
     0xff80bbf6,0xff4e6a9e,0xffbcdef4,0xffdeefff,0xff7c7e7f,0xffbecddb,0xff92a397,0xffcfe7ff,0xffc9e5fa,0xff4e7aae,0xff409eee,0xff5c787e,0xffafb2b3,0xff1277d7,
@@ -30758,7 +30773,7 @@ image_123_ctable = [
 ]
 
 # resources/icons\xls_format16.png
-image_124_data = \
+image_125_data = \
     "\x00\x00\x01\x00\x78\x9c\x63\x60\x60\x88\x8e\x0c\x0f\xf6" \
     "\xf7\xf5\xf6\x70\x75\x65\x00\x83\xa8\xca\x8a\xf2\xb2\xd2" \
     "\x92\x62\xd7\x2a\xa0\x80\x9b\x83\x95\xa1\xa6\xb2\xbc\x8c" \
@@ -30776,7 +30791,7 @@ image_124_data = \
     "\x26\x26\xa8\x03\xf9\xee\x2e\x2e\xf6\xb6\x96\x66\x46\x7a" \
     "\xda\x1a\xaa\xaa\x00\xb2\x44\x46\x7a"
 
-image_124_ctable = [
+image_125_ctable = [
     0x6f782a,0xff344d19,0xff354d18,0xff345217,0xff345317,0xff345815,0xff345e13,0xff345e14,0xff355e1a,0xff346311,0xff346412,0xff36631b,0xff33690f,0xff326828,
     0xff336d0e,0xff346d0e,0xff3b681e,0xff33700d,0xff3a6f1e,0xff39701e,0xff3b7122,0xff3a7719,0xff3c771f,0xff3e7b1e,0xff3a7d27,0xff3f7d21,0xff428025,0xff46842c,
     0xff47852d,0xff428935,0xff47883b,0xff4d8c36,0xff607e5c,0xff4f8e39,0xff48923f,0xff539340,0xff529748,0xff5580c8,0xff589847,0xff5981c6,0xff5882c5,0xff5a9a49,
@@ -30789,7 +30804,7 @@ image_124_ctable = [
 ]
 
 # resources/icons\xml_format16.png
-image_125_data = \
+image_126_data = \
     "\x00\x00\x01\x00\x78\x9c\x55\x8d\x07\x0e\xc2\x30\x0c\x45" \
     "\xc3\x86\x30\x4a\x4d\xd9\x7b\x74\xa7\xe9\x62\x93\xde\xff" \
     "\x5a\x98\x34\x8a\xca\xb7\x25\xeb\xf9\x59\x09\x21\xe4\x7c" \
@@ -30803,7 +30818,7 @@ image_125_data = \
     "\x9a\xc6\x68\xd0\xeb\xb4\x1a\xf5\xa2\xf8\x02\x4f\x62\x1a" \
     "\xc0"
 
-image_125_ctable = [
+image_126_ctable = [
     0x10ae,0xff5981c6,0xff5882c5,0xff5d84c4,0xff5e84c4,0xff6188c3,0xff6289c3,0xff658ac2,0xff678bc1,0xff698cc1,0xffff6600,0xff6c8ec0,0xff6e8ebf,0xff7290bf,
     0xff7291bf,0xff7693bd,0xff7a95bb,0xff7b95bc,0xff7e97ba,0xff829abc,0xff859dbe,0xff88a0c0,0xff8ba2c2,0xff8ca2c2,0xff8fa5c4,0xff91a7c6,0xff92a8c6,0xff95abc8,
     0xff97acc9,0xff90aed6,0xff99adca,0xff9db1cd,0xffa3b6d1,0xffa9bbd4,0xffafc0d8,0xffb3c3da,0xffd2e2fa,0xffd4e3fa,0xffd6e4fa,0xffd7e5fb,0xffd9e6fb,0xffdbe7fb,
@@ -30812,7 +30827,7 @@ image_125_ctable = [
 ]
 
 # resources/icons\zip_format16.png
-image_126_data = \
+image_127_data = \
     "\x00\x00\x01\x00\x78\x9c\x63\x60\x60\x88\x09\x0b\x09\x0c" \
     "\xf0\xf5\xf2\x70\x75\x65\x00\x83\xa8\xf9\xf3\xe7\xcd\x99" \
     "\x35\x63\x9a\xeb\x42\x88\x40\xc4\xfc\xb9\xb3\x67\x4e\x9f" \
@@ -30832,7 +30847,7 @@ image_126_data = \
     "\xac\xf4\x34\x23\x20\xdf\xcd\xc5\xc5\xc9\xc1\xd6\xda\xd2" \
     "\xdc\xd4\xd8\xc0\x00\x00\x67\x72\x4d\xc3"
 
-image_126_ctable = [
+image_127_ctable = [
     0x202020,0xff000008,0xff00000a,0xff00001b,0xff00001f,0xff00002e,0xff000245,0xff061106,0xff001840,0xff041e1b,0xff042c34,0xff003617,0xff0f2e3b,0xff0c2e45,
     0xff0e2f3d,0xff0c2f45,0xff00344d,0xff003355,0xff003668,0xff302d1d,0xff203532,0xff273a46,0xff004093,0xff612b00,0xff0e4763,0xff004d84,0xff2c4349,0xff21408d,
     0xffd90000,0xff5a4700,0xff8e2e00,0xff0c5e72,0xff006d5d,0xffff0000,0xff2e5e61,0xffff090d,0xff3b5c70,0xff3d5d70,0xff3556b0,0xff445d62,0xff008a82,0xffff230a,
@@ -30952,29 +30967,30 @@ embed_image_vec = [
     [24,24,8,image_101_data,427,118,image_101_ctable,1,"refresh24.png"],
     [24,24,8,image_102_data,266,128,image_102_ctable,1,"register_db24.png"],
     [24,24,8,image_103_data,156,43,image_103_ctable,1,"Relation24.png"],
-    [24,24,32,image_104_data,257,0,None,0,"relationType24.png"],
-    [24,24,8,image_105_data,178,41,image_105_ctable,1,"remove24.png"],
-    [24,24,32,image_106_data,801,0,None,1,"rename24.png"],
-    [24,24,8,image_107_data,179,62,image_107_ctable,1,"reset24.png"],
-    [24,24,8,image_108_data,174,52,image_108_ctable,1,"save24.png"],
-    [24,24,32,image_109_data,642,0,None,0,"save_all24.png"],
-    [24,24,8,image_110_data,345,128,image_110_ctable,1,"save_as24.png"],
-    [24,24,8,image_111_data,285,83,image_111_ctable,1,"search24.png"],
-    [24,24,8,image_112_data,325,128,image_112_ctable,1,"sql_execute24.png"],
-    [24,24,8,image_113_data,378,128,image_113_ctable,1,"sql_scriptopen24.png"],
-    [16,16,8,image_114_data,174,78,image_114_ctable,1,"txt_format16.png"],
-    [24,24,8,image_115_data,265,256,image_115_ctable,1,"user24.png"],
-    [24,24,8,image_116_data,329,128,image_116_ctable,1,"users24.png"],
-    [24,24,8,image_117_data,295,128,image_117_ctable,1,"user_add24.png"],
-    [24,24,32,image_118_data,861,0,None,1,"verify_document_24.png"],
-    [16,16,8,image_119_data,240,142,image_119_ctable,1,"video_format16.png"],
-    [23,19,32,image_120_data,352,0,None,0,"views.png"],
-    [23,19,32,image_121_data,352,0,None,0,"viewsmenu.png"],
-    [16,16,8,image_122_data,233,143,image_122_ctable,1,"vsd_format16.png"],
-    [24,24,8,image_123_data,237,62,image_123_ctable,1,"window_options24.png"],
-    [16,16,8,image_124_data,219,124,image_124_ctable,1,"xls_format16.png"],
-    [16,16,8,image_125_data,155,62,image_125_ctable,1,"xml_format16.png"],
-    [16,16,8,image_126_data,248,163,image_126_ctable,1,"zip_format16.png"],
+    [16,16,32,image_104_data,147,0,None,0,"relationType16.png"],
+    [24,24,32,image_105_data,257,0,None,0,"relationType24.png"],
+    [24,24,8,image_106_data,178,41,image_106_ctable,1,"remove24.png"],
+    [24,24,32,image_107_data,801,0,None,1,"rename24.png"],
+    [24,24,8,image_108_data,179,62,image_108_ctable,1,"reset24.png"],
+    [24,24,8,image_109_data,174,52,image_109_ctable,1,"save24.png"],
+    [24,24,32,image_110_data,642,0,None,0,"save_all24.png"],
+    [24,24,8,image_111_data,345,128,image_111_ctable,1,"save_as24.png"],
+    [24,24,8,image_112_data,285,83,image_112_ctable,1,"search24.png"],
+    [24,24,8,image_113_data,325,128,image_113_ctable,1,"sql_execute24.png"],
+    [24,24,8,image_114_data,378,128,image_114_ctable,1,"sql_scriptopen24.png"],
+    [16,16,8,image_115_data,174,78,image_115_ctable,1,"txt_format16.png"],
+    [24,24,8,image_116_data,265,256,image_116_ctable,1,"user24.png"],
+    [24,24,8,image_117_data,329,128,image_117_ctable,1,"users24.png"],
+    [24,24,8,image_118_data,295,128,image_118_ctable,1,"user_add24.png"],
+    [24,24,32,image_119_data,861,0,None,1,"verify_document_24.png"],
+    [16,16,8,image_120_data,240,142,image_120_ctable,1,"video_format16.png"],
+    [23,19,32,image_121_data,352,0,None,0,"views.png"],
+    [23,19,32,image_122_data,352,0,None,0,"viewsmenu.png"],
+    [16,16,8,image_123_data,233,143,image_123_ctable,1,"vsd_format16.png"],
+    [24,24,8,image_124_data,237,62,image_124_ctable,1,"window_options24.png"],
+    [16,16,8,image_125_data,219,124,image_125_ctable,1,"xls_format16.png"],
+    [16,16,8,image_126_data,155,62,image_126_ctable,1,"xml_format16.png"],
+    [16,16,8,image_127_data,248,163,image_127_ctable,1,"zip_format16.png"],
 ]
 
 
