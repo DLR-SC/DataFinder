@@ -37,7 +37,7 @@
 
 
 """ 
-The standard hello world example.
+Performs tests using data store "Data Store" and data type "Directory".
 """
 
 
@@ -58,7 +58,7 @@ from datafinder.script_api.properties import \
 __version__ = "$Revision-Id$" 
 
 
-_DATA_STORE_NAME = "Cloud Store" # Change this to use another data store
+_DATA_STORE_NAME = "Data Store" # Change this to use another data store
 # Change this to use another data type
 # The data type should allow recursive definitions
 _DATA_TYPE_NAME = "Directory" # Change this to use with another data model
@@ -92,7 +92,7 @@ class _Author(DomainObject):
         
 def _createLeaf():
     for _ in range(3):
-        collectionPaths = [u"/test 1" , u"/test 1" + "/sub test"]
+        collectionPaths = [u"/test 1" + _SMALL_AE, u"/test 1" + _SMALL_AE + "/sub test"]
 
         # Create test collection structure and a test file
         for path in collectionPaths: 
@@ -162,4 +162,3 @@ else:
 #    _createLeaf()
     
     _log.error("Please connect the shared repository.")
-    
