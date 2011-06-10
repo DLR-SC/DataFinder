@@ -123,7 +123,7 @@ class-rgx=_{0,1}[A-Z][a-zA-Z0-9]*_{0,1}$
 function-rgx=_{0,2}[a-z][a-zA-Z0-9]*_{0,1}$
 
 # Regular expression which should only match correct method names
-method-rgx=((_{0,2}[a-z][a-zA-Z0-9]*$)|(__[a-z0-9]*__))
+method-rgx=((_{0,2}[a-z][a-zA-Z0-9]*_{0,1}$)|(__[a-z0-9]*__))
 
 # Regular expression which should only match correct instance attribute names
 attr-rgx=_{0,2}[a-z][a-zA-Z0-9]*_{0,2}$
@@ -224,7 +224,7 @@ max-branchs=12
 max-statements=100
 
 # Maximum number of parents for a class (see R0901).
-max-parents=6
+max-parents=7
 
 # Maximum number of attributes for a class (see R0902).
 max-attributes=15
