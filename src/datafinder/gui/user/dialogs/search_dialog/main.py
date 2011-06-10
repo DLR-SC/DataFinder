@@ -561,7 +561,6 @@ class _ServerSearchStoreModel(QtCore.QAbstractTableModel):
             self._preferences.clearSearchQueries()
             for name, query, _ in self._storedSearchQueries:
                 self._preferences.addSearchQuery(name, query)
-            self._preferences.store()
         self._dirty = False
 
     def restrictionFromIndex(self, index):

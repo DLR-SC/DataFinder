@@ -207,7 +207,6 @@ class AuthConnectDialogView(QDialog, Ui_AuthConnectDialog):
             self._preferences.useLdap = preferencesDialog.useLdap
             self._preferences.ldapBaseDn = preferencesDialog.ldapBaseDn
             self._preferences.ldapServerUri = preferencesDialog.ldapServerUri
-            self._preferences.store()
     
     def _editLocationActionSlot(self):
         """ Shows the edit Loaction dialog for more information on the location settings"""

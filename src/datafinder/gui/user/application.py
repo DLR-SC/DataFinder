@@ -71,7 +71,7 @@ class MainWindow(Ui_mainWindow, QtGui.QMainWindow, FocusObserver):
     """
     This class defines the MainWindow of the DataFinder User Client.
     This class is a singleton and can only exists one time per datafinder instance.
-    """
+    """ 
 
     def __init__(self, parent=None):
         """
@@ -348,7 +348,7 @@ class Application(QtGui.QApplication):
         self.__unmanagedRepositoryController = UnmanagedRepositoryController(self.__mainWindow, repositoryManager)
         self.__managedRepositoryController = ManagedRepositoryController(self.__mainWindow, repositoryManager)
         self.__scriptController = ScriptController(repositoryManager.scriptRegistry, 
-                                                   self.__unmanagedRepositoryController.model, 
+                                                   self.__unmanagedRepositoryController.model,
                                                    self.__mainWindow)
         self.__unmanagedRepositoryController.load(self.__managedRepositoryController, self.__scriptController)
         self.__managedRepositoryController.load(self.__unmanagedRepositoryController, self.__scriptController)
@@ -380,6 +380,19 @@ class Application(QtGui.QApplication):
 
         #Log message that everything is fine...
         rootLogger.info("DataFinder successful started.")
+
+    @staticmethod
+    def exec_():
+        """ This is a workaround for those systems that 
+        crash on Qt exit. It is ensured that all registered
+        exit functions are executed before Qt the application exits. """
+        # pylint: disable=W0212
+        
+        QtGui.QApplication.exec_()
+        try: 
+            atexit._run_exitfuncs()
+        except: # pylint: disable=W0702
+            pass # _run_exitfuncs already prints errors to stderr
 
 
 class _ScriptApiContext(object):

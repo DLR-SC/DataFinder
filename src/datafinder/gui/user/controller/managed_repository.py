@@ -233,14 +233,8 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
                 password = connectDialog.password
             self._repositoryManager.preferences.addConnection(connectDialog.uri, connectDialog.username, password,
                                                               defaultDataStore, defaultArchiveStore, defaultOfflineStore) 
-            try:
-                self._repositoryManager.savePreferences()
-            except ConfigurationError, error:
-                self._logger.error("Cannot connect repository. Reason: '%s'" % error.message)
-                self._mainWindow.connectAction.setEnabled(True)
-            else:
-                self._workerThread = util.startNewQtThread(self._doConnect, self._connectCallback, 
-                                                           connectDialog.uri, connectDialog.username, connectDialog.password)
+            self._workerThread = util.startNewQtThread(self._doConnect, self._connectCallback, 
+                                                       connectDialog.uri, connectDialog.username, connectDialog.password)
 
     def _connectCallback(self):
         """ Callback for the thread establishing the repository connection. """
@@ -306,4 +300,3 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
                 self._repositoryManager.preferences.addConnection(configurationUri, connection.username, connection.password, 
                                                                   dialog.defaultDataStore, dialog.defaultArchiveStore, 
                                                                   dialog.defaultOfflineStore)
-                self._repositoryManager.savePreferences()

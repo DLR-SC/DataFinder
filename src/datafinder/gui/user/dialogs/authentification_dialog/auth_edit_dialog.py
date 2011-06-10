@@ -205,4 +205,3 @@ class AuthEditDialogView(QtGui.QDialog, Ui_editAuth):
             self._preferences.useLdap = preferencesDialog.useLdap
             self._preferences.ldapBaseDn = preferencesDialog.ldapBaseDn
             self._preferences.ldapServerUri = preferencesDialog.ldapServerUri
-            self._preferences.store()
