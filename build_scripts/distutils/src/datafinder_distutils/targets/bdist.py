@@ -69,7 +69,9 @@ _forcedIncludes = ["datafinder", "sgmllib", "htmlentitydefs",
 				   "datafinder.persistence.adapters.tsm.factory",
                    "datafinder.persistence.adapters.archive.factory",
                    "datafinder.persistence.adapters.svn.factory",
+                   "datafinder.script_api.events",
                    "datafinder.script_api.repository",
+                   "datafinder.script_api.properties.constants",
                    "datafinder.script_api.properties.property_support",
                    "datafinder.script_api.item.item_support"]
 _win32ForcedIncludes = ["win32com", "win32com.client"]
