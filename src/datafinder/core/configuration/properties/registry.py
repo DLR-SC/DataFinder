@@ -197,7 +197,7 @@ class PropertyDefinitionRegistry(object):
         archivePartIndexProperty = PropertyDefinition(
             const.ARCHIVE_PART_INDEX_ID, 
             const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-            property_type.NumberType(0, None, 0, 0),
+            property_type.NumberType(0, None),
             const.ARCHIVE_PART_INDEX_DISPLAYNAME,
             const.ARCHIVE_PART_INDEX_DESCRIPTION)
         self._systemPropertyDefinitions.append(archivePartIndexProperty)
@@ -205,7 +205,7 @@ class PropertyDefinitionRegistry(object):
         archivePartCount = PropertyDefinition(
             const.ARCHIVE_PART_COUNT_ID, 
             const.MANAGED_SYSTEM_PROPERTY_CATEGORY,
-            property_type.NumberType(0, None, 0, 0),
+            property_type.NumberType(0, None),
             const.ARCHIVE_PART_COUNT_DISPLAYNAME,
             const.ARCHIVE_PART_COUNT_DESCRIPTION)
         self._systemPropertyDefinitions.append(archivePartCount)

@@ -140,6 +140,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
             customProperties.update(properties)
             newJsonString = json_format.convertToPersistenceFormat(customProperties)
             try:
+                connection.update(self.identifier)
                 connection.setProperty(self.identifier, JSON_PROPERTY_NAME, newJsonString)
             except SubversionError, error:
                 errorMessage = "Cannot update properties of item '%s'. " % self.identifier \
@@ -159,6 +160,7 @@ class MetadataSubversionAdapter(NullMetadataStorer):
                     del customProperties[propertyId]
             newJsonString = json_format.convertToPersistenceFormat(customProperties)
             try:
+                connection.update(self.identifier)
                 connection.setProperty(self.identifier, JSON_PROPERTY_NAME, newJsonString)
             except SubversionError, error:
                 errorMessage = "Cannot delete properties of item '%s'. " % self.identifier \
