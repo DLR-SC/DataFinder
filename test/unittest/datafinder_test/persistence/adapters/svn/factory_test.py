@@ -62,7 +62,8 @@ __version__ = "$Revision-Id$"
 class FileSystemTestCase(unittest.TestCase):
 
     def setUp(self):
-        self._createSvnConnectionMock = SimpleMock(SimpleMock())
+        self._connectionMock = SimpleMock()
+        self._createSvnConnectionMock = SimpleMock(self._connectionMock)
         connection_pool.util.createSubversionConnection = self._createSvnConnectionMock
         factory.FileSystem._connectionManager = ConnectionPoolManager(10) # Ensure it is empty
         self._factory = factory.FileSystem(BaseConfiguration("http://svn.test.de/svn"))
@@ -84,6 +85,14 @@ class FileSystemTestCase(unittest.TestCase):
         
         # Error
         self.assertRaises(PersistenceError, self._factory.updateCredentials, dict())
+        
+    def testPrepareUsage(self):
+        # Success
+        self._factory.prepareUsage()
+        
+        # Error
+        self._connectionMock.error = PersistenceError("")
+        self.assertRaises(PersistenceError, self._factory.prepareUsage)
         
     def testRelease(self):
         # Success

@@ -81,8 +81,6 @@ class CPythonSubversionWrapper(object):
             lambda trustData: (True, trustData["failures"], True)
         self._repositoryUri = repositoryUri
         
-        self._initializeWorkingCopy()
-        
     def _getLogin(self, _, __, ___):
         """ Provides the login information for the pysvn
         client. """
@@ -93,7 +91,7 @@ class CPythonSubversionWrapper(object):
             self._loginTries += 1
             return (True, self._username, self._password, False)
         
-    def _initializeWorkingCopy(self):
+    def initializeWorkingCopy(self):
         """ Checks the working copy out if it does not exist. """
         
         try: 
@@ -304,6 +302,14 @@ class CPythonSubversionWrapper(object):
                 raise SubversionError(error)
         return entry
 
+    @property
+    def canBeAccessed(self):
+        try:
+            self._client.log(self._repositoryUri)
+            return True
+        except ClientError:
+            return False
+        
     @property
     def workingCopyPath(self):
         return self._workingCopyPath

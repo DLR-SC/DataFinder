@@ -116,6 +116,15 @@ class FileSystem(BaseFileSystem):
         
         self._connectionManager.remove(self._configuration.baseUrl)
         
+    def prepareUsage(self):
+        """ Creates the working copy before any action is performed. """
+        
+        connection = self._getConnectionPool().acquire()
+        try:
+            connection.initializeWorkingCopy()
+        finally:
+            self._getConnectionPool().release(connection)
+
     @property
     def hasCustomMetadataSupport(self):
         """ 
@@ -136,5 +145,7 @@ class FileSystem(BaseFileSystem):
             self._logger.debug(error)
             return False
         else:
-            self._getConnectionPool().release(connection)
-            return True
+            try:
+                return connection.canBeAccessed
+            finally:
+                self._getConnectionPool().release(connection)

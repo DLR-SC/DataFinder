@@ -43,6 +43,7 @@ Implements a SVN specific data adapter for Jython.
 """
 
 
+import os
 from java.io import File
 
 from org.tmatesoft.svn.core import SVNException, SVNURL, SVNNodeKind, SVNDepth, \
@@ -99,12 +100,19 @@ class JythonSubversionWrapper(object):
             self._svnCommitClient = SVNCommitClient(self._authManager, None)
             self._svnCopyClient = SVNCopyClient(self._authManager, None)
             self._svnUpdateClient = SVNUpdateClient(self._authManager, None)
-            self._svnUpdateClient.doCheckout(self._repositoryURL, self._repoWorkingCopyFile, SVNRevision.HEAD, SVNRevision.HEAD, True)
         except SVNException, error:
             raise PersistenceError(error) 
         except TypeError, error:
             raise PersistenceError(error) 
     
+    def initializeWorkingCopy(self):
+        try:
+            if not os.path.exists(self._repoWorkingCopyPath):
+                self._svnUpdateClient.doCheckout(self._repositoryURL, self._repoWorkingCopyFile, 
+                                                 SVNRevision.HEAD, SVNRevision.HEAD, True)
+        except SVNException, error:
+            raise PersistenceError(error) 
+        
     def isLeaf(self, path):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
           
@@ -269,3 +277,12 @@ class JythonSubversionWrapper(object):
         """ Returns the working copy path. """
         
         return self._repoWorkingCopyPath
+
+    @property
+    def canBeAccessed(self):
+        try:
+            self._svnWorkingCopyClient.doInfo(
+                self._repositoryURL, SVNRevision.HEAD, SVNRevision.HEAD)
+            return True
+        except SVNException:
+            return False
