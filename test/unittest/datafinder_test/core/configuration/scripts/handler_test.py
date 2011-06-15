@@ -150,11 +150,3 @@ class ScripthandlerTestCase(unittest.TestCase):
         self._sourceFileStorerMock.error = SimpleMock(True)
         self._targetFileStorerMock.error = PersistenceError("")
         self.assertRaises(ConfigurationError, self._handler.removeScript, SimpleMock(name="scriptBaseFileName"))
-        
-    def testExecuteStartupScripts(self):
-        # Success
-        self._handler.executeStartupScripts()
-        
-        # Error
-        self._registryMock.error = ConfigurationError("")
-        self.assertRaises(ConfigurationError, self._handler.executeStartupScripts)

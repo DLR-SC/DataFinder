@@ -243,10 +243,6 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
         if not repository is None:
             self._model.load(repository)
             self._scriptController.loadSharedScripts(repository.configuration.scripts)
-            try:
-                repository.configuration.scriptHandler.executeStartupScripts()
-            except ConfigurationError, error:
-                self._logger.error(str(error.args))
             self._controller.setConnectionState(True)
         else:
             if not self._workerThread.error is None:

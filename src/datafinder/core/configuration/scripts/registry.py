@@ -136,34 +136,6 @@ class ScriptRegistry(object):
             if location == constants.LOCAL_SCRIPT_LOCATION:
                 self._preferences.addScriptUri(script.uri)
             
-    def executeStartupScripts(self, location):
-        """ Executes all scripts which are indicated the @automatic tag.
-        
-        @param location: Represents the scope / location of the scripts.
-        @type location: C{unicode}
-        
-        @raise ConfigurationError: Signals all failed scripts.
-        """
-        
-        if location in self._registeredScripts:
-            failedScripts = list()
-            for script in self._registeredScripts[location].values():
-                try:
-                    try:
-                        for subScript in script.scripts: 
-                            if subScript.automatic:
-                                subScript.execute()
-                    except AttributeError: # It is not a script collection                 
-                        if script.automatic:
-                            script.execute()
-                except ConfigurationError, error:
-                    failedScripts.append((script, error))
-            if len(failedScripts) > 0:
-                message = "The execution of the following scripts failed:\n"
-                for script, error in failedScripts:
-                    message += "%s:%s\n" % (script.name, str(error.args))
-                raise ConfigurationError(message)
-                        
     def unregister(self, location, script):
         """ 
         Unregisters the given script.

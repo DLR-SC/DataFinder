@@ -122,16 +122,6 @@ class ScriptRegistryTestCase(unittest.TestCase):
         self._registry.unregister(LOCAL_SCRIPT_LOCATION, firstScript)
         
         
-    def testExecuteStartupScripts(self):
-        # Success
-        self._registry.register("location", [_ScriptMock("test"), _ScriptCollectionMock("testCollection")])
-        self._registry.executeStartupScripts("location")
-        
-        # Error during execution
-        self._registry.register("location", [_ScriptMock("error", True)])
-        self.assertRaises(ConfigurationError, self._registry.executeStartupScripts, "location")
-        
-        
 class _ScriptMock(object):
     def __init__(self, uri, error=False):
         self.uri = uri

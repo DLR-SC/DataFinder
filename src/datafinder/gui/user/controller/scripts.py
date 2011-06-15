@@ -113,10 +113,6 @@ class ScriptController(object):
                      key=operator.attrgetter("title"))
         for script in scripts:
             self._addScript(script)
-        try:
-            self._scriptRegistry.executeStartupScripts(LOCAL_SCRIPT_LOCATION)
-        except ConfigurationError, error:
-            self._logger.error(str(error.args))    
         
     def _addScript(self, script, isLocal=True):
         """ Adds the corresponding actions for the given script. """
@@ -160,6 +156,32 @@ class ScriptController(object):
         else:
             removeScriptSlot = self._createRemoveScriptSlot(script, useScriptMenu, useScriptAction, None, preferencesAction)
             self._sharedScriptRemovalSlots.append(removeScriptSlot)
+            
+        self._exceuteAutomaticScript(script)
+        
+    def _exceuteAutomaticScript(self, script):
+        """ Executes the given script / the contained scripts if
+        they are indicated with the C{automatic} tag. """
+         
+        failedScripts = list()
+        try:
+            for subScript in script.scripts: 
+                if subScript.automatic:
+                    try:
+                        subScript.execute()
+                    except ConfigurationError, error:
+                        failedScripts.append((script, error))
+        except AttributeError: # It is a single script                 
+            if script.automatic:
+                try:
+                    script.execute()
+                except ConfigurationError, error:
+                    failedScripts.append((script, error))
+        if len(failedScripts) > 0:
+            message = "The execution of the following scripts failed:\n"
+            for script, error in failedScripts:
+                message += "%s:%s\n" % (script.name, str(error.args))
+            self._logger.error(message)
             
     def _createAction(self, parentMenu, name, slot=None, toolTip=None, icon=None):
         """ Creates the requested action. """
