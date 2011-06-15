@@ -77,14 +77,13 @@ _forcedIncludes = ["datafinder", "sgmllib", "htmlentitydefs",
 _win32ForcedIncludes = ["win32com", "win32com.client"]
 _qtSpecificForcedIncludes = ["qt", "sip"]
 
-_MANIFEST_FILE_CONTENT = """
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+_MANIFEST_FILE_CONTENT = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-    <noInheritable />
-    <assemblyIdentity type="win32" name="Microsoft.VC90.CRT" version="9.0.30411.0" processorArchitecture="x86" />
-    <file name="msvcr90.dll" /> 
-    <file name="msvcp90.dll" /> 
-    <file name="msvcm90.dll" />
+ <dependency>
+   <dependentAssembly>
+     <assemblyIdentity type="win32" name="Microsoft.VC90.CRT" version="9.0.30729.1" processorArchitecture="x86" publicKeyToken='1fc8b3b9a1e18e3b'/>
+   </dependentAssembly>
+ </dependency>
 </assembly>
 """
 _DOCUMENTATION_DIRECTORY = "doc"
