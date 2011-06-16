@@ -81,8 +81,7 @@ datastores.OFFLINE_STORE: [standardOptionsPage, storageOptionsPage],
 datastores.DEFAULT_STORE: [standardOptionsPage],
 datastores.TSM_CONNECTOR_STORE: [standardOptionsPage, storageOptionsPage,
                                 authenticationOptionsPage],
-datastores.S3_STORE: [standardOptionsPage, storageOptionsPage,
-                                authenticationOptionsPage],
+datastores.S3_STORE: [standardOptionsPage, authenticationOptionsPage],
 datastores.SUBVERSION_STORE: [standardOptionsPage, storageOptionsPage, 
                               authenticationOptionsPage],
 }
@@ -126,8 +125,6 @@ class DataStoreConfigurationWizardController(object):
             offline.storage_option_controller.StorageOptionController(self.wizardView, self, storageOptionsPage),
            datastores.TSM_CONNECTOR_STORE: 
             tsm.storage_option_controller.StorageOptionController(self.wizardView, self, storageOptionsPage),
-           datastores.S3_STORE:
-            s3.storage_option_controller.StorageOptionController(self.wizardView, self, storageOptionsPage),
            _defaultForAllDataStores:
             default.storage_option_controller.StorageOptionController(self.wizardView, self, storageOptionsPage)
          },

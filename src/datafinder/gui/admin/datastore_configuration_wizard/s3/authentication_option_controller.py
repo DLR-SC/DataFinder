@@ -58,10 +58,6 @@ class AuthenticationOptionController(AbstractOptionController):
         """
         
         AbstractOptionController.__init__(self, wizardView, wizardController, pageType)
-        #self.wizardView.externalWebDavPublicKeyLabel.show()
-        #self.wizardView.externalWebDavPrivateKeyLabel.show()
-        #self.wizardView.externalWebdavUploadPrivateKeyFilePushButton.show()
-        #self.wizardView.externalWebdavUploadPublicKeyFilePushButton.show()
         self.wizardView.connect(self.wizardView.userLineEdit, SIGNAL("textChanged(const QString&)"), self._userTextChanged)
         self.wizardView.connect(self.wizardView.passwordLineEdit, SIGNAL("textChanged(const QString&)"), self._passwordTextChanged)  
     
