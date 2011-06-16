@@ -172,8 +172,10 @@ class ActionHandler(object):
             if sourceIndex.isValid():
                 sourceItem = self._parentModel.nodeFromIndex(sourceIndex)
                 targetParentItem = self._parentModel.nodeFromIndex(targetParentIndex)
-                if sourceItem.path == targetParentItem.path or sourceItem.path in targetParentItem.path:
-                    raise ItemError("Cannot move item in its own sub-structure.")
+                if targetParentItem.path.startswith(sourceItem.path):
+                    postPath = targetParentItem.path[len(sourceItem.path):]
+                    if len(postPath) == 0 or postPath[0] == "/":
+                        raise ItemError("Cannot move item in its own sub-structure.")
                 targetName = self._repository.determineUniqueItemName(newName or sourceItem.name, targetParentItem)
                 try:
                     targetItem = self._createNewItem(targetName, targetParentItem, sourceItem.isCollection, sourceItem.linkTarget)

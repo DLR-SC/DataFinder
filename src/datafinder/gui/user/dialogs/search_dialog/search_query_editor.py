@@ -259,7 +259,7 @@ class Completer(QtGui.QCompleter):
         counter = 0
         keys = completions.keys()
         if sortCompletions:
-            keys.sort(key=unicode.lower)
+            keys.sort()
         for name in keys:
             item = QtGui.QStandardItem(name)
             item.setToolTip(completions[name])
