@@ -174,7 +174,7 @@ class GetPersistenceRepresentationTestCase(unittest.TestCase):
         persistedValue = decimal.Decimal("4.5")
         self.assertEquals(json_format.convertToPersistenceFormat(persistedValue), u"4.5")
         persistedValue = decimal.Decimal("5")
-        self.assertEquals(json_format.convertToPersistenceFormat(persistedValue), u"5.0")
+        self.assertEquals(json_format.convertToPersistenceFormat(persistedValue), u"5")
         # Raw integer
         self.assertEquals(json_format.convertToPersistenceFormat(5), u"5")
         # Raw float
@@ -186,10 +186,10 @@ class GetPersistenceRepresentationTestCase(unittest.TestCase):
                           '"2006-10-16T08:19:39Z"')
         
     def testListValue(self):
-        persistedValue = [decimal.Decimal("2006"), decimal.Decimal("10"), 
-                          decimal.Decimal("16"), decimal.Decimal("10")]
+        persistedValue = [decimal.Decimal("2006"), decimal.Decimal("10.0"), 
+                          decimal.Decimal("16"), decimal.Decimal("10.01")]
         self.assertEquals(json_format.convertToPersistenceFormat(persistedValue), 
-                          u"[2006.0, 10.0, 16.0, 10.0]")
+                          u"[2006, 10.0, 16, 10.01]")
         persistedValue = list()
         self.assertEquals(json_format.convertToPersistenceFormat(persistedValue), 
                           u"[]")

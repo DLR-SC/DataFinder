@@ -108,7 +108,11 @@ def _jsonEncoder(obj):
     if isinstance(obj, datetime.datetime):
         obj = datetime_util.convertToIso8601(obj)
     elif isinstance(obj, decimal.Decimal):
-        obj = float(str(obj))
+        decimalTuple = obj.as_tuple()
+        if decimalTuple.exponent == 0:
+            obj = int(obj)
+        else:
+            obj = float(obj)
     return obj
 
  

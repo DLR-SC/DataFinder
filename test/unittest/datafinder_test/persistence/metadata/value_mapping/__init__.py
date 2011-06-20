@@ -38,3 +38,5 @@
 """ 
 Provides test cases for the property encoding/decoding.
 """
+
+__version__ = "$Revision-Id$" 
