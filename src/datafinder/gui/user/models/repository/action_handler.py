@@ -134,20 +134,22 @@ class ActionHandler(object):
                 sourceItem = self._parentModel.nodeFromIndex(sourceIndex)
                 targetParentItem = self._parentModel.nodeFromIndex(targetParentIndex)
                 targetName = self._repository.determineUniqueItemName(sourceItem.name, targetParentItem)
-                targetItem = self._createNewItem(targetName, targetParentItem, sourceItem.isCollection, sourceItem.linkTarget)
-                
+                targetItem = self._createNewItem(
+                    targetName, targetParentItem, sourceItem.isCollection, 
+                    sourceItem.linkTarget, sourceItem.isLink)
                 try:
                     sourceItem.copy(targetItem)
                 except ItemError, error:
                     targetItem.invalidate()
                     raise error
 
-    def _createNewItem(self, name, parent, isCollection=False, linkTargetItem=None):
+    def _createNewItem(self, name, parent, isCollection=False, 
+                       linkTargetItem=None, isLink=False):
         """ Item factory helper method. """
         
         if isCollection:
             item = self._repository.createCollection(name, parent)
-        elif not linkTargetItem is None:
+        elif isLink:
             item = self._repository.createLink(name, linkTargetItem, parent)
         else:
             item = self._repository.createLeaf(name, parent)
@@ -178,7 +180,9 @@ class ActionHandler(object):
                         raise ItemError("Cannot move item in its own sub-structure.")
                 targetName = self._repository.determineUniqueItemName(newName or sourceItem.name, targetParentItem)
                 try:
-                    targetItem = self._createNewItem(targetName, targetParentItem, sourceItem.isCollection, sourceItem.linkTarget)
+                    targetItem = self._createNewItem(
+                        targetName, targetParentItem, sourceItem.isCollection, 
+                        sourceItem.linkTarget, sourceItem.isLink)
                     sourceItem.move(targetItem)
                 except ItemError, error:
                     targetItem.invalidate()
@@ -314,7 +318,7 @@ class ActionHandler(object):
         if sys.platform == "win32" and not name.endswith(".lnk") and parentItem.uri.startswith("file:///"):
             name += ".lnk"
         name = self._repository.determineUniqueItemName(name, parentItem)
-        link = self._createNewItem(name, parentItem, linkTargetItem=targetItem)
+        link = self._createNewItem(name, parentItem, linkTargetItem=targetItem, isLink=True)
         if properties is None:
             properties = list()
         

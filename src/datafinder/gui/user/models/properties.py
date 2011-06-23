@@ -552,6 +552,7 @@ class PropertiesModel(QtCore.QAbstractTableModel):
         @type itemIndex: L{QModelIndex<PyQt4.QtCore.QModelIndex>}
         """
 
+        self.reset()
         self._properties = list(list())
         self.isReadOnly = True
         if index.isValid():
