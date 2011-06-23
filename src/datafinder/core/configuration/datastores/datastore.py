@@ -101,6 +101,9 @@ class DefaultDataStore(object):
             return cmp(self.name, other.name)
         except AttributeError:
             return 1
+        
+    def __hash__(self):
+        return hash(self.name)
 
     @property
     def dataLocationUri(self):
