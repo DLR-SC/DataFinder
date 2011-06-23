@@ -46,6 +46,7 @@ import mimetypes
 
 from datafinder.persistence.adapters.svn.constants import JSON_PROPERTY_NAME
 from datafinder.persistence.adapters.svn.error import SubversionError
+from datafinder.persistence.adapters.svn.util import util
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.metadata import constants as const
 from datafinder.persistence.metadata.value_mapping import custom_format
@@ -104,10 +105,15 @@ class MetadataSubversionAdapter(NullMetadataStorer):
         customProperties = dict()
         try:
             jsonString = connection.getProperty(self.identifier, JSON_PROPERTY_NAME)
-            if not jsonString is None:
-                customProperties = json_format.convertFromPersistenceFormat(jsonString)
-        except SubversionError, error:
-            raise PersistenceError(str(error))
+        except SubversionError:
+            parentId = util.determineParentPath(self.identifier)
+            try:
+                connection.update(parentId)
+                jsonString = connection.getProperty(self.identifier, JSON_PROPERTY_NAME)
+            except SubversionError, error:
+                raise PersistenceError(str(error))
+        if not jsonString is None:
+            customProperties = json_format.convertFromPersistenceFormat(jsonString)
         return customProperties
         
     def _retrieveSystemProperties(self, connection):

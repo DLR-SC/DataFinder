@@ -43,6 +43,7 @@ Tests the base configuration.
 import unittest
 
 from datafinder.persistence.common.configuration import BaseConfiguration
+from datafinder.persistence.error import PersistenceError
 
 
 __version__ = "$Revision-Id:$" 
@@ -86,3 +87,11 @@ class BaseConfigurationTestCase(unittest.TestCase):
         self.assertEquals(self._baseConfig.uriPort, None)
         self.assertEquals(self._baseConfig.uriPath, "")
         self.assertEquals(self._baseConfig.baseUri, "")
+
+        # Testing parsing error
+        for uri in ["http://test.de:as", "file://c:/as/as"]:
+            try:
+                self._baseConfig.baseUri = uri
+                self.fail("No PersistenceError has been thrown.")
+            except PersistenceError:
+                self.assertTrue(True)

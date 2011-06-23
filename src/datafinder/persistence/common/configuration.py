@@ -42,6 +42,8 @@ Module provides class defining basic configuration parameters.
 
 from urlparse import urlsplit
 
+from datafinder.persistence.error import PersistenceError
+
 
 __version__ = "$Revision-Id:$" 
 
@@ -85,14 +87,17 @@ class BaseConfiguration(object):
         # cannot correctly determine it.
 
         if not baseUri is None:
-            parsedUri = urlsplit(baseUri)
-            self._baseUri = parsedUri.geturl()
-            self.uriScheme = parsedUri.scheme
-            self.uriNetloc = parsedUri.netloc
-            self.uriHostname = parsedUri.hostname
-            self.uriPort = parsedUri.port
-            self.uriPath = parsedUri.path
-        
+            try:
+                parsedUri = urlsplit(baseUri)
+                self._baseUri = parsedUri.geturl()
+                self.uriScheme = parsedUri.scheme
+                self.uriNetloc = parsedUri.netloc
+                self.uriHostname = parsedUri.hostname
+                self.uriPort = parsedUri.port
+                self.uriPath = parsedUri.path
+            except ValueError, error:
+                msg = "Cannot parse URI '%s'. Reason: '%s'" % (baseUri, str(error))
+                raise PersistenceError(msg)
     baseUri = property(__getBaseUri, __setBaseUri)
         
     def __getattr__(self, _):

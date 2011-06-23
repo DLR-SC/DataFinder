@@ -53,6 +53,7 @@ from datafinder_test.mocks import SimpleMock
 __version__ = "$Revision-Id$" 
 
 
+
 class _OsModuleMock(SimpleMock):
     """ Mocks the relevant functions of the os module. """
     
@@ -66,7 +67,7 @@ class _OsModuleMock(SimpleMock):
         
     @staticmethod
     def strerror(errorNumber):
-        """ Explicitly mocking the error interpretation function. """
+        """ Explicitly mocking the error code function. """
         
         return str(errorNumber)
 
@@ -92,13 +93,24 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
     """ Tests the SVN - data adapter implementation. """
     
     def setUp(self):
+        # Install os mock
         self._osPathMock = SimpleMock()
         self._osModuleMock = _OsModuleMock(self._osPathMock)
         svn_adapter.os = self._osModuleMock
+        # Install shutil mock
+        self._shutilMock = SimpleMock()
+        svn_adapter.shutil = self._shutilMock
+        # Install open mock
         self._openMock = _OpenMock()
+        self._openFunction = globals()["__builtins__"]["open"]
+        globals()["__builtins__"]["open"] = self._openMock
+        
         self._connectionMock = SimpleMock(workingCopyPath="")
         self._adapter = svn_adapter.DataSubversionAdapter(
             "/path/identify", SimpleMock(self._connectionMock))
+        
+    def tearDown(self):
+        globals()["__builtins__"]["open"] = self._openFunction
            
     def testLinkTarget(self):
         # Is a link
@@ -106,8 +118,9 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
             {"getProperty": ("/thelinkTargetPath", None)}
         self.assertEquals(self._adapter.linkTarget, "/thelinkTargetPath")
         self.assertTrue(self._adapter.isLink)
-        
+
         # No link
+        self._connectionMock.methodNameResultMap = None
         self._connectionMock.error = SubversionError("")
         self.assertEquals(self._adapter.linkTarget, None)
         self.assertFalse(self._adapter.isLink)
@@ -147,46 +160,59 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
             self.assertTrue(True)
 
     def testCreateResource(self):
-        openFunction = globals()["__builtins__"]["open"]
-        globals()["__builtins__"]["open"] = self._openMock
-        try:
-            # Success
-            self._adapter.createResource()
-            
-            # Error
-            self._connectionMock.error = SubversionError("")
-            self.assertRaises(PersistenceError, self._adapter.createResource)
-            self._openMock.error = True
-            self.assertRaises(PersistenceError, self._adapter.createResource)
-        finally:
-            globals()["__builtins__"]["open"] = openFunction
+        # Success
+        self._adapter.createResource()
+        # Local not versioned directory exists but gets removed
+        self._osPathMock.methodNameResultMap = {"exists": (True, None), "isdir": (True, None)}
+        self._adapter.createResource()
+        
+        # Error
+        # Problem to commit resource
+        self._connectionMock.error = SubversionError("")
+        self.assertRaises(PersistenceError, self._adapter.createResource)
+        
+        # Local file cannot be created
+        self._connectionMock.error = None
+        self._openMock.error = True
+        self.assertRaises(PersistenceError, self._adapter.createResource)
+        
+        # Local directory cannot be removed
+        self._osPathMock.methodNameResultMap = {"exists": (True, None), "isdir": (True, None)}
+        self._shutilMock.error = OSError("")
+        self.assertRaises(PersistenceError, self._adapter.createResource)
     
     def testCreateCollection(self):
         # Success
         self._adapter.createCollection()
         self._osPathMock.value = True
         self._adapter.createCollection(True)
+        # Local not versioned file exists but gets removed
+        self._osPathMock.methodNameResultMap = {"exists": (True, None), "isdir": (False, None)}
+        self._adapter.createCollection()
         
         # Error
+        # Problem to commit directory
         self._connectionMock.error = SubversionError("")
         self.assertRaises(PersistenceError, self._adapter.createCollection)
+        
+        # Problem creating local directory
+        self._connectionMock.error = None
         self._osModuleMock.error = OSError("")
         self.assertRaises(PersistenceError, self._adapter.createCollection)
         
+        # Local directory cannot be removed
+        self._osPathMock.methodNameResultMap = {"exists": (True, None), "isdir": (False, None)}
+        self.assertRaises(PersistenceError, self._adapter.createCollection)
+    
     def testCreateLink(self):
-        openFunction = globals()["__builtins__"]["open"]
-        globals()["__builtins__"]["open"] = self._openMock
-        try:
-            # Success
-            self._adapter.createLink(SimpleMock(identifier="/destPath"))
-            
-            # Error
-            self._connectionMock.methodNameResultMap = \
-                {"setProperty": (None, SubversionError(""))}
-            self.assertRaises(PersistenceError, self._adapter.createLink, 
-                              SimpleMock(identifier="/destPath"))
-        finally:
-            globals()["__builtins__"]["open"] = openFunction
+        # Success
+        self._adapter.createLink(SimpleMock(identifier="/destPath"))
+        
+        # Error
+        self._connectionMock.methodNameResultMap = \
+            {"setProperty": (None, SubversionError(""))}
+        self.assertRaises(PersistenceError, self._adapter.createLink, 
+                          SimpleMock(identifier="/destPath"))
     
     def testGetChildren(self):
         # Success
@@ -198,34 +224,24 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         self.assertRaises(PersistenceError, self._adapter.getChildren)
         
     def testWriteData(self):
-        openFunction = globals()["__builtins__"]["open"]
-        globals()["__builtins__"]["open"] = self._openMock
-        try:
-            # Success
-            self._adapter.writeData(io.StringIO("test"))
-            
-            # Error
-            self._openMock.error = True
-            self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(""))
-            self._connectionMock.error = SubversionError("")
-            self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(""))
-        finally:
-            globals()["__builtins__"]["open"] = openFunction
+        # Success
+        self._adapter.writeData(io.StringIO("test"))
+        
+        # Error
+        self._openMock.error = True
+        self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(""))
+        self._connectionMock.error = SubversionError("")
+        self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(""))
         
     def testReadData (self):
-        openFunction = globals()["__builtins__"]["open"]
-        globals()["__builtins__"]["open"] = self._openMock
-        try:
-            # Success
-            self._adapter.readData()
-            
-            # Error
-            self._openMock.error = True
-            self.assertRaises(PersistenceError, self._adapter.readData)
-            self._connectionMock.error = SubversionError("")
-            self.assertRaises(PersistenceError, self._adapter.readData)
-        finally:
-            globals()["__builtins__"]["open"] = openFunction
+        # Success
+        self._adapter.readData()
+        
+        # Error
+        self._openMock.error = True
+        self.assertRaises(PersistenceError, self._adapter.readData)
+        self._connectionMock.error = SubversionError("")
+        self.assertRaises(PersistenceError, self._adapter.readData)
         
     def testDelete (self):
         # Success
@@ -257,12 +273,6 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         
     def testExists(self):
         # Success
-        self._osPathMock.value = True
         self.assertTrue(self._adapter.exists()) 
-        
-        self._osPathMock.value = False
-        self.assertFalse(self._adapter.exists())
-
-        # Error
         self._connectionMock.error = SubversionError("")
-        self.assertRaises(PersistenceError, self._adapter.exists)
+        self.assertFalse(self._adapter.exists())

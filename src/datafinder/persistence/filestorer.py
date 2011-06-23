@@ -162,8 +162,9 @@ class FileStorer(object):
         If the file storer is no link the property is C{None}.
         """
         
-        if not self.__dataStorer.linkTarget is None:
-            return self.__fileSystem.createFileStorer(self.__dataStorer.linkTarget)
+        linkTarget = self.__dataStorer.linkTarget
+        if not linkTarget is None:
+            return self.__fileSystem.createFileStorer(linkTarget)
     
     @property
     def isLink(self):

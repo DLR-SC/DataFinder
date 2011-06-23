@@ -42,6 +42,7 @@ Implements adapter for manipulating a SVN file system.
 
 import logging
 import os
+import shutil
 
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.adapters.svn.error import SubversionError
@@ -80,13 +81,21 @@ class DataSubversionAdapter(NullDataStorer):
 
         connection = self._connectionPool.acquire()
         try:
-            connection.update(util.determineParentPath(self.identifier))
-            result = connection.getProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME)
-            return result
+            return connection.getProperty(
+                self.identifier, constants.LINK_TARGET_PROPERTY_NAME)
         except SubversionError:
-            return None
+            try:
+                self._updateParentItem(connection)
+                return connection.getProperty(
+                    self.identifier, constants.LINK_TARGET_PROPERTY_NAME)
+            except SubversionError:
+                return None
         finally:
             self._connectionPool.release(connection)
+        
+    def _updateParentItem(self, connection):
+        parentId = util.determineParentPath(self.identifier)
+        connection.update(parentId)
         
     @property
     def isLink(self):
@@ -98,35 +107,40 @@ class DataSubversionAdapter(NullDataStorer):
     def isLeaf(self):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
+        return self._determinItemKind(False)
+            
+    def _determinItemKind(self, checkCollectionKind=True):
         connection = self._connectionPool.acquire()
+        if checkCollectionKind:
+            checkMethod = connection.isCollection
+        else:
+            checkMethod = connection.isLeaf
+        
+        # Perform the check
         try:
-            return connection.isLeaf(self.identifier)
-        except SubversionError, error:
-            errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" \
-                         % (self.identifier, error)
-            raise PersistenceError(errorMessage)
+            return checkMethod(self.identifier)
+        except SubversionError:
+            try:
+                self._updateParentItem(connection)
+                return checkMethod(self.identifier)
+            except SubversionError, error:
+                errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" \
+                             % (self.identifier, error)
+                raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
+    
+    @property
+    def isCollection(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
+        return self._determinItemKind()
+    
     @property
     def canAddChildren(self):
         """ @see L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         return self.isCollection
-
-    @property
-    def isCollection(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
-        
-        connection = self._connectionPool.acquire()
-        try:
-            return connection.isCollection(self.identifier)
-        except SubversionError, error:
-            errorMessage = u"Cannot determine resource type of '%s'. Reason: '%s'" \
-                           % (self.identifier, error)
-            raise PersistenceError(errorMessage)
-        finally:
-            self._connectionPool.release(connection)
 
     def createLink(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
@@ -134,9 +148,9 @@ class DataSubversionAdapter(NullDataStorer):
         self.createResource()
         connection = self._connectionPool.acquire()
         try:
+            connection.update(self.identifier)
             connection.setProperty(self.identifier, constants.LINK_TARGET_PROPERTY_NAME, 
                                    destination.identifier)
-            connection.checkin(self.identifier)
         except SubversionError, error:
             errorMessage = u"Cannot set property. Reason: '%s'" % error
             raise PersistenceError(errorMessage)
@@ -144,24 +158,38 @@ class DataSubversionAdapter(NullDataStorer):
             self._connectionPool.release(connection)
             
     def createResource(self):
-        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
 
         connection = self._connectionPool.acquire()
+        path = connection.workingCopyPath + self.identifier
         try:
-            fd = open(connection.workingCopyPath + self.identifier, "wb")
-            fd.close()
+            self._updateParentItem(connection)
+            if not os.path.exists(path):
+                self._createLocalFile(path)
+            else:
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                self._createLocalFile(path)
             connection.add(self.identifier)
             connection.checkin(self.identifier)
-        except IOError, error:
+        except OSError, error:
             errorMessage = os.strerror(error.errno)
             raise PersistenceError(errorMessage)
         except SubversionError, error:
-            os.remove(connection.workingCopyPath + self.identifier)
             errorMessage = u"Cannot create resource '%s'. Reason: '%s'" % (self.identifier, error)
             raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
             
+    @staticmethod
+    def _createLocalFile(path):
+        try:
+            fd = open(path, "wb")
+            fd.close()
+        except IOError, error:
+            errorMessage = os.strerror(error.errno)
+            raise PersistenceError(errorMessage)
+        
     def createCollection(self, recursively=False):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
 
@@ -171,8 +199,15 @@ class DataSubversionAdapter(NullDataStorer):
                 parent.createCollection(True)
         
         connection = self._connectionPool.acquire()
+        path = connection.workingCopyPath + self.identifier
         try:
-            os.mkdir(connection.workingCopyPath + self.identifier)
+            self._updateParentItem(connection)
+            if not os.path.exists(path):
+                self._createLocalDirectory(path)
+            else:
+                if not os.path.isdir(path):
+                    os.remove(path)
+                    self._createLocalDirectory(path)
             connection.add(self.identifier)
             connection.checkin(self.identifier)
         except OSError, error:
@@ -184,7 +219,11 @@ class DataSubversionAdapter(NullDataStorer):
             raise PersistenceError(errorMessage)
         finally:
             self._connectionPool.release(connection)
-                    
+            
+    @staticmethod
+    def _createLocalDirectory(path):
+        os.mkdir(path)
+              
     def _getParent(self):
         """ Helper which create the parent data storer. """
   
@@ -250,11 +289,9 @@ class DataSubversionAdapter(NullDataStorer):
     def delete(self):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
-        parentId = util.determineParentPath(self.identifier)
         connection = self._connectionPool.acquire()
         try:
             connection.delete(self.identifier)
-            connection.update(parentId)
         except SubversionError, error:
             errorMessage = u"Unable to delete item '%s'. " % self.identifier \
                            + u"Reason: %s" % error
@@ -271,11 +308,9 @@ class DataSubversionAdapter(NullDataStorer):
     def copy(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}  """
         
-        destinationParentId = util.determineParentPath(destination.identifier)
         connection = self._connectionPool.acquire()
         try:
             connection.copy(self.identifier, destination.identifier)
-            connection.update(destinationParentId)
         except SubversionError, error:
             errorMessage = u"Unable to copy item '%s' to '%s'. " \
                            % (self.identifier, destination.identifier) \
@@ -289,9 +324,10 @@ class DataSubversionAdapter(NullDataStorer):
 
         connection = self._connectionPool.acquire()
         try:
-            connection.update(util.determineParentPath(self.identifier))
-            return os.path.exists(connection.workingCopyPath + self.identifier)
-        except SubversionError, error:
-            raise PersistenceError("Cannot determine item existence. Reason: '%s'" % error)
+            self._updateParentItem(connection)
+            connection.info(self.identifier)
+            return True
+        except SubversionError:
+            return False
         finally:
             self._connectionPool.release(connection)

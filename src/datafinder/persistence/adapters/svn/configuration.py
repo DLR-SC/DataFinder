@@ -44,8 +44,8 @@ import hashlib
 import os
 import tempfile
 
-from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.error import PersistenceError
+from datafinder.persistence.adapters.svn.util.util import pepareSvnPath
 
 
 __version__ = "$Revision-Id$" 
@@ -60,7 +60,7 @@ class Configuration(object):
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """
         
-        path = baseConfiguration.uriPath.encode(constants.UTF8)
+        path = pepareSvnPath(baseConfiguration.uriPath)
         self.baseUrl = baseConfiguration.uriScheme + "://" + baseConfiguration.uriNetloc + path 
         self.protocol = baseConfiguration.uriScheme
 

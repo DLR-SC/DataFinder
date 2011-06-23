@@ -46,13 +46,13 @@ import os
 import pysvn
 import sys
 import threading
-import urllib
 
 from pysvn._pysvn_2_6 import ClientError
 
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.adapters.svn import constants
 from datafinder.persistence.adapters.svn.error import SubversionError
+from datafinder.persistence.adapters.svn.util.util import pepareSvnPath
 
 
 __version__ = "$Revision-Id$" 
@@ -94,7 +94,7 @@ class CPythonSubversionWrapper(object):
     def initializeWorkingCopy(self):
         """ Checks the working copy out if it does not exist. """
         
-        try: 
+        try:
             if not os.path.exists(self._workingCopyPath):
                 self._client.checkout(self._repositoryUri, self._workingCopyPath)
         except ClientError, error:
@@ -124,7 +124,7 @@ class CPythonSubversionWrapper(object):
     
     def update(self, path):
         """ Updates the working copy. 
-        This method is sychronized among different connections.
+        This method is synchronized among different connections.
         The update call also restores accidently deleted files (mode: infinity).
         """
         # pylint: disable=E1101
@@ -133,6 +133,8 @@ class CPythonSubversionWrapper(object):
         self._sharedState.lock.acquire()
         try:
             try:
+                self._client.cleanup(self.workingCopyPath)
+                self._client.revert(self._workingCopyPath + path, True)
                 self._client.update(self._workingCopyPath + path, depth=pysvn.depth.infinity )
             except ClientError, error:
                 raise SubversionError(error)
@@ -145,7 +147,6 @@ class CPythonSubversionWrapper(object):
         """
         
         try:
-            self._client.resolved(self._workingCopyPath + path, recurse=True)
             self._client.checkin(self._workingCopyPath + path, "")
         except ClientError, error:
             raise SubversionError(error)
@@ -178,9 +179,8 @@ class CPythonSubversionWrapper(object):
         the special characters are quoted. It returns the 
         full repository URI. It assumes that the repository URI is already in 
         the correctly quoted and encoded format. """
-        
-        path = path.encode(constants.UTF8)
-        return self._repositoryUri + urllib.pathname2url(path)
+
+        return self._repositoryUri + pepareSvnPath(path)
         
     def copy(self, path, destinationPath):
         """ The copying process is directly performed on the SVN server. """
@@ -369,8 +369,9 @@ class _SharedState(object):
     def removeFromCache(self, path):
         self._lock.acquire()
         try:
-            if path in self._cache:
-                del self._cache[path]
+            for key in self._cache.keys():
+                if key.startswith(path):
+                    del self._cache[key]
         finally:
             self._lock.release()
 

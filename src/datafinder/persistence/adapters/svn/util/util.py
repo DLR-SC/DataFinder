@@ -41,13 +41,10 @@ Implements mapping of logical identifiers to SVN-specific identifiers.
 
 
 import platform
+import urllib
 
-if platform.platform().lower().find("java") == -1:
-    from datafinder.persistence.adapters.svn.util.cpython import createCPythonWrapper
-    SubversionWrapper = createCPythonWrapper
-else:
-    from datafinder.persistence.adapters.svn.util.jython import JythonSubversionWrapper
-    SubversionWrapper = JythonSubversionWrapper
+from datafinder.persistence.error import PersistenceError
+from datafinder.persistence.adapters.svn import constants
 
 
 __version__ = "$Revision-Id$" 
@@ -70,7 +67,13 @@ def createSubversionConnection(repoPath, workingCopyPath, username, password):
     
     @raise PersistenceError: Initialization failed. 
     """
-    
+
+    if platform.platform().lower().find("java") == -1:
+        from datafinder.persistence.adapters.svn.util.cpython import createCPythonWrapper
+        SubversionWrapper = createCPythonWrapper
+    else:
+        from datafinder.persistence.adapters.svn.util.jython import JythonSubversionWrapper
+        SubversionWrapper = JythonSubversionWrapper
     return SubversionWrapper(repoPath, workingCopyPath, username, password)
 
 
@@ -89,3 +92,20 @@ def determineParentPath(path):
     if parentPath == "" and path.startswith("/") and path != "/":
         parentPath = "/"
     return parentPath
+
+
+def pepareSvnPath(svnPath, encoding=constants.UTF8):
+    """ Encodes the SVN path to given encoding and
+    quotes special characters within the path using the function
+    C{urllib.quote}. Default encoding is UTF-8.
+    
+    @raise PersistenceError: If conversion fails.
+    """
+    
+    try:
+        quotedPath = svnPath.encode(encoding)
+    except (AttributeError, UnicodeError), error:
+        msg = "Cannot encode '%s' to '%s'. Reason: '%s'" \
+              % (svnPath, encoding, str(error))
+        raise PersistenceError(msg)
+    return urllib.quote(quotedPath, ":/")
