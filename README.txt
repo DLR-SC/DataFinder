@@ -27,7 +27,7 @@ WebDAV server stores configuration data, the logical data structure, and
 optionally the managed data files. Examples of supported WebDAV servers are:
 * Catacomb (open source)
 * Apache + mod_dav (open source)
-* Tamino 4.4 (commercial)
+* Subversion
 
 Currently, the best option is the Catacomb WebDAV server which implements additional
 WebDAV specification (e.g. searching, access control) which in-turn 
@@ -39,16 +39,18 @@ http://catacomb.tigris.org/
 == Source Distribution Installation ==
 * Required Packages:
   * Python >= 2.6
-  * Python WebDAV Library >= 0.3.0
   * Pyparsing >= 1.5.2
 * GUI clients only
    * PyQt 3.18.1 (Qt 3.3.8, SIP 4.10)
    * PyQt 4.7.3 (Qt 4.6.2, SIP 4.10)
 * Win32 only
    * PyWin32 214 (Win32 only) 
-* Optional Packages:
-  * Paramiko >= 1.7.4
+* Optional Packages (at least the WebDAV library or the Subversion package is required):
+  * Python WebDAV Library >= 0.3.0
+  * paramiko >= 1.7.4
   * nose 0.11.1
+  * pysvn >=1.7.2
+  * boto >= 2.0rc1
   
 * Install dependencies.
 * Extract archive.

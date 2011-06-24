@@ -1,3 +1,12 @@
+2.2.0
+=====
+Among bug fixes and refactorings this release contains the following new features:
+* Added Subversion support. A subversion server can be used for meta data storage and data storage.
+* Added Amazon S3 support. S3 storage resources can be used for data storage.
+* Added domain property support.
+* Added first version of an event notification system.
+The complete list is available at: https://launchpad.net/datafinder/+milestone/2.2.0
+
 2.1.0
 =====
 * History of the user client allows direct navigation to a specific path.
@@ -8,7 +17,7 @@
 * Enhanced provided distributions (stand-alone script API distribution, Additional documentation, and script examples).
 * Improvements of the script API functions and the script extension user client integration.
 * Some bug fixes.
-The complete list is available on: https://launchpad.net/datafinder/+milestone/2.1.0
+The complete list is available at: https://launchpad.net/datafinder/+milestone/2.1.0
 
 2.0.0
 =====

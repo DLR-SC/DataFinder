@@ -2,6 +2,7 @@ DataFinder Authors
 
 Tobias Schlauch <Tobias.Schlauch@dlr.de>
 Miriam Ney <Miriam.Ney@dlr.de>
+Patrick Schaefer <Patrick.Schaefer@dlr.de>
 ...
 
 
