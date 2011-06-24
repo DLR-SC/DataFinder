@@ -135,11 +135,10 @@ class _bdist_nsis(Command):
         # Create NSIS installer       
         baseName = self.__buildConfiguration.fullName + "%s.exe"
         releaseVersions = os.environ.get("GENERATE_RELEASE_VERSIONS")
-        if releaseVersions is None:
-            self._createNsisInstaller(baseName % "_User+Admin", True, True)
-            self._createNsisInstaller(baseName % "_User", True, False)
-            self._createNsisInstaller(baseName % "_Admin", False, True)
-        else:
+        self._createNsisInstaller(baseName % "_User+Admin", True, True)
+        self._createNsisInstaller(baseName % "_User", True, False)
+        self._createNsisInstaller(baseName % "_Admin", False, True)
+        if not releaseVersions is None:
             nameStartUrls = releaseVersions.split(";")
             for nameAndStarturl in nameStartUrls:
                 if len(nameAndStarturl) > 0:
