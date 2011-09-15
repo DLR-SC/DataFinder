@@ -303,6 +303,32 @@ class ItemFactory(object):
                 raise ItemError("Cannot perform action because no relation between " \
                                 + "both data types is defined by the underlying data model.")
 
+    def determineValidItemName(self, proposedName, replacement=None):
+        """ Replaces invalid characters with the replacement character 
+        and returns the new valid name. 
+        
+        @param proposedName: The proposed name of the item.
+        @type proposedName: C{string}
+        @param replacement: The character(s) used to replace the invalid characters.
+            The default is C{_}.
+        
+        @return: The corrected item name.
+        @rtype: C{string}
+        """
+        
+        name = proposedName
+        if not self._fileSystem.isValidIdentifier(replacement):
+            replacement = "_"
+        isValid, invalidPosition = self._fileSystem.isValidIdentifier(name)
+        while not isValid:
+            isValid, invalidPosition = self._fileSystem.isValidIdentifier(name)
+            if not isValid:
+                if not invalidPosition is None:
+                    name = name[:invalidPosition] + replacement + name[invalidPosition + 1:]
+                else: # original name was empty
+                    name = replacement
+        return name
+
     @property
     def isManaged(self):
         """ Returns a flag indicating whether the factory belongs to a managed repository or not. """

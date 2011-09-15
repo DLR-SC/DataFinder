@@ -62,8 +62,6 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
     
     def __init__(self, stopTraversalStates=None, stopProcessStates=None):
         """ 
-        Constructor. 
-        
         @param stopTraversalStates: List of states that are used to prevent traversal of specific collections. Default: C{None}
         @type stopTraversalStates: C{list} of C{unicode}
         @param stopProcessStates: List of states that are used to prevent processing a specific items. Default: C{None}
@@ -186,6 +184,7 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         importName = item.name
         if item == self._source and not self._newSourceName is None:
             importName = self._newSourceName
+        importName = self._itemFactory.determineValidItemName(importName)
         return importName
     
     def _importLeaf(self, leaf):
