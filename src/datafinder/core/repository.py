@@ -128,7 +128,7 @@ class Repository(object):
         @rtype: C{unicode}
         """
         
-        proposedName = self._determineValidItemName(proposedName)
+        proposedName = self._itemFactory.determineValidItemName(proposedName)
         uniqueName = proposedName
         appendPosition = uniqueName.rfind(".")
         if appendPosition == -1:
@@ -143,20 +143,6 @@ class Repository(object):
                 uniqueName = uniqueName[:appendPosition] + "_%i_" % counter + uniqueName[appendPosition + offset:]
                 counter += 1
         return uniqueName
-        
-    def _determineValidItemName(self, proposedName):
-        """ Replaces invalid characters with the C{_} character and returns the new string. """
-        
-        name = proposedName
-        isValid, invalidPosition = self.isValidIdentifier(name)
-        while not isValid:
-            isValid, invalidPosition = self.isValidIdentifier(name)
-            if not isValid:
-                if not invalidPosition is None:
-                    name = name[:invalidPosition] + "_" + name[invalidPosition + 1:]
-                else: # original name was empty
-                    name = "_"
-        return name
         
     def createArchive(self, sourceCollection, parentCollection, properties=None):
         """ Just a delegate method. @see: L{create<datafinder.core.archiver.Archiver.create>} """
