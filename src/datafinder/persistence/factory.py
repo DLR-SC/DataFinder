@@ -135,6 +135,7 @@ class FileSystem(object):
         """ Determines dynamically the concrete factory implementation. """
         
         try:
+            errors = list()
             for location in self._uriSchemeAdapterMap[uriScheme]:
                 adapterPackageName = location
                 fullDottedModuleName = self._BASE_IMPL_PACKAGE_PATTERN % adapterPackageName
@@ -148,7 +149,8 @@ class FileSystem(object):
                 except (ImportError, AttributeError), error:
                     errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
                                    % (adapterPackageName, str(error))
-                    raise PersistenceError(errorMessage)
+                    errors.append(errorMessage)
+            raise PersistenceError("No suitable interface has been found. Reason:\n" + "\n".join(errors))
         except KeyError:
             raise PersistenceError("The URI scheme '%s' is unsupported." % uriScheme)            
 
