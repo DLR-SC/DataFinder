@@ -107,8 +107,6 @@ class SearchDialog(QtGui.QDialog, Ui_searchDialog):
         """ @see: L{QDialog<PyQt4.QtGui.QDialog>}"""
         
         self.startLineEdit.setText(self.__model.activePath or "/")
-        #self.expertModePushButton.emit(QtCore.SIGNAL("clicked(bool)"), True)
-        #self.expertModePushButton.setEnabled(False)
         QtGui.QDialog.show(self)
 
     def _initSearchQueryEditor(self):

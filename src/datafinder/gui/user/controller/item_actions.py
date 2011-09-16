@@ -92,7 +92,6 @@ class ItemActionController(object):
         self._creationWizard = None
         self._progressDialog = None
         self._searchDialog = None
-        self._luceneSearchDialog = None
         self._privilegeDialog = None
 
         self._itemActionChecker = _ItemActionChecker(self._sourceRepositoryModel,
