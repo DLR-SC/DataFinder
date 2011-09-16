@@ -92,6 +92,7 @@ class ItemActionController(object):
         self._creationWizard = None
         self._progressDialog = None
         self._searchDialog = None
+        self._luceneSearchDialog = None
         self._privilegeDialog = None
 
         self._itemActionChecker = _ItemActionChecker(self._sourceRepositoryModel,
@@ -609,9 +610,16 @@ class _ItemActionChecker(object):
     def _handleSearchAction(self, availableActionConstants, _):
         """ Restricts availability of the search action. """
         
+        connection = self._sourceRepositoryModel.repository.configuration.preferences
+        luceneSearchSupport = False
+        if not connection is None:
+            luceneSearchSupport = connection.useLucene
         if not self._sourceRepositoryModel.hasMetadataSearchSupport:
             if ac.SEARCH_ACTION in availableActionConstants:
                 availableActionConstants.remove(ac.SEARCH_ACTION)
+        if luceneSearchSupport:
+            if not ac.SEARCH_ACTION in availableActionConstants:
+                availableActionConstants.append(ac.SEARCH_ACTION)
                 
     def _handleCreationActions(self, availableActionConstants, _):
         """ Restricts availability of the create actions. """

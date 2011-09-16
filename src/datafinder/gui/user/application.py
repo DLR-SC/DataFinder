@@ -454,6 +454,6 @@ class _ScriptApiContext(object):
 
 def main(startUrl=None, debug=False):
     """ Main function to start the user client. """
-
+    
     application = Application(sys.argv, startUrl, debug)
     sys.exit(application.exec_())

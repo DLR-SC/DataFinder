@@ -245,8 +245,7 @@ class ActionHandler(object):
         @raise CoreError: Indicating problems on search.
         """
 
-        collection = self._parentModel.nodeFromIndex(index)
-        searchResult = collection.search(restrictions)
+        searchResult = self._repository.search(restrictions)
         self._parentModel.searchResultChangedSignal(searchResult)
 
     def createCollection(self, name, parentIndex, properties=None):

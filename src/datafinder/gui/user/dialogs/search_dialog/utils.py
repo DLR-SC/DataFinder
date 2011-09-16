@@ -48,7 +48,7 @@ from PyQt4 import QtCore
 
 from datafinder.core.error import PropertyError
 from datafinder.core.configuration.properties import constants
-from datafinder.core.item.search_restriction import OR_OPERATOR, LIKE_OPERATOR
+from datafinder.core.search_restriction import OR_OPERATOR, LIKE_OPERATOR
 
 
 __version__ = "$Revision-Id:$" 

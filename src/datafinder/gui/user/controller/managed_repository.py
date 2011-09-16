@@ -219,11 +219,21 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
         connectDialog = ConnectDialogView(self._mainWindow, self._repositoryManager.preferences)
         if connectDialog.exec_() == QtGui.QDialog.Accepted:
             self._mainWindow.connectAction.setEnabled(False)
+            useLdap = None
+            ldapServerUri = None
+            ldapBaseDn = None
+            useLucene = None
+            luceneIndexUri = None
             defaultDataStore = None
             defaultArchiveStore = None
             defaultOfflineStore = None
             connection = self._repositoryManager.preferences.getConnection(connectDialog.uri)
             if not connection is None:
+                useLdap = connection.useLdap
+                ldapServerUri = connection.ldapServerUri
+                ldapBaseDn = connection.ldapBaseDn
+                useLucene = connection.useLucene
+                luceneIndexUri = connection.luceneIndexUri
                 defaultDataStore = connection.defaultDataStore
                 defaultArchiveStore = connection.defaultArchiveStore
                 defaultOfflineStore = connection.defaultOfflineStore
@@ -232,6 +242,8 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
             if connectDialog.savePasswordFlag:
                 password = connectDialog.password
             self._repositoryManager.preferences.addConnection(connectDialog.uri, connectDialog.username, password,
+                                                              useLdap, ldapServerUri, ldapBaseDn,
+                                                              useLucene, luceneIndexUri,
                                                               defaultDataStore, defaultArchiveStore, defaultOfflineStore) 
             self._workerThread = util.startNewQtThread(self._doConnect, self._connectCallback, 
                                                        connectDialog.uri, connectDialog.username, connectDialog.password)
@@ -287,12 +299,24 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
             
             configurationUri = self._model.repository.configuration.repositoryConfigurationUri
             connection = self._repositoryManager.preferences.getConnection(configurationUri)
+            useLdap = None
+            ldapServerUri = None
+            ldapBaseDn = None
+            useLucene = None
+            luceneIndexUri = None
             if not connection is None:
+                useLdap = connection.useLdap
+                ldapServerUri = connection.ldapServerUri
+                ldapBaseDn = connection.ldapBaseDn
+                useLucene = connection.useLucene
+                luceneIndexUri = connection.luceneIndexUri
                 dialog.defaultDataStore = connection.defaultDataStore
                 dialog.defaultArchiveStore = connection.defaultArchiveStore
                 dialog.defaultOfflineStore = connection.defaultOfflineStore
                 
             if dialog.exec_() == QtGui.QDialog.Accepted:
-                self._repositoryManager.preferences.addConnection(configurationUri, connection.username, connection.password, 
+                self._repositoryManager.preferences.addConnection(configurationUri, connection.username, connection.password,
+                                                                  useLdap, ldapServerUri, ldapBaseDn,
+                                                                  useLucene, luceneIndexUri, 
                                                                   dialog.defaultDataStore, dialog.defaultArchiveStore, 
                                                                   dialog.defaultOfflineStore)

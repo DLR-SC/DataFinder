@@ -69,6 +69,7 @@ class PreferencesDialogView(QtGui.QDialog, Ui_preferencesDialog):
         self.connect(self.cancelButton, QtCore.SIGNAL("clicked()"), self.reject)
         self.connect(self.okButton, QtCore.SIGNAL("clicked()"), self.accept)
         self.connect(self.useLdapCheckBox, QtCore.SIGNAL("stateChanged(int)"), self.useLdapStateChanged)
+        self.connect(self.useLuceneCheckBox, QtCore.SIGNAL("stateChanged(int)"), self.useLuceneStateChanged)
 
     def useLdapStateChanged(self, state):
         """
@@ -150,4 +151,63 @@ class PreferencesDialogView(QtGui.QDialog, Ui_preferencesDialog):
         self.baseDnLineEdit.setText(basedn or "")
         
     ldapBaseDn = property(_getLdapBaseDn, _setLdapBaseDn)
+    
+    def useLuceneStateChanged(self, state):
+        """
+        Enables and disables the line edits to edit the lucene properties.
+        
+        @param state: The new state
+        @type state C{Qt::CheckState}
+        """
+        if state == 2:
+            self.indexUriLineEdit.setEnabled(True)
+        else:
+            self.indexUriLineEdit.setEnabled(False)
+            
+    def _getUseLucene(self):
+        """
+        Returns if lucene should be used.
+
+        @return: If lucene should be used.
+        @rtype: C{boolean}
+        """
+
+        if self.useLuceneCheckBox.checkState() == 2:
+            return True
+        else:
+            return False
+
+    def _setUseLucene(self, use):
+        """
+        If lucene should be used.
+
+        @param urls: If lucene should be used.
+        @type urls: C{boolean}
+        """
+        if use:
+            self.useLuceneCheckBox.setCheckState(2)
+        else:
+            self.useLuceneCheckBox.setCheckState(0)
+            
+    useLucene = property(_getUseLucene, _setUseLucene)
+    
+    def _getLuceneIndexUri(self):
+        """
+        Returns the lucene index uri.
+
+        @return: The lucene index uri.
+        @rtype: C{String}
+        """
+        return unicode(self.indexUriLineEdit.text())
+
+    def _setLuceneIndexUri(self, uri):
+        """
+        Sets the lucene index uri.
+
+        @param uri: The lucene index uri.
+        @type uri: C{String}
+        """
+        self.indexUriLineEdit.setText(uri or "")
+                
+    luceneIndexUri = property(_getLuceneIndexUri, _setLuceneIndexUri)
     

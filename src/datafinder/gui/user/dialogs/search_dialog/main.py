@@ -46,7 +46,7 @@ import bisect
 from PyQt4 import QtCore, QtGui
 
 from datafinder.common.logger import getDefaultLogger
-from datafinder.core.item import search_restriction
+from datafinder.core import search_restriction
 from datafinder.gui.gen.user.search_dialog_ui import Ui_searchDialog
 from datafinder.gui.user.common.controller import AbstractController
 from datafinder.gui.user.common import util
@@ -107,8 +107,8 @@ class SearchDialog(QtGui.QDialog, Ui_searchDialog):
         """ @see: L{QDialog<PyQt4.QtGui.QDialog>}"""
         
         self.startLineEdit.setText(self.__model.activePath or "/")
-        self.expertModePushButton.emit(QtCore.SIGNAL("clicked(bool)"), True)
-        self.expertModePushButton.setEnabled(False)
+        #self.expertModePushButton.emit(QtCore.SIGNAL("clicked(bool)"), True)
+        #self.expertModePushButton.setEnabled(False)
         QtGui.QDialog.show(self)
 
     def _initSearchQueryEditor(self):
@@ -213,7 +213,6 @@ class SearchDialog(QtGui.QDialog, Ui_searchDialog):
         self.setEnabled(False)
         text = unicode(self.keywordLineEdit.text())
         path = unicode(self.startLineEdit.text())
-        
         query = self._keywordSearchQueryConverter.convert(text)
         self._worker = util.startNewQtThread(self.__model.search,
                                              self._searchFinishedSlot, 
@@ -319,6 +318,9 @@ class SearchDialog(QtGui.QDialog, Ui_searchDialog):
         self.connect(self.__searchQueryAnalyzer, QtCore.SIGNAL(SearchQueryAnalyzer.VALIDATION_SIGNAL), 
                      self.__storedSearchesController.validationSlot)
 
+        self.startLabel.hide()
+        self.startLineEdit.hide()
+        self.startSelectionButton.hide()
         self.splitter_2.show()
         self.simpleSearchGroupBox.hide()
         self.storedSearchesPushButton.show()

@@ -82,6 +82,12 @@ class ConnectDialogView(QtGui.QDialog, Ui_connectDialog):
         self.connect(self.urlComboBox, QtCore.SIGNAL("currentIndexChanged(const QString)"), self._urlChangedSlot)
         self.connect(self.preferencesButton, QtCore.SIGNAL("clicked()"), self._preferencesActionSlot)
         self.uri = preferences.connectionUris
+        connection = self._preferences.getConnection(self._getUrl())
+        self._useLdap = connection.useLdap
+        self._ldapBaseDn = connection.ldapBaseDn
+        self._ldapServerUri = connection.ldapServerUri
+        self._useLucene = connection.useLucene
+        self._luceneIndexUri = connection.luceneIndexUri
                      
     def _urlChangedSlot(self, newUri):
         """ Implementing changing of connection URI. """
@@ -92,6 +98,11 @@ class ConnectDialogView(QtGui.QDialog, Ui_connectDialog):
             self.username = connection.username
             self.password = connection.password
             self.savePasswordFlag = not connection.password is None
+            self._useLdap = connection.useLdap
+            self._ldapBaseDn = connection.ldapBaseDn
+            self._ldapServerUri = connection.ldapServerUri
+            self._useLucene = connection.useLucene
+            self._luceneIndexUri = connection.luceneIndexUri
     
     def _getUrl(self):
         """
@@ -197,12 +208,28 @@ class ConnectDialogView(QtGui.QDialog, Ui_connectDialog):
         """ Shows the preferences dialog for connection settings. """
 
         preferencesDialog = PreferencesDialogView(self)
-
-        preferencesDialog.useLdap = self._preferences.useLdap
-        preferencesDialog.ldapBaseDn = self._preferences.ldapBaseDn
-        preferencesDialog.ldapServerUri = self._preferences.ldapServerUri
+        preferencesDialog.useLdap = self._useLdap
+        preferencesDialog.ldapBaseDn = self._ldapBaseDn
+        preferencesDialog.ldapServerUri = self._ldapServerUri
+        preferencesDialog.useLucene = self._useLucene
+        preferencesDialog.luceneIndexUri = self._luceneIndexUri
 
         if preferencesDialog.exec_() == QtGui.QDialog.Accepted:
-            self._preferences.useLdap = preferencesDialog.useLdap
-            self._preferences.ldapBaseDn = preferencesDialog.ldapBaseDn
-            self._preferences.ldapServerUri = preferencesDialog.ldapServerUri
+            connection = self._preferences.getConnection(self._getUrl())
+            if not connection is None:
+                connection.useLdap = preferencesDialog.useLdap
+                self._useLdap = preferencesDialog.useLdap
+                connection.ldapBaseDn = preferencesDialog.ldapBaseDn
+                self._ldapBaseDn = preferencesDialog.ldapBaseDn
+                connection.ldapServerUri = preferencesDialog.ldapServerUri
+                self._ldapServerUri = preferencesDialog.ldapServerUri
+                connection.useLucene = preferencesDialog.useLucene
+                self._useLucene = preferencesDialog.useLucene
+                connection.luceneIndexUri = preferencesDialog.luceneIndexUri
+                self._luceneIndexUri = preferencesDialog.luceneIndexUri
+                self._preferences.removeConnection(connection.url)
+                self._preferences.addConnection(connection.url, self.username, self.password,
+                                                connection.useLdap, connection.ldapServerUri, connection.ldapBaseDn,
+                                                connection.useLucene, connection.luceneIndexUri, connection.defaultDataStore,
+                                                connection.defaultArchiveStore, connection.defaultOfflineStore)
+                
