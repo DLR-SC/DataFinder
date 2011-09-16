@@ -55,9 +55,6 @@ __version__ = "$Revision-Id:$"
 
 _VALID_CONFIGURATION = \
 """<preferences>
-    <useLdap>false</useLdap>
-    <ldapServerUri>ldap://</ldapServerUri>
-    <ldapBaseDn>OU=DLR,DC=intra,DC=dlr,DC=de</ldapBaseDn>
     <connections>
         <url>http://192.168.125.130/repos/config/test1</url>
     </connections>
@@ -66,6 +63,10 @@ _VALID_CONFIGURATION = \
         <username>test</username>
         <password>dGVzdA==
 </password>
+        <useLdap>false</useLdap>
+        <ldapServerUri>ldap://</ldapServerUri>
+        <ldapBaseDn>OU=DLR,DC=intra,DC=dlr,DC=de</ldapBaseDn>
+        <useLucene>false</useLucene>
         <defaultDataStore>ds1</defaultDataStore>
         <defaultArchiveStore>ds2</defaultArchiveStore>
     </connections>
@@ -138,12 +139,10 @@ class PreferencesHandlerTestCase(unittest.TestCase):
         self._handler.load()
         writeDataMock = _WriteDataMock()
         self._fileStorerMock.writeData = writeDataMock
-        self._handler.useLdap = False
-        self._handler.ldapServerUri = "ldap://"
-        self._handler.ldapbaseDn = "OU=d,DC=i,DC=d,DC=com"
         self._handler.showDottedFilesLocal = True
         self._handler.showDottedFilesRemote = False
-        self._handler.addConnection("http://192.168.125.130/repos/config/test2", "test", "test", "ds1", "ds2")
+        self._handler.addConnection("http://192.168.125.130/repos/config/test2", "test", "test", False, "ldap://", "OU=DLR,DC=intra,DC=dlr,DC=de",
+                                    False, None, "ds1", "ds2")
         self._handler.addConnection("http://192.168.125.130/repos/config/test1", None, None)
         self._handler.addScriptUri("path")
         self._handler.addScriptUri("path2")
@@ -174,7 +173,8 @@ class PreferencesHandlerTestCase(unittest.TestCase):
         """ Tests the management of connections. """
         
         self._handler.load()
-        self._handler.addConnection("http://192.168.125.130/repos/config/test2", "test", "test", "defaultDs", "defaultADs")
+        self._handler.addConnection("http://192.168.125.130/repos/config/test2", "test", "test", False, None, None, False,
+                                    None, "defaultDs", "defaultADs")
         self.assertEquals(len(self._handler.connectionUris), 1)
         connection = self._handler.getConnection("http://192.168.125.130/repos/config/test2")
         self.assertEquals(connection.username, "test")

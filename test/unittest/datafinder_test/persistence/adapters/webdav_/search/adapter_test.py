@@ -36,16 +36,28 @@
 
 
 """ 
-Defines meta data specific constants.
+Tests the search adapter implementation.
 """
+
+
+import unittest
+
+from datafinder.persistence.adapters.webdav_.search.adapter import SearchWebdavAdapter
+from datafinder_test.mocks import SimpleMock
 
 
 __version__ = "$Revision-Id:$" 
 
+_VALID_WEBDAV_SEARCH_RESULT = {"http://server.de/Path": SimpleMock()}
+_VALID_SEARCH_RESULT = ["/PATH"]
 
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+
+class SearchWebdavAdapterTestCase(unittest.TestCase):
+    """ Tests the search adapter implementation. """
+
+    def testSearchSuccess(self):
+        """ Tests successful search. """
+        
+        adapter = SearchWebdavAdapter(SimpleMock(), SimpleMock("/PATH"), SimpleMock(SimpleMock(_VALID_WEBDAV_SEARCH_RESULT)))
+        self.assertEquals(adapter.search([]), _VALID_SEARCH_RESULT)
+        

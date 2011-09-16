@@ -55,6 +55,7 @@ from datafinder.persistence.adapters.webdav_.metadata.adapter import MetadataWeb
 from datafinder.persistence.adapters.webdav_.principal_search.adapter import PrincipalSearchWebdavAdapter
 from datafinder.persistence.adapters.webdav_.privileges.adapter import PrivilegeWebdavAdapter
 from datafinder.persistence.adapters.webdav_.privileges.privileges_mapping import PrivilegeMapper
+from datafinder.persistence.adapters.webdav_.search.adapter import SearchWebdavAdapter
 from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.common.connection.manager import ConnectionPoolManager
 from datafinder.persistence.error import PersistenceError
@@ -153,6 +154,16 @@ class FileSystem(BaseFileSystem):    """
         
         return PrincipalSearchWebdavAdapter(self._configuration.userCollectionUrl, self._configuration.groupCollectionUrl, 
                                             self._connectionPool)
+        
+    def createSearcher(self):
+        """ 
+        Factory method for the WebDAV-specific search object. 
+        
+        @return: WebDAV-specific implementation of the search interface.
+        @rtype: L{lSearchWebdavAdapter<datafinder.persistence.adapters.webdav_.search.adapter.SearchWebdavAdapter>
+        """
+        
+        return SearchWebdavAdapter(self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl))
 
     def release(self):
         """ Releases the acquired connection pool. """

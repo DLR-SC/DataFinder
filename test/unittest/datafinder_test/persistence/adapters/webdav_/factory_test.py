@@ -50,6 +50,8 @@ from datafinder.persistence.adapters.webdav_ import factory
 from datafinder.persistence.adapters.webdav_.metadata.adapter import MetadataWebdavAdapter
 from datafinder.persistence.adapters.webdav_.data.adapter import DataWebdavAdapter
 from datafinder.persistence.adapters.webdav_.privileges.adapter import PrivilegeWebdavAdapter
+from datafinder.persistence.adapters.webdav_.search.adapter import SearchWebdavAdapter
+from datafinder.persistence.search.searcher import NullSearcher
 from datafinder_test.mocks import SimpleMock
 
 
@@ -113,6 +115,12 @@ class FileSystemTestCase(unittest.TestCase):
         self._factory._hasPrivilegeSupport = True
         self.assertTrue(isinstance(self._factory.createPrivilegeStorer("identifier"), NullPrivilegeStorer))
         self.assertTrue(isinstance(self._factory.createPrivilegeStorer("identifier"), PrivilegeWebdavAdapter))
+        
+    def testCreateSearcher(self):
+        """ Tests the creation of a WebDAV specific searcher. """
+        
+        self.assertTrue(isinstance(self._factory.createSearcher(), NullSearcher))
+        self.assertTrue(isinstance(self._factory.createSearcher(), SearchWebdavAdapter))
         
     def testHasMetadataSearchSupport(self):
         """ Tests the default behavior of the hasMetadataSearchSupport method. """

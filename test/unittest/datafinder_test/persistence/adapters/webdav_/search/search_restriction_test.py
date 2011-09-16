@@ -3,12 +3,12 @@
 # Last Changed: $Date$ $Committer$ $Revision-Id$
 #
 # Copyright (c) 2003-2011, German Aerospace Center (DLR)
-#
 # All rights reserved.
+#
+#
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are
 #met:
-#
 #
 # * Redistributions of source code must retain the above copyright 
 #   notice, this list of conditions and the following disclaimer. 
@@ -36,63 +36,44 @@
 
 
 """ 
-Defines interface and default implementation for meta-data-related actions.
+Implements tests for search restriction mapping.
 """
+
+
+import time
+import unittest
+
+from webdav import Condition
+
+from datafinder.persistence.adapters.webdav_.search.search_restriction_mapping import mapSearchRestriction
 
 
 __version__ = "$Revision-Id:$" 
 
 
-class NullMetadataStorer(object):
-    """ 
-    Null pattern / default implementation of the meta-data-related interface.
-    
-    @note: Real implementations of this interface are raising errors of
-           type L{PersistenceError<datafinder.persistence.error.PersistenceError>}
-           to indicate problems.
+class SearchRestrictionDaslTransformerTestCase(unittest.TestCase):
+    """
+    Defines test cases for the transformation of identified tokens to
+    instances used by the WebDAV library to represent search queries.
     """
     
-    def __init__(self, identifier):
-        """ 
-        Constructor. 
+    def testTransform(self):
+        """ Tests the transforming from a search restriction to a WebDAV library specific expression. """
         
-        @param identifier: The logical identifier of the associated item. 
-                           This is usually the path relative to a root.
-        @type identifier: C{unicode}
-        """
+        daslRestrictions = mapSearchRestriction([[('SITe', '=', 'ggg'), 'OR', [('SITe', '=', 'ggg'), 'AND', ('SITe', '=', 'ggg')]]])
+        self.failUnless(isinstance(daslRestrictions, Condition.OrTerm), "The result is not an or term.")
         
-        self.identifier = identifier
-    
-    def retrieve(self, propertyIds=None):
-        """ 
-        Retrieves all meta data associated with the item.
-        C{propertyIds} allows explicit selection of meta data.
+        daslRestrictions = mapSearchRestriction([(None, "isCollection", None)])
+        self.failUnless(isinstance(daslRestrictions, Condition.IsCollectionTerm), "The result is not a isCollection term.")
         
-        @return: Meta data of the associated item.
-        @rtype: C{dict} of C{unicode}, L{MetadataValue<datafinder.common.metadata.
-        value_mapping.MetaddataValue>}
-        """
+        daslRestrictions = mapSearchRestriction([("PeterProp", "exists", None)])
+        self.failUnless(isinstance(daslRestrictions, Condition.ExistsTerm), "The result is not an exists term.")
         
-        self, propertyIds = self, propertyIds # silent pylint
-        return dict()
-
-    def update(self, properties):
-        """ 
-        Update the associated meta data. 
-        Adds new properties or updates existing property values. 
+        daslRestrictions = mapSearchRestriction([("SITe98", "=", "g")])
+        self.failUnless(isinstance(daslRestrictions, Condition.MatchesTerm), "The result is not a match term.")
         
-        @param properties: New / updated meta data.
-        @type properties: C{dict} of C{unicode}, C{object}
-        """
+        daslRestrictions = mapSearchRestriction([("SITe98", "=", 100)])
+        self.failUnless(isinstance(daslRestrictions, Condition.IsEqualTerm), "The result is not an equal term.")
         
-        pass
-    
-    def delete(self, propertyIds):
-        """
-        Deletes the selected meta data.
-        
-        @param propertyIds: Specifies the meta data that has to be deleted.
-        @type propertyIds: C{list} of C{unicode} 
-        """
-        
-        pass
+        daslRestrictions = mapSearchRestriction([("SITe98", "=", time.localtime())])
+        self.failUnless(isinstance(daslRestrictions, Condition.OnTerm), "The result is not an on term.")

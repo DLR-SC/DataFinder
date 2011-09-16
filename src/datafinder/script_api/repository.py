@@ -64,7 +64,8 @@ def connectRepository(dataUri, configUri=None, username=None, password=None):
     @raise ScriptApiError: Raised when an error occurred.
     """
 
-    try:        
+    try:
+        repositoryManagerInstance.load()        
         configuration = repositoryManagerInstance.getRepositoryConfiguration(configUri, username, password)
         configuration.load()
         repository = repositoryManagerInstance.connectRepository(dataUri, configuration, username, password)
@@ -171,7 +172,7 @@ class RepositoryDescription(object):
     def isManagedRepository(self):
         """ Checks whether the repository is a managed or an unmanaged repository. """
         
-        return self._repository.repositoryConfiguration.isManagedRepository
+        return self._repository.configuration.isManagedRepository
     
     @property
     def hasCustomMetadataSupport(self):

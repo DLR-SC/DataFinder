@@ -36,16 +36,36 @@
 
 
 """ 
-Defines meta data specific constants.
+Lucene-specific factory implementation.
 """
+
+
+import lucene
+
+from datafinder.persistence.adapters.lucene.configuration import Configuration
+from datafinder.persistence.adapters.lucene.search.adapter import SearchLuceneAdapter
+from datafinder.persistence.common.base_factory import BaseFileSystem
 
 
 __version__ = "$Revision-Id:$" 
 
 
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+class FileSystem(BaseFileSystem):
+    """ Implements factory method of the different aspects of file system items. """
+     
+    def __init__(self, baseConfiguration):
+        """ 
+        Constructor. 
+        
+        @param baseConfiguration: General basic configuration.
+        @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
+        """
+        
+        BaseFileSystem.__init__(self)
+        self._env = lucene.initVM()
+        self._configuration = Configuration(baseConfiguration, self._env)
+            
+    def createSearcher(self):
+        """ Factory method for the search object. """
+
+        return SearchLuceneAdapter(self._configuration)

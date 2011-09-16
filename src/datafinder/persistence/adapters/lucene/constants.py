@@ -36,16 +36,10 @@
 
 
 """ 
-Defines meta data specific constants.
+Constant definitions for lucene.
 """
 
+MAX_RESULTS = 1000
 
-__version__ = "$Revision-Id:$" 
-
-
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+FILEPATH_FIELD = "filePath"
+CONTENT_FIELD = "content"

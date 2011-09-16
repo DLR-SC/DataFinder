@@ -61,9 +61,6 @@ _VALID_PROPERTY_RESULT = {constants.CREATION_DATETIME: MetadataValue(""),
                           constants.MIME_TYPE: MetadataValue(""), 
                           constants.OWNER: MetadataValue("")}
 
-_VALID_WEBDAV_SEARCH_RESULT = {"http://server.de/Path": SimpleMock()}
-_VALID_SEARCH_RESULT = ["/PATH"]
-
 
 class MetadataWebdavAdapterTestCase(unittest.TestCase):
     """ Tests the meta data adapter implementation. """
@@ -95,13 +92,6 @@ class MetadataWebdavAdapterTestCase(unittest.TestCase):
         """ Tests successful deletion of meta data. """
         
         self._defaultAdapter.delete(["1", "2"])
-    
-    def testSearchSuccess(self):
-        """ Tests successful deletion of meta data. """
-        
-        adapter = MetadataWebdavAdapter("identifier", SimpleMock(), SimpleMock("/PATH"), 
-                                        SimpleMock(), SimpleMock(SimpleMock(_VALID_WEBDAV_SEARCH_RESULT)))
-        self.assertEquals(adapter.search([]), _VALID_SEARCH_RESULT)
 
     def testErrorHandlingOnLibraryInstanceCreation(self):
         """ Tests the error handling when creating concrete library instances. """

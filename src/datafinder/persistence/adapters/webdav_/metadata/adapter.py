@@ -45,7 +45,6 @@ from webdav import Constants
 from webdav.NameCheck import WrongNameError 
 
 from datafinder.persistence.adapters.webdav_.metadata import identifier_mapping
-from datafinder.persistence.adapters.webdav_.metadata.search_restriction_mapping import mapSearchRestriction
 from datafinder.persistence.adapters.webdav_ import util
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.metadata import constants, value_mapping
@@ -197,28 +196,3 @@ class MetadataWebdavAdapter(NullMetadataStorer):
                 raise PersistenceError(errorMessage)
         finally:
             self.__connectionPool.release(connection)
-
-    def search(self, restrictions):
-        """ @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}"""
-        
-        result = list()
-        if self.__hasMetadataSearchSupport:
-            connection = self.__connectionPool.acquire()
-            try:
-                try:
-                    restrictions = mapSearchRestriction(restrictions)
-                except AssertionError:
-                    restrictions = list()
-                collectionStorer = self.__connectionHelper.createCollectionStorer(self._persistenceId, connection)
-                try:
-                    rawResult = collectionStorer.search(restrictions, [Constants.PROP_DISPLAY_NAME])
-                except WebdavError, error:
-                    errorMessage = "Problem during meta data search." \
-                                   + "Reason: '%s'" % error.reason 
-                    raise PersistenceError(errorMessage)
-                else:
-                    for persistenceId in rawResult.keys():
-                        result.append(self.__itemIdMapper.mapPersistenceIdentifier(persistenceId))
-            finally:
-                self.__connectionPool.release(connection)
-        return result

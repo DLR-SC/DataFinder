@@ -36,16 +36,33 @@
 
 
 """ 
-Defines meta data specific constants.
+Implements test cases for the lucene-specific file system factory.
 """
+
+
+import unittest
+
+from datafinder.persistence.adapters.lucene import factory
+from datafinder.persistence.adapters.lucene.search.adapter import SearchLuceneAdapter
+from datafinder.persistence.common.configuration import BaseConfiguration
+from datafinder_test.mocks import SimpleMock
 
 
 __version__ = "$Revision-Id:$" 
 
 
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+
+class FileSystemTestCase(unittest.TestCase):
+    """ Test cases for lucene file system factory. """ 
+    
+    def setUp(self):
+        """ Mocks an utility functionality. """
+        
+        factory.FileSystem._getConnectionPool = SimpleMock(SimpleMock(SimpleMock()))
+        self._factory = factory.FileSystem(BaseConfiguration(luceneIndexUri="http://lucene.de/index"))
+    
+    def testCreateSearcher(self):
+        """ Tests the creation of a lucene specific searcher. """
+        
+        self.assertTrue(isinstance(self._factory.createSearcher(), SearchLuceneAdapter))
+        

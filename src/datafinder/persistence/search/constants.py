@@ -36,16 +36,24 @@
 
 
 """ 
-Defines meta data specific constants.
+Defines search specific constants.
 """
 
 
 __version__ = "$Revision-Id:$" 
 
 
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+# search restrictions
+EQUAL_OPERATOR = "="
+LT_OPERATOR = "<"
+GT_OPERATOR = ">"
+LTE_OPERATOR = "<="
+GTE_OPERATOR = ">="
+LIKE_OPERATOR = "like"
+EXISTS_OPERATOR = "exists"
+CONTENT_CONTAINS_OPERATOR = "contains"
+IS_COLLECTION_OPERATOR = "isCollection"
+AND_OPERATOR = "AND"
+OR_OPERATOR = "OR"
+NOT_OPERATOR = "NOT"
+

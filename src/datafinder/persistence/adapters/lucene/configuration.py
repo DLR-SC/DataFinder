@@ -36,16 +36,23 @@
 
 
 """ 
-Defines meta data specific constants.
+Defines the set of lucene-specific configuration parameters.
 """
 
 
 __version__ = "$Revision-Id:$" 
 
 
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+class Configuration(object):
+    """ Defines a set of configuration parameters for lucene. """
+    
+    def __init__(self, baseConfiguration, env):
+        """
+        Constructor.
+        
+        @param baseConfiguration: General basic configuration.
+        @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
+        """
+        
+        self.luceneIndexUri = baseConfiguration.luceneIndexUri.lower()
+        self.env = env

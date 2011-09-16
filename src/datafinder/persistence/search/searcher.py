@@ -3,12 +3,12 @@
 # Last Changed: $Date$ $Committer$ $Revision-Id$
 #
 # Copyright (c) 2003-2011, German Aerospace Center (DLR)
+#
 # All rights reserved.
-#
-#
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are
 #met:
+#
 #
 # * Redistributions of source code must retain the above copyright 
 #   notice, this list of conditions and the following disclaimer. 
@@ -36,16 +36,33 @@
 
 
 """ 
-Defines meta data specific constants.
+Defines interface and default implementation for search actions.
 """
 
 
 __version__ = "$Revision-Id:$" 
 
 
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+class NullSearcher(object):
+    """ 
+    Null pattern / default implementation of the search-interface.
+    
+    @note: Real implementations of this interface are raising errors of
+           type L{PersistenceError<datafinder.persistence.error.PersistenceError>}
+           to indicate problems.
+    """
+    
+    def search(self, restrictions):
+        """ 
+        Allows searching for items based on meta data restrictions.
+        
+        @param restrictions: Boolean conjunction of meta data restrictions.
+                             For defined search operators see L{datafinder.persistence.constants}.
+        @type restrictions: C{list}
+        
+        @return: List of matched item identifiers.
+        @rtype: C{list} of C{unicode}
+        """
+        
+        self, restrictions = self, restrictions # silent pylint
+        return list()

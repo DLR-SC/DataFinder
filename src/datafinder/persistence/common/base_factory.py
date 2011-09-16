@@ -45,6 +45,7 @@ from datafinder.persistence.data.datastorer import NullDataStorer
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
 from datafinder.persistence.principal_search.principalsearcher import NullPrincipalSearcher
 from datafinder.persistence.privileges.privilegestorer import NullPrivilegeStorer
+from datafinder.persistence.search.searcher import NullSearcher
 
 
 __version__ = "$Revision-Id:$" 
@@ -107,6 +108,17 @@ class BaseFileSystem(object):
         
         self = self # silent pylint
         return NullPrincipalSearcher()
+    
+    def createSearcher(self):
+        """ 
+        Factory method an adapter specific meta data storer. 
+        
+        @return: Adapter specific meta data storer.
+        @rtype: instanceOf L{NullMetadataStorer<datafinder.persistence.search.searcher.NullSearcher>}
+        """
+        
+        self = self # silent pylint
+        return NullSearcher()
 
     def release(self):
         """ 

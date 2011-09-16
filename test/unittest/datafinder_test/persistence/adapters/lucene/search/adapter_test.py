@@ -36,16 +36,33 @@
 
 
 """ 
-Defines meta data specific constants.
+Tests the search adapter implementation.
 """
+
+
+import unittest
+
+from datafinder.persistence.adapters.lucene.search import adapter as lucene_adapter
+from datafinder.persistence.adapters.lucene.search.adapter import SearchLuceneAdapter
+from datafinder_test.mocks import SimpleMock
 
 
 __version__ = "$Revision-Id:$" 
 
+_VALID_WEBDAV_SEARCH_RESULT = {"http://server.de/Path": SimpleMock()}
+_VALID_SEARCH_RESULT = ["/PATH"]
 
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"
+
+class SearchLuceneAdapterTestCase(unittest.TestCase):
+    """ Tests the search adapter implementation. """
+
+    def testSearchSuccess(self):
+        """ Tests successful search. """
+        
+        configurationMock = SimpleMock(luceneIndexUri="file:///test")
+        #luceneMock = SimpleMock()
+        #lucene_adapter.lucene = luceneMock
+        lucene_adapter.IndexSearcher = SimpleMock(methodNameResultMap={"search": ('{"name": "me"}', None)})
+        adapter = SearchLuceneAdapter(configurationMock)
+        self.assertEquals(adapter.search([]), _VALID_SEARCH_RESULT)
+        

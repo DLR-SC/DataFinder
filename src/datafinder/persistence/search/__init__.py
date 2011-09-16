@@ -36,16 +36,8 @@
 
 
 """ 
-Defines meta data specific constants.
+Defines the search interface.
 """
 
 
 __version__ = "$Revision-Id:$" 
-
-
-# default properties
-CREATION_DATETIME = "____creationdatetime____" # as datetime
-MODIFICATION_DATETIME = "____modificationdatetime____" # as datetime
-SIZE = "____size____" # size in bytes
-OWNER = "____owner____"
-MIME_TYPE = "____mimetype____"

@@ -108,7 +108,7 @@ class FileSystem(object):
     
     _BASE_IMPL_PACKAGE_PATTERN = "datafinder.persistence.adapters.%s.factory"
     
-    def __init__(self, baseConfiguration=None, basePrincipalSearchConfiguration=None):
+    def __init__(self, baseConfiguration=None, basePrincipalSearchConfiguration=None, baseSearchConfiguration=None):
         """ 
         Initializes the generic file system. 
         
@@ -116,6 +116,9 @@ class FileSystem(object):
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         @param basePrincipalSearchConfiguration: Specifies configuration properties of the principal search.
         @type basePrincipalSearchConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
+        @param basePrincipalSearchConfiguration: Specifies configuration properties of the principal search.
+        @type basePrincipalSearchConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
+
 
         @raise PersistenceError: Indicates an unsupported interface or wrong configuration.
         """
@@ -123,13 +126,22 @@ class FileSystem(object):
         self._baseConfiguration = baseConfiguration
         if not baseConfiguration is None:
             self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
+        
             if basePrincipalSearchConfiguration is None:
                 self._principalSearchFactory = self._factory
             else:
                 self._principalSearchFactory = self._getFactory(baseConfiguration.uriScheme)(basePrincipalSearchConfiguration)
+            if baseSearchConfiguration is None:
+                self._searchFactory = self._factory
+            else:
+                try:
+                    self._searchFactory = self._getSearchFactory()(baseSearchConfiguration)
+                except PersistenceError:
+                    self._searchFactory = self._factory
         else:
             self._factory = BaseFileSystem()
             self._principalSearchFactory = BaseFileSystem()
+            self._searchFactory = BaseFileSystem()
             
     def _getFactory(self, uriScheme):
         """ Determines dynamically the concrete factory implementation. """
@@ -153,6 +165,19 @@ class FileSystem(object):
             raise PersistenceError("No suitable interface has been found. Reason:\n" + "\n".join(errors))
         except KeyError:
             raise PersistenceError("The URI scheme '%s' is unsupported." % uriScheme)            
+
+    def _getSearchFactory(self):
+        adapterPackageName = "lucene"
+        fullDottedModuleName = self._BASE_IMPL_PACKAGE_PATTERN % adapterPackageName
+        try:
+            moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
+            factory = getattr(moduleInstance, self.__class__.__name__)
+            _logger.debug("Using adapter '%s'." % fullDottedModuleName)
+            return factory
+        except (ImportError, AttributeError), error:
+            errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
+                           % (adapterPackageName, str(error))
+            raise PersistenceError(errorMessage)
 
     def createFileStorer(self, identifier):
         """ 
@@ -202,6 +227,23 @@ class FileSystem(object):
         
         principalSearcher = self._principalSearchFactory.createPrincipalSearcher()
         return principalSearcher.searchPrincipal(pattern, searchMode)
+    
+    def search(self, query):
+        """ 
+        Allows searching for items based on meta data restrictions.
+        
+        @param query: The search query string.
+        @type query: C{unicode}
+        
+        @return: List of matched item identifiers.
+        @rtype: C{list} of L{FileStorer<datafinder.persistence.factory.FileStorer>}
+        """
+        
+        result = list()
+        searcher = self._searchFactory.createSearcher()
+        for item in searcher.search(query):
+            result.append(self.createFileStorer(item))
+        return result
     
     def updateCredentials(self, credentials):
         """ 
