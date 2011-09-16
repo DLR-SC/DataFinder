@@ -396,23 +396,6 @@ class FileStorer(object):
         
         self.__metadataStorer.delete(propertyIds)
     
-    def metadataSearch(self, restrictions):
-        """ 
-        Allows searching for items based on meta data restrictions.
-        
-        @param restrictions: Boolean conjunction of meta data restrictions.
-                             For defined search operators see L{datafinder.persistence.constants}.
-        @type restrictions: C{list}
-        
-        @return: List of matched item identifiers.
-        @rtype: C{list} of L{FileStorer<datafinder.persistence.factory.FileStorer>}
-        """
-        
-        result = list()
-        for item in self.__metadataStorer.search(restrictions):
-            result.append(self.__fileSystem.createFileStorer(item))
-        return result
-    
     def updateAcl(self, acl):
         """
         Updates the associated Access Control List (ACL).
