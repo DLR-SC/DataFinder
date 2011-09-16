@@ -40,6 +40,9 @@ Module that contains the repository class.
 """
 
 
+from pyparsing import ParseException
+
+from datafinder.core import search_restriction
 from datafinder.core.archiver import Archiver
 from datafinder.core.error import CoreError
 from datafinder.core.item.factory import ItemFactory
@@ -77,9 +80,13 @@ class Repository(object):
         self._metadataSearchSupport = None
         self._privilegeSupport = None
         self._archiver = Archiver(self, repositoryManager)
-        self.root = self._itemFactory.create("/")
- 
     
+        self.root = self._itemFactory.create("/")
+        connection = self._configuration.preferences
+        self._luceneSearchSupport = False
+        if not connection is None:
+            self._luceneSearchSupport = connection.useLucene
+ 
     @Observable
     @staticmethod
     def performImport(sourceItem, targetCollection, targetItemName=None, 
@@ -210,7 +217,30 @@ class Repository(object):
             for principal in principals:
                 mappedPrincipals.append(Principal.create(principal))
             return mappedPrincipals
-
+        
+    def search(self, restrictions):
+        """ Triggers a search.
+        
+        @param restrictions: The search restrictions.
+        @type restrictions: C{unicode}
+        """
+        
+        parser = search_restriction.SearchRestrictionParser()
+        try:
+            parsedRestrictions = parser.parseString(restrictions).asList()
+        except ParseException, error:
+            raise CoreError(str(error))
+        else:
+            result = list()
+            try:
+                fileStorers = self._fileStorerFactory.search(parsedRestrictions)
+                for fileStorer in fileStorers:
+                    result.append(self._itemFactory.create(fileStorer.identifier, fileStorer=fileStorer))
+            except PersistenceError, error:
+                print error
+                raise CoreError(str(error))
+            return result
+            
     def isValidIdentifier(self, identifier):
         """ 
         Checks whether the given string describes a valid identifier.
@@ -252,6 +282,12 @@ class Repository(object):
         if self._metadataSearchSupport is None:
             self._metadataSearchSupport = self._fileStorerFactory.hasMetadataSearchSupport
         return self._metadataSearchSupport
+    
+    @property
+    def hasLuceneSearchSupport(self):
+        """ Checks whether a lucene search is supported. """
+        
+        return self._luceneSearchSupport
     
     @property
     def hasPrivilegeSupport(self):

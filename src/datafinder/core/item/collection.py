@@ -42,12 +42,9 @@ Module that contains the collection item type.
 
 import logging
 
-from pyparsing import ParseException
-
 from datafinder.core.configuration.properties.constants import DATATYPE_ID
 from datafinder.core.item.base import ItemBase
-from datafinder.core.item import search_restriction
-from datafinder.core.error import CoreError, ItemError
+from datafinder.core.error import ItemError
 from datafinder.persistence.error import PersistenceError
 
 
@@ -102,25 +99,6 @@ class ItemCollection(ItemBase):
             raise ItemError("Unable to create collection item.\nReason:'%s'" % error.message)
         else:
             self._created = True
-            
-    def search(self, restrictions):
-        """ @see: L{ItemBase.search<datafinder.core.item.base.ItemBase.search>} """
-        
-        parser = search_restriction.SearchRestrictionParser()
-        try:
-            parsedRestrictions = parser.parseString(restrictions).asList()
-        except ParseException, error:
-            raise CoreError(str(error))
-        else:
-            result = list()
-            try:
-                fileStorers = self.fileStorer.metadataSearch(parsedRestrictions)
-                for fileStorer in fileStorers:
-                    result.append(self.itemFactory.create(None, fileStorer=fileStorer))
-            except PersistenceError, error:
-                self._logger.error(error.args)
-                raise CoreError(str(error))
-            return result
     
     def getChildren(self):
         """ @see: L{ItemBase.getChildren<datafinder.core.item.base.ItemBase.getChildren>} """

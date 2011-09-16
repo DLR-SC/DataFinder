@@ -66,6 +66,7 @@ except AttributeError:
     if sys.getdefaultencoding() == "ascii":
         print("It is required to correctly set default encoding. " + \
               "Please see site.py for further details.")
+        
     
 if profile:
     import cProfile

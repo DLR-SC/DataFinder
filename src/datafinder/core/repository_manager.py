@@ -186,7 +186,11 @@ class RepositoryManager(object):
         if repositoryConfiguration is None:
             repositoryConfiguration = self._createDefaultRepositoryConfiguration()
         try:
-            fileSystem = FileSystem(BaseConfiguration(dataUri, username=username, password=password))
+            baseSearchConfiguration = None
+            connection = self.preferences.getConnection(repositoryConfiguration.repositoryConfigurationUri)
+            if connection is not None:
+                baseSearchConfiguration = BaseConfiguration(luceneIndexUri=connection.luceneIndexUri)
+            fileSystem = FileSystem(BaseConfiguration(dataUri, username=username, password=password), baseSearchConfiguration=baseSearchConfiguration)
         except PersistenceError, error:
             raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
         else:

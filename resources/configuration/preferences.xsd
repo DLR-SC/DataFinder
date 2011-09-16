@@ -5,15 +5,11 @@
 	<xs:element name="preferences">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="useLdap" type="xs:boolean" default="false"/>
-                <xs:element name="ldapServerUri" type="xs:string" default="ldap://intra.dlr.de:389/" />
-                <xs:element name="ldapBaseDn" type="xs:string" default="OU=DLR,DC=intra,DC=dlr,DC=de" />
-
 				<xs:element name="connections" maxOccurs="unbounded" type="connection"/>
 
 				<xs:element name="scriptUris" type="xs:string" maxOccurs="unbounded"/>
 
-				<xs:element name="searchQueries" type="searchQuery" maxOccurs="unbounded" />
+				<xs:element name="searchQueries" type="searchQuery" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -23,6 +19,13 @@
 			<xs:element name="url" type="xs:string"/>
 			<xs:element name="username" type="xs:string"/>
 			<xs:element name="password" type="xs:string"/>
+		
+			<xs:element name="useLdap" type="xs:boolean" default="false"/>
+            <xs:element name="ldapServerUri" type="xs:string" default="ldap://intra.dlr.de:389/"/>
+            <xs:element name="ldapBaseDn" type="xs:string" default="OU=DLR,DC=intra,DC=dlr,DC=de"/>
+		
+			<xs:element name="useLucene" type="xs:boolean" default="false"/>
+			<xs:element name="luceneIndexUri" type="xs:string"/>
 			
 			<xs:element name="defaultDataStore" type="xs:string"/>
 			<xs:element name="defaultArchiveStore" type="xs:string"/>

@@ -98,7 +98,7 @@ class PreferencesHandler(object):
                 data.close()
                 try:
                     self._preferences = preferences.parseString(unicode(content, _DEFAULT_ENCODING))
-                except (ValueError, ExpatError, UnicodeDecodeError):
+                except (ValueError, ExpatError, UnicodeDecodeError, SyntaxError):
                     self._preferences = self._getDefaultPreferences()
             else:
                 self._preferences = self._getDefaultPreferences()
@@ -130,9 +130,12 @@ class PreferencesHandler(object):
                     encryptedPassword = None
                 else:
                     encryptedPassword = base64.encodestring(connection.password)
-                copiedConnection = preferences.connection(connection.url, connection.username, encryptedPassword, 
+                copiedConnection = preferences.connection(connection.url, connection.username, encryptedPassword,
+                                                          connection.useLdap, connection.ldapServerUri, connection.ldapBaseDn,
+                                                          connection.useLucene, connection.luceneIndexUri, 
                                                           connection.defaultDataStore, connection.defaultArchiveStore,
                                                           connection.defaultOfflineStore)
+
                 if not copiedConnection.url is None:
                     self._preferences.addConnections(copiedConnection)
             self._preferences.__dict__.update(self.__dict__)
@@ -237,7 +240,9 @@ class PreferencesHandler(object):
         
         self._preferences.searchQueries = list()
     
-    def addConnection(self, configurationUri, username=None, password=None, 
+    def addConnection(self, configurationUri, username=None, password=None,
+                      useLdap=None, ldapServerUri=None, ldapBaseDn=None, 
+                      useLucene=None, luceneIndexUri=None,
                       defaultDataStore=None, defaultArchiveStore=None, defaultOfflineStore=None):
         """ 
         Adds a connection. 
@@ -256,10 +261,17 @@ class PreferencesHandler(object):
                 connection = self.getConnection(configurationUri)
                 self._connectionOrder.remove(configurationUri)
             else:
-                connection = preferences.connection(configurationUri, username, password, defaultDataStore, defaultArchiveStore)
+                connection = preferences.connection(configurationUri, username, password, useLdap,
+                                                    ldapServerUri, ldapBaseDn, useLucene, luceneIndexUri,
+                                                    defaultDataStore, defaultArchiveStore)
 
             connection.username = username
             connection.password = password
+            connection.useLdap = useLdap
+            connection.ldapServerUri = ldapServerUri
+            connection.ldapBaseDn = ldapBaseDn
+            connection.useLucene = useLucene
+            connection.luceneIndexUri = luceneIndexUri
             connection.defaultDataStore = defaultDataStore
             connection.defaultArchiveStore = defaultArchiveStore
             connection.defaultOfflineStore = defaultOfflineStore
@@ -309,6 +321,8 @@ class PreferencesHandler(object):
                     if not decryptedPassword is None:
                         decryptedPassword = base64.decodestring(connection.password)
                     copiedConnection = preferences.connection(connection.url, connection.username, decryptedPassword,
+                                                              connection.useLdap, connection.ldapServerUri, connection.ldapBaseDn,
+                                                              connection.useLucene, connection.luceneIndexUri, 
                                                               connection.defaultDataStore, connection.defaultArchiveStore,
                                                               connection.defaultOfflineStore)
                     self._connections[copiedConnection.url] = copiedConnection

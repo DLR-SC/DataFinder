@@ -296,17 +296,6 @@ class ItemBase(object):
                 self.dataPersister.storeData(fileObj)
             except PersistenceError, error:
                 raise ItemError("Cannot write item data. Reason: '%s'" % error.message)
-    
-    def search(self, restrictions):
-        """
-        Search from this item the whole subtree.
-
-        @param restrictions: The search restrictions.
-        @type restrictions: C{unicode}
-        """
-        
-        if not self.parent is None:
-            return self.parent.search(restrictions)
 
     def getChildren(self):
         """
