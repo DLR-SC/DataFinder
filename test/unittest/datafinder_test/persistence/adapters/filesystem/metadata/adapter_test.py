@@ -135,8 +135,3 @@ class MetadataFileSystemAdapterTestCase(unittest.TestCase):
         
         self._adapter.delete(list())
         
-    def testSearch(self):
-        """ Tests the search behavior. """
-        
-        self.assertEquals(self._adapter.search(list()), list())
-        self.assertEquals(self._adapter.search([("prop1", "=", "test")]), list())

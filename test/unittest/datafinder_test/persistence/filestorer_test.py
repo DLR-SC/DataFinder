@@ -101,7 +101,6 @@ class FileStorerTestCase(unittest.TestCase):
         self.assertEquals(self._fileStorer.retrieveMetadata([]), self._metadataStorer.retrieve([]))
         self.assertEquals(self._fileStorer.updateMetadata([]), self._metadataStorer.update(dict()))
         self.assertEquals(self._fileStorer.deleteMetadata([]), self._metadataStorer.delete([]))
-        self.assertEquals(self._fileStorer.metadataSearch([]), self._metadataStorer.search([]))
         
         self.assertEquals(self._fileStorer.updateAcl(list()), self._privilegeStorer.updateAcl(list()))
         self.assertEquals(self._fileStorer.retrievePrivileges(), self._privilegeStorer.retrievePrivileges())

@@ -101,7 +101,6 @@ class MetadataWebdavAdapterTestCase(unittest.TestCase):
         self.assertRaises(PersistenceError, adapter.retrieve)
         self.assertRaises(PersistenceError, adapter.update, dict())
         self.assertRaises(PersistenceError, adapter.delete, [])
-        self.assertRaises(PersistenceError, adapter.search, [])
 
     def testErrorHandlingUsingLibraryInstances(self):
         """ Tests the error handling when using concrete library instances. """
@@ -111,4 +110,3 @@ class MetadataWebdavAdapterTestCase(unittest.TestCase):
         self.assertRaises(PersistenceError, adapter.retrieve)
         self.assertRaises(PersistenceError, adapter.update, dict())
         self.assertRaises(PersistenceError, adapter.delete, [])
-        self.assertRaises(PersistenceError, adapter.search, [])
