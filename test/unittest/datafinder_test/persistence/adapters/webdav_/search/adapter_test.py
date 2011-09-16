@@ -59,5 +59,5 @@ class SearchWebdavAdapterTestCase(unittest.TestCase):
         """ Tests successful search. """
         
         adapter = SearchWebdavAdapter(SimpleMock(), SimpleMock("/PATH"), SimpleMock(SimpleMock(_VALID_WEBDAV_SEARCH_RESULT)))
-        self.assertEquals(adapter.search("/", []), _VALID_SEARCH_RESULT)
+        self.assertEquals(adapter.search([], SimpleMock("/PATH")), _VALID_SEARCH_RESULT)
         

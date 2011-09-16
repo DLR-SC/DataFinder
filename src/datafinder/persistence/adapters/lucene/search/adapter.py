@@ -71,7 +71,7 @@ class SearchLuceneAdapter(NullSearcher):
         NullSearcher.__init__(self)
         self._configuration = configuration
 
-    def search(self, index, restrictions):
+    def search(self, restrictions, destination):
         """ @see: L{NullPrincipalSearcher<datafinder.persistence.search.searcher.NullSearcher>} """
         
         results = list()

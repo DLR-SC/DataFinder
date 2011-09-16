@@ -228,7 +228,7 @@ class FileSystem(object):
         principalSearcher = self._principalSearchFactory.createPrincipalSearcher()
         return principalSearcher.searchPrincipal(pattern, searchMode)
     
-    def search(self, query):
+    def search(self, query, destination):
         """ 
         Allows searching for items based on meta data restrictions.
         
@@ -241,7 +241,7 @@ class FileSystem(object):
         
         result = list()
         searcher = self._searchFactory.createSearcher()
-        for item in searcher.search(query):
+        for item in searcher.search(query, destination):
             result.append(self.createFileStorer(item))
         return result
     

@@ -233,7 +233,7 @@ class Repository(object):
         else:
             result = list()
             try:
-                fileStorers = self._fileStorerFactory.search(index, parsedRestrictions)
+                fileStorers = self._fileStorerFactory.search(parsedRestrictions, self._itemFactory.create(index))
                 for fileStorer in fileStorers:
                     result.append(self._itemFactory.create(fileStorer.identifier, fileStorer=fileStorer))
             except PersistenceError, error:
