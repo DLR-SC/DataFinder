@@ -283,11 +283,11 @@ class Repository(object):
             self._metadataSearchSupport = self._fileStorerFactory.hasMetadataSearchSupport
         return self._metadataSearchSupport
     
-    @property
-    def hasLuceneSearchSupport(self):
+    # @property
+    #def hasLuceneSearchSupport(self):
         """ Checks whether a lucene search is supported. """
         
-        return self._luceneSearchSupport
+     #   return self._luceneSearchSupport
     
     @property
     def hasPrivilegeSupport(self):
