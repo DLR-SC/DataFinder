@@ -70,7 +70,7 @@ class SearchWebdavAdapter(NullSearcher):
         self.__itemIdMapper = itemIdMapper
         self.__connectionHelper = connectionHelper
 
-    def search(self, restrictions):
+    def search(self, index, restrictions):
         """ @see: L{NullPrincipalSearcher<datafinder.persistence.search.searcher.NullSearcher>} """
         
         result = list()
@@ -80,7 +80,7 @@ class SearchWebdavAdapter(NullSearcher):
                 restrictions = mapSearchRestriction(restrictions)
             except AssertionError:
                 restrictions = list()
-            collectionStorer = self.__connectionHelper.createCollectionStorer("/", connection)
+            collectionStorer = self.__connectionHelper.createCollectionStorer(index, connection)
             try:
                 rawResult = collectionStorer.search(restrictions, [Constants.PROP_DISPLAY_NAME])
             except WebdavError, error:

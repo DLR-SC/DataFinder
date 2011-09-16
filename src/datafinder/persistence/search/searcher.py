@@ -52,7 +52,7 @@ class NullSearcher(object):
            to indicate problems.
     """
     
-    def search(self, restrictions):
+    def search(self, index, restrictions):
         """ 
         Allows searching for items based on meta data restrictions.
         

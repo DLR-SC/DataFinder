@@ -317,7 +317,6 @@ class SearchDialog(QtGui.QDialog, Ui_searchDialog):
                      self.__storedSearchesController.validationSlot)
 
         self.startLabel.hide()
-        self.startLineEdit.hide()
         self.startSelectionButton.hide()
         self.splitter_2.show()
         self.simpleSearchGroupBox.hide()

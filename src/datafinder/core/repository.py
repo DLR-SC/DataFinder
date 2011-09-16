@@ -218,7 +218,7 @@ class Repository(object):
                 mappedPrincipals.append(Principal.create(principal))
             return mappedPrincipals
         
-    def search(self, restrictions):
+    def search(self, index, restrictions):
         """ Triggers a search.
         
         @param restrictions: The search restrictions.
@@ -233,7 +233,7 @@ class Repository(object):
         else:
             result = list()
             try:
-                fileStorers = self._fileStorerFactory.search(parsedRestrictions)
+                fileStorers = self._fileStorerFactory.search(index, parsedRestrictions)
                 for fileStorer in fileStorers:
                     result.append(self._itemFactory.create(fileStorer.identifier, fileStorer=fileStorer))
             except PersistenceError, error:
@@ -282,13 +282,7 @@ class Repository(object):
         if self._metadataSearchSupport is None:
             self._metadataSearchSupport = self._fileStorerFactory.hasMetadataSearchSupport
         return self._metadataSearchSupport
-    
-    # @property
-    #def hasLuceneSearchSupport(self):
-        """ Checks whether a lucene search is supported. """
-        
-     #   return self._luceneSearchSupport
-    
+
     @property
     def hasPrivilegeSupport(self):
         """ Checks whether privilege setting is supported. """
