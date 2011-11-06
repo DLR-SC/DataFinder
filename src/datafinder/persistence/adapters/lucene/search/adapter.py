@@ -41,12 +41,10 @@
 import solr
 import urllib
 
-from lucene import \
-    SimpleFSDirectory, System, File, \
-    Document, Field, StandardAnalyzer, IndexSearcher, Version, MultiFieldQueryParser, QueryParser
+import lucene
  
 from datafinder.persistence.adapters.lucene import constants    
-from datafinder.persistence.adapters.lucene.search.search_restriction_mapping import mapSearchRestriction
+from datafinder.persistence.adapters.lucene.search import search_restriction_mapping
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.search.searcher import NullSearcher
 
@@ -62,8 +60,6 @@ class SearchLuceneAdapter(NullSearcher):
     
     def __init__(self, configuration):
         """ 
-        Constructor. 
-        
         @param configuration: Lucene-specific configuration parameters.
         @type configuration: L{Configuration<datafinder.persistence.lucene.configuration.Configuration>}
         """
@@ -71,18 +67,23 @@ class SearchLuceneAdapter(NullSearcher):
         NullSearcher.__init__(self)
         self._configuration = configuration
 
-    def search(self, restrictions, destination):
-        """ @see: L{NullPrincipalSearcher<datafinder.persistence.search.searcher.NullSearcher>} """
+    def search(self, restrictions, destination): # pylint: disable=E0611
+        """ 
+        @see: L{NullPrincipalSearcher<datafinder.persistence.search.searcher.NullSearcher>} 
+        
+        E0611: Pylint cannot detect the internals of the modules solr and lucene. 
+        """
         
         results = list()
-        queryString = mapSearchRestriction(restrictions)
+        queryString = search_restriction_mapping.mapSearchRestriction(restrictions)
         if self._configuration.luceneIndexUri.startswith("file:///"):
             try:
                 self._configuration.env.attachCurrentThread()
-                indexDir = SimpleFSDirectory(File(self._configuration.luceneIndexUri.replace("file:///""", "")))
-                analyzer = StandardAnalyzer(Version.LUCENE_CURRENT)
-                searcher = IndexSearcher(indexDir)
-                query = QueryParser(Version.LUCENE_CURRENT, "content", analyzer).parse(queryString)
+                indexDir = lucene.SimpleFSDirectory(lucene.File(
+                    self._configuration.luceneIndexUri.replace("file:///", "")))
+                analyzer = lucene.StandardAnalyzer(lucene.Version.LUCENE_CURRENT)
+                searcher = lucene.IndexSearcher(indexDir)
+                query = lucene.QueryParser(lucene.Version.LUCENE_CURRENT, "content", analyzer).parse(queryString)
                 hits = searcher.search(query, constants.MAX_RESULTS)
                 for hit in hits.scoreDocs:
                     doc = searcher.doc(hit.doc)

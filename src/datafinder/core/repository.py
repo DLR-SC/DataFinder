@@ -218,11 +218,13 @@ class Repository(object):
                 mappedPrincipals.append(Principal.create(principal))
             return mappedPrincipals
         
-    def search(self, index, restrictions):
+    def search(self, restrictions, collection):
         """ Triggers a search.
         
         @param restrictions: The search restrictions.
         @type restrictions: C{unicode}
+        @param collection: Restricts the search to a certain collection and its sub-items.
+        @type collection: L{<ItemBase>datafinder.core.item.base.ItemBase}
         """
         
         parser = search_restriction.SearchRestrictionParser()
@@ -233,11 +235,10 @@ class Repository(object):
         else:
             result = list()
             try:
-                fileStorers = self._fileStorerFactory.search(parsedRestrictions, self._itemFactory.create(index))
+                fileStorers = self._fileStorerFactory.search(parsedRestrictions, collection.fileStorer)
                 for fileStorer in fileStorers:
                     result.append(self._itemFactory.create(fileStorer.identifier, fileStorer=fileStorer))
             except PersistenceError, error:
-                print error
                 raise CoreError(str(error))
             return result
             

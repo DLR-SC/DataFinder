@@ -59,6 +59,8 @@ class NullSearcher(object):
         @param restrictions: Boolean conjunction of meta data restrictions.
                              For defined search operators see L{datafinder.persistence.constants}.
         @type restrictions: C{list}
+        @param destination: Restricts the search to a certain item and its sub-items.
+        @type destination: L{<FilerStorer>datafinder.persistence.filestorer.FileStorer}
         
         @return: List of matched item identifiers.
         @rtype: C{list} of C{unicode}
