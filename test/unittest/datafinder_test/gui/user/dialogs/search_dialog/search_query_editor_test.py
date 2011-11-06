@@ -44,7 +44,7 @@ import unittest, sys
 
 from PyQt4 import QtCore, QtGui
 
-from datafinder.core.item.search_restriction import SearchRestrictionParser
+from datafinder.core.search_restriction import SearchRestrictionParser
 from datafinder.gui.user.dialogs.search_dialog.search_query_editor import SearchQueryEditor, SearchQueryAnalyzer
 
 
