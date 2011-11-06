@@ -146,9 +146,7 @@ def _createItem(cwr, item, properties=None):
     @raise ItemSupportError: Raised when an error occurred.
     """
     
-    mappedProperties = list()
-    if not properties is None:
-        mappedProperties = _mapProperties(dict(), properties, cwr)
+    mappedProperties = _mapProperties(dict(), properties, cwr)
     try:
         item.create(mappedProperties)
     except ItemError, error:
@@ -359,7 +357,7 @@ def createArchive(path, targetPath, defaultProperties=None):
         raise ItemSupportError("One of the items has not been found.")
     else:
         try:
-            mappedProperties = _mapProperties(item.requiredPropertyDefinitions, defaultProperties, cwr)
+            mappedProperties = _mapProperties(dict(), defaultProperties, cwr)
             cwr.createArchive(item, targetItem, mappedProperties)
         except ItemError, error:
             errorMessage = "Cannot archive item.\nReason:'%s'" % error.message
@@ -427,13 +425,14 @@ def _mapProperties(reqPropDefs, properties, cwr):
     """ Converts the given properties. """
     
     mappedProperties = list()
-    for propId, value in properties.iteritems():
-        if propId in reqPropDefs:
-            propDef = reqPropDefs[propId]
-            prop = cwr.createPropertyFromDefinition(propDef, value)
-        else:
-            prop = cwr.createProperty(propId, value)
-        mappedProperties.append(prop)
+    if not properties is None:
+        for propId, value in properties.iteritems():
+            if propId in reqPropDefs:
+                propDef = reqPropDefs[propId]
+                prop = cwr.createPropertyFromDefinition(propDef, value)
+            else:
+                prop = cwr.createProperty(propId, value)
+            mappedProperties.append(prop)
     return mappedProperties
 
 
