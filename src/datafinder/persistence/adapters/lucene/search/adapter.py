@@ -67,11 +67,11 @@ class SearchLuceneAdapter(NullSearcher):
         NullSearcher.__init__(self)
         self._configuration = configuration
 
-    def search(self, restrictions, destination): # pylint: disable=E0611
+    def search(self, restrictions, destination): # pylint: disable=E1101
         """ 
         @see: L{NullPrincipalSearcher<datafinder.persistence.search.searcher.NullSearcher>} 
         
-        E0611: Pylint cannot detect the internals of the modules solr and lucene. 
+        E1101: Pylint cannot detect the internals of the modules solr and lucene. 
         """
         
         results = list()
