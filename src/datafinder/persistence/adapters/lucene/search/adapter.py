@@ -67,12 +67,13 @@ class SearchLuceneAdapter(NullSearcher):
         NullSearcher.__init__(self)
         self._configuration = configuration
 
-    def search(self, restrictions, destination): # pylint: disable=E1101
+    def search(self, restrictions, destination):
         """ 
         @see: L{NullPrincipalSearcher<datafinder.persistence.search.searcher.NullSearcher>} 
         
         E1101: Pylint cannot detect the internals of the modules solr and lucene. 
         """
+        # pylint: disable=E1101
         
         results = list()
         queryString = search_restriction_mapping.mapSearchRestriction(restrictions)
