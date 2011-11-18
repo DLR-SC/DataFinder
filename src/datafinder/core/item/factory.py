@@ -48,15 +48,15 @@ from datafinder.core.item.data_persister.factory import DataPersisterFactory
 from datafinder.core.item.visitor.checks import ActionCheckTreeWalker, ItemCapabilityChecker
 from datafinder.persistence.error import PersistenceError
 
+
 __version__ = "$Revision-Id:$" 
+
 
 class ItemFactory(object):
     """ Factory for the item creation. """
     
     def __init__(self, fileSytem, configuration):
         """
-        Constructor.
-
         @param fileSytem: Generic file system used for file storer creation.
         @type fileSytem: L{FileSystem<datafinder.persistence.factory.FileSystem>} 
         @param configuration: The configuration of the data repository.
@@ -245,8 +245,6 @@ class ItemFactory(object):
         """ Creates the concrete item. """
         
         item = itemClass(name, fileStorer)
-     
-       
         item.itemFactory = self
         if not parent is None:
             if parent.hasChild(item.name):
@@ -256,9 +254,7 @@ class ItemFactory(object):
         if not parent is None:
             item._ignoreChecks = parent.ignoreChecks
         self._itemCache[item.path] = item
-
         return item 
-
     
     def invalidate(self, path):
         """ Invalidate an entry from the item cache. """
@@ -317,9 +313,9 @@ class ItemFactory(object):
         """
         
         name = proposedName
-        if not self._fileSystem.isValidIdentifier(replacement):
+        if not self._fileSystem.isValidIdentifier(replacement)[0]:
             replacement = "_"
-        isValid, invalidPosition = self._fileSystem.isValidIdentifier(name)
+        isValid, _ = self._fileSystem.isValidIdentifier(name)
         while not isValid:
             isValid, invalidPosition = self._fileSystem.isValidIdentifier(name)
             if not isValid:
