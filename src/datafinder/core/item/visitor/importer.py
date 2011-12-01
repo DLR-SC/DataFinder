@@ -38,6 +38,7 @@
 """ This module provides a tree walker that copies all items from one repository to another. """
 
 
+from datafinder.common import logger
 from datafinder.core.configuration.properties.constants import CONTENT_CREATION_DATETIME_PROPERTY_ID, \
                                                                CREATION_DATETIME_ID, DATA_FORMAT_ID, SIZE_ID, \
                                                                CONTENT_SIZE_ID, CONTENT_MODIFICATION_DATETIME_ID, \
@@ -59,6 +60,10 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
     protocol to implement a recursive copy algorithm between two repositories. It is assumed
     (but NOT checked) that the repository configurations are compatible.
     """
+    
+    
+    _log = logger.getDefaultLogger()
+    
     
     def __init__(self, stopTraversalStates=None, stopProcessStates=None):
         """ 
@@ -177,7 +182,7 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
                     self._copyLink(link, importName, self._pwd)
                 except ItemError:
                     self._deferredLinks.append((link, importName, self._pwd))
-    
+
     def _determineImportName(self, item):
         """ Determines the name used importing the given item. """
         
@@ -185,6 +190,8 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         if item == self._source and not self._newSourceName is None:
             importName = self._newSourceName
         importName = self._itemFactory.determineValidItemName(importName)
+        if importName != item.name:
+            self._log.warning("Imported '%s' using different name: '%s'." % (item.path, importName))
         return importName
     
     def _importLeaf(self, leaf):

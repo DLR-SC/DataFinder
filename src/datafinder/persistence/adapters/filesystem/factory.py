@@ -94,3 +94,19 @@ class FileSystem(BaseFileSystem):
         
         if self._configuration.connectBaseDirectory:
             connectWindowsShare(self._configuration.basePath, self._configuration.username, self._configuration.password)
+
+    def isValidIdentifier(self, name):
+        """ 
+        @see: L{FileSystem.isValidIdentifier<datafinder.persistence.factory.FileSystem.metadataIdentifierPattern>}
+        @note: This implementation always returns C{True}, C{None}.
+        """
+        
+        return True, None
+    
+    def isValidMetadataIdentifier(self, name):
+        """ 
+        @see: L{FileSystem.metadataIdentifier<datafinder.persistence.factory.FileSystem.metadataIdentifierPattern>}
+        @note: This implementation always returns C{True}, C{None}.
+        """
+        
+        return True, None
