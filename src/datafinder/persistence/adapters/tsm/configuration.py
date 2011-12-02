@@ -76,5 +76,5 @@ class Configuration(object):
         # E1103: urlsplit produces the required results but Pylint
         # cannot correctly determine it.
 
-        splitUrl = urlsplit("http:" + hostAndPath)
+        splitUrl = urlsplit("http:" + hostAndPath, allow_fragments=False)
         return splitUrl.hostname, splitUrl.path

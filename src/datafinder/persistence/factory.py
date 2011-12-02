@@ -79,7 +79,7 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
     if itemUri is None:
         return FileSystem(None).createFileStorer("/")
     else:
-        parsedUri = urlsplit(itemUri)
+        parsedUri = urlsplit(itemUri, allow_fragments=False)
         baseUri = parsedUri.scheme + "://" + parsedUri.netloc + "/"
         if additionalParameters.baseUri is None:
             additionalParameters.baseUri = baseUri

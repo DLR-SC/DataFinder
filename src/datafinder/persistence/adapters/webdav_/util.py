@@ -135,7 +135,7 @@ class ItemIdentifierMapper(object):
         # E1103: urlsplit produces the required results but Pylint
         # cannot correctly determine it.
 
-        parsedUrl = urlparse.urlsplit(identifier)
+        parsedUrl = urlparse.urlsplit(identifier, allow_fragments=False)
         result = parsedUrl.path
         if result.startswith(self.__basePath):
             result = result[len(self.__basePath):]

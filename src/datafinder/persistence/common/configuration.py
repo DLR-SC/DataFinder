@@ -88,7 +88,7 @@ class BaseConfiguration(object):
 
         if not baseUri is None:
             try:
-                parsedUri = urlsplit(baseUri)
+                parsedUri = urlsplit(baseUri, allow_fragments=False)
                 self._baseUri = parsedUri.geturl()
                 self.uriScheme = parsedUri.scheme
                 self.uriNetloc = parsedUri.netloc
