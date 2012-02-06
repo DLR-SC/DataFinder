@@ -47,7 +47,7 @@ import operator
 from PyQt4 import QtCore, QtGui
 
 from datafinder.core.error import ConfigurationError
-from datafinder.core.configuration.scripts.constants import LOCAL_SCRIPT_LOCATION
+from datafinder.core.configuration.scripts import constants
 from datafinder.core.configuration.scripts.script import createScript
 from datafinder.gui.user.common.item_selection_dialog import ItemSelectionDialog
 from datafinder.gui.user.models.repository.filter.property_filter import PropertyFilter
@@ -108,7 +108,7 @@ class ScriptController(object):
     def load(self):
         """ Initializes the scripts menu. """
         
-        scripts = self._scriptRegistry.getScripts(LOCAL_SCRIPT_LOCATION)
+        scripts = self._scriptRegistry.getScripts(constants.LOCAL_SCRIPT_LOCATION)
         scripts.sort(cmp=lambda x, y: cmp(x.lower(), y.lower()), 
                      key=operator.attrgetter("title"))
         for script in scripts:
@@ -311,7 +311,7 @@ class ScriptController(object):
                 errorMessage = "Cannot add script '%s'.\nReason:%s" % (item.uri, error.message)
                 self._logger.error(errorMessage)
             else:
-                self._scriptRegistry.register(LOCAL_SCRIPT_LOCATION, [script])
+                self._scriptRegistry.register(constants.LOCAL_SCRIPT_LOCATION, [script])
                 self._addScript(script)
 
     def scriptsAvailable(self, dataFormatNames, dataTypeNames, context):
@@ -332,15 +332,16 @@ class ScriptController(object):
         """
         
         scriptsAvailable = False
-        if len(dataFormatNames) > 0 or len(dataTypeNames) > 0:
-            self._boundScriptExecutionContext = context
-            actions = self._boundScriptActions
-            for dataFormatName in dataFormatNames:
-                actions = actions & set(self._dataFormatScriptActionMap.get(dataFormatName, list()))
-            for dataTypeName in dataTypeNames:
-                actions = actions & set(self._dataTypeScriptActionMap.get(dataTypeName, list()))
-            self._setCurrentActions(list(actions))
-            scriptsAvailable = len(actions) > 0
+        dataFormatNames.append(constants.ALL_VALUE)
+        dataTypeNames.append(constants.ALL_VALUE)
+        self._boundScriptExecutionContext = context
+        actions = self._boundScriptActions
+        for dataFormatName in dataFormatNames:
+            actions = actions & set(self._dataFormatScriptActionMap.get(dataFormatName, list()))
+        for dataTypeName in dataTypeNames:
+            actions = actions & set(self._dataTypeScriptActionMap.get(dataTypeName, list()))
+        self._setCurrentActions(list(actions))
+        scriptsAvailable = len(actions) > 0
         return scriptsAvailable
     
     def _setCurrentActions(self, useScriptActions):
