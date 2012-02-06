@@ -55,3 +55,5 @@ DATAFORMATS_KEYWORD = "@dataformats:"
 ICON_KEYWORD = "@icon:"
 VERSION_KEYWORD = "@version:"
 AUTOMATIC_EXECUTE_KEYWORD = "@automatic"
+
+ALL_VALUE = "*"

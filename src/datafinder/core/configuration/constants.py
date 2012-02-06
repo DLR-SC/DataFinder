@@ -52,7 +52,7 @@ ICON_DIRECTORYNAME = "icons"
 SCRIPT_DIRECTORYNAME = "scripts"
 
 # Path to the working directory
-WORKING_PATH = "D:\\test\\datafinder"# os.path.join(os.path.expanduser("~"), ".datafinder")
+WORKING_PATH = os.path.join(os.path.expanduser("~"), ".datafinder")
 
 # DataFinder install directory
 INSTALLATION_HOME = os.environ.get("DF_HOME")
