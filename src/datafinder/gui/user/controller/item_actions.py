@@ -635,13 +635,16 @@ class _ItemActionChecker(object):
         if len(items) > 0:
             dataTypeNames = list()
             dataFormatNames = list()
+            collectionsAvailable = False
             for item in items:
+                if item.isCollection:
+                    collectionsAvailable = True
                 if not item.dataFormat is None:
                     dataFormatNames.append(item.dataFormat.name)
                 if not item.dataType is None:
                     dataTypeNames.append(item.dataType.name)
             context = (self._sourceRepositoryModel.repository, items)
-            scriptsAvailable = self._scriptController.scriptsAvailable(dataFormatNames, dataTypeNames, context)
+            scriptsAvailable = self._scriptController.scriptsAvailable(dataFormatNames, dataTypeNames, context, collectionsAvailable)
 
         if not scriptsAvailable and ac.USE_SCRIPT_ACTION in availableActionConstants:
             availableActionConstants.remove(ac.USE_SCRIPT_ACTION)

@@ -314,7 +314,7 @@ class ScriptController(object):
                 self._scriptRegistry.register(constants.LOCAL_SCRIPT_LOCATION, [script])
                 self._addScript(script)
 
-    def scriptsAvailable(self, dataFormatNames, dataTypeNames, context):
+    def scriptsAvailable(self, dataFormatNames, dataTypeNames, context, collectionsAvailable):
         """
         Enables bound (to data type or data format) scripts extensions and
         returns whether those script extension are available at all.
@@ -326,14 +326,20 @@ class ScriptController(object):
         @context: Returns the current set of items used on script execution. 
         @context: C{tuple} of L{Repository<datafinder.core.repository.Repository>}, 
                               C{list} of L{ItemBase<datafinder.core.item.base.ItemBase>}
+        @collectionsAvailable: Flag indicating that one or more collections are contained in
+                               in C{context}
+        @type collectionsAvailable: C{bool}
     
         @return: Flag indicating availability of those actions.
         @rtype: C{bool}
         """
         
-        scriptsAvailable = False
-        dataFormatNames.append(constants.ALL_VALUE)
-        dataTypeNames.append(constants.ALL_VALUE)
+        if dataFormatNames:
+            dataFormatNames.append(constants.ALL_VALUE)
+        #TODO(tobias-schlauch): Ensure that all collections own a data type. Until: Release 2.3.
+        # see: datafinder.core.item.collection.ItemCollection.dataType
+        if dataTypeNames or collectionsAvailable:
+            dataTypeNames.append(constants.ALL_VALUE)
         self._boundScriptExecutionContext = context
         actions = self._boundScriptActions
         for dataFormatName in dataFormatNames:
