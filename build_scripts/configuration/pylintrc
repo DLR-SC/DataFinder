@@ -108,7 +108,7 @@ required-attributes=__version__
 
 # Regular expression which should only match functions or classes name which do
 # not require a docstring
-no-docstring-rgx=
+no-docstring-rgx=((_.*)|(test.*)|(setUp.*)|(tearDown.*)|(.*Test))
 
 # Regular expression which should only match correct module names
 module-rgx=(([a-z_][a-z0-9_]*)$)
