@@ -44,6 +44,7 @@ Connect dialog for entering the url, username, password of the WebDAV Server.
 import logging
 
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtCore import Qt
 
 from datafinder.gui.user.dialogs.preferences_dialog import PreferencesDialogView
 from datafinder.gui.gen.user.connect_dialog_ui import Ui_connectDialog
@@ -75,7 +76,9 @@ class ConnectDialogView(QtGui.QDialog, Ui_connectDialog):
         Ui_connectDialog.__init__(self)
 
         self.setupUi(self)
-        
+        self.urlComboBox.setDuplicatesEnabled(True)
+        self.urlComboBox.completer().setCaseSensitivity(Qt.CaseSensitive)
+
         self._preferences = preferences
         self.connect(self.cancelButton, QtCore.SIGNAL("clicked()"), self.reject)
         self.connect(self.connectButton, QtCore.SIGNAL("clicked()"), self.accept)
