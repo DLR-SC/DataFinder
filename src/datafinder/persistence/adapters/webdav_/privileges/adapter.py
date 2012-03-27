@@ -40,6 +40,8 @@ Implements the privilege adapter.
 """
 
 
+from webdav import Constants
+from webdav.acp import Privilege
 from webdav.Connection import WebdavError
 
 from datafinder.persistence.error import PersistenceError
@@ -116,3 +118,59 @@ class PrivilegeWebdavAdapter(NullPrivilegeStorer):
                 raise PersistenceError(error.reason)
         finally:
             self.__connectionPool.release(connection)
+            
+
+class SimplePrivilegeWebdavAdapter(NullPrivilegeStorer):
+    """ Used for non-ACP version. It just evaluates the WebDAV options. """
+    
+    def __init__(self, identifier, connectionPool, itemIdMapper, privilegeMapper, connectionHelper=util):
+        NullPrivilegeStorer.__init__(self, identifier)
+        self.__connectionPool = connectionPool
+        self.__persistenceId = itemIdMapper.mapIdentifier(identifier)
+        self.__privilegeMapper = privilegeMapper
+        self.__connectionHelper = connectionHelper
+
+    def retrievePrivileges(self):
+        """ @see: L{NullPrivilegeStorer<datafinder.persistence.privileges.privilegestorer.NullPrivilegeStorer>}"""
+        
+        connection = self.__connectionPool.acquire()
+        try:
+            webdavStorer = self.__connectionHelper.createResourceStorer(self.__persistenceId, connection)
+            try:
+                options = webdavStorer.options()
+            except WebdavError, error:
+                raise PersistenceError(error.reason)
+            else:
+                privileges = list()
+                if "allow" in options:
+                    privileges = self._mapHttpOptionsToPrivileges(options["allow"])
+                return privileges
+        finally:
+            self.__connectionPool.release(connection)
+            
+    def _mapHttpOptionsToPrivileges(self, allowed):
+        raw_privileges = list()
+        self._check_read_privilege(allowed, raw_privileges)
+        self._check_write_content_privilege(allowed, raw_privileges)
+        self._check_write_properties_privilege(allowed, raw_privileges)
+        return self.__privilegeMapper.mapPersistencePrivileges(raw_privileges)
+
+    def _check_read_privilege(self, allowed, raw_privileges):
+        read_privilege = True
+        for read_part_privilege in ["GET", "PROPFIND"]:
+            if read_part_privilege not in allowed:
+                read_privilege = False
+        if read_privilege:
+            raw_privileges.append(Privilege(Constants.TAG_READ))
+            
+    def _check_write_content_privilege(self, allowed, raw_privileges):
+        write_content_privilege = True
+        for write_part_privilege in ["POST", "DELETE", "COPY", "MOVE"]:
+            if write_part_privilege not in allowed:
+                write_content_privilege = False
+        if write_content_privilege:
+            raw_privileges.append(Privilege(Constants.TAG_WRITE_CONTENT))
+            
+    def _check_write_properties_privilege(self, allowed, raw_privileges):
+        if "PROPPATCH" in allowed:
+            raw_privileges.append(Privilege(Constants.TAG_WRITE_PROPERTIES))
