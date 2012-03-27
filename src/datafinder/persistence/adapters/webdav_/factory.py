@@ -53,7 +53,7 @@ from datafinder.persistence.adapters.webdav_.util import ItemIdentifierMapper, c
 from datafinder.persistence.adapters.webdav_.data.adapter import DataWebdavAdapter
 from datafinder.persistence.adapters.webdav_.metadata.adapter import MetadataWebdavAdapter
 from datafinder.persistence.adapters.webdav_.principal_search.adapter import PrincipalSearchWebdavAdapter
-from datafinder.persistence.adapters.webdav_.privileges.adapter import PrivilegeWebdavAdapter
+from datafinder.persistence.adapters.webdav_.privileges.adapter import PrivilegeWebdavAdapter, SimplePrivilegeWebdavAdapter
 from datafinder.persistence.adapters.webdav_.privileges.privileges_mapping import PrivilegeMapper
 from datafinder.persistence.adapters.webdav_.search.adapter import SearchWebdavAdapter
 from datafinder.persistence.common.base_factory import BaseFileSystem
@@ -141,7 +141,7 @@ class FileSystem(BaseFileSystem):    """
             return PrivilegeWebdavAdapter(identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl),
                                           PrivilegeMapper(self._configuration.userCollectionUrl, self._configuration.groupCollectionUrl))
         else:
-            return NullPrivilegeStorer(identifier)
+            return SimplePrivilegeWebdavAdapter(identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl), PrivilegeMapper(None, None))
         
     def createPrincipalSearcher(self):
         """ 

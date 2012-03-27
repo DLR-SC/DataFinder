@@ -48,8 +48,10 @@ import unittest
 from webdav.Connection import WebdavError
 
 from datafinder.persistence.principal_search import principal
+from datafinder.persistence.privileges import constants
 from datafinder.persistence.privileges.ace import AccessControlListEntry
-from datafinder.persistence.adapters.webdav_.privileges.adapter import PrivilegeWebdavAdapter
+from datafinder.persistence.adapters.webdav_.privileges import adapter
+from datafinder.persistence.adapters.webdav_.privileges import privileges_mapping
 from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock
 
@@ -58,44 +60,56 @@ _VALID_ACL = [AccessControlListEntry(principal.Principal("id"))]
 
 
 class PrivilegeWebdavAdapterTestCase(unittest.TestCase):
-    """ Test case of the privilege adapter. """
     
     def setUp(self):
-        """ Creates object under test. """
-        
-        self._privilegeMapperMock = SimpleMock()
-        self._connectionHelperMock = SimpleMock(SimpleMock())
-        self._adapter = PrivilegeWebdavAdapter("identifier", SimpleMock(), SimpleMock(), 
-                                               self._privilegeMapperMock, self._connectionHelperMock)
+        self._privilegeMapper = SimpleMock()
+        self._connectionHelper = SimpleMock(SimpleMock())
+        self._adapter = adapter.PrivilegeWebdavAdapter(
+            "identifier", SimpleMock(), SimpleMock(), self._privilegeMapper, self._connectionHelper)
     
     def testRetrieveAcl(self):
-        """ Tests the retrieval of an ACL. """
-        
-        self._privilegeMapperMock.value = _VALID_ACL
+        self._privilegeMapper.value = _VALID_ACL
         self.assertEquals(self._adapter.retrieveAcl(), _VALID_ACL)
         
     def testUpdateAcl(self):
-        """ Tests the update of an ACL. """
-        
+        self._privilegeMapper.value = _VALID_ACL
         self._adapter.updateAcl(_VALID_ACL)
 
     def testRetrievePrivileges(self):
-        """ Tests the retrieval of user privileges. """
-        
-        self._privilegeMapperMock.value = list()
+        self._privilegeMapper.value = list()
         self.assertEquals(self._adapter.retrievePrivileges(), list())
 
     def testErrorHandling(self):
-        """ Tests the error handling. """
-        
-        self._connectionHelperMock.error = PersistenceError("")
+        self._connectionHelper.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._adapter.retrieveAcl)
         self.assertRaises(PersistenceError, self._adapter.updateAcl, dict())
         self.assertRaises(PersistenceError, self._adapter.retrievePrivileges)
         
-        self._connectionHelperMock.error = None
-        self._connectionHelperMock.value = SimpleMock(error=WebdavError(""))
+        self._connectionHelper.error = None
+        self._connectionHelper.value = SimpleMock(error=WebdavError(""))
         self.assertRaises(PersistenceError, self._adapter.retrieveAcl)
         self.assertRaises(PersistenceError, self._adapter.updateAcl, dict())
         self.assertRaises(PersistenceError, self._adapter.retrievePrivileges)
         
+class SimplePrivilegeWebdavAdapterTestCase(unittest.TestCase):
+    
+    def setUp(self):
+        self._privilegeMapper = privileges_mapping.PrivilegeMapper("", "")
+        self._connectionHelper = SimpleMock(SimpleMock())
+        self._adapter = adapter.SimplePrivilegeWebdavAdapter(
+            "identifier", SimpleMock(), SimpleMock(), self._privilegeMapper, self._connectionHelper)
+        
+    def testRetrievePrivilegesSuccess(self):
+        self._connectionHelper.value.value = {
+            "allow": ["GET", "PROPFIND", "PROPPATCH", "POST", "DELETE", "COPY", "MOVE"]}
+        self.assertEquals(
+            self._adapter.retrievePrivileges(), 
+            [constants.READ_PRIVILEGE, constants.WRITE_CONTENT_PRIVILEGE, constants.WRITE_PROPERTIES_PRIVILEGE])
+        
+    def testRetrievePrivilegesEmptyAllow(self):
+        self._connectionHelper.value.value = dict()
+        self.assertEquals(self._adapter.retrievePrivileges(), list())
+        
+    def testRetrievePrivilegesError(self):
+        self._connectionHelper.error = PersistenceError("")
+        self.assertRaises(PersistenceError, self._adapter.retrievePrivileges)
