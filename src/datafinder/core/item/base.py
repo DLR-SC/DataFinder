@@ -47,7 +47,7 @@ from datafinder.core.configuration.properties.constants import UNMANAGED_SYSTEM_
 from datafinder.core.error import ItemError, PrivilegeError, PropertyError
 from datafinder.core.item.property import Property
 from datafinder.core.item.privileges.acl import AccessControlList
-from datafinder.core.item.privileges.privilege import getPrivilege
+from datafinder.core.item.privileges import privilege
 from datafinder.persistence.error import PersistenceError
 
 
@@ -274,7 +274,7 @@ class ItemBase(object):
         @rtype: C{tuple} of C{unicode}, C{object} implementing file protocol
         """
 
-        if self.dataPersister.fileStorer is None:
+        if self.dataPersister.fileStorer is None or not self.capabilities.canRetrieveData:
             raise ItemError("This item does not allow data retrieval.")
         else:
             try:
@@ -365,20 +365,23 @@ class ItemBase(object):
     def _refreshProperties(self):
         """ Updates the item properties with current information of the persistence backend. """
         
-        try:
-            persistedProps = self.fileStorer.retrieveMetadata()
-        except PersistenceError, error:
-            self._properties = dict()
-            _logger.error(error.args)
-        except AttributeError:
-            self._properties = dict()
+        self._properties = dict()
+        if not privilege.READ_PRIVILEGE in self.privileges and not privilege.ALL_PRIVILEGE in self.privileges:
+            _logger.warning("You are not allowed to retrieve properties!")
         else:
-            self._properties = dict()
-            for propId, value in persistedProps.iteritems():
-                propDef = self.itemFactory.getPropertyDefinition(propId)
-                prop = Property.create(propDef, value)
-                self._properties[propId] = prop
-            self._completeProperties(persistedProps)
+            try:
+                persistedProps = self.fileStorer.retrieveMetadata()
+            except PersistenceError, error:
+                _logger.error(error.args)
+            except AttributeError:
+                self._properties = dict()
+            else:
+                self._properties = dict()
+                for propId, value in persistedProps.iteritems():
+                    propDef = self.itemFactory.getPropertyDefinition(propId)
+                    prop = Property.create(propDef, value)
+                    self._properties[propId] = prop
+                self._completeProperties(persistedProps)
                     
     def updateProperties(self, properties):
         """ 
@@ -388,6 +391,8 @@ class ItemBase(object):
         @type properties: C{list} of L{Property<datafinder.core.item.property.Property>}
         """
         
+        if not self.capabilities.canStoreProperties:
+            raise ItemError("You are not allowed to change properties!")
         propertiesToStore = dict()
         currentProperties = None 
         if not self.properties is None:
@@ -419,6 +424,8 @@ class ItemBase(object):
         @type propertyIdentifiers: C{list} of C{unicode}
         """
         
+        if not self.capabilities.canWriteProperties:
+            raise ItemError("You are not allowed to delete properties!")
         try:
             self.fileStorer.deleteMetadata(propertyIdentifiers)
         except (AttributeError, PersistenceError), error:
@@ -549,8 +556,8 @@ class ItemBase(object):
                     privileges = self.fileStorer.retrievePrivileges()
                 except PersistenceError, error:
                     raise PrivilegeError("Cannot determine privileges.\nReason: '%s'" % error.message)
-                for privilege in privileges:
-                    self._privileges.append(getPrivilege(privilege))
+                for privilege_ in privileges:
+                    self._privileges.append(privilege.getPrivilege(privilege_))
         return self._privileges
 
     def _setParent(self, parent):

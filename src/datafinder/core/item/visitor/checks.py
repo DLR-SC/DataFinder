@@ -49,7 +49,7 @@ from datafinder.core.item.collection import ItemRoot, ItemCollection
 from datafinder.core.item.data_persister import constants
 from datafinder.core.item.leaf import ItemLeaf
 from datafinder.core.item.link import ItemLink
-from datafinder.core.item.privileges.privilege import ALL_PRIVILEGE, WRITE_PRIVILEGE
+from datafinder.core.item.privileges.privilege import ALL_PRIVILEGE, WRITE_CONTENT, WRITE_PROPERTIES, READ_PRIVILEGE
 from datafinder.core.item.visitor.base import ItemTreeWalkerBase, VisitSlot
 from datafinder.persistence.error import PersistenceError
 
@@ -99,8 +99,6 @@ class ActionCheckVisitor(object):
 
     
     def __init__(self, resolveLinks=False, hasCustomMetadataSupport=False, hasSearchSupport=False):
-        """ Constructor. """
-
         self.resolveLinks = resolveLinks
         self._hasCustomMetadataSupport = hasCustomMetadataSupport
         self._hasSearchSupport = hasSearchSupport
@@ -124,8 +122,6 @@ class ActionCheckVisitor(object):
             self.handle(item)
     
     def _initCapabilities(self):
-        """ Initializes the capabilities. """
-        
         self.capabilities = {
             ActionCheckTreeWalker.CAPABILITY_ADD_CHILDREN: True,
             ActionCheckTreeWalker.CAPABILITY_DELETE: True,
@@ -139,14 +135,6 @@ class ActionCheckVisitor(object):
             ActionCheckTreeWalker.CAPABILITY_RETRIEVE_PROPERTIES: self._hasCustomMetadataSupport,
             ActionCheckTreeWalker.CAPABILITY_STORE_PROPERTIES: self._hasCustomMetadataSupport
         }
-    
-    def _disable(self, caps):
-        """
-        Helper method that disables the given capabilities.
-        """
-    
-        for capability in caps:
-            self.capabilities[capability] = False
     
     def handleDataNode(self, item):
         """
@@ -164,7 +152,7 @@ class ActionCheckVisitor(object):
         """
         
         if item.isRoot:
-            self._disable(self.capabilities.keys())
+            self._disableAllCapabilities()
             try:
                 self.capabilities[self.CAPABILITY_ADD_CHILDREN] = item.fileStorer.canAddChildren
             except PersistenceError, error:
@@ -172,14 +160,39 @@ class ActionCheckVisitor(object):
                 self.capabilities[self.CAPABILITY_ADD_CHILDREN] = False
             self.capabilities[self.CAPABILITY_SEARCH] = self._hasSearchSupport
         else:
-            self._checkDataState(item)
             self._checkPrivileges(item)
+            self._checkDataState(item)
         if not (item.isCollection and item.state == constants.ITEM_STATE_NULL):
             self._disable((ActionCheckVisitor.CAPABILITY_ARCHIVE,))
             
-    def _checkDataState(self, item):
-        """ Helper method checking the data state of the item. """
+    def _disableAllCapabilities(self):
+        self._disable(self.capabilities.keys())
+        
+    def _disable(self, caps):
+        for capability in caps:
+            self.capabilities[capability] = False
     
+    def _checkPrivileges(self, item):
+        try:
+            if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_CONTENT in item.privileges):
+                self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
+                               ActionCheckVisitor.CAPABILITY_STORE,
+                               ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES,
+                               ActionCheckVisitor.CAPABILITY_MOVE,
+                               ActionCheckVisitor.CAPABILITY_DELETE))
+            if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_PROPERTIES in item.privileges):
+                self._disable((ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES,))
+            if not item is None and not (ALL_PRIVILEGE in item.privileges or READ_PRIVILEGE in item.privileges):
+                self._disable((ActionCheckVisitor.CAPABILITY_RETRIEVE, 
+                               ActionCheckVisitor.CAPABILITY_RETRIEVE_PROPERTIES, 
+                               ActionCheckVisitor.CAPABILITY_COPY, 
+                               ActionCheckVisitor.CAPABILITY_ARCHIVE,
+                               ActionCheckVisitor.CAPABILITY_SEARCH))
+        except PrivilegeError, error:
+            _logger.debug(error.args)
+            self._disableAllCapabilities()
+    
+    def _checkDataState(self, item):
         state = item.state
         # Capability constraints for items in state INACCESSIBLE or NULL
         #  - must not store data
@@ -193,7 +206,7 @@ class ActionCheckVisitor(object):
         #  - must not be accessed
         elif state == constants.ITEM_STATE_MIGRATED \
              or state == constants.ITEM_STATE_UNSUPPORTED_STORAGE_INTERFACE:
-            self._disable(self.capabilities.keys())
+            self._disableAllCapabilities()
         # Capability constraints for items in state ARCHIVE
         #  - must not change properties
         elif state == constants.ITEM_STATE_ARCHIVED:
@@ -219,24 +232,6 @@ class ActionCheckVisitor(object):
                            ActionCheckVisitor.CAPABILITY_DELETE,
                            ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES))
 
-    def _checkPrivileges(self, item):
-        """ Helper method checking the privileges. """
-        
-        try:
-            if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_PRIVILEGE in item.privileges):
-                self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
-                               ActionCheckVisitor.CAPABILITY_STORE,
-                               ActionCheckVisitor.CAPABILITY_MOVE,
-                               ActionCheckVisitor.CAPABILITY_DELETE,
-                               ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES))
-        except PrivilegeError, error:
-            _logger.debug(error.args)
-            self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
-                           ActionCheckVisitor.CAPABILITY_STORE,
-                           ActionCheckVisitor.CAPABILITY_MOVE,
-                           ActionCheckVisitor.CAPABILITY_DELETE,
-                           ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES))
-    
     def handleLink(self, item):
         """
         Implementation of the C{handle} slot for L{ItemLink<datafinder.core.item.link.ItemLink>}.

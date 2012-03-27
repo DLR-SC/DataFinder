@@ -92,7 +92,8 @@ class ItemCollection(ItemBase):
         try:
             if not self.fileStorer.exists():
                 self.fileStorer.createCollection()
-                self.updateProperties(properties)
+                if self.capabilities.canStoreProperties:
+                    self.updateProperties(properties)
                 self.dataPersister.create()
                 self._refreshProperties()
         except PersistenceError, error:
