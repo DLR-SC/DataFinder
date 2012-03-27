@@ -100,7 +100,8 @@ class SearchDialog(QtGui.QDialog, Ui_searchDialog):
         self._keywordSearchQueryConverter = KeywordSearchQueryConverter(self.__model.repository.configuration.registeredPropertyDefinitions)
         
         self.storedSearchesPushButton.setChecked(True)
-        self._activateSimpleMode()
+        self._activateExpertMode()
+        self.expertModePushButton.setEnabled(False)
         self._connectSlots()
 
     def show(self):

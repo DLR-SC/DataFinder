@@ -80,7 +80,8 @@ class SearchWebdavAdapter(NullSearcher):
                 restrictions = mapSearchRestriction(restrictions)
             except AssertionError:
                 restrictions = list()
-            collectionStorer = self.__connectionHelper.createCollectionStorer(destination.identifier, connection)
+            persistenceId = self.__itemIdMapper.mapIdentifier(destination.identifier)
+            collectionStorer = self.__connectionHelper.createCollectionStorer(persistenceId, connection)
             try:
                 rawResult = collectionStorer.search(restrictions, [Constants.PROP_DISPLAY_NAME])
             except WebdavError, error:
