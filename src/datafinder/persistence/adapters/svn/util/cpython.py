@@ -47,7 +47,7 @@ import pysvn
 import sys
 import threading
 
-from pysvn._pysvn_2_6 import ClientError
+from pysvn import ClientError
 
 from datafinder.persistence.error import PersistenceError
 from datafinder.persistence.adapters.svn import constants
