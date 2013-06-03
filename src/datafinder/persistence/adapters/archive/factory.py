@@ -137,8 +137,8 @@ class FileSystem(BaseFileSystem):
             filename = self._configuration.uriPath
             try:
                 if os.path.exists(filename) and is_zipfile(filename):
-                    self._archive = ZipFile(filename, "a")
+                    self._archive = ZipFile(filename, "a", allowZip64=True)
                 else:
-                    self._archive = ZipFile(filename, "w")
+                    self._archive = ZipFile(filename, "w", allowZip64=True)
             except IOError, error:
                 raise PersistenceError("Unable to create archive. Reason: '%s'" % str(error))
