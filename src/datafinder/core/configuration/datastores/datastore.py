@@ -219,7 +219,9 @@ class FtpDataStore(DefaultDataStore):
         
         DefaultDataStore.__init__(self, name, storeType, iconName, url, isDefault, owner, persistedStore)
         self._password = self._store.password
-        
+        self._dataLocationUri = self.dataLocation
+        self._parameters = self._parameters = {"username": self.username, "password": self.password}
+
     def __getPassword(self):
         """ Getter for the password. """
         
@@ -247,18 +249,6 @@ class FtpDataStore(DefaultDataStore):
         store.password = self._password
         return store
 
-class SftpDataStore(FtpDataStore):
-    """ Restricts properties of a SFTP data store configuration. """
-    
-    _xmlBindingClass = datastores.sftp
-    
-    def __init__(self, name=None, storeType=None, iconName="dataStore", url=None, isDefault=False, owner=None, 
-                 persistedStore=None):
-        """ Constructor. """
-        
-        FtpDataStore.__init__(self, name, storeType, iconName, url, isDefault, owner, persistedStore)
-        self._password = self._store.password
-    
 
 class OfflineDataStore(DefaultDataStore):
     """ Restricts properties of an Offline data store configuration. """
