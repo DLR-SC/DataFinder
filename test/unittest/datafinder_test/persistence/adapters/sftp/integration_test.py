@@ -57,7 +57,6 @@ _USERNAME = None
 _PASSWORD = None
 
 
-@unittest.skipIf(_PASSWORD is None, "Not initialized.")
 class SftpIntegrationTest(unittest.TestCase):
     """ Provides simple integration tests through the FileStorer interface. """
     # pylint: disable=R0904
@@ -67,6 +66,8 @@ class SftpIntegrationTest(unittest.TestCase):
         self._fs = factory.FileSystem(bc)
         
     def testFileOperations(self):
+        if _PASSWORD is None: # Python26 supports no skipIf
+            return
         root = self._fs.createFileStorer("/")
         file1 = self._fs.createFileStorer(u"/fileä.txt")
         newFile = self._fs.createFileStorer(u"/fileä2.txt")
@@ -88,6 +89,8 @@ class SftpIntegrationTest(unittest.TestCase):
         self.assertFalse(newFile.exists())
         
     def testDirectoryOperations(self):
+        if _PASSWORD is None: # Python26 supports no skipIf
+            return
         # Setting it up
         collection = self._fs.createFileStorer(u"/päth/here/there")
         collection.createCollection(True)
