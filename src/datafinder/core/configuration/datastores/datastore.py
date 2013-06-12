@@ -246,6 +246,18 @@ class FtpDataStore(DefaultDataStore):
         store = DefaultDataStore.toPersistenceRepresentation(self)
         store.password = self._password
         return store
+
+class SftpDataStore(FtpDataStore):
+    """ Restricts properties of a SFTP data store configuration. """
+    
+    _xmlBindingClass = datastores.sftp
+    
+    def __init__(self, name=None, storeType=None, iconName="dataStore", url=None, isDefault=False, owner=None, 
+                 persistedStore=None):
+        """ Constructor. """
+        
+        FtpDataStore.__init__(self, name, storeType, iconName, url, isDefault, owner, persistedStore)
+        self._password = self._store.password
     
 
 class OfflineDataStore(DefaultDataStore):

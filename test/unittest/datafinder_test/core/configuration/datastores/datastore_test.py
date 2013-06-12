@@ -214,12 +214,31 @@ class S3DataStoreTestCase(unittest.TestCase):
 
 
 class SubversionDataStoreTestCase(unittest.TestCase):
-    """ Test cases for the WebDAV data store configuration. """
+    """ Test cases for the Subversion data store configuration. """
 
     def setUp(self):
         """ Creates object under test. """
         
         self._store = datastore.SubversionDataStore(datastores.svn())
+
+    def testPassword(self):
+        """ Tests the setting of the password. """
+        
+        self._store.password = "test"
+        self.assertEquals(self._store.password, "test")
+        self.assertNotEquals(self._store.toPersistenceRepresentation().password, "test")
+
+        self._store.password = None
+        self.assertEquals(self._store.password, None)
+        
+
+class SftpDataStoreTestCase(unittest.TestCase):
+    """ Test cases for the SFTP data store configuration. """
+
+    def setUp(self):
+        """ Creates object under test. """
+        
+        self._store = datastore.SftpDataStore(datastores.sftp())
 
     def testPassword(self):
         """ Tests the setting of the password. """

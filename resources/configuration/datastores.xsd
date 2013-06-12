@@ -73,6 +73,23 @@
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
+	
+	<xs:complexType name="sftp">
+        <xs:complexContent>
+            <xs:extension base="datastore">
+                <xs:sequence>
+                    <xs:element name="storeType" type="xs:string" />
+                    <xs:element name="dataLocation" type="xs:string" default="" />
+                    <xs:element name="removePathPrefix" type="xs:string" default="" />
+                    <xs:element name="isMigratedTo" type="xs:string" default="" />
+                    <xs:element name="storageRealisation" type="storageRealisationEnum" default="Hierarchical"/>
+                    
+                    <xs:element name="username" type="xs:string" default="" />
+                    <xs:element name="password" type="xs:string" default="" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
 
 	<xs:complexType name="gridftp">
 		<xs:complexContent>
