@@ -48,12 +48,27 @@ __version__ = "$Revision-Id:$"
 
 
 class ItemIdentifierMapper(object):
-    
+    """ Utility class to simplify different operations on logical
+    and persistence IDs. """
+
     def __init__(self, basePath):
+        """
+        @param basePath: Base path on the SFTP server.
+        @type basePath: C{unicode}
+        """
+        
         self._basePath = basePath
     
-    def determinePeristenceIdentifier(self, identifier):
-        """ Transforms the logical identifier to the persistence identifier. """
+    def determinePeristenceId(self, identifier):
+        """ Transforms the logical identifier to the persistence identifier. 
+        
+        @param identifier: The logical ID of an item.
+        @type identifier: C{unicode}
+        
+        @return: Path on the SFTP server. 
+                 It is already correctly encoded to use it with the library.
+        @rtype: C{str}
+        """
         
         if self._basePath.endswith("/"):
             persistenceId = self._basePath[:-1] + identifier
@@ -65,6 +80,16 @@ class ItemIdentifierMapper(object):
     
     @staticmethod
     def determineParentId(identifier):
+        """ Determines the logical ID of the parent item.
+        @param identifier: The logical ID of an item.
+        @type identifier: C{unicode}
+        
+        @return: The logical ID of the parent item.
+        @rtype: C{unicode}
+        """
+        
+        if identifier.endswith("/"):
+            identifier = identifier[:-1]
         parentId = "/".join(identifier.rsplit("/")[:-1])
         if parentId == "" and identifier.startswith("/") and identifier != "/":
             parentId = "/"
@@ -72,6 +97,16 @@ class ItemIdentifierMapper(object):
     
     @staticmethod
     def determineChildId(identifier, name):
+        """
+        Creates the child ID for the given identifier and the child name.
+        
+        @note: Both parameters can be C{str} or C{unicode}. 
+               However, make sure that both have the same type/
+               are encoded the same way.
+        """
+        
+        if not identifier and not name:
+            return ""
         if identifier.endswith("/"):
             child_id = identifier + name
         else:
@@ -80,4 +115,10 @@ class ItemIdentifierMapper(object):
     
     @staticmethod
     def determinePersistenceChildId(persistenceIdentifier, name):
+        """
+        Creates the child ID for the given persistence identifier and the child name.
+        @note: It is just an alias definition for persistence IDs which implies that you 
+               use already encoded string.
+        """
+        
         return ItemIdentifierMapper.determineChildId(persistenceIdentifier, name)

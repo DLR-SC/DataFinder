@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -72,10 +74,10 @@ class SftpDataAdapterTest(unittest.TestCase):
         self._connectionPoolMock = mock.Mock()
         self._connectionPoolMock.acquire.return_value = self._connectionMock
         
-        self._idMapper = utils.ItemIdentifierMapper("/basePath")
+        self._idMapper = utils.ItemIdentifierMapper(u"/bäsePath")
         
         self._sftpItem = adapter.SftpDataAdapter(
-            "/parent/identifier", "/pparent/pidentifier", 
+            u"/pärent/identifier", "/ppärent/pidentifier", 
             self._connectionPoolMock, self._factoryMock, self._idMapper)
         
     def testIsCollection(self):
@@ -122,7 +124,8 @@ class SftpDataAdapterTest(unittest.TestCase):
         
     def testCreateCollectionRecursivelyTooDeeplyNestedCollection(self):
         parentDataStorer = adapter.SftpDataAdapter(
-            "/parent", "/pparent", self._connectionPoolMock, self._factoryMock, self._idMapper)
+            u"/pärent", "/ppärent", 
+            self._connectionPoolMock, self._factoryMock, self._idMapper)
         parentDataStorer.exists = mock.Mock(return_value=False)
         self._factoryMock.createDataStorer.return_value = parentDataStorer
         
@@ -185,8 +188,8 @@ class SftpDataAdapterTest(unittest.TestCase):
         self.assertEquals(self._connectionMock.rmdir.call_count, 3)
         
     def _defineSubCollectionStructure(self):
-        leaf1 = mock.Mock(st_mode=_STAT_IS_LEAF_CODE, filename="a1")
-        leaf2 = mock.Mock(st_mode=_STAT_IS_LEAF_CODE, filename="a2")
+        leaf1 = mock.Mock(st_mode=_STAT_IS_LEAF_CODE, filename="ä1")
+        leaf2 = mock.Mock(st_mode=_STAT_IS_LEAF_CODE, filename="ä2")
         col1 = mock.Mock(st_mode=_STAT_IS_COLLECTION_CODE, filename="c1")
         col2 = mock.Mock(st_mode=_STAT_IS_COLLECTION_CODE, filename="c2")
         self._connectionMock.listdir_attr.side_effect = [[col1, col2], [leaf1], [leaf2]]
@@ -200,14 +203,14 @@ class SftpDataAdapterTest(unittest.TestCase):
     def testCopyLeafSuccess(self):
         self._markItemAsLeaf()
         
-        destination = mock.Mock(identifier="/newDestination")
+        destination = mock.Mock(identifier=u"/newDästination")
         self._sftpItem.copy(destination)
         
     def testCopyLeafThatDoesNotExist(self):
         self._markItemAsLeaf()
         self._sftpItem.readData = mock.Mock(side_effect=error.PersistenceError)
         
-        destination = mock.Mock(identifier="/newDestination")
+        destination = mock.Mock(identifier=u"/newDästination")
         self.assertRaises(error.PersistenceError, self._sftpItem.copy, destination)
         
     def testCopyCollectionSuccess(self):
@@ -223,18 +226,18 @@ class SftpDataAdapterTest(unittest.TestCase):
                 return mock.Mock(identifier=identifier)
         self._sftpItem._factory = _FactoryMock()
             
-        destination = mock.Mock(identifier="/newDestination")
+        destination = mock.Mock(identifier=u"/newDästination")
         self._sftpItem.copy(destination)
     
     def testCopyCollectionWhichDoesNotExist(self):
         self._markItemAsCollection()
         self._connectionMock.listdir_attr.side_effect = IOError
         
-        destination = mock.Mock(identifier="/newDestination")
+        destination = mock.Mock(identifier=u"/newDästination")
         self.assertRaises(error.PersistenceError, self._sftpItem.copy, destination)
         
     def testMoveSuccess(self):
-        destination = mock.Mock(identifier="/newDestination")
+        destination = mock.Mock(identifier=u"/newDästination")
         self._sftpItem.move(destination)
         
         self.assertTrue(self._connectionMock.rename.called)
@@ -242,7 +245,7 @@ class SftpDataAdapterTest(unittest.TestCase):
     def testMoveNonExistingItem(self):
         self._connectionMock.rename.side_effect = IOError
         
-        destination = mock.Mock(identifier="/newDestination")
+        destination = mock.Mock(identifier=u"/newDästination")
         self.assertRaises(error.PersistenceError, self._sftpItem.move, destination)
         
     def testWriteSuccess(self):

@@ -86,7 +86,7 @@ class FileSystem(BaseFileSystem):
         @rtype: L{SftpDataAdapter<datafinder.persistence.adapters.sftp.adapter.SftpDataAdapter>}
         """
         
-        persistenceId = self._idMapper.determinePeristenceIdentifier(identifier)
+        persistenceId = self._idMapper.determinePeristenceId(identifier)
         return SftpDataAdapter(
             identifier, persistenceId, self._connectionPool, self, self._idMapper)
     

@@ -42,53 +42,74 @@ Small integration test with a real SFTP server.
 """
 
 
+import unittest
+
+from datafinder.persistence.common import configuration
+from datafinder.persistence import factory
+import StringIO
+
+
 __version__ = "$Revision-Id:$" 
 
 
-if __name__ == "__main__":
-    from datafinder.persistence.common.configuration import BaseConfiguration
-    from datafinder.persistence.adapters.sftp.factory import FileSystem
-    import StringIO
-    bc = BaseConfiguration("sftp://192.168.64.128/home/schlauch/datafinder", username="username", password="password")
-    fs = FileSystem(bc)
-    
-    
-    root = fs.createDataStorer("/")
-    
-    
-    fileStorer = fs.createDataStorer("/file.txt")
-    print root.getChildren()
-    fileStorer.writeData(StringIO.StringIO("test"))
-    print fileStorer.readData().read()
-    fileStorer.delete()
-    print fileStorer.exists()
-    
-    print root.getChildren()
+_SERVER_URL = u"sftp://"
+_USERNAME = None
+_PASSWORD = None
 
-    recDir = fs.createDataStorer("/päth/here/there")
-    recDir.createCollection(True)
-    print "Collection:", recDir.exists(), recDir.isCollection, recDir.isLeaf
-    
-    file1 = fs.createDataStorer("/päth/file�.txt")
-    file1.writeData(StringIO.StringIO("test2"))
-    print file1.readData().read()
-    file2 = fs.createDataStorer("/päth/file2.txt")
-    file1.move(file2)
-    print "file2", file2.readData().read()
-    
-    file2.copy(file1)
-    print "file1", file1.readData().read()
-    file2.copy(fs.createDataStorer("/päth/here/there/file3"))
-    
-    path = fs.createDataStorer("/päth")
-    newPath = fs.createDataStorer("/päth2")
-    path.move(newPath)
-    print "path", path.exists()
-    print "newPath", newPath.exists()
 
-    newPath.copy(path)
-    newPath.copy(fs.createDataStorer("/päth/here/there/12"))
-    newPath.delete()
-    path.delete()
+@unittest.skipIf(_PASSWORD is None, "Not initialized.")
+class SftpIntegrationTest(unittest.TestCase):
+    """ Provides simple integration tests through the FileStorer interface. """
+    # pylint: disable=R0904
     
-    print root.getChildren()
+    def setUp(self):
+        bc = configuration.BaseConfiguration(_SERVER_URL, username=_USERNAME, password=_PASSWORD)
+        self._fs = factory.FileSystem(bc)
+        
+    def testFileOperations(self):
+        root = self._fs.createFileStorer("/")
+        file1 = self._fs.createFileStorer(u"/fileä.txt")
+        newFile = self._fs.createFileStorer(u"/fileä2.txt")
+        self.assertEquals(len(root.getChildren()), 0)
+        
+        # Write and read some data
+        file1.writeData(StringIO.StringIO("täst"))
+        self.assertEquals(file1.readData().read(), "täst")
+        self.assertTrue(file1.isLeaf)
+        
+        # Copy file
+        file1.copy(newFile)
+        self.assertEquals(newFile.readData().read(), "täst")
+        
+        # Cleaning up
+        file1.delete()
+        newFile.delete()
+        self.assertFalse(file1.exists())
+        self.assertFalse(newFile.exists())
+        
+    def testDirectoryOperations(self):
+        # Setting it up
+        collection = self._fs.createFileStorer(u"/päth/here/there")
+        collection.createCollection(True)
+        file1 = self._fs.createFileStorer(u"/päth/fileä.txt")
+        file1.writeData(StringIO.StringIO(u"test2"))
+        self.assertTrue(collection.isCollection)
+        self.assertTrue(file1.isLeaf)
+        orgCollection = self._fs.createFileStorer(u"/päth")
+        newCollection = self._fs.createFileStorer(u"/päth2")
+        
+        # Moving it
+        orgCollection.move(newCollection)
+        self.assertTrue(newCollection.isCollection)
+        self.assertFalse(orgCollection.exists())
+        
+        # Copying it
+        newCollection.copy(orgCollection)
+        self.assertTrue(newCollection.isCollection)
+        self.assertTrue(orgCollection.exists())
+        
+        # Cleaning up
+        orgCollection.delete()
+        newCollection.delete()
+        self.assertFalse(orgCollection.exists())
+        self.assertFalse(newCollection.exists())

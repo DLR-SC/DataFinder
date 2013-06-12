@@ -104,7 +104,8 @@ class FileSystem(object):
                             "ldap": ["ldap_"],
                             "tsm": ["tsm"],
                             "arch": ["archive"],
-                            "s3": ["amazons3"]}
+                            "s3": ["amazons3"],
+                            "sftp": ["sftp"]}
     
     _BASE_IMPL_PACKAGE_PATTERN = "datafinder.persistence.adapters.%s.factory"
     

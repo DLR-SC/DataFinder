@@ -36,7 +36,7 @@
 
 
 """ 
-The pure data part of the SFTP adapter.
+Implements the data adapter to access files/directories via SFTP.
 """
 
 
@@ -46,6 +46,7 @@ __version__ = "$Revision-Id:$"
 import errno
 import stat
 import StringIO
+import sys
 import tempfile
 
 from paramiko.ssh_exception import SSHException
@@ -55,11 +56,12 @@ from datafinder.persistence.adapters.sftp import constants
 
 
 class SftpDataAdapter(datastorer.NullDataStorer):
-    """ Implements the data adapter to access files/directories via SFTP.
+    """
     @note: Links are not supported.
-    @note: Copying of large collections might be ineffecient
+    @note: Copying of large collections might be inefficient
            because files are transferred to the client and then 
            back to the server. However, this is a limitation of SFTP.
+    @see: For interface details see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
     """
     
     def __init__(self, identifier, persistenceIdentifier, 
@@ -73,24 +75,41 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         
     @property
     def isCollection(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         connection = self._connectionPool.acquire()
         try:
             return stat.S_ISDIR(connection.stat(self._persistenceIdentifier).st_mode)
-        except (IOError, SSHException), error:
-            errorMessage = "Cannot determine status of file/collection from host!\nReason: '%s'" % str(error)
-            raise PersistenceError(errorMessage)
+        except (IOError, EOFError, SSHException):
+            message = "Cannot determine item type (file or collection) of '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
             
+    @staticmethod
+    def _reRaiseError(message):
+        _, value, traceback = sys.exc_info()
+        raise PersistenceError, u"%s.\nReason: '%s'" % (message, value), traceback
+            
     @property
     def isLeaf(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         return not self.isCollection
 
     @property
     def canAddChildren(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         return self.isCollection
 
     def createCollection(self, recursively=False):
+        """
+        @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
+        @note: Currently it is parent collections are created recursively. I.e., 
+               this might lead to problems when creating largely nested collections. 
+        """
+        
         if recursively:
             self._createMissingParents()
         self._createSingleCollection()
@@ -110,19 +129,25 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         connection = self._connectionPool.acquire()
         try:
             connection.mkdir(self._persistenceIdentifier)
-        except (IOError, SSHException), error:
-            raise PersistenceError(
-                "Cannot create collection '%s'. Reason: '%s'" % (self._persistenceIdentifier, error))
+        except (IOError, EOFError, SSHException):
+            message = "Cannot create collection '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
     
     def createResource(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         self.writeData(StringIO.StringIO(""))
         
     def createLink(self, destination):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         raise PersistenceError("Not implemented.")
 
     def getChildren(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         connection = self._connectionPool.acquire()
         try:
             children = list()
@@ -131,13 +156,15 @@ class SftpDataAdapter(datastorer.NullDataStorer):
                 child_id = self._idMapper.determineChildId(self.identifier, name)
                 children.append(child_id)
             return children
-        except (IOError, SSHException), error:
-            raise PersistenceError(
-                "Cannot retrieve children of item '%s'. Reason: '%s'" % (self._persistenceIdentifier, error))
+        except (IOError, EOFError, SSHException):
+            message = "Cannot retrieve children of item '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
 
     def exists(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         connection = self._connectionPool.acquire()
         try:
             connection.stat(self._persistenceIdentifier)
@@ -145,12 +172,21 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         except IOError, error:
             if error.errno == errno.ENOENT:
                 return False
-            raise PersistenceError(
-                "Cannot determine existence of '%s'. Reason: '%s'" % (self._persistenceIdentifier, error))
+            message = "Cannot determine existence of '%s'!" % self.identifier
+            self._reRaiseError(message)
+        except (EOFError, SSHException):
+            message = "Cannot determine existence of '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
 
     def delete(self):
+        """
+        @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
+        @note: As there is no library function to delete complete directories,
+               we implemented it on our own.
+        """
+        
         isCollection = self.isCollection
         connection = self._connectionPool.acquire()
         try:
@@ -158,9 +194,9 @@ class SftpDataAdapter(datastorer.NullDataStorer):
                 self._deleteCollection(connection)
             else:
                 self._deleteLeaf(connection)
-        except (IOError, SSHException), error:
-            raise PersistenceError(
-                "Cannot delete item '%s'. Reason: '%s'" % (self._persistenceIdentifier, error))
+        except (IOError, EOFError, SSHException):
+            message = "Cannot delete item '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
             
@@ -194,6 +230,14 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         connection.remove(self._persistenceIdentifier)
 
     def copy(self, destination):
+        """
+        @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>}
+        @note: There is no library function to copy complete directories.
+               Additionally, every file needs to be transferred to the client
+               and back to the server. Thus, it takes some time to copy large data sets.
+               Unfortunately, this is a limitation of SFTP.
+        """
+        
         isCollection = self.isCollection
         connection = self._connectionPool.acquire()
         try:
@@ -201,9 +245,9 @@ class SftpDataAdapter(datastorer.NullDataStorer):
                 self._copyCollection(connection, destination)
             else:
                 self._copyLeaf(destination)
-        except (IOError, SSHException), error:
-            raise PersistenceError(
-                "Cannot copy item '%s'. Reason: '%s'" % (self._persistenceIdentifier, error))
+        except (IOError, EOFError, SSHException):
+            message = "Cannot copy item '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
             
@@ -222,7 +266,7 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         destCollection.createCollection()
     
     def _copyCollectionContent(self, orgCollection, connection, collections, baseOrginalId, baseDestinationId):
-        orgPersistenceId = self._idMapper.determinePeristenceIdentifier(orgCollection.identifier)
+        orgPersistenceId = self._idMapper.determinePeristenceId(orgCollection.identifier)
         for attrs in connection.listdir_attr(orgPersistenceId):
             name = attrs.filename.decode(constants.FILE_NAME_ENCODING, errors="replace")
             itemId = self._idMapper.determineChildId(orgCollection.identifier, name)
@@ -241,17 +285,21 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         destination.writeData(data)
 
     def move(self, destination):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         connection = self._connectionPool.acquire()
-        destPersistenceId = self._idMapper.determinePeristenceIdentifier(destination.identifier)
+        destPersistenceId = self._idMapper.determinePeristenceId(destination.identifier)
         try:
             connection.rename(self._persistenceIdentifier, destPersistenceId)
-        except (IOError, SSHException), error:
-            errorMessage = "Cannot rename item!\nReason: '%s'" % str(error)
-            raise PersistenceError(errorMessage)
+        except (IOError, EOFError, SSHException):
+            message = "Cannot move/rename item '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
 
     def readData(self):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         connection = self._connectionPool.acquire()
         temporaryFileObject = tempfile.TemporaryFile()
         try:
@@ -263,13 +311,15 @@ class SftpDataAdapter(datastorer.NullDataStorer):
                 block = remoteFileObject.read(constants.BLOCK_SIZE)
             temporaryFileObject.seek(0)
             return temporaryFileObject
-        except (IOError, SSHException), error:
-            errorMessage = "Cannot retrieve file from host!\nReason: '%s'" % str(error)
-            raise PersistenceError(errorMessage)
+        except (IOError, EOFError, SSHException):
+            message = "Cannot read data of item '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
 
     def writeData(self, data):
+        """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
+        
         connection = self._connectionPool.acquire()
         try:
             remoteFileObject = connection.open(self._persistenceIdentifier, "w")
@@ -277,9 +327,9 @@ class SftpDataAdapter(datastorer.NullDataStorer):
             while block:
                 remoteFileObject.write(block)
                 block = data.read(constants.BLOCK_SIZE)
-        except (IOError, SSHException), sshException:
-            errorMessage = "Cannot transfer data to host!\nReason: '%s'" % str(sshException)
-            raise PersistenceError(errorMessage)
+        except (IOError, EOFError, SSHException):
+            message = "Cannot write data to item '%s'!" % self.identifier
+            self._reRaiseError(message)
         finally:
             data.close()
             self._connectionPool.release(connection)
