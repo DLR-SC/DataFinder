@@ -75,7 +75,7 @@ class ItemIdentifierMapper(object):
         else:
             persistenceId = self._basePath + identifier
         persistenceId = persistenceId.encode(
-            constants.FILE_NAME_ENCODING, errors="replace")
+            constants.FILE_NAME_ENCODING, "replace")
         return persistenceId
     
     @staticmethod

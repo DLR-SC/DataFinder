@@ -152,7 +152,7 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         try:
             children = list()
             for name in connection.listdir(self._persistenceIdentifier):
-                name = name.decode(constants.FILE_NAME_ENCODING, errors="replace")
+                name = name.decode(constants.FILE_NAME_ENCODING, "replace")
                 child_id = self._idMapper.determineChildId(self.identifier, name)
                 children.append(child_id)
             return children
@@ -268,7 +268,7 @@ class SftpDataAdapter(datastorer.NullDataStorer):
     def _copyCollectionContent(self, orgCollection, connection, collections, baseOrginalId, baseDestinationId):
         orgPersistenceId = self._idMapper.determinePeristenceId(orgCollection.identifier)
         for attrs in connection.listdir_attr(orgPersistenceId):
-            name = attrs.filename.decode(constants.FILE_NAME_ENCODING, errors="replace")
+            name = attrs.filename.decode(constants.FILE_NAME_ENCODING, "replace")
             itemId = self._idMapper.determineChildId(orgCollection.identifier, name)
             itemStorer = self._factory.createDataStorer(itemId)
             if stat.S_ISDIR(attrs.st_mode):
