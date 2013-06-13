@@ -193,7 +193,7 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
         if importName != item.name:
             self._log.warning("Imported '%s' using different name: '%s'." % (item.path, importName))
         return importName
-    
+
     def _importLeaf(self, leaf):
         """ Retrieves the content of a leaf item. """
         
@@ -204,13 +204,25 @@ class Importer(ItemTreeWalkerBase, object): # inherit from object to make pylint
             try:
                 importedLeaf.create(properties)
             except CoreError, error:
-                importedLeaf.invalidate()
-                raise error
+                self._handleLeafCreationError(importedLeaf, error)
             else:
                 if self._copyData:
-                    importedLeaf.storeData(leaf.retrieveData())
-                    self.importedLeafs.append(leaf)
-    
+                    try:
+                        importedLeaf.storeData(leaf.retrieveData())
+                    except CoreError, error:
+                        self._handleLeafCreationError(importedLeaf, error)
+                    else:
+                        self.importedLeafs.append(leaf)
+                        
+    def _handleLeafCreationError(self, leaf, error):
+        self._log.error(error.args)
+        try:
+            leaf.delete(ignoreStorageLocation=True)
+        except CoreError, error_:
+            leaf.invalidate()
+            self._log.info(error_.args)
+        raise error
+                        
     def _determineLeafProperties(self, leaf):
         """ Determines the properties when importing a leaf item. """
         

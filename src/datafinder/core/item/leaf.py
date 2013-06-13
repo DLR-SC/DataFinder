@@ -68,8 +68,9 @@ class ItemLeaf(ItemBase):
         ItemBase.create(self, properties)
         try:
             if not self.fileStorer.exists():
+                canStoreProperties = self.capabilities.canStoreProperties
                 self.fileStorer.createResource()
-                if self.capabilities.canStoreProperties:
+                if canStoreProperties:
                     self.updateProperties(properties)
                 self.dataPersister.create()
                 self._refreshProperties()
