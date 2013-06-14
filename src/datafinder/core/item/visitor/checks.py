@@ -43,7 +43,6 @@ defined in this package.
 
 import logging
 
-from datafinder.core.error import PrivilegeError
 from datafinder.core.item.base import ItemBase
 from datafinder.core.item.collection import ItemRoot, ItemCollection
 from datafinder.core.item.data_persister import constants
@@ -173,24 +172,20 @@ class ActionCheckVisitor(object):
             self.capabilities[capability] = False
     
     def _checkPrivileges(self, item):
-        try:
-            if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_CONTENT in item.privileges):
-                self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
-                               ActionCheckVisitor.CAPABILITY_STORE,
-                               ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES,
-                               ActionCheckVisitor.CAPABILITY_MOVE,
-                               ActionCheckVisitor.CAPABILITY_DELETE))
-            if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_PROPERTIES in item.privileges):
-                self._disable((ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES,))
-            if not item is None and not (ALL_PRIVILEGE in item.privileges or READ_PRIVILEGE in item.privileges):
-                self._disable((ActionCheckVisitor.CAPABILITY_RETRIEVE, 
-                               ActionCheckVisitor.CAPABILITY_RETRIEVE_PROPERTIES, 
-                               ActionCheckVisitor.CAPABILITY_COPY, 
-                               ActionCheckVisitor.CAPABILITY_ARCHIVE,
-                               ActionCheckVisitor.CAPABILITY_SEARCH))
-        except PrivilegeError, error:
-            _logger.debug(error.args)
-            self._disableAllCapabilities()
+        if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_CONTENT in item.privileges):
+            self._disable((ActionCheckVisitor.CAPABILITY_ADD_CHILDREN,
+                           ActionCheckVisitor.CAPABILITY_STORE,
+                           ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES,
+                           ActionCheckVisitor.CAPABILITY_MOVE,
+                           ActionCheckVisitor.CAPABILITY_DELETE))
+        if not item is None and not (ALL_PRIVILEGE in item.privileges or WRITE_PROPERTIES in item.privileges):
+            self._disable((ActionCheckVisitor.CAPABILITY_STORE_PROPERTIES,))
+        if not item is None and not (ALL_PRIVILEGE in item.privileges or READ_PRIVILEGE in item.privileges):
+            self._disable((ActionCheckVisitor.CAPABILITY_RETRIEVE, 
+                           ActionCheckVisitor.CAPABILITY_RETRIEVE_PROPERTIES, 
+                           ActionCheckVisitor.CAPABILITY_COPY, 
+                           ActionCheckVisitor.CAPABILITY_ARCHIVE,
+                           ActionCheckVisitor.CAPABILITY_SEARCH))
     
     def _checkDataState(self, item):
         state = item.state
@@ -241,8 +236,8 @@ class ActionCheckVisitor(object):
             item = item.linkTarget
             self.handle(item)
         else:
-            self._checkDataState(item)
             self._checkPrivileges(item)
+            self._checkDataState(item)
     
     def handleBase(self, item):
         """

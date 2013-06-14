@@ -187,11 +187,13 @@ class CreationWizard(QtGui.QWizard, Ui_Wizard):
 
     def configureTargetItemPage(self, filteredRepositoryModel, preSelectedIndexes, itemNameLabelText="", 
                                 checkTargetDataTypesExistence=False, disableItemNameSpecification=False,
-                                selectionMode=QtGui.QAbstractItemView.SingleSelection, targetIndex=None):
+                                selectionMode=QtGui.QAbstractItemView.SingleSelection, targetIndex=None,
+                                itemCheckFunction=None):
         """ Prepares the target item wizard page. """
         
-        self._configureItemChoserPage(self.targetChoserWizardPage, filteredRepositoryModel, preSelectedIndexes, itemNameLabelText, 
-                                      checkTargetDataTypesExistence, disableItemNameSpecification, selectionMode, targetIndex)
+        self._configureItemChoserPage(
+            self.targetChoserWizardPage, filteredRepositoryModel, preSelectedIndexes, itemNameLabelText, 
+            checkTargetDataTypesExistence, disableItemNameSpecification, selectionMode, targetIndex, itemCheckFunction)
         
     def configureDataStorePage(self, dataStoreMode, baseRepositoryModel):
         """ Prepares the source item wizard page. """

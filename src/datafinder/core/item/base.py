@@ -554,8 +554,9 @@ class ItemBase(object):
             if not self.fileStorer is None:
                 try:
                     privileges = self.fileStorer.retrievePrivileges()
-                except PersistenceError, error:
-                    raise PrivilegeError("Cannot determine privileges.\nReason: '%s'" % error.message)
+                except PersistenceError:
+                    _logger.exception("Problems retrieving privileges.")
+                    return self._privileges
                 for privilege_ in privileges:
                     self._privileges.append(privilege.getPrivilege(privilege_))
         return self._privileges

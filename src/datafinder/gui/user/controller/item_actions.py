@@ -582,7 +582,7 @@ class _ItemActionChecker(object):
         for action in removeActions:
             availableItemActions.remove(action)
 
-    def _handleImportActions(self, availableActionConstants, _):
+    def _handleImportActions(self, availableActionConstants, items):
         """ Restricts availability of import/export action. """
         
         if self._sourceRepositoryModel.isManagedRepository:
@@ -595,6 +595,13 @@ class _ItemActionChecker(object):
                 availableActionConstants.remove(ac.EXPORT_ACTION)
                 if not self._targetRepositoryModel.initialized and ac.IMPORT_ACTION in availableActionConstants:
                     availableActionConstants.remove(ac.IMPORT_ACTION)
+                    
+        if ac.EXPORT_ACTION in availableActionConstants:
+            for item in items:
+                if (item.isLeaf and not item.capabilities.canRetrieveData
+                    or item.isCollection and not item.capabilities.canArchive):
+                    availableActionConstants.remove(ac.EXPORT_ACTION)
+                    break
 
     def _handlePasteAction(self, availableActionConstants, items):
         """ Restricts availability of the paste action. """
@@ -605,6 +612,12 @@ class _ItemActionChecker(object):
               and not items[0].capabilities.canStoreProperties):
             if ac.PASTE_ACTION in availableActionConstants:
                 availableActionConstants.remove(ac.PASTE_ACTION)
+        else:
+            if ac.PASTE_ACTION in availableActionConstants:
+                for item in items:
+                    if not item.capabilities.canAddChildren:
+                        availableActionConstants.remove(ac.PASTE_ACTION)
+                        break
     
     def _handleSearchAction(self, availableActionConstants, _):
         """ Restricts availability of the search action. """
@@ -644,7 +657,8 @@ class _ItemActionChecker(object):
                 if not item.dataType is None:
                     dataTypeNames.append(item.dataType.name)
             context = (self._sourceRepositoryModel.repository, items)
-            scriptsAvailable = self._scriptController.scriptsAvailable(dataFormatNames, dataTypeNames, context, collectionsAvailable)
+            scriptsAvailable = self._scriptController.scriptsAvailable(
+                dataFormatNames, dataTypeNames, context, collectionsAvailable)
 
         if not scriptsAvailable and ac.USE_SCRIPT_ACTION in availableActionConstants:
             availableActionConstants.remove(ac.USE_SCRIPT_ACTION)

@@ -109,7 +109,8 @@ class ImportHandler(BaseStateHandler):
                                                  False, True, QtGui.QAbstractItemView.MultiSelection)
         elif identifier == TARGET_PAGE_ID:
             self._wizard.configureTargetItemPage(LeafFilter(self._targetRepositoryModel),
-                                                 [self._targetRepositoryModel.activeIndex], "", False, True)
+                                                 [self._targetRepositoryModel.activeIndex], "", False, True,
+                                                 itemCheckFunction=lambda item: item.capabilities.canAddChildren)
         elif identifier == DATASTORE_PAGE_ID:
             self._wizard.configureDataStorePage(ONLINE_DATASTORE_MODE, self._targetRepositoryModel)
         else:
