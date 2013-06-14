@@ -430,6 +430,14 @@ class ActionHandler(object):
             if index.isValid():
                 item = self._parentModel.nodeFromIndex(index)
                 self._repository.commitArchive(item)
+                
+    def searchPrincipal(self, pattern, searchMode):
+        """ 
+        Just redirects to the repository functionality.
+        @see: L{searchPrincipal<datafinder.core.repository.Repository.searchPrincipal>}
+        """
+        
+        return self._repository.searchPrincipal(pattern, searchMode)
     
     @property
     def hasMetadataSearchSupport(self):

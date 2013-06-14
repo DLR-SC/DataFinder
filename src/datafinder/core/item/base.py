@@ -451,6 +451,7 @@ class ItemBase(object):
                 except PrivilegeError, error:
                     _logger.error(error.args)
                     self._acl = AccessControlList()
+        return self._acl
 
     def updateAcl(self, acl):
         """ Stores access control list. """

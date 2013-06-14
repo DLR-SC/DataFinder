@@ -261,6 +261,12 @@ class _TreeDelegate(AbstractDelegate):
         """ Opens the search dialog. """
 
         self._itemActionController.searchAction()
+    
+    @util.deferredConnectionDecorator("privilegeAction", "triggered()")
+    def _privilegeActionClickedSlot(self):
+        """ Opens the privilege dialog. """
+
+        self._itemActionController.privilegeAction()
 
     @util.deferredConnectionDecorator("commitArchiveAction", "triggered()")
     def _commitArchiveActionClickedSlot(self):

@@ -383,9 +383,13 @@ class ItemActionController(object):
         self._searchDialog.show()
     
     def privilegeAction(self):
-        """Shows the privilege dialog. """
+        """ Shows the privilege dialog. """
+        
         if self._privilegeDialog is None:
             self._privilegeDialog = PrivilegeDialog(self._sourceRepositoryModel, self._mainWindow)
+        index = self._mapIndexToSource(self._selectionModel.currentIndex())
+        item = self._sourceRepositoryModel.nodeFromIndex(index)
+        self._privilegeDialog.item = item
         self._privilegeDialog.show()
 
     def commitArchive(self):
