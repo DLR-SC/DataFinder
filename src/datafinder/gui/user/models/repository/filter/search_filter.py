@@ -181,8 +181,7 @@ class SearchFilter(BaseRepositoryFilter, QtCore.QAbstractTableModel):
                 sourceIndex = self._emptyModelIndex
         return sourceIndex
     
-    @staticmethod
-    def flags(_):
+    def flags(self, _):
         """ L{flags<QtCore.QAbstractItemModel.flags>} """
         
         flags = QtCore.Qt.ItemIsSelectable
