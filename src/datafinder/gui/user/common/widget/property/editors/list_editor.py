@@ -59,7 +59,7 @@ class ListEditor(QtGui.QLineEdit):
     the manipulation of list data.
     """
     
-    def __init__(self, editorFactory, initData=list(), parent=None):
+    def __init__(self, restrictions, editorFactory, initData=list(), parent=None):
         """
         Constructor.
 
@@ -76,8 +76,15 @@ class ListEditor(QtGui.QLineEdit):
         
         self._editorFactory = editorFactory
         self.value = initData
-        self._propertyTypeNames = [constants.STRING_TYPE, constants.DATETIME_TYPE, 
-                                   constants.NUMBER_TYPE, constants.BOOLEAN_TYPE]
+        propertyTypeNames = [constants.STRING_TYPE, constants.DATETIME_TYPE, 
+                 constants.NUMBER_TYPE, constants.BOOLEAN_TYPE]
+        self._propertyTypeNames = restrictions.get(constants.ALLOWED_SUB_TYPES, propertyTypeNames)
+        removes = list()
+        for ptn in self._propertyTypeNames:
+            if ptn not in propertyTypeNames:
+                removes.append(ptn)
+        for ptn in removes:
+            self._propertyTypeNames.remove(ptn)
         
         self._editButton = QtGui.QPushButton("...", self)
         self._editButton.setMaximumSize(QtCore.QSize(20, 20))
@@ -145,6 +152,12 @@ class _ListPropertyDialog(QtGui.QDialog, Ui_listPropertyDialog):
         self.connect(self.deleteButton, QtCore.SIGNAL("clicked()"), self.deleteSlot)
         self.tableWidget.setColumnWidth(1, 150)
         self._fillModelFromList(initData)
+        
+        if not propertyTypeNames:
+            self.addButton.setEnabled(False)
+        if not initData:
+            self.deleteButton.setEnabled(False)
+            self.editButton.setEnabled(False)
     
     def _fillModelFromList(self, propList):
         """
@@ -247,6 +260,8 @@ class _ListPropertyItemDelegate(QtGui.QItemDelegate):
                 editor.setCurrentIndex(self._propertyTypes.index(valueType))
         elif index.column() == 1:
             editor = self._factory.createEditor(parent, valueType)
+            if not editor.isEnabled():
+                return None
         return editor
 
     def setModelData(self, editor, model, index):

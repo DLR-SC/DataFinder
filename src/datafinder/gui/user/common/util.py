@@ -566,6 +566,8 @@ def determineDisplayRepresentation(value, propertyIdentifier=None):
         displayRepresentation = u""
     elif isinstance(value, basestring):
         displayRepresentation = unicode(value)
+    elif isinstance(value, dict):
+        displayRepresentation = unicode(value)
     return displayRepresentation
 
 

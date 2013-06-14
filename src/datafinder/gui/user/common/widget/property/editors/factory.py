@@ -89,7 +89,8 @@ class EditorFactory(object):
         except TypeError:
             editor = self._handlingMethods[unicode(objectType)](restrictions, None, parent)
         except KeyError:
-            editor = None
+            editor = self._createStringEditor(restrictions, initState, parent)
+            editor.setEnabled(False)
         return editor
         
     def _createStringEditor(self, restriction, initData, parent):
@@ -175,7 +176,7 @@ class EditorFactory(object):
             editor.setRange(-9999999999, 9999999999)
         return editor
     
-    def _createListEditor(self, _, listItems, parent=None):
+    def _createListEditor(self, restrictions, listItems, parent=None):
         """
         Creates an adequate editor for a list 
         
@@ -188,7 +189,7 @@ class EditorFactory(object):
         """
         
         listItems = listItems or list()
-        return ListEditor(self, listItems, parent)
+        return ListEditor(restrictions, self, listItems, parent)
     
     @staticmethod
     def _createBooleanEditor(_, __, parent):
