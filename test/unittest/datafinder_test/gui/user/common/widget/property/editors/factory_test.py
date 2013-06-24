@@ -111,10 +111,10 @@ class EditorFactoryTest(unittest.TestCase):
         comboBox.addItems([u"test1"])
         self.assertEquals(self._editorFactory.getValueFromEditor(comboBox), u"test1")
         
-        listEditor = ListEditor(self._editorFactory, ["test"])
+        listEditor = ListEditor(dict(), self._editorFactory, ["test"])
         self.assertEquals(self._editorFactory.getValueFromEditor(listEditor), ["test"])
         
-        listEditor = ListEditor(self._editorFactory)
+        listEditor = ListEditor(dict(), self._editorFactory)
         self.assertEquals(self._editorFactory.getValueFromEditor(listEditor), list())
         
     def testEditorRestrictionsStringInt(self):
