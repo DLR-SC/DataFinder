@@ -551,15 +551,18 @@ class ItemBase(object):
         """ Getter for the granted privileges on the specific item. """
         
         if self._privileges is None:
-            self._privileges = list()
-            if not self.fileStorer is None:
-                try:
-                    privileges = self.fileStorer.retrievePrivileges()
-                except PersistenceError:
-                    _logger.exception("Problems retrieving privileges.")
-                    return self._privileges
-                for privilege_ in privileges:
-                    self._privileges.append(privilege.getPrivilege(privilege_))
+            if self._created:
+                self._privileges = list()
+                if not self.fileStorer is None:
+                    try:
+                        privileges = self.fileStorer.retrievePrivileges()
+                    except PersistenceError:
+                        _logger.exception("Problems retrieving privileges.")
+                        return self._privileges
+                    for privilege_ in privileges:
+                        self._privileges.append(privilege.getPrivilege(privilege_))
+            else:
+                return [privilege.ALL_PRIVILEGE]
         return self._privileges
 
     def _setParent(self, parent):
