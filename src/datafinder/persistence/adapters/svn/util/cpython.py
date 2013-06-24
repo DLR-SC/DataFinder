@@ -74,6 +74,7 @@ class CPythonSubversionWrapper(object):
         self._sharedState = None
         
         self._client = pysvn.Client()
+        self._client.exception_style = 1
         self._loginTries = 0
         self._client.callback_get_login = self._getLogin
         self._client.callback_get_log_message = lambda: (True, "")
@@ -307,7 +308,9 @@ class CPythonSubversionWrapper(object):
         try:
             self._client.log(self._repositoryUri)
             return True
-        except ClientError:
+        except ClientError, error:
+            if error.code == 160006: # We have no commit in the repository
+                return True
             return False
         
     @property
