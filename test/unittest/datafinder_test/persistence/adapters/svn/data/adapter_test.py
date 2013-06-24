@@ -1,4 +1,3 @@
-# pylint: disable=W0511
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -86,11 +85,12 @@ class _OpenMock(object):
         if self.error:
             raise IOError("")
         else:
-            return io.StringIO("")
+            return io.StringIO(u"")
 
     
 class DataSubversionAdapterTestCase(unittest.TestCase):
     """ Tests the SVN - data adapter implementation. """
+    # pylint: disable=R0904
     
     def setUp(self):
         # Install os mock
@@ -225,13 +225,13 @@ class DataSubversionAdapterTestCase(unittest.TestCase):
         
     def testWriteData(self):
         # Success
-        self._adapter.writeData(io.StringIO("test"))
+        self._adapter.writeData(io.StringIO(u"test"))
         
         # Error
         self._openMock.error = True
-        self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(""))
+        self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(u""))
         self._connectionMock.error = SubversionError("")
-        self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(""))
+        self.assertRaises(PersistenceError, self._adapter.writeData, io.StringIO(u""))
         
     def testReadData (self):
         # Success
