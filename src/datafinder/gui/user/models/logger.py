@@ -54,12 +54,33 @@ __version__ = "$Revision-Id:$"
 _DATETIME_FORMAT = "%d.%m.%y %X"
 
 
-class LoggingModel(QtCore.QAbstractTableModel, logging.Handler):
+class LoggerHandler(logging.Handler, QtCore.QObject):
+    """ Implements a logging handler which indicates available log records via
+    the custom Qt signal C{logrecord}. The separation of logger handler and model
+    is required to avoid threading issues."""
+    
+    def __init__(self, name, level=logging.DEBUG):
+        """
+        @param name: Logger name to which the handler should be added.
+        @param level: Minimum logging level which should be handled.
+        """
+        
+        QtCore.QObject.__init__(self)
+        logging.Handler.__init__(self, level)
+
+        logging.getLogger(name).addHandler(self)
+        
+        
+    def emit(self, record):
+        """ @see: L{emit<logging.Handler.emit>} """
+        
+        QtCore.QObject.emit(self, QtCore.SIGNAL("logrecord"), record)
+        
+
+class LoggingModel(QtCore.QAbstractTableModel):
     """
-    The LoggingModel implements a model for the DataFinder.
     It implements the L{QtCore.QAbstractTableModel} to present the logging records in a L{QtGui.QTableView}.
-    With the implementation of the L{logging.Handler} class it is possible to add this model to the
-    standard Python logger.
+    It uses C{LoggerHandler} which indicates new logging records via a custom Qt signal.
     """
 
     _LEVEL_NAME = "levelname"
@@ -72,20 +93,17 @@ class LoggingModel(QtCore.QAbstractTableModel, logging.Handler):
     LEVEL_NO = "levelno"
     CREATED = "created"
 
-    def __init__(self, name, level=logging.DEBUG, parent=None):
+    def __init__(self, loggerHandler, parent=None):
         """
-        Constructor.
 
-        @param name: Name of the logger that has to been associated with this model.
-        @type name: C{string}
-        @param level: The initial logging level of the widget.
-        @type level: C{object}
+        @param loggerHandler: Indicates new log records via Qt signals.
+        @type loggerHandler: C{LoggerHandler}
         @param parent: Parent L{QtCore.QObject} of the model.
         @type parent: C{QtCore.QObject}
         """
 
         QtCore.QAbstractTableModel.__init__(self, parent)
-        logging.Handler.__init__(self, level)
+        self._loggerHandler = loggerHandler
 
         self.__methods = [self._LEVEL_NAME, self.CREATED, self._NAME, self._PATH_NAME,
                           self._FUNC_NAME, self._LINE_NO, self._MESSAGE]
@@ -94,7 +112,8 @@ class LoggingModel(QtCore.QAbstractTableModel, logging.Handler):
                           self.tr("Message")]
         self.__recordBuffer = []
 
-        logging.getLogger(name).addHandler(self)
+        self.connect(self._loggerHandler, QtCore.SIGNAL("logrecord"), self._addNewLogRecord)
+        
 
     def _getHeaders(self):
         """
@@ -212,11 +231,8 @@ class LoggingModel(QtCore.QAbstractTableModel, logging.Handler):
         except RuntimeError:
             return
 
-    def emit(self, record):
-        """
-        @see: logging.Handler#emit
-        """
-
+    def _addNewLogRecord(self, record):
+        
         try:
             self.beginInsertRows(QtCore.QModelIndex(), self.rowCount(), self.rowCount())
             self.__recordBuffer.append(record)

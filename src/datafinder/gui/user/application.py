@@ -57,7 +57,7 @@ from datafinder.gui.user.controller.managed_repository import ManagedRepositoryC
 from datafinder.gui.user.controller.output.facade import OutputFacadeController
 from datafinder.gui.user.controller.scripts import ScriptController
 from datafinder.gui.user.dialogs.about_dialog import AboutDialogView
-from datafinder.gui.user.models.logger import LoggingModel, LoggingSortFilterModel
+from datafinder.gui.user.models.logger import LoggingModel, LoggingSortFilterModel, LoggerHandler
 from datafinder.gui.user.models.repository.filter.search_filter import SearchFilter
 from datafinder.gui.user import script_api
 from datafinder.gui.user.common.widget.widget import ActionTooltipMenu
@@ -325,17 +325,19 @@ class Application(QtGui.QApplication):
         self.installTranslator(self.__translator)
 
         #Initializing of the logging mechanism.
-        rootLoggingModel = LoggingModel(constants.LOGGER_ROOT, parent=self)
+        rootLoggerHandler = LoggerHandler(constants.LOGGER_ROOT)
+        rootLoggingModel = LoggingModel(rootLoggerHandler, parent=self)
         rootLogger = logging.getLogger(constants.LOGGER_ROOT)
         if debug:
             rootLogger.setLevel(logging.DEBUG)
-        rootLogger.addHandler(rootLoggingModel)
-        logger.getDefaultLogger().addHandler(rootLoggingModel)
+        rootLogger.addHandler(rootLoggerHandler)
+        logger.getDefaultLogger().addHandler(rootLoggerHandler)
 
-        scriptLoggingModel = LoggingModel(constants.LOGGER_SCRIPT, parent=self)
+        scriptLoggerHandler = LoggerHandler(constants.LOGGER_SCRIPT)
+        scriptLoggingModel = LoggingModel(scriptLoggerHandler, parent=self)
         scriptLogger = logging.getLogger(constants.LOGGER_SCRIPT)
         scriptLogger.setLevel(logging.DEBUG)
-        scriptLogger.addHandler(scriptLoggingModel)
+        scriptLogger.addHandler(scriptLoggerHandler)
 
         #Model initialization.
         repositoryManager = repositoryManagerInstance
