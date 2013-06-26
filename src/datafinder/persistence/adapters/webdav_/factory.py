@@ -44,6 +44,8 @@ access a WebDAV file system.
 __version__ = "$Revision-Id:$" 
 
 
+import logging
+
 from webdav.Connection import WebdavError
 
 from datafinder.persistence.adapters.webdav_.configuration import Configuration
@@ -59,7 +61,10 @@ from datafinder.persistence.adapters.webdav_.search.adapter import SearchWebdavA
 from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.common.connection.manager import ConnectionPoolManager
 from datafinder.persistence.error import PersistenceError
-from datafinder.persistence.privileges.privilegestorer import NullPrivilegeStorer
+from datafinder.persistence.principal_search.principalsearcher import NullPrincipalSearcher
+
+
+_logger = logging.getLogger()
 
 
 class FileSystem(BaseFileSystem):    """ 
@@ -125,8 +130,9 @@ class FileSystem(BaseFileSystem):    """
         metadata.adapter.MetadataWebdavAdapter>
         """
 
-        return MetadataWebdavAdapter(identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl), 
-                                     hasMetadataSearchSupport=self.hasMetadataSearchSupport)
+        return MetadataWebdavAdapter(
+            identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl), 
+            hasMetadataSearchSupport=self.hasMetadataSearchSupport)
     
     def createPrivilegeStorer(self, identifier):
         """ 
@@ -141,7 +147,8 @@ class FileSystem(BaseFileSystem):    """
             return PrivilegeWebdavAdapter(identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl),
                                           PrivilegeMapper(self._configuration.userCollectionUrl, self._configuration.groupCollectionUrl))
         else:
-            return SimplePrivilegeWebdavAdapter(identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl), PrivilegeMapper(None, None))
+            return SimplePrivilegeWebdavAdapter(
+                identifier, self._connectionPool, ItemIdentifierMapper(self._configuration.baseUrl), PrivilegeMapper(None, None))
         
     def createPrincipalSearcher(self):
         """ 
@@ -152,8 +159,12 @@ class FileSystem(BaseFileSystem):    """
         principal_search.adapter.PrincipalSearchWebdavAdapter>
         """
         
-        return PrincipalSearchWebdavAdapter(self._configuration.userCollectionUrl, self._configuration.groupCollectionUrl, 
-                                            self._connectionPool)
+        if not self._configuration.userCollectionUrl or not self._configuration.groupCollectionUrl:
+            _logger.debug("Missing user or group URL to use the principal searcher. Thus, using a null value object.")
+            return NullPrincipalSearcher()
+        else:
+            return PrincipalSearchWebdavAdapter(
+                self._configuration.userCollectionUrl, self._configuration.groupCollectionUrl, self._connectionPool)
         
     def createSearcher(self):
         """ 
@@ -170,7 +181,7 @@ class FileSystem(BaseFileSystem):    """
         
         self._connectionManager.remove(self._configuration.baseUrl)
 
-    @property #R0201
+    @property
     def hasCustomMetadataSupport(self):
         """ 
         This is the WebDAV-specific implementation.
@@ -180,7 +191,7 @@ class FileSystem(BaseFileSystem):    """
         
         return True
     
-    @property #R0201
+    @property
     def hasMetadataSearchSupport(self):
         """ 
         This is the WebDAV-specific implementation.
@@ -200,7 +211,7 @@ class FileSystem(BaseFileSystem):    """
                 self._connectionPool.release(connection)
         return self._hasMetadataSearchSupport
     
-    @property #R0201
+    @property
     def hasPrivilegeSupport(self):
         """ 
         This is the WebDAV-specific implementation.

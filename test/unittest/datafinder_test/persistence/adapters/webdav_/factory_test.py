@@ -35,6 +35,7 @@
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 
 
+
 """ 
 Implements test cases for the WebDAV-specific file system factory.
 """
@@ -45,13 +46,14 @@ import unittest
 from webdav.Connection import WebdavError
 
 from datafinder.persistence.common.configuration import BaseConfiguration
-from datafinder.persistence.privileges.privilegestorer import NullPrivilegeStorer
+from datafinder.persistence.adapters.webdav_.principal_search.adapter import PrincipalSearchWebdavAdapter
 from datafinder.persistence.adapters.webdav_ import factory
 from datafinder.persistence.adapters.webdav_.metadata.adapter import MetadataWebdavAdapter
 from datafinder.persistence.adapters.webdav_.data.adapter import DataWebdavAdapter
-from datafinder.persistence.adapters.webdav_.privileges.adapter import PrivilegeWebdavAdapter
+from datafinder.persistence.adapters.webdav_.privileges.adapter import PrivilegeWebdavAdapter, SimplePrivilegeWebdavAdapter
 from datafinder.persistence.adapters.webdav_.search.adapter import SearchWebdavAdapter
 from datafinder.persistence.search.searcher import NullSearcher
+from datafinder.persistence.principal_search.principalsearcher import NullPrincipalSearcher
 from datafinder_test.mocks import SimpleMock
 
 
@@ -109,12 +111,21 @@ class FileSystemTestCase(unittest.TestCase):
         """ Tests the creation of a WebDAV specific privilege data storer. """
         
         self._factory._hasPrivilegeSupport = False
-        self.assertTrue(isinstance(self._factory.createPrivilegeStorer("identifier"), NullPrivilegeStorer))
+        self.assertTrue(isinstance(self._factory.createPrivilegeStorer("identifier"), SimplePrivilegeWebdavAdapter))
         self.assertFalse(isinstance(self._factory.createPrivilegeStorer("identifier"), PrivilegeWebdavAdapter))
         
         self._factory._hasPrivilegeSupport = True
-        self.assertTrue(isinstance(self._factory.createPrivilegeStorer("identifier"), NullPrivilegeStorer))
+        self.assertFalse(isinstance(self._factory.createPrivilegeStorer("identifier"), SimplePrivilegeWebdavAdapter))
         self.assertTrue(isinstance(self._factory.createPrivilegeStorer("identifier"), PrivilegeWebdavAdapter))
+        
+    def testCreatePrincipalSearcher(self):
+        """ Tests the creation of a WebDAV specific principal searcher. """
+        
+        self.assertTrue(isinstance(self._factory.createPrincipalSearcher(), NullPrincipalSearcher))
+        
+        self._factory._configuration.userCollectionUrl = "http://server.de/users"
+        self._factory._configuration.groupCollectionUrl = "http://server.de/groups"
+        self.assertTrue(isinstance(self._factory.createPrincipalSearcher(), PrincipalSearchWebdavAdapter))
         
     def testCreateSearcher(self):
         """ Tests the creation of a WebDAV specific searcher. """
