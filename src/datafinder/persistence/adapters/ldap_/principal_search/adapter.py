@@ -62,10 +62,10 @@ _FILTER = {_LDAP_PROPERTY_COMMON_NAME: 0,
            _LDAP_PROPERTY_DISPLAY_NAME: 2,
            _LDAP_PROPERTY_MEMBEROF_NAME: 3}
 
-_userQuery = "(&%s (%s=%s))" % ("(%s=" + _LDAP_PROPERTY_DISPLAY_NAME + ")",
+_userQuery = "(&%s (%s=%s))" % ("(" + _LDAP_PROPERTY_DISPLAY_NAME + "=%s)",
                                 _LDAP_PROPERTY_OBJECT_CLASS,
                                 _LDAP_PROPERTY_OBJECT_CLASS_USER_VALUE)
-_groupQuery = "(&%s (%s=%s))" % ("(%s=" + _LDAP_PROPERTY_COMMON_NAME + ")",
+_groupQuery = "(&%s (%s=%s))" % ("(" +_LDAP_PROPERTY_COMMON_NAME + "=%s)",
                                  _LDAP_PROPERTY_OBJECT_CLASS,
                                  _LDAP_PROPERTY_OBJECT_CLASS_GROUP_VALUE)
 
@@ -75,8 +75,6 @@ class LdapPrincipalSearchAdapter(NullPrincipalSearcher):
     
     def __init__(self, configuration):
         """ 
-        Constructor. 
-        
         @param configuration: LDAP-specific configuration parameters.
         @type configuration: L{Configuration<datafinder.persistence.ldap.configuration.Configuration>}
         """
@@ -89,7 +87,7 @@ class LdapPrincipalSearchAdapter(NullPrincipalSearcher):
         
         connection = self._createConnection()
         try:
-            pattern = _LDAP_WILDCARD_CHARACTER + pattern + _LDAP_WILDCARD_CHARACTER
+            pattern = pattern + _LDAP_WILDCARD_CHARACTER
             userQuery = _userQuery % pattern
             groupQuery = _groupQuery % pattern
             rawResult = list()
@@ -115,14 +113,22 @@ class LdapPrincipalSearchAdapter(NullPrincipalSearcher):
     def _createConnection(self):
         """ Creates a connection accessing the specified LDAP server. """
         
+        username = self._getUsername()
         try:
-            connection = _Ldap(self._configuration.serverUri, self._configuration.username, 
-                               self._configuration.password, encoding=self._configuration.encoding)
+            connection = _Ldap(
+                self._configuration.serverUri, username, self._configuration.password, 
+                encoding=self._configuration.encoding)
         except ldap.LDAPError, error:
             errorMessage = "Cannot perform principal search on LDAP server. Reason: '%s'" % str(error)
             raise PersistenceError(errorMessage)
         else:
             return connection
+        
+    def _getUsername(self):
+        if self._configuration.domain and self._configuration.username:
+            return self._configuration.domain + _DOMAIN_SEPARATOR + self._configuration.username
+        else:
+            return self._configuration.username
         
     def _mapRawResult(self, rawResult):
         """ Prepare LDAP query result. """
@@ -140,9 +146,10 @@ class LdapPrincipalSearchAdapter(NullPrincipalSearcher):
             memberOf = list()
             if not item[3] is None:
                 for member in item[3]:
-                    uniqueMemberName = self._configuration.domain + _DOMAIN_SEPARATOR + unicode(member, self._configuration.encoding)
-                    member = principal.Principal(uniqueMemberName, type=constants.GROUP_PRINCIPAL_TYPE)
-                    memberOf.append(member)
+                    if not member is None:
+                        uniqueMemberName = self._configuration.domain + _DOMAIN_SEPARATOR + unicode(member, self._configuration.encoding)
+                        member = principal.Principal(uniqueMemberName, type=constants.GROUP_PRINCIPAL_TYPE)
+                        memberOf.append(member)
             principal_ = principal.Principal(uniqueName, type=principalType, displayName=displayName, roles=memberOf)
             mappedResult.append(principal_)
         return mappedResult
