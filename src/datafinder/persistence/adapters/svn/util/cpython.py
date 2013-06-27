@@ -42,6 +42,7 @@ This implementation works with CPython and is based on C[pysvn}.
 
 
 import locale
+import logging
 import os
 import pysvn
 import sys
@@ -56,6 +57,9 @@ from datafinder.persistence.adapters.svn.util.util import pepareSvnPath
 
 
 __version__ = "$Revision-Id$" 
+
+
+_logger = logging.getLogger()
 
 
 class CPythonSubversionWrapper(object):
@@ -74,7 +78,7 @@ class CPythonSubversionWrapper(object):
         self._sharedState = None
         
         self._client = pysvn.Client()
-        self._client.exception_style = 1
+        self._client.exception_style = 1 # errors have tuple args: (full msg, list((msg, error code)))
         self._loginTries = 0
         self._client.callback_get_login = self._getLogin
         self._client.callback_get_log_message = lambda: (True, "")
@@ -305,12 +309,15 @@ class CPythonSubversionWrapper(object):
 
     @property
     def canBeAccessed(self):
+        print self._repositoryUri
         try:
             self._client.log(self._repositoryUri)
             return True
         except ClientError, error:
-            if error.code == 160006: # We have no commit in the repository
-                return True
+            _logger.debug(error.args[0])
+            for _, errorCode in  error.args[1]:
+                if errorCode == 160006: # We have no commit in the repository, but its ok.
+                    return True
             return False
         
     @property
