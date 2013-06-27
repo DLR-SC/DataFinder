@@ -89,8 +89,6 @@ class PropertyError(CoreError):
     
     def __init__(self, propertyIdentifier, errorMessage):
         """ 
-        Constructor.
-
         @param propertyIdentifier: The identifier of the property.
         @type propertyIdentifier: C{unicode}
         @param errorMessage: The message describing the occurred error.
@@ -106,18 +104,16 @@ class AuthenticationError(CoreError):
     
     def __init__(self, errorMessage, datastore, updateCredentialsCallback):
         """ 
-        Constructor.
-
         @param errorMessage: The message describing the occurred error.
         @type errorMessage: C{unicode}
         @param datastore: Data store configuration of the accessed file system.
         @type datastore: L{DefaultDataStore<datafinder.core.configuration.datastores.datastore.DefaultDataStore>}
-        @param updateCredentialsCallback: Function which allows specification of authentication information
-                                          via a parameter dictionary.
+        @param updateCredentialsCallback: Function which allows specification of authentication 
+            information via dictionary (key value pairs). The callback checks the accessibility again and
+            returns the result via a boolean.
         @type updateCredentialsCallback: C{Callable}
         """
         
         CoreError.__init__(self, errorMessage)
         self.updateCredentialsCallback = updateCredentialsCallback
         self.datastore = datastore
-

@@ -1,4 +1,4 @@
-# pylint: disable=R0201
+# pylint: disable=R0201, C0111, R0904, W0212
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -55,116 +55,99 @@ __version__ = "$Revision-Id:$"
 
 _UNSUPPORTED_URI_SCHEME = "unknown"
 _VALID_URI_SCHEME = "valid"
-_VALID_PRINCIPAL_SEARCH_SCHEME = "valid_principal"
+_VALID_PRINCIPAL_SEARCH_SCHEME = "ldap"
+_VALID_SEARCH_SCHEME = "lucene+http"
 
 
 class _ConcreteFactoryMock(BaseFileSystem):
-    """ Mocks the concrete factory implementation. """
     
     def __init__(self, _):
-        """ Constructor. """
-        
         BaseFileSystem.__init__(self)
     
     def createDataStorer(self, _):
-        """ Mock implementation. """
-        
         mock = SimpleMock(True)
         mock.identifier = "id"
         return mock
     
     def createMetadataStorer(self, _):
-        """ Mock implementation. """
-        
         mock = SimpleMock()
         mock.identifier = "id"
         return mock
     
     def createPrincipalSearcher(self):
-        """ Mock implementation. """
-        
         class PrincipalSearcherMock(object):
             def searchPrincipal(self, _, __):
-                return [""]
+                return list()
         return PrincipalSearcherMock()
     
     def createPrivilegeStorer(self, _):
-        """ Mock implementation. """
-        
         mock = SimpleMock()
         mock.identifier = "id"
         return mock
     
     @property
     def hasCustomMetadataSupport(self):
-        """ Mock implementation. """
-        
         return True
     
     @property
     def hasMetadataSearchSupport(self):
-        """ Mock implementation. """
-        
         return True
     
     @property
     def hasPrivilegeSupport(self):
-        """ Mock implementation. """
-        
         return True
     
     @property
     def metadataIdentifierPattern(self):
-        """ Mock implementation. """
-        
         return re.compile(".")
     
     @property
     def identifierPattern(self):
-        """ Mock implementation. """
-        
         return re.compile(".")
 
 
-class _ConcretePrincipalSeacherFactoryMock(BaseFileSystem):
-    """ Mocks the concrete factory implementation. """
+class _ConcretePrincipalSearcherFactoryMock(BaseFileSystem):
     
     def __init__(self, _):
-        """ Constructor. """
-        
         BaseFileSystem.__init__(self)
     
     def createPrincipalSearcher(self):
-        """ Mock implementation. """
-        
         class PrincipalSearcherMock(object):
             def searchPrincipal(self, _, __):
                 return ["", ""]
         return PrincipalSearcherMock()
 
 
-def _getFactoryMock(_, uriScheme):
-    """ Raises a persistence error. """
+class _ConcreteSearcherFactoryMock(BaseFileSystem):
     
+    def __init__(self, _):
+        BaseFileSystem.__init__(self)
+    
+    def createSearcher(self):
+        class SearcherMock(object):
+            def search(self, _, __):
+                return ["", ""]
+        return SearcherMock()
+
+
+def _createFactoryMock(_, uriScheme, configuration):
     if uriScheme == _UNSUPPORTED_URI_SCHEME:
         raise PersistenceError("")
     elif uriScheme == _VALID_PRINCIPAL_SEARCH_SCHEME:
-        return _ConcretePrincipalSeacherFactoryMock
+        return _ConcretePrincipalSearcherFactoryMock(configuration)
+    elif uriScheme == _VALID_SEARCH_SCHEME:
+        return _ConcreteSearcherFactoryMock(configuration)
     else:
-        return _ConcreteFactoryMock
+        return _ConcreteFactoryMock(configuration)
 
 
 class FileSystemTestCase(unittest.TestCase):
     """ Test cases for the file system factory. """
     
     def setUp(self):
-        """ Mocks the factory creation method. """
-        
-        FileSystem._getFactory = _getFactoryMock
+        FileSystem._createFactory = _createFactoryMock
             
     def testNullFactory(self):
-        """ Checks the initialization of a null factory. """
-        
         nullFileSystem = FileSystem()
         self.assertEquals(nullFileSystem.searchPrincipal("pattern", "searchMode"), list())
         self.assertTrue(not nullFileSystem.createFileStorer("identifier") is None)
@@ -179,19 +162,15 @@ class FileSystemTestCase(unittest.TestCase):
         nullFileSystem.release()
 
     def testInvalidInterfaceType(self):
-        """ Tests the behavior when an unsupported interface type is provided. """
-        
         baseConf = SimpleMock()
         baseConf.uriScheme = _UNSUPPORTED_URI_SCHEME
         self.assertRaises(PersistenceError, FileSystem, baseConf)
     
     def testValidInterfaceType(self):
-        """ Tests the behavior when a valid interface type is provided. """
-        
         baseConf = SimpleMock()
         baseConf.uriScheme = _VALID_URI_SCHEME
         fileSystem = FileSystem(baseConf)
-        self.assertTrue(fileSystem.searchPrincipal("pattern", "searchMode"), 1)
+
         fileStorer = fileSystem.createFileStorer("identifier")
         self.assertFalse(fileStorer is None)
         self.assertFalse(fileStorer.dataStorer is None)
@@ -203,16 +182,44 @@ class FileSystemTestCase(unittest.TestCase):
         self.assertNotEquals(fileSystem.baseUri, None)
         self.assertNotEquals(fileSystem.baseConfiguration, None)
         self.assertEquals(fileSystem.isAccessible, True)
+        
+        self.assertEquals(len(fileSystem.searchPrincipal("pattern", "searchMode")), 0)
         fileSystem.updateCredentials(dict())
         fileSystem.updatePrincipalSearchCredentials(dict())
         fileSystem.release()
         
-    def testDifferentPrincipalSearchInterface(self):
-        """ Tests the combination of a file system interface with another one for principal search. """
-        
+    def testDifferentPrincipalSearch(self):
         baseConf = SimpleMock()
         baseConf.uriScheme = _VALID_URI_SCHEME
         principalSearchBaseConf = SimpleMock()
         principalSearchBaseConf.uriScheme = _VALID_PRINCIPAL_SEARCH_SCHEME
         fileSystem = FileSystem(baseConf, principalSearchBaseConf)
-        self.assertTrue(fileSystem.searchPrincipal("pattern", "searchMode"), 2)
+        
+        self.assertEquals(len(fileSystem.searchPrincipal("pattern", "searchMode")), 2)
+        
+    def testDifferentPrincipalSearchFallback(self):
+        baseConf = SimpleMock()
+        baseConf.uriScheme = _VALID_URI_SCHEME
+        principalSearchBaseConf = SimpleMock()
+        principalSearchBaseConf.uriScheme = "invalid_principal_scheme"
+        fileSystem = FileSystem(baseConf, principalSearchBaseConf)
+        
+        self.assertEquals(len(fileSystem.searchPrincipal("pattern", "searchMode")), 0)
+        
+    def testDifferentSearch(self):
+        baseConf = SimpleMock()
+        baseConf.uriScheme = _VALID_URI_SCHEME
+        searchBaseConf = SimpleMock()
+        searchBaseConf.uriScheme = _VALID_SEARCH_SCHEME
+        fileSystem = FileSystem(baseConf, baseSearchConfiguration=searchBaseConf)
+        
+        self.assertEquals(len(fileSystem.search("*", "/")), 2)
+        
+    def testDifferentSearchFallback(self):
+        baseConf = SimpleMock()
+        baseConf.uriScheme = _VALID_URI_SCHEME
+        searchBaseConf = SimpleMock()
+        searchBaseConf.uriScheme = "invalid_search_interface"
+        fileSystem = FileSystem(baseConf, baseSearchConfiguration=searchBaseConf)
+        
+        self.assertEquals(len(fileSystem.search("*", "/")), 0)

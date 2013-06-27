@@ -55,6 +55,7 @@ __version__ = "$Revision-Id:$"
 
 class DataStoreHandlerTestsCase(unittest.TestCase):
     """ Test cases for the data store handler. """
+    #pylint: disable=R0904
     
     def setUp(self):
         """ Creates object under test. """
@@ -196,8 +197,9 @@ class DataStoreHandlerTestsCase(unittest.TestCase):
         self._datastoreHandler.setDataStores([dataStore, anotherDataStore])
         self.assertEquals(len(self._datastoreHandler.datastores), 2)
     
-    def testDataStoreGetter(self):
+    def testDataStoreGetter(self): 
         """ Tests the read-only properties of the handler allowing access to the data store configurations. """
+        # Fine for testing: pylint: disable=W0212
         
         datastores_ = {"tsm": SimpleMock(storeType=constants.TSM_CONNECTOR_STORE, isMigrated=False),
                       "file": SimpleMock(storeType=constants.FILE_STORE, isMigrated=False),
@@ -206,10 +208,13 @@ class DataStoreHandlerTestsCase(unittest.TestCase):
                       "default": SimpleMock(storeType=constants.DEFAULT_STORE, isMigrated=False),
                       "webdav": SimpleMock(storeType=constants.WEBDAV_STORE, isMigrated=False),
                       "offline": SimpleMock(storeType=constants.OFFLINE_STORE, isMigrated=False),
-                      "s3": SimpleMock(storeType = constants.S3_STORE, isMigrated=False)}
+                      "s3": SimpleMock(storeType = constants.S3_STORE, isMigrated=False),
+                      "svn": SimpleMock(storeType = constants.SUBVERSION_STORE, isMigrated=False),
+                      "svn_migrated": SimpleMock(storeType = constants.SUBVERSION_STORE, isMigrated=True)}
         self._datastoreHandler._datastores = datastores_
         
-        self.assertEquals(len(self._datastoreHandler.datastores), 8)
+        self.assertEquals(len(self._datastoreHandler.datastores), 10)
         self.assertEquals(len(self._datastoreHandler.archiveDatastores), 1)
-        self.assertEquals(len(self._datastoreHandler.onlineDatastores), 6)
+        self.assertEquals(len(self._datastoreHandler.onlineDatastores), 7)
         self.assertEquals(len(self._datastoreHandler.offlineDatastores), 1)
+        self.assertEquals(len(self._datastoreHandler.externalDatastores), 7)

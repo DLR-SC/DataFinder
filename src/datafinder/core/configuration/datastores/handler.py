@@ -35,6 +35,7 @@
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 
 
+
 """ Handler for the generated data store stuff. """
 
 
@@ -291,16 +292,6 @@ class DataStoreHandler(object):
         
         return name in self._datastores
             
-    def getDataStores(self):
-        """ 
-        Returns the list of data store names.
-        
-        @return: Returns the list of data store names.
-        @rtype: C{list} of C{String}
-        """
-        
-        return self._datastores.keys()
-
     @property
     def datastores(self):
         """ Getter for the data stores encapsulated by the handler. """
@@ -315,6 +306,7 @@ class DataStoreHandler(object):
         """ Retrieves all archive data stores. """
         
         return self._getDataStoreByCategory(constants.ARCHIVE_STORE_CATEGORY)
+    
     @property
     def onlineDatastores(self):
         """ Retrieves all online data stores. """
@@ -326,6 +318,12 @@ class DataStoreHandler(object):
         """ Retrieves all off-line data stores. """
         
         return self._getDataStoreByCategory(constants.OFFLINE_STORE_CATEGORY)
+    
+    @property
+    def externalDatastores(self):
+        """ Retrieves all data store which use an external file system. """
+        
+        return self._getDataStoreByCategory(constants.EXTERNAL_STORE_CATEGORY)
     
     def _getDataStoreByCategory(self, allowedStoreTypes):
         """ Retrieves all archive data stores. """

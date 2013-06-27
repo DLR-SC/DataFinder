@@ -73,12 +73,13 @@ class RepositoryConfiguration(object):
         self._configurationCollection = None
         self._dataModelHandler = None
         self._dataStoreHandler = None
+        self._dataStoreAccessManager = None
         self._iconHandler = None
         self._scriptHandler = None
         self._preferences = None
 
     def setManagedRepositoryParameters(self, configurationCollection, dataModelHandler, dataStoreHandler,
-                                       iconHandler, scriptHandler, preferences):
+                                       dataStoreAccessManager, iconHandler, scriptHandler, preferences):
         """
         Sets the additional parameters required accessing a managed repository.
         
@@ -88,6 +89,9 @@ class RepositoryConfiguration(object):
         @type dataModelHandler: L{DataModelHandler<datafinder.core.configuration.datamodel.handler.DataModelHandler>}
         @param dataStoreHandler: The data store configuration handler.
         @type dataStoreHandler: L{DataStoreHandler<datafinder.core.configuration.datastores.handler.DataStoreHandler>}
+        @param dataStoreAccessManager: Manages and validates access to corresponding data store file systems.
+        @type dataStoreAccessManager: L{DataStoreAccessManager<datafinder.core.configuration.
+            datastores.access_manager.DataStoreAccessManager>}
         @param iconHandler: The icon handler.
         @type iconHandler: L{IconHandler<datafinder.core.configuration.icons.handler.IconHandler>}
         @param scriptHandler: The script handler.
@@ -99,6 +103,7 @@ class RepositoryConfiguration(object):
         self._configurationCollection = configurationCollection
         self._dataModelHandler = dataModelHandler
         self._dataStoreHandler = dataStoreHandler
+        self._dataStoreAccessManager = dataStoreAccessManager
         self._iconHandler = iconHandler
         self._scriptHandler = scriptHandler
         self._preferences = preferences
@@ -215,6 +220,7 @@ class RepositoryConfiguration(object):
         if self.isManagedRepository:
             try:
                 self._configurationCollection.fileSystem.release()
+                self._dataStoreAccessManager.release()
             except PersistenceError, error:
                 raise ConfigurationError("Problem on releasing acquired configuration resources. Reason: '%s'" % error.message)
     
@@ -275,6 +281,12 @@ class RepositoryConfiguration(object):
         return self._dataStoreHandler
     
     @property
+    def dataStoreAccessManager(self):
+        """ Getter for the data store access manager. """
+        
+        return self._dataStoreAccessManager
+    
+    @property
     def scriptHandler(self):
         """ Getter for the script handler. """
         
@@ -321,6 +333,8 @@ class RepositoryConfiguration(object):
             result = getattr(self._dataModelHandler, name)
         if hasattr(self._dataStoreHandler, name):
             result = getattr(self._dataStoreHandler, name)
+        if hasattr(self._dataStoreAccessManager, name):
+            result = getattr(self._dataStoreAccessManager, name)
         if hasattr(self._iconHandler, name):
             result = getattr(self._iconHandler, name)
         if hasattr(self._scriptHandler, name):

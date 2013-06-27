@@ -40,23 +40,24 @@ Factory for creation of data persister.
 """
 
 
+import logging
+
 from datafinder.core.configuration.datastores.constants import DEFAULT_STORE, OFFLINE_STORE, STORAGE_REALISATION_MODE_ENUM
-from datafinder.core.error import CoreError, AuthenticationError
 from datafinder.core.configuration.properties import constants as property_constants
 from datafinder.core.item.data_persister import constants
 from datafinder.core.item.data_persister import persisters
-from datafinder.persistence.common.configuration import BaseConfiguration
-from datafinder.persistence.error import PersistenceError
-from datafinder.persistence.factory import FileSystem
 
 
 __version__ = "$Revision-Id:$" 
 
 
+_logger = logging.getLogger()
+
+
 class DataPersisterFactory(object):
     """ Factory creating corresponding data persister. """
     
-    def __init__(self, configuration):
+    def __init__(self, dataStoreHandler, dataStoreAccessManager, propertyDefinitionRegistry):
         """
         Constructor.
         
@@ -64,9 +65,9 @@ class DataPersisterFactory(object):
         @type configuration: L{RepositoryConfiguration<datafinder.core.configuration.configuration.RepositoryCOnfiguration>}
         """
         
-        self._configuration = configuration
-        self._configurationFileSystemsMap = dict()
-        self._fileSystemAccessible = list()
+        self._dataStoreHandler = dataStoreHandler
+        self._dataStoreAccessManager = dataStoreAccessManager
+        self._propertyDefinitionRegistry = propertyDefinitionRegistry
         
     def createDataPersister(self, item):
         """ Creates the suitable data persister and attaches it to the item. """
@@ -77,25 +78,24 @@ class DataPersisterFactory(object):
         if dataState == constants.ITEM_STATE_ARCHIVED_MEMBER:
             rootItemPath = item.properties[property_constants.ARCHIVE_ROOT_COLLECTION_ID].value
             rootItem = item.itemFactory.create(rootItemPath)
-            dataPersister = persisters.ArchiveMemberDataPersister(dataState, item, rootItem, self._configuration)
+            dataPersister = persisters.ArchiveMemberDataPersister(dataState, item, rootItem, self._propertyDefinitionRegistry)
         elif dataState in [constants.ITEM_STATE_NULL, constants.ITEM_STATE_INACCESSIBLE, 
                            constants.ITEM_STATE_UNSUPPORTED_STORAGE_INTERFACE]:
             dataPersister = persisters.NullDataPersister(dataState)
         elif datastore is None or datastore.storeType == DEFAULT_STORE:
             dataPersister = persisters.DefaultDataPersister(dataState, item.fileStorer)
         else:
-            try:
-                fileSystem = self._getFileSystem(datastore)
-            except PersistenceError:
+            fileSystem = self._dataStoreAccessManager.getFileSystem(datastore)
+            isAccessible = self._dataStoreAccessManager.isAccessible(datastore)
+            if fileSystem is None or not isAccessible:
                 dataPersister = persisters.NullDataPersister(constants.ITEM_STATE_UNSUPPORTED_STORAGE_INTERFACE)
             else:
                 if datastore.storageRealisation == STORAGE_REALISATION_MODE_ENUM.FLAT:
                     baseFileStorer = fileSystem.createFileStorer("/")
-                    dataPersister = persisters.FlatDataPersister(dataState, baseFileStorer, item, 
-                                                                 self._configuration, self._testFileSystemAccessiblityCallback)
+                    dataPersister = persisters.FlatDataPersister(dataState, baseFileStorer, item, self._propertyDefinitionRegistry)
                 else:
                     fileStorer = self._createHierachicalFileStorer(datastore, fileSystem, item.path)
-                    dataPersister = persisters.HierarchicalDataPersister(dataState, fileStorer, self._testFileSystemAccessiblityCallback)
+                    dataPersister = persisters.HierarchicalDataPersister(dataState, fileStorer)
                 if property_constants.ARCHIVE_PART_COUNT_ID in item.properties:
                     dataPersister = persisters.ArchiveDataPersister(dataState, item, dataPersister)
         return dataPersister
@@ -105,7 +105,7 @@ class DataPersisterFactory(object):
         
         try:
             datastoreName = item.properties[property_constants.DATASTORE_NAME_ID].value
-            datastore = self._configuration.getDataStore(datastoreName)
+            datastore = self._dataStoreHandler.getDataStore(datastoreName)
         except KeyError:
             datastore = None
         return datastore
@@ -152,44 +152,6 @@ class DataPersisterFactory(object):
                 dataState = constants.ITEM_STATE_ARCHIVED
         return dataState
                 
-    def _getFileSystem(self, datastore):
-        """ Returns the corresponding file storer factory. """
-        
-        if not datastore in self._configurationFileSystemsMap:
-            baseConfiguration = BaseConfiguration(datastore.dataLocationUri, **datastore.parameters)
-            self._configurationFileSystemsMap[datastore] = FileSystem(baseConfiguration)
-            self._fileSystemAccessible.append(False)
-        return self._configurationFileSystemsMap[datastore]
-    
-    def _testFileSystemAccessiblityCallback(self, fileSystem):
-        """ Tests the file system accessibility. """
-        
-        try:
-            index = self._configurationFileSystemsMap.values().index(fileSystem)
-            datastore = self._configurationFileSystemsMap.keys()[index]
-            fileSystemAccessible = self._fileSystemAccessible[index]
-        except (IndexError, ValueError):
-            raise CoreError("Internally managed file systems are inconsistent.")
-        else:
-            if not fileSystemAccessible:
-                if not fileSystem.isAccessible:
-                    raise AuthenticationError("Problem accessing storage resource '%s' occurred." % datastore.name,
-                                              datastore, self._createCredentialCallback(fileSystem))
-                else:
-                    self._fileSystemAccessible[index] = True
-
-    @staticmethod
-    def _createCredentialCallback(fileSystem):
-        """ Creates a callback function which allows specification of credentials. """
-        
-        def _setCredentialCallback(credentials):
-            """ Callback for setting storage-specific credentials. """
-            
-            try:
-                fileSystem.updateCredentials(credentials)
-            except PersistenceError:
-                raise CoreError("Authentication information update is invalid")
-            
     @staticmethod
     def _createHierachicalFileStorer(datastore, fileStorerFactory, path):
         """ Creates for the given item path the specific file storer object. """

@@ -1,3 +1,4 @@
+# pylint: disable=W0212
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -53,6 +54,7 @@ __version__ = "$Revision-Id:$"
 
 class RepositoryConfigurationTest(unittest.TestCase):
     """ Tests the repository configuration. """
+    #pylint: disable=R0904
     
     def setUp(self):
         """ Creates test setup. """
@@ -73,6 +75,7 @@ class RepositoryConfigurationTest(unittest.TestCase):
         self._configuration.setManagedRepositoryParameters(self._configurationCollectionMock, 
                                                            self._dataModelHandlerMock, 
                                                            self._dataStoreHandlerMock,
+                                                           SimpleMock(),
                                                            self._iconHandlerMock,
                                                            self._scriptHandlerMock,
                                                            SimpleMock())

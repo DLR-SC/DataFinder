@@ -36,7 +36,7 @@
 
 
 """
-Module that contains the repository class.
+Entry point to access repository items and corresponding configuration.
 """
 
 
@@ -58,34 +58,36 @@ __version__ = "$Revision-Id:$"
 
 
 class Repository(object):
-    """
-    The repository represents the container for the items.
-    """
+    """ Provides basic interface to manage items of the repository. """
     
     # The root repository node.
     root = None
     
-    
     def __init__(self, fileSystem, configuration, repositoryManager):
-        """
-        Constructor.
+        """        
+        @param fileSystem: Provides access to the repository items.
+        @type fileSystem: L{FileSystem<datafinder.persistence.factory.FileSystem>}
+        @param configuration: Central repository configuration.
+        @type configuration: L{RepositoryConfigurationy<datafinder.core.configuration.configuration.RepositoryConfiguration>}
+        @param repositoryManager: 
+        @type repositoryManager: L{<RepositoryManager>datafinder.core.repository_manager.RepositoryManager}
         """
 
-        self._repositoryManager = repositoryManager
+        self._fileSystem = fileSystem
         self._configuration = configuration
-        self._fileStorerFactory = fileSystem
-        self._itemFactory = ItemFactory(self._fileStorerFactory, self._configuration)
+        
+        self._archiver = Archiver(self, repositoryManager)
+        self._itemFactory = ItemFactory(self._fileSystem, self._configuration)
         self._identifierPattern = None
         self._customMetadataSupport = None
         self._metadataSearchSupport = None
         self._privilegeSupport = None
-        self._archiver = Archiver(self, repositoryManager)
-    
+        
         self.root = self._itemFactory.create("/")
-        connection = self._configuration.preferences
+        preferences = self._configuration.preferences
         self._luceneSearchSupport = False
-        if not connection is None:
-            self._luceneSearchSupport = connection.useLucene
+        if not preferences is None:
+            self._luceneSearchSupport = preferences.useLucene
  
     @Observable
     @staticmethod
@@ -150,7 +152,7 @@ class Repository(object):
                 uniqueName = uniqueName[:appendPosition] + "_%i_" % counter + uniqueName[appendPosition + offset:]
                 counter += 1
         return uniqueName
-        
+    
     def createArchive(self, sourceCollection, parentCollection, properties=None):
         """ Just a delegate method. @see: L{create<datafinder.core.archiver.Archiver.create>} """
         
@@ -165,7 +167,7 @@ class Repository(object):
         """ Disconnects from the current repository. """
         
         self._configuration.release()
-        self._fileStorerFactory.release()
+        self._fileSystem.release()
         
     def getItem(self, path):
         """ @see: L{ItemFactory.create<datafinder.core.item.factory.ItemFactory.create>}"""
@@ -209,7 +211,7 @@ class Repository(object):
         """
         
         try:
-            principals = self._fileStorerFactory.searchPrincipal(pattern, searchMode)
+            principals = self._fileSystem.searchPrincipal(pattern, searchMode)
         except PersistenceError, error:
             raise CoreError(error.message)
         else:
@@ -235,7 +237,7 @@ class Repository(object):
         else:
             result = list()
             try:
-                fileStorers = self._fileStorerFactory.search(parsedRestrictions, collection.fileStorer)
+                fileStorers = self._fileSystem.search(parsedRestrictions, collection.fileStorer)
                 for fileStorer in fileStorers:
                     result.append(self._itemFactory.create(fileStorer.identifier, fileStorer=fileStorer))
             except PersistenceError, error:
@@ -253,7 +255,7 @@ class Repository(object):
         @rtype: C{tuple} of C{bool}, C{int}
         """
         
-        return self._fileStorerFactory.isValidIdentifier(identifier)
+        return self._fileSystem.isValidIdentifier(identifier)
         
     def isValidPropertyIdentifier(self, identifier):
         """ 
@@ -273,7 +275,7 @@ class Repository(object):
         """ Checks whether it is allowed to store custom meta data or not. """
         
         if self._customMetadataSupport is None:
-            self._customMetadataSupport = self._fileStorerFactory.hasCustomMetadataSupport
+            self._customMetadataSupport = self._fileSystem.hasCustomMetadataSupport
         return self._customMetadataSupport
 
     @property
@@ -281,7 +283,7 @@ class Repository(object):
         """ Checks whether a meta data search is supported. """
         
         if self._metadataSearchSupport is None:
-            self._metadataSearchSupport = self._fileStorerFactory.hasMetadataSearchSupport
+            self._metadataSearchSupport = self._fileSystem.hasMetadataSearchSupport
         return self._metadataSearchSupport
 
     @property
@@ -289,7 +291,7 @@ class Repository(object):
         """ Checks whether privilege setting is supported. """
         
         if self._privilegeSupport is None:
-            self._privilegeSupport = self._fileStorerFactory.hasPrivilegeSupport
+            self._privilegeSupport = self._fileSystem.hasPrivilegeSupport
         return self._privilegeSupport
 
     @property
@@ -302,4 +304,3 @@ class Repository(object):
         """
         
         return self._configuration
-

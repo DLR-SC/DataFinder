@@ -1,3 +1,4 @@
+# Fine for testing: pylint: disable=W0212
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -45,10 +46,8 @@ import unittest
 from datafinder.core.configuration.datastores.constants import DEFAULT_STORE, OFFLINE_STORE, STORAGE_REALISATION_MODE_ENUM
 from datafinder.core.configuration.properties.constants import DATASTORE_NAME_ID, ARCHIVE_ROOT_COLLECTION_ID, \
                                                                ARCHIVE_RETENTION_EXCEEDED_DATETIME_ID,\
-    ARCHIVE_PART_INDEX_ID, ARCHIVE_PART_COUNT_ID
+                                                               ARCHIVE_PART_INDEX_ID, ARCHIVE_PART_COUNT_ID
 from datafinder.core.item.data_persister import constants, factory, persisters
-from datafinder.core.error import AuthenticationError, CoreError
-from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock
 
 
@@ -74,6 +73,7 @@ class _FileSystemMock(object):
     
 class DataPersisterFactoryTestCase(unittest.TestCase):
     """ Tests the data persister factory. """
+    #pylint: disable=R0904
     
     def setUp(self):
         """ Creates the object under test. """
@@ -85,7 +85,10 @@ class DataPersisterFactoryTestCase(unittest.TestCase):
         self._dataStoreMock = SimpleMock(name="test", storeType=DEFAULT_STORE, isMigrated=False, 
                                          dataLocationUri="", parameters=dict())
         self._fileSystemMock = _FileSystemMock()
-        self._factory = factory.DataPersisterFactory(self._configurationMock)
+        self._dataStoreAccessManagerMock = SimpleMock(methodNameResultMap={
+            "getFileSystem": (self._fileSystemMock, None), "isAccessible": (True, None)})
+        self._factory = factory.DataPersisterFactory(
+            self._configurationMock, self._dataStoreAccessManagerMock, self._configurationMock)
         
     def testCreateDataPersiterWithoutDataStore(self):
         """ Tests the data persister creation of items which own no data store property. """
@@ -113,7 +116,6 @@ class DataPersisterFactoryTestCase(unittest.TestCase):
         """ Tests the data persister creation for items which own a data store property. """
 
         self._factory._determineDatastore = SimpleMock(self._dataStoreMock)
-        self._factory._getFileSystem = SimpleMock(self._fileSystemMock)
         dataPersister = self._factory.createDataPersister(self._itemMock)
         self.assertEquals(dataPersister.state, constants.ITEM_STATE_ACCESSIBLE)
         self.assertTrue(isinstance(dataPersister, persisters.DefaultDataPersister))
@@ -133,7 +135,6 @@ class DataPersisterFactoryTestCase(unittest.TestCase):
         """ Tests the creation with archival data stores. """
 
         self._factory._determineDatastore = SimpleMock(self._dataStoreMock)
-        self._factory._getFileSystem = SimpleMock(self._fileSystemMock)
         self._itemMock.fileStorer = SimpleMock()
         self._itemMock.properties[ARCHIVE_ROOT_COLLECTION_ID] = SimpleMock(value=None)
         self._itemMock.properties[ARCHIVE_PART_INDEX_ID] = SimpleMock(value=0)
@@ -162,7 +163,6 @@ class DataPersisterFactoryTestCase(unittest.TestCase):
         """ Tests the creation with hierarchical data stores. """
 
         self._factory._determineDatastore = SimpleMock(self._dataStoreMock)
-        self._factory._getFileSystem = SimpleMock(self._fileSystemMock)
         self._dataStoreMock.storeType = ""
         self._dataStoreMock.storageRealisation = STORAGE_REALISATION_MODE_ENUM.HIERARCHICAL
         self._dataStoreMock.removePathPrefix = ""
@@ -183,39 +183,11 @@ class DataPersisterFactoryTestCase(unittest.TestCase):
         self.assertTrue(isinstance(dataPersister, persisters.HierarchicalDataPersister))
         self.assertEquals(dataPersister.fileStorer.identifier, self._itemMock.path)
   
-    def testFileSystemAccessibility(self):
-        """ Tests the check accessibility callback. """
-        
-        self._factory._determineDatastore = SimpleMock(self._dataStoreMock)
-        self._factory._getFileSystem = SimpleMock(self._fileSystemMock)
-        self._dataStoreMock.storeType = ""
-        self._dataStoreMock.storageRealisation = STORAGE_REALISATION_MODE_ENUM.FLAT
-        self._dataStoreMock.removePathPrefix = ""
-        self._factory._configurationFileSystemsMap = {self._dataStoreMock:self._fileSystemMock}
-        self._factory._fileSystemAccessible = [True]
-        dataPersister = self._factory.createDataPersister(self._itemMock)
-        dataPersister.delete()
-        
-        self._factory._fileSystemAccessible = [False]
-        self._fileSystemMock.isAccessible = True
-        dataPersister = self._factory.createDataPersister(self._itemMock)
-        dataPersister.delete()
-        
-        self._factory._fileSystemAccessible = [False]
-        self._fileSystemMock.isAccessible = False
-        dataPersister = self._factory.createDataPersister(self._itemMock)
-        self.assertRaises(AuthenticationError, dataPersister.delete)
-        
-        self._factory._fileSystemAccessible = list()
-        dataPersister = self._factory.createDataPersister(self._itemMock)
-        self.assertRaises(CoreError, dataPersister.delete)
-        
     def testErrorHandling(self):
         """ Tests the error handling. """
         
         self._itemMock.properties = {DATASTORE_NAME_ID: SimpleMock(value=None)}
         self._factory._determineDatastore = SimpleMock()
-        self._factory._getFileSystem = SimpleMock(self._fileSystemMock)
         dataPersister = self._factory.createDataPersister(self._itemMock)
         self.assertEquals(dataPersister.state, constants.ITEM_STATE_UNSUPPORTED_STORAGE_INTERFACE)
         self.assertTrue(isinstance(dataPersister, persisters.NullDataPersister))
@@ -223,7 +195,7 @@ class DataPersisterFactoryTestCase(unittest.TestCase):
         self._itemMock.properties = {DATASTORE_NAME_ID: SimpleMock(value=None)}
         self._dataStoreMock.storeType = ""
         self._factory._determineDatastore = SimpleMock(self._dataStoreMock)
-        self._factory._getFileSystem = SimpleMock(error=PersistenceError)
+        self._dataStoreAccessManagerMock.methodNameResultMap["isAccessible"] = (False, None)
         dataPersister = self._factory.createDataPersister(self._itemMock)
         self.assertEquals(dataPersister.state, constants.ITEM_STATE_UNSUPPORTED_STORAGE_INTERFACE)
         self.assertTrue(isinstance(dataPersister, persisters.NullDataPersister))

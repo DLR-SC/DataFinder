@@ -68,7 +68,7 @@ def createFileStorer(itemUri, additionalParameters=BaseConfiguration()):
     @type additionalParameters: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
 
     @raise PersistenceError: Indicates an unsupported interface or wrong configuration.
-        
+   
     @note: When setting C{itemUri} to C{None} a null pattern conform file storer 
            implementation is returned. 
     """
@@ -105,7 +105,10 @@ class FileSystem(object):
                             "tsm": ["tsm"],
                             "arch": ["archive"],
                             "s3": ["amazons3"],
-                            "sftp": ["sftp"]}
+                            "sftp": ["sftp"],
+                            "lucene+http": ["lucene"],
+                            "lucene+https": ["lucene"],
+                            "lucene+file": ["lucene"]}
     
     _BASE_IMPL_PACKAGE_PATTERN = "datafinder.persistence.adapters.%s.factory"
     
@@ -125,28 +128,37 @@ class FileSystem(object):
         """
 
         self._baseConfiguration = baseConfiguration
-        if not baseConfiguration is None:
-            self._factory = self._getFactory(baseConfiguration.uriScheme)(baseConfiguration)
-        
-            if basePrincipalSearchConfiguration is None:
-                self._principalSearchFactory = self._factory
-            else:
-                self._principalSearchFactory = self._getFactory(baseConfiguration.uriScheme)(basePrincipalSearchConfiguration)
-            if baseSearchConfiguration is None:
-                self._searchFactory = self._factory
-            else:
-                try:
-                    self._searchFactory = self._getSearchFactory()(baseSearchConfiguration)
-                except PersistenceError:
-                    self._searchFactory = self._factory
-        else:
+        if baseConfiguration is None: # Creating a null object file system
             self._factory = BaseFileSystem()
             self._principalSearchFactory = BaseFileSystem()
             self._searchFactory = BaseFileSystem()
+        else:
+            self._factory = self._createFactory(baseConfiguration.uriScheme, baseConfiguration)
+            self._principalSearchFactory = self._createPrincipalSearchFactory(basePrincipalSearchConfiguration)
+            self._searchFactory = self._createSearchFactory(baseSearchConfiguration)
             
-    def _getFactory(self, uriScheme):
-        """ Determines dynamically the concrete factory implementation. """
-        
+    def _createPrincipalSearchFactory(self, basePrincipalSearchConfiguration):
+        if basePrincipalSearchConfiguration is None:
+            return self._factory
+        else:
+            try:
+                return self._createFactory(
+                    basePrincipalSearchConfiguration.uriScheme, basePrincipalSearchConfiguration)
+            except PersistenceError:
+                _logger.exception("Using default principal search capabilities.")
+                return self._factory
+                
+    def _createSearchFactory(self, baseSearchConfiguration):
+        if baseSearchConfiguration is None:
+            return self._factory
+        else:
+            try:
+                return self._createFactory(baseSearchConfiguration.uriScheme, baseSearchConfiguration)
+            except PersistenceError:
+                _logger.exception("Using default search capabilities.")
+                return self._factory
+            
+    def _createFactory(self, uriScheme, configuration):
         try:
             errors = list()
             for location in self._uriSchemeAdapterMap[uriScheme]:
@@ -155,10 +167,10 @@ class FileSystem(object):
                 try:
                     moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
                     factory = getattr(moduleInstance, self.__class__.__name__)
-                    filesystem = factory(self._baseConfiguration)
+                    filesystem = factory(configuration)
                     if filesystem.canHandleLocation:
                         _logger.debug("Using adapter '%s'." % fullDottedModuleName)
-                        return factory
+                        return filesystem
                 except (ImportError, AttributeError), error:
                     errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
                                    % (adapterPackageName, str(error))
@@ -166,19 +178,6 @@ class FileSystem(object):
             raise PersistenceError("No suitable interface has been found. Reason:\n" + "\n".join(errors))
         except KeyError:
             raise PersistenceError("The URI scheme '%s' is unsupported." % uriScheme)            
-
-    def _getSearchFactory(self):
-        adapterPackageName = "lucene"
-        fullDottedModuleName = self._BASE_IMPL_PACKAGE_PATTERN % adapterPackageName
-        try:
-            moduleInstance = __import__(fullDottedModuleName, globals(), dict(), [""])
-            factory = getattr(moduleInstance, self.__class__.__name__)
-            _logger.debug("Using adapter '%s'." % fullDottedModuleName)
-            return factory
-        except (ImportError, AttributeError), error:
-            errorMessage = "The specified interface '%s' is not supported.\nReason:'%s'" \
-                           % (adapterPackageName, str(error))
-            raise PersistenceError(errorMessage)
 
     def createFileStorer(self, identifier):
         """ 
@@ -364,8 +363,3 @@ class FileSystem(object):
         """
     
         return self._factory.hasPrivilegeSupport
-
-
-if __name__ == "__main__":
-    fs = createFileStorer("http://localhost/webdav", BaseConfiguration("http://localhost/webdav", username="wampp", password="xampp")) 
-    _logger.info(fs.getChildren())

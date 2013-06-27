@@ -43,7 +43,7 @@ Implementing handling of data store configurations.
 __version__ = "$Revision-Id:$" 
 
 
-from datafinder.core.configuration.datastores.handler import DataStoreHandler
+from datafinder.core.configuration.datastores.access_manager import DataStoreAccessManager
 from datafinder.core.configuration.datastores.constants import DEFAULT_STORE
 from datafinder.core.configuration.datastores.constants import FILE_STORE
 from datafinder.core.configuration.datastores.constants import FTP_STORE
@@ -53,6 +53,6 @@ from datafinder.core.configuration.datastores.constants import TSM_CONNECTOR_STO
 from datafinder.core.configuration.datastores.constants import WEBDAV_STORE
 from datafinder.core.configuration.datastores.constants import S3_STORE
 from datafinder.core.configuration.datastores.constants import SUBVERSION_STORE
-
 from datafinder.core.configuration.datastores.constants import GRIDFTP_SECURITY_MODE_ENUM
 from datafinder.core.configuration.datastores.constants import GRIDFTP_TRANSFER_MODE_ENUM
+from datafinder.core.configuration.datastores.handler import DataStoreHandler

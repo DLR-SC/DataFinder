@@ -192,7 +192,7 @@ class DefaultDataPersister(NullDataPersister):
 class FlatDataPersister(DefaultDataPersister):
     """ Implements the data behavior allowing access to external storage resource. """
     
-    def __init__(self, dataState, baseFileStorer, item, propertyRegistry, testFileSystemAccessiblityCallback):
+    def __init__(self, dataState, baseFileStorer, item, propertyRegistry):
         """ 
         Constructor. 
 
@@ -205,15 +205,12 @@ class FlatDataPersister(DefaultDataPersister):
         @param propertyRegistry: Reference to the property definition registry.
         @type propertyRegistry: L{PropertyDefinitionRegistry<datafinder.core.configuration.
         properties.registry.PropertyDefinitionRegistry>} 
-        @param testFileSystemAccessiblityCallback: Callback allowing the of accessibility of the file system.
-        @type testFileSystemAccessiblityCallback: C{Callable}
         """
         
         DefaultDataPersister.__init__(self, dataState, None)
         self._baseFileStorer = baseFileStorer
         self._item = item
         self._propertyRegistry = propertyRegistry
-        self._testFileSystemAccessiblityCallback = testFileSystemAccessiblityCallback
         
         if CONTENT_IDENTIFIER_ID in item.properties:
             uniqueName = item.properties[CONTENT_IDENTIFIER_ID].value
@@ -222,7 +219,6 @@ class FlatDataPersister(DefaultDataPersister):
     def _prepareAction(self):
         """ Helper method performing common preparation steps. """
         
-        self._testFileSystemAccessiblityCallback(self._baseFileStorer.fileSystem)
         if self._fileStorer is None:
             uniqueName = _generateUniqueIdentifier(self._item.uri)
             self._fileStorer = self._baseFileStorer.getChild(uniqueName)
@@ -259,7 +255,6 @@ class FlatDataPersister(DefaultDataPersister):
         """
 
         self._prepareAction()
-        self._testFileSystemAccessiblityCallback(self._baseFileStorer.fileSystem)
         uniqueName = _generateUniqueIdentifier(item.uri)
         targetFileStorer = self._baseFileStorer.getChild(uniqueName)
         self._fileStorer.copy(targetFileStorer)
@@ -288,7 +283,7 @@ class FlatDataPersister(DefaultDataPersister):
 class HierarchicalDataPersister(DefaultDataPersister):
     """ Implements the data behavior allowing access to external storage resource. """
     
-    def __init__(self, dataState, fileStorer, testFileSystemAccessiblityCallback):
+    def __init__(self, dataState, fileStorer):
         """
         Constructor. 
         
@@ -296,17 +291,13 @@ class HierarchicalDataPersister(DefaultDataPersister):
         @type dataState: C{unicode}
         @param fileStorer: The file storer representing the associated file resource.
         @type fileStorer: L{FileStorer<datafinder.persistence.factory.FileStorer>}
-        @param testFileSystemAccessiblityCallback: Callback allowing the of accessibility of the file system.
-        @type testFileSystemAccessiblityCallback: C{Callable}
         """
         
         DefaultDataPersister.__init__(self, dataState, fileStorer)
-        self._testFileSystemAccessiblityCallback = testFileSystemAccessiblityCallback
 
     def create(self):
         """ Creates the file resource on separated storage system under the path of the item. """
         
-        self._testFileSystemAccessiblityCallback(self.fileStorer.fileSystem)
         if not self._fileStorer.exists():
             self._createParentCollection(self._fileStorer.parent)
             self._fileStorer.createResource()
@@ -317,7 +308,6 @@ class HierarchicalDataPersister(DefaultDataPersister):
     def delete(self):
         """ Deletes on the file resource on separated storage system and cleans up created directories. """
 
-        self._testFileSystemAccessiblityCallback(self.fileStorer.fileSystem)
         self._fileStorer.delete()
         self._cleanupCollections()
         
@@ -332,7 +322,6 @@ class HierarchicalDataPersister(DefaultDataPersister):
     def copy(self, item):
         """ Duplicates the file resource under the path of the given target item. """
 
-        self._testFileSystemAccessiblityCallback(self.fileStorer.fileSystem)
         destFileStorer = item.dataPersister.fileStorer
         self._createParentCollection(destFileStorer.parent)
         self._fileStorer.copy(destFileStorer)
@@ -340,7 +329,6 @@ class HierarchicalDataPersister(DefaultDataPersister):
     def move(self, item):
         """ Move the file resource to the path of the target item. """
 
-        self._testFileSystemAccessiblityCallback(self.fileStorer.fileSystem)
         destFileStorer = item.dataPersister.fileStorer
         self._createParentCollection(destFileStorer.parent)
         self._fileStorer.move(destFileStorer)

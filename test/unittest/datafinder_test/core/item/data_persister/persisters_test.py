@@ -1,3 +1,4 @@
+# Fine for testing: pylint: disable=W0212, R0904
 # $Filename$ 
 # $Authors$
 # Last Changed: $Date$ $Committer$ $Revision-Id$
@@ -43,11 +44,11 @@ Tests the different data persister implementations.
 import unittest
 
 from datafinder.core.configuration.properties.constants import ARCHIVE_PART_COUNT_ID, CONTENT_IDENTIFIER_ID
-from datafinder.core.error import AuthenticationError, ItemError
+from datafinder.core.error import ItemError
 from datafinder.core.item.data_persister import persisters
 from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock
-
+ 
 
 __version__ = "$Revision-Id:$" 
 
@@ -87,9 +88,8 @@ class FlatDataPersisterTestCase(unittest.TestCase):
         self._fileStorerMock = SimpleMock()
         self._itemMock = SimpleMock(uri="", properties={CONTENT_IDENTIFIER_ID:SimpleMock(value="")})
         self._propertyRegistryMock = SimpleMock(SimpleMock())
-        self._testAccessCallback = SimpleMock()
-        self._persister = persisters.FlatDataPersister("dataState", SimpleMock(), self._itemMock, 
-                                                       self._propertyRegistryMock, self._testAccessCallback)
+        self._persister = persisters.FlatDataPersister(
+            "dataState", SimpleMock(), self._itemMock, self._propertyRegistryMock)
         self._persister._fileStorer = self._fileStorerMock
         
     def testCreate(self):
@@ -107,9 +107,6 @@ class FlatDataPersisterTestCase(unittest.TestCase):
         self._fileStorerMock.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._persister.create)
 
-        self._testAccessCallback.error = AuthenticationError("", None, None)
-        self.assertRaises(AuthenticationError, self._persister.create)
-        
     def testDelete(self):
         """ FlatDataPersisterTestCase: Tests the deletion. """
         
@@ -118,9 +115,6 @@ class FlatDataPersisterTestCase(unittest.TestCase):
         self._fileStorerMock.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._persister.delete)
 
-        self._testAccessCallback.error = AuthenticationError("", None, None)
-        self.assertRaises(AuthenticationError, self._persister.delete)
-        
     def testCopy(self):
         """ FlatDataPersisterTestCase: Tests the additional actions performed during copying. """
         
@@ -134,9 +128,6 @@ class FlatDataPersisterTestCase(unittest.TestCase):
         self._fileStorerMock.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._persister.copy, itemMock)
 
-        self._testAccessCallback.error = AuthenticationError("", None, None)
-        self.assertRaises(AuthenticationError, self._persister.copy, itemMock)
-
 
 class HierarchicalDataPersisterTestCase(unittest.TestCase):
     """ Tests the hierarchical data persister. """
@@ -145,8 +136,7 @@ class HierarchicalDataPersisterTestCase(unittest.TestCase):
         """ Creates object under test. """
         
         self._fileStorerMock = SimpleMock(parent=SimpleMock([SimpleMock()], identifier="/test"))
-        self._testAccessCallback = SimpleMock()
-        self._persister = persisters.HierarchicalDataPersister("dataState", self._fileStorerMock, self._testAccessCallback)
+        self._persister = persisters.HierarchicalDataPersister("dataState", self._fileStorerMock)
         
     def testCreate(self):
         """ HierarchicalDataPersisterTestCase: Tests the additional actions performed during creation. """
@@ -155,9 +145,6 @@ class HierarchicalDataPersisterTestCase(unittest.TestCase):
         
         self._fileStorerMock.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._persister.create)
-        
-        self._testAccessCallback.error = AuthenticationError("", None, None)
-        self.assertRaises(AuthenticationError, self._persister.create)
         
     def testDelete(self):
         """ HierarchicalDataPersisterTestCase: Tests the deletion. """
@@ -173,9 +160,6 @@ class HierarchicalDataPersisterTestCase(unittest.TestCase):
         self._fileStorerMock.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._persister.delete)
         
-        self._testAccessCallback.error = AuthenticationError("", None, None)
-        self.assertRaises(AuthenticationError, self._persister.delete)
-
     def testCopy(self):
         """ HierarchicalDataPersisterTestCase: Tests the additional actions performed during copying. """
         
@@ -185,9 +169,6 @@ class HierarchicalDataPersisterTestCase(unittest.TestCase):
         self._fileStorerMock.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._persister.copy, itemMock)
 
-        self._testAccessCallback.error = AuthenticationError("", None, None)
-        self.assertRaises(AuthenticationError, self._persister.copy, itemMock)
-
     def testMove(self):
         """ HierarchicalDataPersisterTestCase: Tests the additional actions performed during move operations. """
         
@@ -196,9 +177,6 @@ class HierarchicalDataPersisterTestCase(unittest.TestCase):
         
         self._fileStorerMock.error = PersistenceError("")
         self.assertRaises(PersistenceError, self._persister.move, itemMock)
-
-        self._testAccessCallback.error = AuthenticationError("", None, None)
-        self.assertRaises(AuthenticationError, self._persister.move, itemMock)
 
 
 class ArchivePersisterTestCase(unittest.TestCase):

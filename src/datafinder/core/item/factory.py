@@ -65,7 +65,8 @@ class ItemFactory(object):
         
         self._fileSystem = fileSytem
         self._configuration = configuration
-        self._dataPersisterFactory = DataPersisterFactory(self._configuration)
+        self._dataPersisterFactory = DataPersisterFactory(
+            configuration.dataStoreHandler, configuration.dataStoreAccessManager ,configuration.propertyDefinitionRegistry)
         self._itemCache = dict()
                 
     def createFileStorer(self, path):
@@ -298,7 +299,7 @@ class ItemFactory(object):
             if not self._existsConnection(parentDataType, childDataType):
                 raise ItemError("Cannot perform action because no relation between " \
                                 + "both data types is defined by the underlying data model.")
-
+    
     def determineValidItemName(self, proposedName, replacement=None):
         """ Replaces invalid characters with the replacement character 
         and returns the new valid name. 

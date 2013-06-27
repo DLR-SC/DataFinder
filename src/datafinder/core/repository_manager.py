@@ -37,7 +37,11 @@
 
 
 """
-Main application class of the datafinder.
+Central entry point into the repository handling.
+
+@note: There should be only ONE repository manager for every "DataFinder application".
+       For that reason just use the module variable C{repositoryManagerInstance} 
+       instead of creating your own instance.
 """
 
 
@@ -47,7 +51,7 @@ from datafinder.core.configuration import constants
 from datafinder.core.configuration.configuration import RepositoryConfiguration
 from datafinder.core.configuration.dataformats.registry import DataFormatRegistry
 from datafinder.core.configuration.datamodel import DataModelHandler
-from datafinder.core.configuration.datastores import DataStoreHandler
+from datafinder.core.configuration.datastores import DataStoreAccessManager, DataStoreHandler
 from datafinder.core.configuration.icons import IconRegistry, IconHandler
 from datafinder.core.configuration.preferences import PreferencesHandler
 from datafinder.core.configuration.properties import PropertyDefinitionRegistry, PropertyDefinitionFactory
@@ -62,21 +66,26 @@ from datafinder.persistence.factory import FileSystem, createFileStorer
 __version__ = "$Revision-Id:$" 
 
 
-
-
 class RepositoryManager(object):
-    """ Init point. """
+    """ Manages the available repositories. 
+    
+    In detail it:
+     * Loads global configuration data
+     * Allows initialization of repositories and their configuration
+     * Centrally manages the available repositories
+     
+    Repositories are distinguished into managed and unmanaged repositories. 
+     * A managed repository has DataFinder-specific configuration (e.g., data model, data stores, etc.).
+     * A unmanaged repository is just a "plain file system" without any specific configuration.
+    """
     
     def __init__(self):
-        """
-        Constructor.
-        """
-        
         self.managedRepositories = list()
         self.unmanagedRepositories = list()
         self.iconRegistry = IconRegistry()
         self.dataFormatRegistry = DataFormatRegistry()
-        self.workingRepository = None
+        self.workingRepository = None # Basically
+        # Might be required in the persistence layer to have a "persistent" working directory
         BaseConfiguration.baseWorkingDirectory = constants.WORKING_PATH
         
         try:
@@ -90,7 +99,7 @@ class RepositoryManager(object):
         
     def load(self):
         """
-        Initializes global data structures.
+        Loads basic configuration data like global preferences.
         
         @raise ConfigurationError: Indicating problems loading the base configuration.
         """
@@ -120,58 +129,61 @@ class RepositoryManager(object):
         @rtype: L{RepositoryConfigurationy<datafinder.core.configuration.configuration.RepositoryConfiguration>}
         """
 
-        repositoryConfiguration = self._createDefaultRepositoryConfiguration(not configurationUri is None)
-        if not configurationUri is None:
-            if baseUri is None:
-                baseUri = configurationUri
-            try:
-                configurationCollection = createFileStorer(configurationUri, 
-                                                           BaseConfiguration(baseUri, username=username, password=password))
-            except PersistenceError, error:
-                raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
-            else:
-                repositoryHash = self._determineRepositoryHash(configurationUri)
-                localConfigurationCollection = self._localBaseConfigurationCollection.getChild(repositoryHash)
-                
-                repositoryConfiguration.propertyDefinitionFactory.propertyIdValidator = \
-                                                                          configurationCollection.fileSystem.isValidMetadataIdentifier
-                dataModelHandler = DataModelHandler(configurationCollection.getChild(constants.DATAMODEL_FILENAME), 
-                                                    repositoryConfiguration.propertyDefinitionRegistry)
-                dataStoreHandler = DataStoreHandler(configurationCollection.getChild(constants.DATASTORE_FILENAME))
+        isManaged = not configurationUri is None
+        baseConfiguration = self._createBaseRepositoryConfiguration(isManaged)
+        if isManaged:
+            configurationCollection = self._createConfigurationCollection(configurationUri, username, password, baseUri)
+            localConfigurationCollection = self._createLocalConfigurationCollection(configurationUri)
+            self._setManagedRepositoryParameters(baseConfiguration, configurationCollection, localConfigurationCollection)
+        return baseConfiguration
             
-                sourceFileStorer = configurationCollection.getChild(constants.ICON_DIRECTORYNAME)
-                targetFileStorer = localConfigurationCollection.getChild(constants.ICON_DIRECTORYNAME)
-                iconHandler = IconHandler(self.iconRegistry, sourceFileStorer, targetFileStorer)
-            
-                sourceFileStorer = configurationCollection.getChild(constants.SCRIPT_DIRECTORYNAME)
-                targetFileStorer = localConfigurationCollection.getChild(constants.SCRIPT_DIRECTORYNAME)
-                scriptHandler = ScriptHandler(self.scriptRegistry, sourceFileStorer, targetFileStorer)
-                
-                repositoryConfiguration.setManagedRepositoryParameters(configurationCollection, dataModelHandler, dataStoreHandler, 
-                                                                       iconHandler, scriptHandler, self.preferences)
-        return repositoryConfiguration
-        
-    def _createDefaultRepositoryConfiguration(self, isManagedRepository=False):
-        """ Creates a new repository configurations initialized with the basic parameters. """
-        
+    def _createBaseRepositoryConfiguration(self, isManagedRepository=False):
         propertyDefinitionFactory = PropertyDefinitionFactory()
         propertyDefinitionRegistry = PropertyDefinitionRegistry(propertyDefinitionFactory, isManagedRepository)
-        repositoryConfiguration = RepositoryConfiguration(propertyDefinitionFactory, propertyDefinitionRegistry,
-                                                          self.iconRegistry, self.dataFormatRegistry)
-        return repositoryConfiguration
-        
+        return RepositoryConfiguration(
+            propertyDefinitionFactory, propertyDefinitionRegistry, self.iconRegistry, self.dataFormatRegistry)
+      
     @staticmethod
-    def _determineRepositoryHash(configurationUri):
-        """ Helper function to determine the repository has by the configuration URI of the repository. """
-        
+    def _createConfigurationCollection(configurationUri, username, password, baseUri):
+        if baseUri is None:
+            baseUri = configurationUri
         try:
-            return sha1(configurationUri).hexdigest()
+            return createFileStorer(configurationUri, BaseConfiguration(baseUri, username=username, password=password))
+        except PersistenceError, error:
+            raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
+        
+    def _createLocalConfigurationCollection(self, configurationUri):
+        try:
+            repositoryHash = sha1(configurationUri).hexdigest()
         except TypeError, error:
             raise ConfigurationError("Cannot determine unique repository hash. Reason: '%s'" % error.message)
+        return self._localBaseConfigurationCollection.getChild(repositoryHash)
+            
+    def _setManagedRepositoryParameters(self, baseConfiguration, configurationCollection, localConfigurationCollection):
+        baseConfiguration.propertyDefinitionFactory.propertyIdValidator = configurationCollection.fileSystem.isValidMetadataIdentifier
         
+        dataModelHandler = DataModelHandler(
+            configurationCollection.getChild(constants.DATAMODEL_FILENAME), baseConfiguration.propertyDefinitionRegistry)
+        
+        dataStoreHandler = DataStoreHandler(configurationCollection.getChild(constants.DATASTORE_FILENAME))
+        
+        dataStoreAccessManager = DataStoreAccessManager()
+    
+        sourceIconCollection = configurationCollection.getChild(constants.ICON_DIRECTORYNAME)
+        targetIconCollection = localConfigurationCollection.getChild(constants.ICON_DIRECTORYNAME)
+        iconHandler = IconHandler(self.iconRegistry, sourceIconCollection, targetIconCollection)
+    
+        sourceScriptCollection = configurationCollection.getChild(constants.SCRIPT_DIRECTORYNAME)
+        targetScriptCollection = localConfigurationCollection.getChild(constants.SCRIPT_DIRECTORYNAME)
+        scriptHandler = ScriptHandler(self.scriptRegistry, sourceScriptCollection, targetScriptCollection)
+        
+        baseConfiguration.setManagedRepositoryParameters(
+            configurationCollection, dataModelHandler, dataStoreHandler, 
+            dataStoreAccessManager, iconHandler, scriptHandler, self.preferences)
+    
     def connectRepository(self, dataUri, repositoryConfiguration=None, username=None, password=None):
         """
-        Connect to a remote repository.
+        Connect to a repository.
         
         @param dataUri: URI identifying the root item of repository which has to be connected.
         @type dataUri: C{unicode}
@@ -184,25 +196,40 @@ class RepositoryManager(object):
         """
         
         if repositoryConfiguration is None:
-            repositoryConfiguration = self._createDefaultRepositoryConfiguration()
+            repositoryConfiguration = self._createBaseRepositoryConfiguration()
         try:
-            baseSearchConfiguration = None
-            connection = self.preferences.getConnection(repositoryConfiguration.repositoryConfigurationUri)
-            if connection is not None:
-                baseSearchConfiguration = BaseConfiguration(luceneIndexUri=connection.luceneIndexUri)
-            fileSystem = FileSystem(BaseConfiguration(dataUri, username=username, password=password), baseSearchConfiguration=baseSearchConfiguration)
+            fileSystem = self._createRepositoryFileSystem(
+                repositoryConfiguration.repositoryConfigurationUri, dataUri, username, password)
         except PersistenceError, error:
-            raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
+            raise ConfigurationError("Unable to initialize the repository.\nReason: '%s'" % error.message)
         else:
-            repository = Repository(fileSystem, repositoryConfiguration, self)
-            if repositoryConfiguration.isManagedRepository:
-                self.managedRepositories.append(repository)
-            else:
-                self.unmanagedRepositories.append(repository)
-                
-            self.workingRepository = repository
-            return repository
+            return self._createRepository(fileSystem, repositoryConfiguration)
+        
+    def _createRepositoryFileSystem(self, configurationUri, dataUri, username, password):
+        baseConfiguration = BaseConfiguration(dataUri, username=username, password=password)
+        principalSearchConfiguration = None
+        searchConfiguration = None
+        connection = self.preferences.getConnection(configurationUri)
+        if not connection is None:
+            if connection.useLdap and connection.ldapServerUri:
+                principalSearchConfiguration = BaseConfiguration(
+                    connection.ldapServerUri, baseDn=connection.ldapBaseDn, 
+                    username=username, password=password, domain="dlr") # Hard-code domain should be put into preferences
+            if connection.useLucene and connection.luceneIndexUri:
+                searchConfiguration = BaseConfiguration(connection.luceneIndexUri, username=username, password=password)
+        
+        return FileSystem(baseConfiguration, principalSearchConfiguration, searchConfiguration)
+    
+    def _createRepository(self, fileSystem, repositoryConfiguration):
+        repository = Repository(fileSystem, repositoryConfiguration, self)
 
+        if repositoryConfiguration.isManagedRepository:
+            self.managedRepositories.append(repository)
+        else:
+            self.unmanagedRepositories.append(repository)
+        self.workingRepository = repository
+        return repository
+    
     def disconnectRepository(self, repository):
         """
         Disconnects the given repository.
@@ -230,4 +257,5 @@ class RepositoryManager(object):
         self.preferences.store()
         
 
+# Central single instance for script API and clients
 repositoryManagerInstance = RepositoryManager()

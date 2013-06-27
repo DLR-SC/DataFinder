@@ -40,7 +40,14 @@ Defines the set of lucene-specific configuration parameters.
 """
 
 
+from datafinder.persistence.error import PersistenceError
+
+
 __version__ = "$Revision-Id:$" 
+
+
+_LUCENE_SCHEME_PREFIX = "lucene+"
+_LUCENE_PLUS_FILE_SCHEME_PREFIX = _LUCENE_SCHEME_PREFIX + "file"
 
 
 class Configuration(object):
@@ -48,11 +55,18 @@ class Configuration(object):
     
     def __init__(self, baseConfiguration, env):
         """
-        Constructor.
-        
         @param baseConfiguration: General basic configuration.
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
+        @param env: lucene module specific Java VM
         """
         
-        self.luceneIndexUri = baseConfiguration.luceneIndexUri.lower()
+        indexUri = baseConfiguration.baseUri
+        if not indexUri:
+            raise PersistenceError("Invalid lucene index URI has been provided.")
+        if indexUri.startswith(_LUCENE_SCHEME_PREFIX):
+            if indexUri.startswith(_LUCENE_PLUS_FILE_SCHEME_PREFIX):
+                indexUri = "file://" + baseConfiguration.uriPath
+            else:
+                indexUri = indexUri[len(_LUCENE_SCHEME_PREFIX):]
+        self.luceneIndexUri = indexUri
         self.env = env
