@@ -309,7 +309,6 @@ class CPythonSubversionWrapper(object):
 
     @property
     def canBeAccessed(self):
-        print self._repositoryUri
         try:
             self._client.log(self._repositoryUri)
             return True
