@@ -145,7 +145,7 @@ class FileSystem(object):
                 return self._createFactory(
                     basePrincipalSearchConfiguration.uriScheme, basePrincipalSearchConfiguration)
             except PersistenceError:
-                _logger.exception("Using default principal search capabilities.")
+                _logger.info("Using default principal search capabilities.", exc_info=True)
                 return self._factory
                 
     def _createSearchFactory(self, baseSearchConfiguration):
@@ -155,7 +155,7 @@ class FileSystem(object):
             try:
                 return self._createFactory(baseSearchConfiguration.uriScheme, baseSearchConfiguration)
             except PersistenceError:
-                _logger.exception("Using default search capabilities.")
+                _logger.info("Using default search capabilities.", exc_info=True)
                 return self._factory
             
     def _createFactory(self, uriScheme, configuration):
@@ -350,8 +350,8 @@ class FileSystem(object):
         @return: Flag indicating whether meta data search is supported.
         @rtype: C{bool}
         """
-        
-        return self._factory.hasMetadataSearchSupport
+
+        return self._searchFactory.hasMetadataSearchSupport
 
     @property
     def hasPrivilegeSupport(self):

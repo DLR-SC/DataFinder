@@ -55,17 +55,22 @@ class FileSystem(BaseFileSystem):
      
     def __init__(self, baseConfiguration):
         """ 
-        Constructor. 
-        
         @param baseConfiguration: General basic configuration.
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """
         
         BaseFileSystem.__init__(self)
-        self._env = lucene.initVM()
+        self._env = None#lucene.initVM()
         self._configuration = Configuration(baseConfiguration, self._env)
             
     def createSearcher(self):
         """ Factory method for the search object. """
 
         return SearchLuceneAdapter(self._configuration)
+
+    @property
+    def hasMetadataSearchSupport(self):
+        """ @see: L{<BaseFileSystem.hasMetadataSearchSupport>datafinder.persistence.
+        common.base_factory.BaseFileSystem.hasMetadataSearchSupport} """
+        
+        return True
