@@ -109,7 +109,7 @@ class FileActionHandler(object):
             raise ItemError("The '%s' action for files is currently only supported on Windows." % command)
         localContentPath, alreadyLocal = self._getContent(item)
         if not alreadyLocal and len(self._checkUntilClosedWorker) == self._MAX_WORKER_THREADS:
-            errorMessage = "The maximum (%i) of parallel started and monitored applications " % self._MAX_WORKER_THREADS \
+            errorMessage = "The maximum number (%i) of parallel opened editors " % self._MAX_WORKER_THREADS \
                            + "has been reached. Please close at least one external application."
             raise ItemError(errorMessage)
         
@@ -159,7 +159,7 @@ class FileActionHandler(object):
         """ Retrieves the file content of the associated item and returns its local path. """
         
         dataUri = item.dataUri
-        if not item.isManaged and dataUri.startswith("file://"): # directly accessable
+        if not item.isManaged and dataUri.startswith("file://"): # directly accessible
             localContentPath = dataUri[8:]
             temporaryFileObject = None
         else: # get temporary file
