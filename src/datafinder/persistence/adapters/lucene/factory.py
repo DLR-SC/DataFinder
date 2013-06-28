@@ -58,6 +58,7 @@ class FileSystem(BaseFileSystem):
         @param baseConfiguration: General basic configuration.
         @type baseConfiguration: L{BaseConfiguration<datafinder.persistence.common.configuration.BaseConfiguration>}
         """
+        # pylint can not recognize initVM method: pylint: disable=E1101
         
         BaseFileSystem.__init__(self)
         self._env = lucene.initVM()
