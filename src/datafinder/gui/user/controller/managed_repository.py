@@ -44,7 +44,7 @@ import logging
 
 from PyQt4 import QtGui, QtCore
 
-from datafinder.core.error import ConfigurationError, ItemError
+from datafinder.core.error import AuthenticationError, ConfigurationError, ItemError
 from datafinder.gui.user.constants import LOGGER_ROOT
 from datafinder.gui.user.common.controller import AbstractController
 from datafinder.gui.user.common.delegate import AbstractDelegate
@@ -56,7 +56,8 @@ from datafinder.gui.user.controller.repository.collection import StackedCollecti
 from datafinder.gui.user.controller.repository.properties import PropertiesController
 from datafinder.gui.user.controller.repository.toolbar import ToolbarController
 from datafinder.gui.user.dialogs.connect_dialog import ConnectDialogView
-from datafinder.gui.user.dialogs.datastores_dialog import DatastoresDialog
+from datafinder.gui.user.dialogs.datastore_dialog import DataStoreCredentialUpdateDialog
+from datafinder.gui.user.dialogs.datastore_dialog import DataStoresPreferencesDialog
 from datafinder.gui.user.models.repository.filter.leaf_filter import LeafFilter
 from datafinder.gui.user.models.properties import PropertiesModel
 from datafinder.gui.user.models.repository.repository import RepositoryModel
@@ -107,7 +108,8 @@ class ManagedRepositoryController(AbstractController):
         self._unmanagedRepositoryController = None
         self._scriptController = None
         
-        self._delegate = _ManagedRepositoryDelegate(self, repositoryManager)
+        self._repositoryManager = repositoryManager
+        self._delegate = None
 
     def load(self, unmanagedRepositoryController, scriptController):
         """
@@ -120,7 +122,7 @@ class ManagedRepositoryController(AbstractController):
         """
 
         self._unmanagedRepositoryController = unmanagedRepositoryController
-        self._delegate._scriptController = scriptController
+        self._delegate = _ManagedRepositoryDelegate(self, self._repositoryManager, scriptController)
         self._itemActionController = ItemActionController(self.mainWindow, self.model, 
                                                           unmanagedRepositoryController.model, scriptController)
         
@@ -183,7 +185,7 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
     _logger = logging.getLogger(LOGGER_ROOT)
     _workerThread = None
     
-    def __init__(self, controller, repositoryManager):
+    def __init__(self, controller, repositoryManager, scriptController):
         """
         Constructor.
 
@@ -197,8 +199,9 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
         self._mainWindow.disconnectAction.setEnabled(True)
         
         self._repositoryManager = repositoryManager
+        self._repository = None
         self._model = self._controller.model 
-        self._scriptController = None
+        self._scriptController = scriptController
 
     @util.immediateConnectionDecorator("disconnectAction", "triggered()")
     def _disconnectActionSlot(self):
@@ -206,9 +209,12 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
         Slot is called when the disconnection action was triggered.
         """
         
-        self._controller.model.clear()
-        self._scriptController.clearSharedScripts()
-        self._controller.setConnectionState(False)
+        try:
+            self._controller.model.clear()
+            self._scriptController.clearSharedScripts()
+            self._repositoryManager.disconnectRepository(self._repository)
+        finally:
+            self._controller.setConnectionState(False)
         
     @util.immediateConnectionDecorator("connectAction", "triggered()")
     def _connectActionSlot(self):
@@ -219,6 +225,7 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
         connectDialog = ConnectDialogView(self._mainWindow, self._repositoryManager.preferences)
         if connectDialog.exec_() == QtGui.QDialog.Accepted:
             self._mainWindow.connectAction.setEnabled(False)
+            # To refactor this ugly code: return an empty connection instead of None in preferences.getConnection
             useLdap = None
             ldapServerUri = None
             ldapBaseDn = None
@@ -245,53 +252,89 @@ class _ManagedRepositoryDelegate(AbstractDelegate):
                                                               useLdap, ldapServerUri, ldapBaseDn,
                                                               useLucene, luceneIndexUri,
                                                               defaultDataStore, defaultArchiveStore, defaultOfflineStore) 
-            self._workerThread = util.startNewQtThread(self._doConnect, self._connectCallback, 
+            self._workerThread = util.startNewQtThread(self._establishRepositoryConnection, self._establishRepositoryConnectionCallback, 
                                                        connectDialog.uri, connectDialog.username, connectDialog.password)
 
-    def _connectCallback(self):
-        """ Callback for the thread establishing the repository connection. """
+    def _establishRepositoryConnection(self, uri, username, password):
+        try:
+            repositoryConfiguration = self._loadRepositoryConfiguration(uri, username, password)
+            repository = self._loadRepository(repositoryConfiguration, username, password)
+            inaccessibleDatastores = self._checkDatastores(repositoryConfiguration)
+            return repository, inaccessibleDatastores
+        except ConfigurationError:
+            pass # Errors already handled
         
-        repository = self._workerThread.result
-        if not repository is None:
-            self._model.load(repository)
-            self._scriptController.loadSharedScripts(repository.configuration.scripts)
-            self._controller.setConnectionState(True)
-        else:
-            if not self._workerThread.error is None:
-                self._logger.error(self._workerThread.error)
-            self._mainWindow.connectAction.setEnabled(True)
-
-    def _doConnect(self, uri, username, password):
-        """ Performs the repository connection. """
-
-        repository = None
-        repositoryConfiguration = None
+    def _loadRepositoryConfiguration(self, uri, username, password):
         try:
             repositoryConfiguration = self._repositoryManager.getRepositoryConfiguration(uri, username, password)
             repositoryConfiguration.load()
+            return repositoryConfiguration
         except ConfigurationError, error:
             self._logger.error("Cannot load repository configuration.\nReason: '%s'" % error.message)
             if not repositoryConfiguration is None:
                 repositoryConfiguration.release()
+            raise error
+    
+    def _loadRepository(self, repositoryConfiguration, username, password):
+        try:
+            repository = self._repositoryManager.connectRepository(
+                repositoryConfiguration.defaultDataUris[0], repositoryConfiguration, username, password)
+        except ConfigurationError, error:
+            self._logger.error("Cannot connect repository.\nReason: '%s'" % error.message)
+            raise error
         else:
             try:
-                repository = self._repositoryManager.connectRepository(repositoryConfiguration.defaultDataUris[0], 
-                                                                       repositoryConfiguration, username, password)
-            except ConfigurationError, error:
-                self._logger.error("Cannot connect repository.\nReason: '%s'" % error.message)
+                repository.root.getChildren()
+            except ItemError, error:
+                self._logger.error("Cannot retrieve children of the root item.\nReason: '%s'" % error.message)
+                raise error
             else:
-                try:
-                    repository.root.getChildren()
-                except ItemError, error:
-                    self._logger.error("Cannot retrieve children of the root item.\nReason: '%s'" % error.message)
-                    repository = None
-        return repository
+                return repository
+    
+    @staticmethod
+    def _checkDatastores(repositoryConfiguration):
+        inaccessibleDatastores = list()
+        for datastore in repositoryConfiguration.externalDatastores:
+            try:
+                repositoryConfiguration.checkAccessibility(datastore)
+            except AuthenticationError, error:
+                inaccessibleDatastores.append((error.datastore, error.updateCredentialsCallback))
+        return inaccessibleDatastores
 
+    def _establishRepositoryConnectionCallback(self):
+        result = self._workerThread.result
+        if not result is None:
+            repository, inaccessibleDatastores = result
+            self._activateRepository(repository, inaccessibleDatastores)
+        else:
+            self._handleRepositoryConnectionErrors()
+            
+    def _activateRepository(self, repository, inaccessibleDatastores):
+        self._repository = repository
+        self._model.load(repository)
+        self._scriptController.loadSharedScripts(repository.configuration.scripts)
+        self._controller.setConnectionState(True)
+        self._indicateInaccessibleDatastores(inaccessibleDatastores)
+        
+    @staticmethod
+    def _indicateInaccessibleDatastores(inaccessibleDatastores):
+        if inaccessibleDatastores:
+            for inaccessibleDatastore in inaccessibleDatastores:
+                datastore, updateCredentialsCallback = inaccessibleDatastore
+                credentialUpdateDialog = DataStoreCredentialUpdateDialog(datastore, updateCredentialsCallback)
+                credentialUpdateDialog.exec_()
+                
+    def _handleRepositoryConnectionErrors(self):
+        if not self._workerThread.error is None:
+            self._logger.error(self._workerThread.error)
+        self._repository = None
+        self._mainWindow.connectAction.setEnabled(True)
+            
     @util.immediateConnectionDecorator("selectDatastoresAction", "triggered()")
     def _selectDatastoresSlot(self):
         """ Shows the data store selection dialog. """
 
-        dialog = DatastoresDialog(self._mainWindow)
+        dialog = DataStoresPreferencesDialog(self._mainWindow)
         if self._model.initialized:
             dialog.load([ds.name for ds in self._model.repository.configuration.onlineDatastores],
                         [ds.name for ds in self._model.repository.configuration.archiveDatastores],

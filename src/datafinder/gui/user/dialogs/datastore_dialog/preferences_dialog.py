@@ -36,7 +36,7 @@
 
 
 """
-Dialog to configure local default data stores.
+Dialog to configure default data stores.
 """
 
 
@@ -48,17 +48,15 @@ from datafinder.gui.gen.user.datastores_dialog_ui import Ui_datastoresDialog
 __version__ = "$Revision-Id:$" 
 
 
-class DatastoresDialog(QtGui.QDialog, Ui_datastoresDialog):
+class DataStoresPreferencesDialog(QtGui.QDialog, Ui_datastoresDialog):
     """
-    Dialog to configure connection preferences, currently only LDAP.
+    Dialog to configure default data stores.
     """
 
     _DEFAULT_STORE_NAME = ""
     
     def __init__(self, parent=None):
         """
-        Constructor.
-
         @param parent: Parent window of this L{QtGui.QDialog}
         @type parent: C{QtGui.QWidget}
         """

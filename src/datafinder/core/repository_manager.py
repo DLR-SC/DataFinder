@@ -239,6 +239,7 @@ class RepositoryManager(object):
         """
         
         repository.release()
+        repository.configuration.release()
         if repository in self.managedRepositories:
             self.managedRepositories.remove(repository)
         if repository in self.unmanagedRepositories:
