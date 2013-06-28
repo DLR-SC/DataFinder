@@ -49,6 +49,8 @@ __version__ = "$Revision-Id:$"
 
 
 class PartialRelationIcon(QCanvasPolygon):
+    """ Represents a partial relation. """
+    
     def __init__(self, relCnvs, relIcn, colIcn, relType):
         """
         initiates the partial relation and sets the connected

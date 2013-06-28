@@ -169,11 +169,11 @@ class CallbackEventHandler(QObject):
             if blocking:
                 conditionVar = Condition(Lock())
                 conditionVar.acquire()
-                def callback():
+                def _callback():
                     conditionVar.acquire()
                     conditionVar.notify()
                     conditionVar.release()
-                event.callback = callback
+                event.callback = _callback
                 qApp.postEvent(self, event)
                 conditionVar.wait()
                 conditionVar.release()

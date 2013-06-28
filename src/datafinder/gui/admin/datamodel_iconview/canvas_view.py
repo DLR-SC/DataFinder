@@ -55,6 +55,7 @@ __version__ = "$Revision-Id:$"
 
 
 class ContextMenu(QPopupMenu):
+    """ Implements the context menu in the icon view. """
     # pylint: disable=R0901
     # There too many parent classes as it inherits from QPopupMenu
     
@@ -176,10 +177,10 @@ class ContextMenu(QPopupMenu):
 
 
 class CanvasView(QCanvasView):
+    """ Implements the icon view. """
 
     def __init__(self, parent, theFrame, name, f):
         """
-        Constructor.
         Initiates the IconView that provides a canvas.
         """
 
