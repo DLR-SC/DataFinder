@@ -349,9 +349,6 @@ class ScriptController(object):
         return scriptsAvailable
     
     def _getGeneralScripts(self, dataFormatNames, collectionsAvailable):
-        #TODO(tobias-schlauch): Ensure that all collections own a data type. Until: Release 2.3.
-        # see: datafinder.core.item.collection.ItemCollection.dataType
-
         actions = list()
         if (collectionsAvailable and not dataFormatNames
             or not collectionsAvailable and dataFormatNames):

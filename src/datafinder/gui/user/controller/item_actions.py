@@ -160,14 +160,14 @@ class ItemActionController(object):
         targetIndex = self._mapIndexToSource(targetIndex)
         indexes = clipboard.indexes
         if len(indexes) > 0:
-            def pasteCallback():
+            def _pasteCallback():
                 self._sourceRepositoryModel.activeIndex = self._sourceRepositoryModel.activeIndex
             if clipboard.state == constants.CLIPBOARD_STATE_COPY:
                 self._sourceRepositoryModel.lock([targetIndex])
-                def copyCallback():
+                def _copyCallback():
                     self._sourceRepositoryModel.unlock(targetIndex)
                     self._sourceRepositoryModel.activeIndex = targetIndex
-                self._performWithProgressDialog("Copy", "Copying items...", copyCallback,
+                self._performWithProgressDialog("Copy", "Copying items...", _copyCallback,
                                                 self._sourceRepositoryModel.copy, indexes, targetIndex)
             elif clipboard.state == constants.CLIPBOARD_STATE_CUT:
                 parents = [targetIndex]
@@ -175,15 +175,15 @@ class ItemActionController(object):
                     parents.append(index.parent())
                 self.__invalidateFilterModel()
                 self._sourceRepositoryModel.lock(parents)
-                def cutCallback():
+                def _cutCallback():
                     self.__invalidateFilterModel()
                     for index in parents:
                         self._sourceRepositoryModel.unlock(index)
                     self._sourceRepositoryModel.activeIndex = targetIndex
-                self._performWithProgressDialog("Move", "Moving items...", cutCallback,
+                self._performWithProgressDialog("Move", "Moving items...", _cutCallback,
                                                 self._sourceRepositoryModel.move, indexes, targetIndex)
             elif clipboard.state == constants.CLIPBOARD_STATE_COPY_PROPERTIES:
-                self._performWithProgressDialog("Copy Properties", "Copying properties...", pasteCallback,
+                self._performWithProgressDialog("Copy Properties", "Copying properties...", _pasteCallback,
                                                 self._sourceRepositoryModel.copyProperties, indexes[0], targetIndex)
             if clipboard.state == constants.CLIPBOARD_STATE_CUT:
                 clipboard.clear()
@@ -229,12 +229,13 @@ class ItemActionController(object):
                 
                 self._sourceRepositoryModel.activeIndex = parentIndex
                 self._sourceRepositoryModel.lock([parentIndex])
-                def cb():
+                def _callback():
                     self._sourceRepositoryModel.activeIndex = parentIndex
                     self._sourceRepositoryModel.unlock(parentIndex)
                 self._selectionModel.clear()
-                self._performWithProgressDialog("Delete", "Deleting items...", cb,
+                self._performWithProgressDialog("Delete", "Deleting items...", _callback,
                                                 self._sourceRepositoryModel.delete, selectedIndexes, ignoreStorageLocation)
+
     def _askDeletionOptions(self, text):
         """ Asks the user for deletion options. """
         
@@ -400,10 +401,10 @@ class ItemActionController(object):
             parentIndex = self._sourceRepositoryModel.parent(selectedIndexes[0])
             self._sourceRepositoryModel.activeIndex = parentIndex
             self._sourceRepositoryModel.lock([parentIndex])
-            def cb():
+            def _callback():
                 self._sourceRepositoryModel.activeIndex = parentIndex
                 self._sourceRepositoryModel.unlock(parentIndex)
-            self._performWithProgressDialog("Commit Archives", "Committing archives...", cb,
+            self._performWithProgressDialog("Commit Archives", "Committing archives...", _callback,
                                             self._sourceRepositoryModel.commitArchive, selectedIndexes)    
 
     def clear(self):
@@ -413,7 +414,7 @@ class ItemActionController(object):
             self._searchDialog.close()
         self._searchDialog = None
 
-    def _performWithProgressDialog(self, windowTitle, labelText, callbackFunction, function, *args, **kwargs): # W0142
+    def _performWithProgressDialog(self, windowTitle, labelText, callbackFunction, function, *args, **kwargs):
         """ Performs the given action using the progress dialog. """
 
         self._progressDialog = ProgressDialog(windowTitle, labelText, parent=self._mainWindow)

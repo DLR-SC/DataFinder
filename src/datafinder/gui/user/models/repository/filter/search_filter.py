@@ -183,6 +183,7 @@ class SearchFilter(BaseRepositoryFilter, QtCore.QAbstractTableModel):
     
     def flags(self, _):
         """ L{flags<QtCore.QAbstractItemModel.flags>} """
+        # Have to keep the interface: pylint: disable=R0201
         
         flags = QtCore.Qt.ItemIsSelectable
         flags |= QtCore.Qt.ItemIsEnabled

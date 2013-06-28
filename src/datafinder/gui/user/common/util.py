@@ -161,9 +161,9 @@ class StartInQtThread(object):
         Calls function in a new Qt thread.
         """
         
-        def startInNewQtThread(*args, **kwargs):
+        def _startInNewQtThread(*args, **kwargs):
             StartInQtThread._workers.append(startNewQtThread(function, self._callback, *args, **kwargs))
-        return startInNewQtThread
+        return _startInNewQtThread
       
     def _callback(self):
         """ Default callback. """
@@ -255,14 +255,14 @@ def immediateConnectionDecorator(sender, signalSignature):
     @rtype: callable.
     """
     
-    def wrapper(function):
+    def _wrapper(function):
         if not isinstance(function, types.FunctionType): #required for non-Python methods/functions
             function = functools.partial(function)
         function.sender = sender
         function.signalSignature = signalSignature
         function.connectionType = _immediateConnectionType
         return function
-    return wrapper
+    return _wrapper
 
 
 def deferredConnectionDecorator(sender, signalSignature):
@@ -285,14 +285,14 @@ def deferredConnectionDecorator(sender, signalSignature):
     @rtype: callable.
     """
     
-    def wrapper(function):
+    def _wrapper(function):
         if not isinstance(function, types.FunctionType): #required for non-Python methods/functions
             function = functools.partial(function)
         function.sender = sender
         function.signalSignature = signalSignature
         function.connectionType = _deferredConnectionType
         return function
-    return wrapper
+    return _wrapper
 
 
 class QtConnectionDelegate(object):
@@ -507,6 +507,7 @@ def extractPyObject(qVariant):
     
     return convertToPlainPythonObject(casted)
 
+# lambda is fine: pylint: disable=W0108
 _mappingDict = {
                 QtCore.QString: lambda x: unicode(x),
                 QtCore.QDateTime: lambda x: x.toPyDateTime(),

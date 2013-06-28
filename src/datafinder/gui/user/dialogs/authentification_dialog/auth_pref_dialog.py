@@ -118,6 +118,8 @@ class AuthPrefDialogView(QtGui.QDialog, Ui_auth_pref_dialog):
     
     @staticmethod
     def getNewTableWidget(tableString):
+        """ Creates the table widget. """
+        
         widgetItem = QtGui.QTableWidgetItem()
         widgetItem.setText(tableString)
         

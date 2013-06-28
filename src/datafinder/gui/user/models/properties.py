@@ -491,14 +491,18 @@ class PropertiesModel(QtCore.QAbstractTableModel):
     
     @property
     def hasCustomMetadataSupport(self):
+        """ Checks whether custom meta data can be set. """
+        
         return self._repositoryModel.hasCustomMetadataSupport
 
     @property
     def propertyNameValidationFunction(self):
-        def wrapper(inputString):
+        """ Detects the property name validator. """
+        
+        def _wrapper(inputString):
             return self._repositoryModel.repository.configuration.propertyNameValidationFunction(inputString) \
                    and self._isPropertyNameUnique(inputString)
-        return wrapper
+        return _wrapper
 
     @property
     def dirty(self):
