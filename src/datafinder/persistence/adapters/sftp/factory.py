@@ -96,7 +96,7 @@ class FileSystem(BaseFileSystem):
         Cleans up the connection pool
         """
         
-        self._connectionPool.reload()
+        self._connectionManager.remove(self._configuration.baseUri)
 
     def updateCredentials(self, credentials):
         """ 
