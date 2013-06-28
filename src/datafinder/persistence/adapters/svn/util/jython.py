@@ -106,6 +106,8 @@ class JythonSubversionWrapper(object):
             raise PersistenceError(error) 
     
     def initializeWorkingCopy(self):
+        """ Performs the checkout. """
+        
         try:
             if not os.path.exists(self._repoWorkingCopyPath):
                 self._svnUpdateClient.doCheckout(self._repositoryURL, self._repoWorkingCopyFile, 
@@ -280,6 +282,8 @@ class JythonSubversionWrapper(object):
 
     @property
     def canBeAccessed(self):
+        """ Checks accessibility of the SVN URL. """
+        
         try:
             self._svnWorkingCopyClient.doInfo(
                 self._repositoryURL, SVNRevision.HEAD, SVNRevision.HEAD)

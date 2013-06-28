@@ -56,8 +56,11 @@ __version__ = "$Revision-Id$"
 
 
 class FileSystem(BaseFileSystem):
+    """ Implements a Subversion-based file system. """
+    
     _connectionManager = ConnectionPoolManager(constants.MAX_POOL_NUMBER)
     _logger = logging.getLogger()
+    
         
     def __init__(self, baseConfiguration):
         """

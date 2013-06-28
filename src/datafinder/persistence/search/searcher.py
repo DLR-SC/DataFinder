@@ -66,5 +66,5 @@ class NullSearcher(object):
         @rtype: C{list} of C{unicode}
         """
         
-        self, restrictions = self, restrictions # silent pylint
+        self, restrictions, destination = self, restrictions, destination # silent pylint
         return list()

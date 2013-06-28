@@ -60,7 +60,7 @@ class FileSystem(BaseFileSystem):
         """
         
         BaseFileSystem.__init__(self)
-        self._env = None#lucene.initVM()
+        self._env = lucene.initVM()
         self._configuration = Configuration(baseConfiguration, self._env)
             
     def createSearcher(self):

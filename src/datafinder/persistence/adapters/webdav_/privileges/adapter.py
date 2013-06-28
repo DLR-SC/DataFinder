@@ -150,20 +150,22 @@ class SimplePrivilegeWebdavAdapter(NullPrivilegeStorer):
             
     def _mapHttpOptionsToPrivileges(self, allowed):
         raw_privileges = list()
-        self._check_read_privilege(allowed, raw_privileges)
-        self._check_write_content_privilege(allowed, raw_privileges)
-        self._check_write_properties_privilege(allowed, raw_privileges)
+        self._checkReadPrivilege(allowed, raw_privileges)
+        self._checkWriteContentPrivilege(allowed, raw_privileges)
+        self._checkWritePropertiesPrivilege(allowed, raw_privileges)
         return self.__privilegeMapper.mapPersistencePrivileges(raw_privileges)
 
-    def _check_read_privilege(self, allowed, raw_privileges):
+    @staticmethod
+    def _checkReadPrivilege(allowed, raw_privileges):
         read_privilege = True
         for read_part_privilege in ["GET", "PROPFIND"]:
             if read_part_privilege not in allowed:
                 read_privilege = False
         if read_privilege:
             raw_privileges.append(Privilege(Constants.TAG_READ))
-            
-    def _check_write_content_privilege(self, allowed, raw_privileges):
+    
+    @staticmethod        
+    def _checkWriteContentPrivilege(allowed, raw_privileges):
         write_content_privilege = True
         for write_part_privilege in ["POST", "DELETE", "COPY", "MOVE"]:
             if write_part_privilege not in allowed:
@@ -171,6 +173,7 @@ class SimplePrivilegeWebdavAdapter(NullPrivilegeStorer):
         if write_content_privilege:
             raw_privileges.append(Privilege(Constants.TAG_WRITE_CONTENT))
             
-    def _check_write_properties_privilege(self, allowed, raw_privileges):
+    @staticmethod
+    def _checkWritePropertiesPrivilege(allowed, raw_privileges):
         if "PROPPATCH" in allowed:
             raw_privileges.append(Privilege(Constants.TAG_WRITE_PROPERTIES))

@@ -101,6 +101,8 @@ class MetadataValue(object):
         
     @property
     def persistedValue(self):
+        """ Value represented by its persistence format. """
+        
         return self._persistedValue
     
     @property

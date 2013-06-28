@@ -48,6 +48,8 @@ import pysvn
 import sys
 import threading
 
+# pylint: disable=E0611
+# E0611: pylint could not resolve ClientError.
 from pysvn import ClientError
 
 from datafinder.persistence.error import PersistenceError
@@ -67,7 +69,7 @@ class CPythonSubversionWrapper(object):
     Implements CPython specific utility class for accessing SVN repositories.
     """
 
-    def __init__(self, repositoryUri, workingCopyPath, username, password):
+    def __init__(self, repositoryUri, workingCopyPath, username, password, sharedState):
         """ Initializes the pysvn client for repository access and performs the initial
         checkout if it does not already exist. """
         
@@ -75,7 +77,7 @@ class CPythonSubversionWrapper(object):
         self._password = password
         self._workingCopyPath = workingCopyPath
         self._workingPathLength = len(workingCopyPath)
-        self._sharedState = None
+        self._sharedState = sharedState
         
         self._client = pysvn.Client()
         self._client.exception_style = 1 # errors have tuple args: (full msg, list((msg, error code)))
@@ -309,6 +311,8 @@ class CPythonSubversionWrapper(object):
 
     @property
     def canBeAccessed(self):
+        """ Checks whether the SVN repository can be accessed. """
+        
         try:
             self._client.log(self._repositoryUri)
             return True
@@ -321,6 +325,8 @@ class CPythonSubversionWrapper(object):
         
     @property
     def workingCopyPath(self):
+        """ Returns local working copy path. """
+        
         return self._workingCopyPath
     
 
@@ -338,11 +344,15 @@ class _Info(object):
         
     @property
     def creationTime(self):
+        """ Float time - the date of the first commit. """
+        
         if not self.logMessage is None :
             return self.logMessage["date"]
         
     @property
     def owner(self):
+        """ Author of the first commit. """
+         
         if not self.logMessage is None:
             return self.logMessage["author"]
         
@@ -353,6 +363,7 @@ class _SharedState(object):
     cache for sharing item information. Items are 
     identified by the their path relative to the
     repository working copy."""
+    # Doc strings add no value: pylint: disable=C0111
      
     def __init__(self):
         self._lock = threading.RLock()
@@ -367,7 +378,6 @@ class _SharedState(object):
             self._lock.release()
     
     def getFromCache(self, path):
-
         self._lock.acquire()
         try:
             if path in self._cache:
@@ -399,14 +409,12 @@ def createCPythonWrapper(repositoryUri, workingCopyPath, username, password):
     by using the default connection pool for connection creation.
     """
     
-    connection = CPythonSubversionWrapper(repositoryUri, workingCopyPath, username, password)
     if repositoryUri in _repositoryUriSharedStateMap:
-        connection._sharedState = _repositoryUriSharedStateMap[repositoryUri]
+        sharedState = _repositoryUriSharedStateMap[repositoryUri]
     else:
         sharedState = _SharedState()
-        connection._sharedState = _SharedState()
         _repositoryUriSharedStateMap[repositoryUri] = sharedState
-    return connection
+    return CPythonSubversionWrapper(repositoryUri, workingCopyPath, username, password, sharedState)
 
 
 def _initializeLocale():

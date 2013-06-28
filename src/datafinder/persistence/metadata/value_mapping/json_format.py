@@ -76,6 +76,8 @@ class MetadataValue(object):
         self.value = value
     
     def guessRepresentation(self):
+        """ Here we always have the right representation. """
+        
         return [self.value]
     
     def __cmp__(self, other):

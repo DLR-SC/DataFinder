@@ -57,8 +57,6 @@ class MetadataFileSystemAdapter(NullMetadataStorer):
     
     def __init__(self, identifier, itemIdMapper):
         """ 
-        Constructor.
-        
         @param identifier: Identifier of the item.
         @type identifier: C{unicode}
         @param itemIdMapper: Utility object allowing item identifier mapping.
@@ -110,27 +108,3 @@ class MetadataFileSystemAdapter(NullMetadataStorer):
             return result
         else:
             return mappedResult
-
-    def update(self, properties):
-        """ 
-        Unsupported delegating to default implementation.
-        @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}
-        """
-        
-        return NullMetadataStorer.update(self, properties)
-
-    def delete(self, propertyIds):
-        """ 
-        Unsupported delegating to default implementation.
-        @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}
-        """
-        
-        return NullMetadataStorer.delete(self, propertyIds)
-
-    def search(self, restrictions):
-        """ 
-        Unsupported delegating to default implementation.
-        @see: L{NullMetadataStorer<datafinder.persistence.metadata.metadatastorer.NullMetadataStorer>}
-        """
-        
-        return NullMetadataStorer.search(self, restrictions)

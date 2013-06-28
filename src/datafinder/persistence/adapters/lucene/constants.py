@@ -39,6 +39,10 @@
 Constant definitions for lucene.
 """
 
+
+__version__ = "$Revision-Id:$" 
+
+
 MAX_RESULTS = 1000
 
 FILEPATH_FIELD = "filePath"
