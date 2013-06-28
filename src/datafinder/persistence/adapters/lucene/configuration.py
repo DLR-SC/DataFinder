@@ -65,7 +65,10 @@ class Configuration(object):
             raise PersistenceError("Invalid lucene index URI has been provided.")
         if indexUri.startswith(_LUCENE_SCHEME_PREFIX):
             if indexUri.startswith(_LUCENE_PLUS_FILE_SCHEME_PREFIX):
-                indexUri = "file://" + baseConfiguration.uriPath
+                if baseConfiguration.uriPath.startswith("//"): # Stupid workaround for urlsplit bug in Python2.6
+                    indexUri = "file:" + baseConfiguration.uriPath
+                else:
+                    indexUri = "file://" + baseConfiguration.uriPath
             else:
                 indexUri = indexUri[len(_LUCENE_SCHEME_PREFIX):]
         self.luceneIndexUri = indexUri
