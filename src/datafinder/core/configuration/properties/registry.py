@@ -419,7 +419,7 @@ class PropertyDefinitionRegistry(object):
         value.
         """
         
-        def wrapperFunction(inputString):
+        def _wrapperFunction(inputString):
             return self._propertyDefinitionFactory.isValidPropertyIdentifier(inputString) \
                    and not self.existsSystemPropertyDefinition(inputString)
-        return wrapperFunction
+        return _wrapperFunction

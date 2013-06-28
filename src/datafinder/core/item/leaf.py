@@ -53,6 +53,7 @@ class ItemLeaf(ItemBase):
     """
     Leaf type that can not contain any child elements.
     """
+    # Root cause is ItemBase: pylint: disable=R0904
     
     def __init__(self, name=None, fileStorer=None):
         """ @see: L{ItemBase.__init__<datafinder.core.item.base.ItemBase.__init__>} """

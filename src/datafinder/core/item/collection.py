@@ -55,6 +55,7 @@ class ItemCollection(ItemBase):
     """
     Representation of a class that can contain child items.
     """
+    # Root cause is ItemBase: pylint: disable=R0904
 
     _logger = logging.getLogger()
     
@@ -183,6 +184,7 @@ class ItemCollection(ItemBase):
 
 class ItemRoot(ItemCollection):
     """ Represent the item root. """
+    # Root cause is ItemBase: pylint: disable=R0904
     
     def __init__(self, name=None, fileStorer=None):
         """ L{ItemBase.__init__<datafinder.core.item.base.ItemBase.__init__>} """

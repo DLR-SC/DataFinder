@@ -79,7 +79,7 @@ class VisitSlot(object):
     def __get__(self, instance, owner):
         """ Descriptor implementation: __get__. """
         
-        def visitClosure(node, *args, **kw):
+        def _visitClosure(node, *args, **kw):
             clazz = node.__class__
             for method, classes in self._handlers:
                 if clazz in classes:
@@ -94,7 +94,7 @@ class VisitSlot(object):
                         except AttributeError:
                             continue
             raise AttributeError("No matching handler found for %s." % (clazz.__name__))
-        return visitClosure
+        return _visitClosure
     
 
 class ItemTreeWalkerBase(object):

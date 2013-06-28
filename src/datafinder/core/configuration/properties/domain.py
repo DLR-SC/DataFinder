@@ -82,6 +82,10 @@ class DomainProperty(property):
         self._validate = lambda _: None
         
     def validate(self, instance):
+        """ Validates the given object.
+        @raise ValueError: Indicates an invalid object.
+        """
+        
         self.type.validate(self._getter(instance))
         self._validate(instance)
 

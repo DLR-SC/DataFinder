@@ -52,7 +52,8 @@ class ItemLink(ItemBase):
     """
     Item class that represents a symbolic link to another item.
     """
-    
+    # Root cause is ItemBase: pylint: disable=R0904
+        
     def __init__(self, name=None, fileStorer=None, linkTargetItem=None):
         """
         @see: L{ItemBase.__init__<datafinder.core.item.base.ItemBase.__init__>} 
