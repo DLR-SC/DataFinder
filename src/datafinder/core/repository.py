@@ -69,8 +69,8 @@ class Repository(object):
         @type fileSystem: L{FileSystem<datafinder.persistence.factory.FileSystem>}
         @param configuration: Central repository configuration.
         @type configuration: L{RepositoryConfigurationy<datafinder.core.configuration.configuration.RepositoryConfiguration>}
-        @param repositoryManager: 
-        @type repositoryManager: L{<RepositoryManager>datafinder.core.repository_manager.RepositoryManager}
+        @param repositoryManager: Central repository manager is required for the archiver.
+        @type repositoryManager: L{RepositoryManager<datafinder.core.repository_manager.RepositoryManager>}
         """
 
         self._fileSystem = fileSystem

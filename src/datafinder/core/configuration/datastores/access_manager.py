@@ -65,10 +65,10 @@ class DataStoreAccessManager(object):
         File system instances are created once and cached for later access.
         
         @param datastore: The configuration of the data store.
-        @type datastore: L{<DefaultDataStore>datafinder.core.configuration.datastores.datastore.DefaultDataStore}
+        @type datastore: L{DefaultDataStore<datafinder.core.configuration.datastores.datastore.DefaultDataStore>}
         
         @return: The file system to access data of the data store.
-        @rtype: L{<FileSystem>datafinder.persistence.factory.FileSystem}
+        @rtype: L{FileSystem<datafinder.persistence.factory.FileSystem>}
         """
         
         return self._findFileSystemEntry(datastore)[0]
@@ -99,7 +99,7 @@ class DataStoreAccessManager(object):
         and returns the cached result in succeeding calls.
         
         @param datastore: The configuration of the data store.
-        @type datastore: L{<DefaultDataStore>datafinder.core.configuration.datastores.datastore.DefaultDataStore}
+        @type datastore: L{DefaultDataStore<datafinder.core.configuration.datastores.datastore.DefaultDataStore>}
         
         @return: Flag indicating the accessibility.
         @rtype: C{bool}
@@ -114,11 +114,11 @@ class DataStoreAccessManager(object):
         sets the new credentials and checks the accessibility again.
         
         @param datastore: The configuration of the data store.
-        @type datastore: L{<DefaultDataStore>datafinder.core.configuration.datastores.datastore.DefaultDataStore}
+        @type datastore: L{DefaultDataStore<datafinder.core.configuration.datastores.datastore.DefaultDataStore>}
         
         @raise AuthenticationError: Indicates missing/wrong authentication information. 
             The error instance provides a callback to update the credentials.
-            @see: L{<AuthenticationError>datafinder.core.error.AuthenticationError}
+            @see: L{AuthenticationError<datafinder.core.error.AuthenticationError>}
         """
         
         fileSystem, isAccessible = self._findFileSystemEntry(datastore)
