@@ -415,10 +415,10 @@ def performImport(sourcePath, targetParentPath, targetRepository,
 def _createDeterminePropertiesCallback(baseFunction, cwr):
     """ Adds parameter conversion to the original callback function. """
     
-    def callback(item):
+    def _callback(item):
         properties = baseFunction(ItemDescription(item))
         return _mapProperties(item.requiredPropertyDefinitions, properties, cwr)
-    return callback
+    return _callback
 
 
 def _mapProperties(reqPropDefs, properties, cwr):
