@@ -35,6 +35,11 @@
 #OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 
 
+""" 
+Provides tests for the credential update dialog.
+"""
+
+
 import sys
 import unittest
 
@@ -42,6 +47,9 @@ from PyQt4 import QtGui
 
 from datafinder.gui.user.dialogs.datastore_dialog import DataStoreCredentialUpdateDialog
 from datafinder_test import mocks
+
+
+__version__ = "$Revision-Id:$" 
 
 
 def _callback(credentials):
