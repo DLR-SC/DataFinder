@@ -423,14 +423,14 @@ class ItemBase(object):
         @param propertyIdentifiers: List of property identifiers.
         @type propertyIdentifiers: C{list} of C{unicode}
         """
-        
-        if not self.capabilities.canWriteProperties:
+
+        if not self.capabilities.canStoreProperties:
             raise ItemError("You are not allowed to delete properties!")
         try:
             self.fileStorer.deleteMetadata(propertyIdentifiers)
         except (AttributeError, PersistenceError), error:
             _logger.error(error.args)
-        else:     
+        else:
             for propertyIdentifier in propertyIdentifiers:
                 if propertyIdentifier in self.properties:
                     del self.properties[propertyIdentifier]
