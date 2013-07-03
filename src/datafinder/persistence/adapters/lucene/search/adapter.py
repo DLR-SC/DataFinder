@@ -38,7 +38,7 @@
 """ Adapts the search interface to the lucene library. """
 
 
-import solr
+import pysolr
 import urllib
 
 import lucene
@@ -94,9 +94,9 @@ class SearchLuceneAdapter(NullSearcher):
                 errorMessage = "Cannot search items. Reason: '%s'" % error 
                 raise PersistenceError(errorMessage)
         elif self._configuration.luceneIndexUri.startswith("http://") or self._configuration.luceneIndexUri.startswith("https://"):
-            s = solr.SolrConnection(self._configuration.luceneIndexUri)
-            response = s.query(queryString)
-            for hit in response.results:
+            solr = pysolr.Solr(self._configuration.luceneIndexUri)
+            results = solr.query(queryString)
+            for hit in results:
                 results.append("/%s" % urllib.unquote(hit[constants.FILEPATH_FIELD]))
         else:
             errorMessage = "Cannot search items. Reason: Invalid luceneIndexUri" 
