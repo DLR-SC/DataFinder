@@ -61,7 +61,7 @@ class doc(Command):
                      ("destdir=", 
                      None, 
                      "Path to directory which should contain the documentation.")]
-    __epydocCommandTemplate = "%s --parse-only --no-sourcecode --html %s %s"
+    __epydocCommandTemplate = "%s --no-sourcecode --html %s %s"
 
     
     def __init__(self, distribution):

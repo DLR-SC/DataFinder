@@ -178,8 +178,8 @@ class bdist(Command):
         """
         
         forcedIncludes = _forcedIncludes[:]
-        forcedIncludes.extend(_qtSpecificForcedIncludes)
         if sys.platform == "win32":
+            forcedIncludes.extend(_qtSpecificForcedIncludes)
             forcedIncludes.extend(_win32ForcedIncludes)
         
         freezer = Freezer(self.destinationPath, includes=forcedIncludes)
