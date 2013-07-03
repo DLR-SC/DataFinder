@@ -96,7 +96,7 @@ class _gen_qt4gui_modules(Command):
     def initialize_options(self):
         """ Definition of command options. """
 
-        self.pyuiccommand = "C:\\Python27\\Lib\\site-packages\\PyQt4\\pyuic4"
+        self.pyuiccommand = "pyuic4"
         self.pyrcccommand = "pyrcc4"
         self.uidirectory = "resources/qt4/ui"
         self.ignoreuifilenames = ""
