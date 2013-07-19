@@ -40,6 +40,7 @@
 
 import base64
 import codecs
+import logging
 from StringIO import StringIO
 from xml.parsers.expat import ExpatError
 
@@ -60,6 +61,7 @@ class PreferencesHandler(object):
    
     _streamWriterClass = codecs.getwriter(_DEFAULT_ENCODING)
     _preferencesFileName = "preferences.xml"
+    _log = logging.getLogger()
     
     def __init__(self, fileStorer):
         """ 
@@ -99,6 +101,7 @@ class PreferencesHandler(object):
                 try:
                     self._preferences = preferences.parseString(unicode(content, _DEFAULT_ENCODING))
                 except (ValueError, ExpatError, UnicodeDecodeError, SyntaxError):
+                    self._log.error("Problem occurred during parsing preferences. Default preferences used.", exc_info=True)
                     self._preferences = self._getDefaultPreferences()
             else:
                 self._preferences = self._getDefaultPreferences()
