@@ -81,6 +81,17 @@ class ItemDescription(object):
         """   
     
         return self.__item.path
+
+    @property
+    def linkTargetPath(self):
+        """
+        Returns the path of the link target. If it is no link None is returned.
+        """   
+        
+        linkTargetPath = self.__item.linkTargetPath
+        if self.isLink and linkTargetPath == None:
+            raise ItemSupportError("Broken Link. Target does not exist.")       
+        return linkTargetPath
     
     @property
     def isRoot(self):
