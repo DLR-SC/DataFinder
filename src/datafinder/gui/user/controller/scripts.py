@@ -127,7 +127,7 @@ class ScriptController(object):
             useScriptMenu.addMenu(scriptCollectionMenu)
             scripts = list()
             for script_ in script.scripts:
-                action = self._createAction(scriptCollectionMenu, script_.name, 
+                action = self._createAction(scriptCollectionMenu, script_.title, 
                                             self._createUseScriptSlot(script_), self._determineScriptTooltip(script_))
                 scripts.append((script_, action))
             self._registerScripts(scripts)
