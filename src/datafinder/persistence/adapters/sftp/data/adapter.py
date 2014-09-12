@@ -137,7 +137,7 @@ class SftpDataAdapter(datastorer.NullDataStorer):
             
         # Set the directory permissions because the mode parameter of 
         # mkdir did not work for rwxrws--T (=> x instead of s) 
-        self._setPermissions(constants.DEFAULT_DIRECTORY_PERMISSION)
+        self._setPermissions(constants.DEFAULT_DIRECTORY_PERMISSIONS)
             
     def _setPermissions(self, mode):
         """ Helper method which sets the permissions of a dirctory/file to the given mode.
@@ -156,7 +156,7 @@ class SftpDataAdapter(datastorer.NullDataStorer):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         self.writeData(StringIO.StringIO(""))
-        self._setPermissions(constants.DEFAULT_FILE_PERMISSION)
+        self._setPermissions(constants.DEFAULT_FILE_PERMISSIONS)
         
     def createLink(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
