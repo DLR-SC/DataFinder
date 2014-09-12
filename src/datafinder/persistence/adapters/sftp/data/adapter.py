@@ -134,11 +134,29 @@ class SftpDataAdapter(datastorer.NullDataStorer):
             self._reRaiseError(message)
         finally:
             self._connectionPool.release(connection)
+            
+        # Set the directory permissions because the mode parameter of 
+        # mkdir did not work for rwxrws--T (=> x instead of s) 
+        self._setPermissions(constants.DEFAULT_DIRECTORY_PERMISSION)
+            
+    def _setPermissions(self, mode):
+        """ Helper method which sets the permissions of a dirctory/file to the given mode.
+        See os.chmode for details on the mode parameter (octal). 
+        """
+        connection = self._connectionPool.acquire()
+        try:
+            connection.chmod(self._persistenceIdentifier, mode)
+        except (IOError, EOFError, SSHException):
+            message = "Cannot set default permissions of file '%s'!" % self.identifier
+            self._reRaiseError(message)
+        finally:
+            self._connectionPool.release(connection)
     
     def createResource(self):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
         
         self.writeData(StringIO.StringIO(""))
+        self._setPermissions(constants.DEFAULT_FILE_PERMISSION)
         
     def createLink(self, destination):
         """ @see: L{NullDataStorer<datafinder.persistence.data.datastorer.NullDataStorer>} """
