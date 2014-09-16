@@ -57,7 +57,15 @@ _logger = logging.getLogger()
 class DataStoreAccessManager(object):
     """ Centrally manages file systems required to access external data stores. """
     
-    def __init__(self):
+    def __init__(self, configurationAuthenticationParameters):
+        """
+        @param configurationAuthenticationParameters: Represents the credentials for the 
+            initial connection to the meta data server. Currentlyit is just username/password.
+        @type configurationAuthenticationParameters: C{dict} 
+        """
+        
+        self._configurationAuthenticationParameters = configurationAuthenticationParameters
+        
         self._datastoreFileSystemMap = dict()
     
     def getFileSystem(self, datastore):
@@ -79,19 +87,26 @@ class DataStoreAccessManager(object):
         return self._datastoreFileSystemMap[datastore] 
         
     def _createFileSystemEntry(self, datastore):
+        fileSystemConfiguration = self._createFileSystemConfiguration(datastore)
         try:
-            fileSystem = self._createFileSystem(datastore)
+            fileSystem = self._createFileSystem(fileSystemConfiguration)
         except PersistenceError:
             _logger.debug("Unsupported data store interface.", exc_info=True)
             self._datastoreFileSystemMap[datastore] = None, False
         else:
             isAccessible = fileSystem.isAccessible
             self._datastoreFileSystemMap[datastore] = fileSystem, isAccessible
-        
+            
+    def _createFileSystemConfiguration(self, datastore):
+        datastoreParameters = datastore.parameters
+        if hasattr(datastore, "reuseMetadataServerCredentials") and datastore.reuseMetadataServerCredentials:
+            datastoreParameters["username"] = self._configurationAuthenticationParameters["username"]
+            datastoreParameters["password"] = self._configurationAuthenticationParameters["password"]
+        return configuration.BaseConfiguration(datastore.dataLocationUri, **datastoreParameters)
+            
     @staticmethod
-    def _createFileSystem(datastore):
-        baseConfiguration = configuration.BaseConfiguration(datastore.dataLocationUri, **datastore.parameters)
-        return FileSystem(baseConfiguration)
+    def _createFileSystem(fileSystemConfiguration):
+        return FileSystem(fileSystemConfiguration)
        
     def isAccessible(self, datastore):
         """ Indicates whether the file system of the given data store

@@ -65,7 +65,7 @@
 					<xs:element name="removePathPrefix" type="xs:string" default="" />
 					<xs:element name="isMigratedTo" type="xs:string" default="" />
                     <xs:element name="storageRealisation" type="storageRealisationEnum" default="Hierarchical"/>
-                    
+                    <xs:element name="reuseMetadataServerCredentials" type="xs:boolean" default="false" />
 					<xs:element name="username" type="xs:string" default="" />
 					<xs:element name="password" type="xs:string" default="" />
 					<xs:element name="isAnonymousAuthenticationEnabled" type="xs:boolean" default="true"/>

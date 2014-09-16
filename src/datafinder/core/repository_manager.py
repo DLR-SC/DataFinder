@@ -84,8 +84,8 @@ class RepositoryManager(object):
         self.unmanagedRepositories = list()
         self.iconRegistry = IconRegistry()
         self.dataFormatRegistry = DataFormatRegistry()
-        self.workingRepository = None # Basically
-        # Might be required in the persistence layer to have a "persistent" working directory
+        self.workingRepository = None
+        # Is required in the persistence layer to have a "persistent" working directory => See SVN adapter
         BaseConfiguration.baseWorkingDirectory = constants.WORKING_PATH
         
         try:
@@ -129,12 +129,13 @@ class RepositoryManager(object):
         @rtype: L{RepositoryConfigurationy<datafinder.core.configuration.configuration.RepositoryConfiguration>}
         """
 
+        authenticationParameters = {"username": username, "password": password}
         isManaged = not configurationUri is None
         baseConfiguration = self._createBaseRepositoryConfiguration(isManaged)
         if isManaged:
-            configurationCollection = self._createConfigurationCollection(configurationUri, username, password, baseUri)
+            configurationCollection = self._createConfigurationCollection(configurationUri, authenticationParameters, baseUri)
             localConfigurationCollection = self._createLocalConfigurationCollection(configurationUri)
-            self._setManagedRepositoryParameters(baseConfiguration, configurationCollection, localConfigurationCollection)
+            self._setManagedRepositoryParameters(baseConfiguration, configurationCollection, localConfigurationCollection, authenticationParameters)
         return baseConfiguration
             
     def _createBaseRepositoryConfiguration(self, isManagedRepository=False):
@@ -144,11 +145,13 @@ class RepositoryManager(object):
             propertyDefinitionFactory, propertyDefinitionRegistry, self.iconRegistry, self.dataFormatRegistry)
       
     @staticmethod
-    def _createConfigurationCollection(configurationUri, username, password, baseUri):
+    def _createConfigurationCollection(configurationUri, authenticationParameters, baseUri):
         if baseUri is None:
             baseUri = configurationUri
+        baseConfiguration = BaseConfiguration(
+            baseUri, username=authenticationParameters.username, password=authenticationParameters.password)
         try:
-            return createFileStorer(configurationUri, BaseConfiguration(baseUri, username=username, password=password))
+            return createFileStorer(configurationUri, baseConfiguration)
         except PersistenceError, error:
             raise ConfigurationError("Unable to initialize configuration.\nReason: '%s'" % error.message)
         
@@ -159,7 +162,7 @@ class RepositoryManager(object):
             raise ConfigurationError("Cannot determine unique repository hash. Reason: '%s'" % error.message)
         return self._localBaseConfigurationCollection.getChild(repositoryHash)
             
-    def _setManagedRepositoryParameters(self, baseConfiguration, configurationCollection, localConfigurationCollection):
+    def _setManagedRepositoryParameters(self, baseConfiguration, configurationCollection, localConfigurationCollection, authenticationParameters):
         baseConfiguration.propertyDefinitionFactory.propertyIdValidator = configurationCollection.fileSystem.isValidMetadataIdentifier
         
         dataModelHandler = DataModelHandler(
@@ -167,7 +170,7 @@ class RepositoryManager(object):
         
         dataStoreHandler = DataStoreHandler(configurationCollection.getChild(constants.DATASTORE_FILENAME))
         
-        dataStoreAccessManager = DataStoreAccessManager()
+        dataStoreAccessManager = DataStoreAccessManager(authenticationParameters)
     
         sourceIconCollection = configurationCollection.getChild(constants.ICON_DIRECTORYNAME)
         targetIconCollection = localConfigurationCollection.getChild(constants.ICON_DIRECTORYNAME)
@@ -207,6 +210,7 @@ class RepositoryManager(object):
         
     def _createRepositoryFileSystem(self, configurationUri, dataUri, username, password):
         baseConfiguration = BaseConfiguration(dataUri, username=username, password=password)
+        # make this accessible for data stores => 
         principalSearchConfiguration = None
         searchConfiguration = None
         connection = self.preferences.getConnection(configurationUri)

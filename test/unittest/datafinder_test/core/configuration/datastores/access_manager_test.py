@@ -52,6 +52,21 @@ from datafinder_test import mocks
 __version__ = "$Revision-Id$" 
 
 
+class CreateFileSystemMock(object):
+    """ Helper class to mock the file system creation. """
+    
+    def __init__(self, fileSystemMock):
+        self._fileSystemMock = fileSystemMock
+        self.fileSystemConfiguration = None
+        self.error = None
+    
+    def __call__(self, fileSystemConfiguration):
+        if self.error:
+            raise self.error
+        self.fileSystemConfiguration = fileSystemConfiguration
+        return self._fileSystemMock
+
+
 class DataStoreAccessManagerTest(unittest.TestCase):
     """ Tests of the data store access manager. """ # pylint: disable=R0904
     
@@ -59,9 +74,10 @@ class DataStoreAccessManagerTest(unittest.TestCase):
         # Fine for testing: pylint: disable=W0212
         self._datastore = datastore.DefaultDataStore()
         self._fileSystemMock = mocks.SimpleMock(isAccessible=True)
-        self._createFileSystemMock = mocks.SimpleMock(self._fileSystemMock)
+        self._createFileSystemMock = CreateFileSystemMock(self._fileSystemMock)
         
-        self._accessManager = access_manager.DataStoreAccessManager()
+        self._configurationAuthenticationParams = {"username": "new_user", "password": "new_password"}
+        self._accessManager = access_manager.DataStoreAccessManager(self._configurationAuthenticationParams)
         self._accessManager._createFileSystem = self._createFileSystemMock
         
     def testIsAccessible(self):
@@ -119,6 +135,24 @@ class DataStoreAccessManagerTest(unittest.TestCase):
             self._fileSystemMock.error = PersistenceError("Cannot update credentials.")
             self.assertTrue(callback({"username": "me", "password__": "secret"}))
             self.assertTrue(self._accessManager.isAccessible(self._datastore))
+            
+    def testOverwriteCredentialsConfigurationAuthenticationParametersSuccess(self):
+        self._datastore.reuseMetadataServerCredentials = True
+        self._datastore._parameters = {"username": "user", "password": "password"}
+        
+        self._accessManager.getFileSystem(self._datastore)
+        
+        self.assertEqual(self._createFileSystemMock.fileSystemConfiguration.username, self._configurationAuthenticationParams["username"])
+        self.assertEqual(self._createFileSystemMock.fileSystemConfiguration.password, self._configurationAuthenticationParams["password"])
+        
+    def testOverwriteCredentialsConfigurationAuthenticationParametersIsDeactivated(self):
+        self._datastore.reuseMetadataServerCredentials = False
+        self._datastore._parameters = {"username": "user", "password": "password"}
+        
+        self._accessManager.getFileSystem(self._datastore)
+        
+        self.assertEqual(self._createFileSystemMock.fileSystemConfiguration.username, "user")
+        self.assertEqual(self._createFileSystemMock.fileSystemConfiguration.password, "password")
         
     def testRelease(self):
         fileSystem = self._accessManager.getFileSystem(self._datastore)
