@@ -135,7 +135,8 @@ class RepositoryManager(object):
         if isManaged:
             configurationCollection = self._createConfigurationCollection(configurationUri, username, password, baseUri)
             localConfigurationCollection = self._createLocalConfigurationCollection(configurationUri)
-            self._setManagedRepositoryParameters(baseConfiguration, configurationCollection, localConfigurationCollection, authenticationParameters)
+            self._setManagedRepositoryParameters(
+                baseConfiguration, configurationCollection, localConfigurationCollection, authenticationParameters)
         return baseConfiguration
             
     def _createBaseRepositoryConfiguration(self, isManagedRepository=False):
@@ -161,7 +162,9 @@ class RepositoryManager(object):
             raise ConfigurationError("Cannot determine unique repository hash. Reason: '%s'" % error.message)
         return self._localBaseConfigurationCollection.getChild(repositoryHash)
             
-    def _setManagedRepositoryParameters(self, baseConfiguration, configurationCollection, localConfigurationCollection, authenticationParameters):
+    def _setManagedRepositoryParameters(self, baseConfiguration, configurationCollection, 
+        localConfigurationCollection, authenticationParameters):
+        
         baseConfiguration.propertyDefinitionFactory.propertyIdValidator = configurationCollection.fileSystem.isValidMetadataIdentifier
         
         dataModelHandler = DataModelHandler(
