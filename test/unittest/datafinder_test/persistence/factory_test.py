@@ -158,7 +158,7 @@ class FileSystemTestCase(unittest.TestCase):
         self.assertFalse(nullFileSystem.hasCustomMetadataSupport)
         self.assertFalse(nullFileSystem.hasMetadataSearchSupport)
         self.assertFalse(nullFileSystem.hasPrivilegeSupport)
-        self.assertGreater(nullFileSystem.determineFreeDiskSpace(), 1.0)
+        self.assertTrue(nullFileSystem.determineFreeDiskSpace() > 1)
         self.assertEquals(nullFileSystem.baseUri, None)
         self.assertEquals(nullFileSystem.baseConfiguration, None)
         self.assertEquals(nullFileSystem.isAccessible, False)
