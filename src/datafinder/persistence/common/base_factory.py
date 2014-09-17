@@ -40,6 +40,8 @@ Base class for the adaptor specific file system factory implementations.
 """
 
 
+import decimal
+
 from datafinder.persistence.common import character_constants as char_const
 from datafinder.persistence.data.datastorer import NullDataStorer
 from datafinder.persistence.metadata.metadatastorer import NullMetadataStorer
@@ -209,3 +211,10 @@ class BaseFileSystem(object):
     
         self = self # silent pylint
         return False
+    
+    def determineFreeDiskSpace(self):
+        """ 
+        @see: L{FileSystem.determineFreeDiskSpace<datafinder.persistence.factory.FileSystem.determineFreeDiskSpace>}
+        """
+        
+        return decimal.Decimal('infinity')

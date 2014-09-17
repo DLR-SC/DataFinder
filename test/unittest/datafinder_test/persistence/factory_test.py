@@ -41,6 +41,7 @@ Implements test cases for the file system factory.
 """
 
 
+import decimal
 import re
 import unittest
 
@@ -96,6 +97,9 @@ class _ConcreteFactoryMock(BaseFileSystem):
     @property
     def hasPrivilegeSupport(self):
         return True
+    
+    def determineFreeDiskSpace(self):
+        return decimal.Decimal("200")
     
     @property
     def metadataIdentifierPattern(self):
@@ -154,6 +158,7 @@ class FileSystemTestCase(unittest.TestCase):
         self.assertFalse(nullFileSystem.hasCustomMetadataSupport)
         self.assertFalse(nullFileSystem.hasMetadataSearchSupport)
         self.assertFalse(nullFileSystem.hasPrivilegeSupport)
+        self.assertGreater(nullFileSystem.determineFreeDiskSpace(), 1.0)
         self.assertEquals(nullFileSystem.baseUri, None)
         self.assertEquals(nullFileSystem.baseConfiguration, None)
         self.assertEquals(nullFileSystem.isAccessible, False)
@@ -179,6 +184,7 @@ class FileSystemTestCase(unittest.TestCase):
         self.assertTrue(fileSystem.hasCustomMetadataSupport)
         self.assertTrue(fileSystem.hasMetadataSearchSupport)
         self.assertTrue(fileSystem.hasPrivilegeSupport)
+        self.assertEquals(fileSystem.determineFreeDiskSpace(), 200)
         self.assertNotEquals(fileSystem.baseUri, None)
         self.assertNotEquals(fileSystem.baseConfiguration, None)
         self.assertEquals(fileSystem.isAccessible, True)

@@ -54,6 +54,6 @@ class Configuration(object):
         
         self.baseUri = baseConfiguration.baseUri or ""
         self.hostname = baseConfiguration.uriHostname or ""
-        self.basePath = baseConfiguration.uriPath or ""
+        self.basePath = baseConfiguration.uriPath or "/"
         self.username = baseConfiguration.username
         self.password = baseConfiguration.password

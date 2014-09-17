@@ -363,3 +363,12 @@ class FileSystem(object):
         """
     
         return self._factory.hasPrivilegeSupport
+
+    def determineFreeDiskSpace(self):
+        """ Determines the available disk space in bytes. 
+        
+        @return: Available disk space in bytes.
+        @rtype: C{decimal.Decimal}
+        """
+        
+        return self._factory.determineFreeDiskSpace()
