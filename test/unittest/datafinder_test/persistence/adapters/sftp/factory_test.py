@@ -53,7 +53,7 @@ class ParseDiskFreeOutpoutParserTestCase(unittest.TestCase):
             "Filesystem     1K-blocks   Used Available Use% Mounted on\n"
             "/dev/sdb1      103079200 245600  97590824   1% /home\n")
         availableSpace = factory._parseDiskFreeCommandOutForAvailableSpace(dfOut)
-        self.assertEquals(availableSpace, 97590824)
+        self.assertEquals(availableSpace, 99933003776)
         
     def testMultipleDevices(self):
         dfOut = (
@@ -61,7 +61,7 @@ class ParseDiskFreeOutpoutParserTestCase(unittest.TestCase):
             "/dev/sdb1      103079200 245600  200   1% /home\n"
             "/dev/sdc1      103079200 245600  1000   1% /home\n")
         availableSpace = factory._parseDiskFreeCommandOutForAvailableSpace(dfOut)
-        self.assertEquals(availableSpace, 200)
+        self.assertEquals(availableSpace, 204800)
         
     def testInvalidFormat(self):
         dfOut = "INVALID"
@@ -78,3 +78,10 @@ class ParseDiskFreeOutpoutParserTestCase(unittest.TestCase):
             "Filesystem     1K-blocks   Used Available Use% Mounted on\n"
             "/dev/sdb1      103079200 245600  NOTANUMBER   1% /home\n")
         self.assertRaises(PersistenceError, factory._parseDiskFreeCommandOutForAvailableSpace, dfOut)
+
+    def testLargeValue(self):
+        dfOut = (
+            "Filesystem     1K-blocks   Used Available Use% Mounted on\n"
+            "/dev/sdb1      103079200 245600  975908240000000000000000   1% /home\n")
+        availableSpace = factory._parseDiskFreeCommandOutForAvailableSpace(dfOut)
+        self.assertEquals(availableSpace, 999330037760000000000000000)

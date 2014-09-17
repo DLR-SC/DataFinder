@@ -124,7 +124,7 @@ class FileSystem(BaseFileSystem):
         connection = self._connectionPool.acquire()
         try:
             transport = connection.get_channel().get_transport()
-            diskFreeCommand = "df %s" % self._configuration.basePath
+            diskFreeCommand = "df -k %s" % self._configuration.basePath
             print diskFreeCommand
             commandRunner = _SshCommandRunner(diskFreeCommand, transport)
             diskFreeCommandOutput, _ = commandRunner.executeCommand()
@@ -136,16 +136,16 @@ class FileSystem(BaseFileSystem):
 def _parseDiskFreeCommandOutForAvailableSpace(diskFreeCommandOutput):
     """ This helper function parses the output of the df command to determine the available
     free space of the first device listed. This functions is a first attempt in this direction and is intended
-    to work fine with the result of 'df <PATH>'. 
+    to work fine with the result of 'df -k <PATH>' (determine only the file system for the base directory, ensuring KB blocks). 
     Consider introducing a separate helper class when introducing different/alternative parsing strategy. """
     
     for line in diskFreeCommandOutput.split("\n"):
         line = line.strip()
         if line and not line.startswith("Filesystem"): # Ignoring header
             token = line.split()
-            if len(token) > 3:
+            if len(token) > 3: # We need the Available column
                 try:
-                    return decimal.Decimal(token[3])
+                    return decimal.Decimal(token[3]) * 1024
                 except decimal.InvalidOperation:
                     raise PersistenceError("Unable to parse df command output '%s' for avaialble disk space." % diskFreeCommandOutput)
     # Handle all non-conformant df command outputs
