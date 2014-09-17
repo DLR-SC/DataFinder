@@ -133,7 +133,7 @@ class RepositoryManager(object):
         isManaged = not configurationUri is None
         baseConfiguration = self._createBaseRepositoryConfiguration(isManaged)
         if isManaged:
-            configurationCollection = self._createConfigurationCollection(configurationUri, authenticationParameters, baseUri)
+            configurationCollection = self._createConfigurationCollection(configurationUri, username, password, baseUri)
             localConfigurationCollection = self._createLocalConfigurationCollection(configurationUri)
             self._setManagedRepositoryParameters(baseConfiguration, configurationCollection, localConfigurationCollection, authenticationParameters)
         return baseConfiguration
@@ -145,11 +145,10 @@ class RepositoryManager(object):
             propertyDefinitionFactory, propertyDefinitionRegistry, self.iconRegistry, self.dataFormatRegistry)
       
     @staticmethod
-    def _createConfigurationCollection(configurationUri, authenticationParameters, baseUri):
+    def _createConfigurationCollection(configurationUri, username, password, baseUri):
         if baseUri is None:
             baseUri = configurationUri
-        baseConfiguration = BaseConfiguration(
-            baseUri, username=authenticationParameters.username, password=authenticationParameters.password)
+        baseConfiguration = BaseConfiguration(baseUri, username=username, password=password)
         try:
             return createFileStorer(configurationUri, baseConfiguration)
         except PersistenceError, error:
