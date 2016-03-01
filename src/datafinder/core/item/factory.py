@@ -236,7 +236,7 @@ class ItemFactory(object):
                 else:
                     raise ItemError("No valid item representation found for '%s'" % path)
         except PersistenceError, error:
-            raise ItemError("Problem accessing item '%s'. Reason: '%s'", (path, error.message))
+            raise ItemError("Problem accessing item '%s'. Reason: '%s'" % (path, error.message))
         else:
             item._created = True
             self._itemCache[path] = item
