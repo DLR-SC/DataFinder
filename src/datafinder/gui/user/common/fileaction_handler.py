@@ -42,8 +42,8 @@ Handles open and print actions of items. Currently it only works on Windows
 
 import os
 import logging
+import subprocess
    
-_platformNotSupported = False
 try: 
 # pylint: disable=E0611,F0401 
 # E0611: "shell" exists in win32com but Pylint cannot detect it.
@@ -51,8 +51,9 @@ try:
     import pywintypes
     from win32com.shell import shell, shellcon
     from win32event import WaitForSingleObject, INFINITE
+    _isWin32 = True
 except ImportError:
-    _platformNotSupported = True
+    _isWin32 = False
     
 from datafinder.core.error import ItemError
 from datafinder.gui.user.constants import LOGGER_ROOT
@@ -69,7 +70,10 @@ class FileActionHandler(object):
     """
 
     _OPEN_COMMAND = "open"
-    _PRINT_COMANND = "print"
+    _PRINT_COMMAND = "print"
+    
+    _DF_DEFAULT_FILE_VIEWER_ENV = "DF_DEFAULT_FILE_VIEWER"
+    _DF_DEFAULT_LINUX_VIEWER = "evince"
     
     _MAX_WORKER_THREADS = 30
     _logger = logging.getLogger(LOGGER_ROOT)
@@ -98,16 +102,31 @@ class FileActionHandler(object):
         @type item: L{ItemBase<datafinder.core.item.base.ItemBase>}
         """
         
-        self._performFileAction(item, self._PRINT_COMANND)
+        self._performFileAction(item, self._PRINT_COMMAND)
     
     def _performFileAction(self, item, command):
+        """ Performs the given command on the specific file. """
+        print _isWin32
+        if _isWin32:
+            self._performFileActionWin32(item, command)
+        else:
+            if self._OPEN_COMMAND: # Run a default viewer
+                defaultViewer = os.environ.get(self._DF_DEFAULT_FILE_VIEWER_ENV , self._DF_DEFAULT_LINUX_VIEWER)
+                localContentPath, _ = self._getContent(item)
+                try:
+                    subprocess.Popen((defaultViewer, localContentPath))
+                except OSError, error:
+                    raise ItemError("Cannot open file. Reason: '%s'" % str(error))
+            else:
+                raise ItemError("Printing is not supported on this platform!")
+
+    def _performFileActionWin32(self, item, command):
         """ Performs the given command on the specific file. """
         # pylint: disable=E1101
         # E1101: Pylint cannot resolve specific win32 modules.
         
-        if _platformNotSupported:
-            raise ItemError("The '%s' action for files is currently only supported on Windows." % command)
         localContentPath, alreadyLocal = self._getContent(item)
+        print localContentPath, alreadyLocal
         if not alreadyLocal and len(self._checkUntilClosedWorker) == self._MAX_WORKER_THREADS:
             errorMessage = "The maximum number (%i) of parallel opened editors " % self._MAX_WORKER_THREADS \
                            + "has been reached. Please close at least one external application."
@@ -159,6 +178,7 @@ class FileActionHandler(object):
         """ Retrieves the file content of the associated item and returns its local path. """
         
         dataUri = item.dataUri
+        print item.dataUri
         if not item.isManaged and dataUri.startswith("file://"): # directly accessible
             localContentPath = dataUri[8:]
             temporaryFileObject = None
