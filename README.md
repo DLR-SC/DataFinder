@@ -51,13 +51,12 @@ http://catacomb.tigris.org/
   * nose 0.11.1
   * pysvn >=1.7.2
   * boto >= 2.0rc1
-  
 * Install dependencies.
-* Extract archive.
-* Change to the created directory.
-* Run to verify your environment: $> python setup.py test
-  (Set --nosecommand to the complete path of the nose Python start script if not found; e.g., --nosecommand=/usr/local/bin/nosetests)
-* Run to install: $> python setup.py install 
+  * Extract archive.
+  * Change to the created directory.
+  * Run to verify your environment: $> python setup.py test
+    (Set --nosecommand to the complete path of the nose Python start script if not found; e.g., --nosecommand=/usr/local/bin/nosetests)
+  * Run to install: $> python setup.py install 
 
 Script API distribution:
 * Try the script examples in contrib/script_examples.
