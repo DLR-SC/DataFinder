@@ -39,6 +39,7 @@
 Controller for the unmanaged data repository.
 """
 
+import os
 
 from datafinder.gui.user.common.controller import AbstractController
 from datafinder.gui.user.controller.item_actions import ItemActionController
@@ -117,6 +118,7 @@ class UnmanagedRepositoryController(AbstractController):
         self.collectionController.model = self.model
         
         self._toolbarController.setActivated(True)
+        self.model.activePath = os.path.expanduser("~")
         self.model.updateSignal()
         self.collectionController.focus()
 
