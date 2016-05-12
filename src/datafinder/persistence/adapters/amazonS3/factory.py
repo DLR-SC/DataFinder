@@ -44,16 +44,17 @@ access an Amazon s3 file system.
 __version__ = "$Revision-Id$" 
 
 
-from datafinder.persistence.adapters.amazons3.configuration import Configuration
-from datafinder.persistence.adapters.amazons3.connection_pool import S3ConnectionPool
-from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
-from datafinder.persistence.adapters.amazons3 import constants
+from datafinder.persistence.adapters.amazonS3.configuration import Configuration
+from datafinder.persistence.adapters.amazonS3.connection_pool import S3ConnectionPool
+from datafinder.persistence.adapters.amazonS3.data.adapter import DataS3Adapter
+from datafinder.persistence.adapters.amazonS3 import constants
 from datafinder.persistence.common.base_factory import BaseFileSystem
 from datafinder.persistence.common.connection.manager import ConnectionPoolManager
 from datafinder.persistence.error import PersistenceError
 
 
-class FileSystem(BaseFileSystem):    """ Implements factory methods of the different aspects of file system items. """
+class FileSystem(BaseFileSystem):
+    """ Implements factory methods of the different aspects of file system items. """
     
     _connectionManager = ConnectionPoolManager(constants.MAX_POOL_NUMBER)
      
