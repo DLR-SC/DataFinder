@@ -43,7 +43,7 @@ Tests the data adapter implementation.
 from unittest import TestCase
 
 from boto.exception import S3ResponseError
-from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter, _cleanupTemporaryFile, _temporaryFiles
+from datafinder.persistence.adapters.amazonS3.data.adapter import DataS3Adapter, _cleanupTemporaryFile, _temporaryFiles
 from datafinder.persistence.error import PersistenceError
 from datafinder_test.mocks import SimpleMock 
 
