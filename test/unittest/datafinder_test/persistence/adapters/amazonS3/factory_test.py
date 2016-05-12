@@ -45,9 +45,9 @@ from unittest import TestCase
 from boto.s3.connection import S3Connection
 
 from datafinder.persistence.common.configuration import BaseConfiguration
-from datafinder.persistence.adapters.amazons3 import factory
-from datafinder.persistence.adapters.amazons3.data.adapter import DataS3Adapter
-from datafinder.persistence.adapters.amazons3.connection_pool import S3ConnectionPool
+from datafinder.persistence.adapters.amazonS3 import factory
+from datafinder.persistence.adapters.amazonS3.data.adapter import DataS3Adapter
+from datafinder.persistence.adapters.amazonS3.connection_pool import S3ConnectionPool
 from datafinder_test.mocks import SimpleMock
 
 
