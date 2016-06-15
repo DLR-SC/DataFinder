@@ -162,6 +162,8 @@ def listDirectory(directoryPath):
         result = [driveLetter for driveLetter in win32api.GetLogicalDriveStrings().split("\000") if driveLetter]
     else:
         result = list()
+        if directoryPath.endswith(":") and sys.platform == _WIN32_PLATFORM: # it is a drive letter
+            directoryPath += "\\" # Required to fix issue with os.listdir / os.path.join in Python 2.7.10
         for path in os.listdir(directoryPath):
             path = os.path.join(directoryPath, path)
             decodedPath = _binaryToUnicodeFilePathDecoding(path)
