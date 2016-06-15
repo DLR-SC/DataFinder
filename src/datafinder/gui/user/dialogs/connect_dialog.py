@@ -84,14 +84,14 @@ class ConnectDialogView(QtGui.QDialog, Ui_connectDialog):
         self.connect(self.connectButton, QtCore.SIGNAL("clicked()"), self.accept)
         self.connect(self.urlComboBox, QtCore.SIGNAL("currentIndexChanged(const QString)"), self._urlChangedSlot)
         self.connect(self.preferencesButton, QtCore.SIGNAL("clicked()"), self._preferencesActionSlot)
+        self._useLdap = None
+        self._ldapBaseDn = None
+        self._ldapServerUri = None
+        self._useLucene = None
+        self._luceneIndexUri = None
+        # triggers creation of connection due to property setting
         self.uri = preferences.connectionUris
-        connection = self._preferences.getConnection(self._getUrl())
-        self._useLdap = connection.useLdap
-        self._ldapBaseDn = connection.ldapBaseDn
-        self._ldapServerUri = connection.ldapServerUri
-        self._useLucene = connection.useLucene
-        self._luceneIndexUri = connection.luceneIndexUri
-                     
+
     def _urlChangedSlot(self, newUri):
         """ Implementing changing of connection URI. """
         
