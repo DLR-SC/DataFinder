@@ -86,4 +86,4 @@ WebDAV server please follow these steps:
 * The environment variable 'DF_START' can be set to the configuration URL.
 * Start the DataFinder data management client.
 
-More detailed information is available on: https://wiki.sistec.dlr.de/DataFinderOpenSource
+More detailed information is available on: https://github.com/DLR-SC/DataFinder/wiki
