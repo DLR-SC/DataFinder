@@ -56,6 +56,7 @@ http://catacomb.tigris.org/
   * Change to the created directory.
   * Run to verify your environment: $> python setup.py test
     (Set --nosecommand to the complete path of the nose Python start script if not found; e.g., --nosecommand=/usr/local/bin/nosetests)
+  * Generate additional files $> python setup.py gen
   * Run to install: $> python setup.py install 
 
 Script API distribution:
