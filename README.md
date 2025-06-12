@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> The software is no longer maintained and is provided only for reference.
+
 Copyright (c) 2008, German Aerospace Center (DLR)
 All rights reserved.
 
